@@ -59,6 +59,12 @@
 
   --transition-fast: 0.15s ease;
   --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Escala Tipográfica Fluida y Proporcional */
+  --font-h1: clamp(1.2rem, 2.2vw, 1.62rem);
+  --font-h2: clamp(1.08rem, 1.8vw, 1.32rem);
+  --font-h3: clamp(0.98rem, 1.4vw, 1.15rem);
+  --font-h4: clamp(0.9rem, 1.1vw, 1.02rem);
 }
 
 /* Tema Claro (Ivory & Antique Paper) */
@@ -104,6 +110,19 @@
   padding: 0;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  color: var(--text-main);
+  line-height: 1.28;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+h1 { font-size: var(--font-h1); }
+h2 { font-size: var(--font-h2); }
+h3 { font-size: var(--font-h3); }
+h4 { font-size: var(--font-h4); }
+
 body {
   font-family: var(--font-sans);
   background-color: var(--bg-app);
@@ -133,14 +152,14 @@ body {
    HEADER SUPERIOR
    ========================================================================== */
 .app-header {
-  height: 64px;
+  height: 56px;
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
-  gap: 16px;
+  padding: 0 16px;
+  gap: 12px;
   z-index: 50;
   box-shadow: var(--shadow-sm);
 }
@@ -148,68 +167,112 @@ body {
 .header-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
 }
 
 .brand-badge {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  text-decoration: none;
+  user-select: none;
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
 }
 
-.brand-icon {
-  width: 28px;
-  height: 28px;
+.brand-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  background: rgba(212, 175, 55, 0.12);
+  border: 1px solid rgba(212, 175, 55, 0.28);
   color: var(--gold-primary);
-  filter: drop-shadow(0 0 8px var(--gold-glow));
+  flex-shrink: 0 !important;
+  box-shadow: 0 0 8px rgba(212, 175, 55, 0.15);
+  transition: var(--transition-fast);
+}
+
+.brand-icon-wrap i,
+.brand-icon-wrap svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.2;
+}
+
+.brand-text-block {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+  line-height: 1.15;
+  gap: 1px;
 }
 
 .brand-title {
   font-family: var(--font-display);
-  font-size: 1.15rem;
+  font-size: 0.76rem !important;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.05em;
   color: var(--gold-primary);
-  line-height: 1.1;
+  line-height: 1.15;
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+  margin: 0;
+  padding: 0;
 }
 
 .brand-subtitle {
-  font-size: 0.72rem;
+  font-family: var(--font-sans);
+  font-size: 0.52rem !important;
   color: var(--text-muted);
-  font-weight: 500;
-  letter-spacing: 0.02em;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+  line-height: 1.15;
+  margin: 0;
+  padding: 0;
 }
 
-/* Pestañas de Navegación de la Cabecera */
+/* Pestañas de Navegación de la Cabecera (Compactas) */
 .header-nav {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   background: var(--bg-surface-elevated);
-  padding: 4px;
+  padding: 3px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-subtle);
+  flex-shrink: 0;
 }
 
 .nav-tab {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
+  gap: 6px;
+  padding: 6px 12px;
   background: transparent;
   border: none;
   border-radius: var(--radius-sm);
   color: var(--text-muted);
   font-family: var(--font-sans);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
   transition: var(--transition-fast);
+  white-space: nowrap;
 }
 
 .nav-tab i {
-  width: 17px;
-  height: 17px;
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
 }
 
 .nav-tab:hover {
@@ -226,66 +289,66 @@ body {
 .badge-count {
   background: var(--gold-primary);
   color: var(--text-inverse);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  padding: 1px 6px;
+  padding: 1px 5px;
   border-radius: var(--radius-full);
 }
 
-/* Barra de Búsqueda Global */
+/* Barra de Búsqueda y Acciones de Cabecera */
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: flex-end;
+  gap: 6px;
+  flex-shrink: 0 !important;
 }
 
 .search-bar {
   position: relative;
-  width: 260px;
+  width: 110px;
+  transition: width var(--transition-fast);
+}
+
+.search-bar:focus-within {
+  width: 160px;
 }
 
 .search-icon {
   position: absolute;
-  left: 10px;
+  left: 8px;
   top: 50%;
   transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
+  width: 13px;
+  height: 13px;
   color: var(--text-subtle);
   pointer-events: none;
 }
 
 .search-bar input {
   width: 100%;
-  padding: 7px 55px 7px 34px;
+  height: 28px;
+  padding: 4px 6px 4px 24px;
   background: var(--bg-surface-elevated);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   color: var(--text-main);
-  font-size: 0.82rem;
+  font-size: 0.74rem;
   transition: var(--transition-fast);
 }
 
 .search-bar input:focus {
   outline: none;
   border-color: var(--gold-primary);
-  box-shadow: 0 0 0 3px var(--gold-glow);
-  width: 320px;
+  box-shadow: 0 0 0 2px var(--gold-glow);
 }
 
 .shortcut-key {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  color: var(--text-subtle);
-  padding: 2px 5px;
-  border-radius: 4px;
-  pointer-events: none;
+  display: none !important;
+}
+
+.live-sync-indicator .live-text {
+  display: none !important;
 }
 
 .search-dropdown {
@@ -608,13 +671,136 @@ body {
   pointer-events: none;
 }
 
+/* ==========================================================================
+   RESPONSIVO: NOTEBOOKS Y PANTALLAS DE RESOLUCIÓN COMPACTA (769px a 1366px)
+   ========================================================================== */
+@media (min-width: 769px) and (max-width: 1366px) {
+  .app-header {
+    height: 54px;
+    padding: 0 12px;
+    gap: 8px;
+  }
+
+  .header-brand {
+    gap: 6px;
+    flex-shrink: 0 !important;
+  }
+
+  .brand-badge {
+    gap: 6px;
+    flex-shrink: 0 !important;
+  }
+
+  .brand-icon-wrap {
+    width: 22px;
+    height: 22px;
+  }
+
+  .brand-icon-wrap i,
+  .brand-icon-wrap svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .brand-title {
+    font-size: 0.72rem !important;
+    letter-spacing: 0.04em;
+    white-space: nowrap !important;
+  }
+
+  .brand-subtitle {
+    font-size: 0.50rem !important;
+    letter-spacing: 0.02em;
+    white-space: nowrap !important;
+  }
+
+  .nav-tab {
+    padding: 5px 9px;
+    font-size: 0.76rem;
+    gap: 5px;
+  }
+
+  .nav-tab i {
+    width: 14px;
+    height: 14px;
+  }
+
+  .header-actions {
+    gap: 5px;
+    flex-shrink: 0 !important;
+  }
+
+  .search-bar {
+    width: 100px;
+  }
+
+  .search-bar:focus-within {
+    width: 145px;
+  }
+
+  .search-bar input {
+    height: 28px;
+    padding: 4px 6px 4px 22px;
+    font-size: 0.73rem;
+  }
+
+  .search-icon {
+    left: 6px;
+    width: 12px;
+    height: 12px;
+  }
+
+  .shortcut-key {
+    display: none !important;
+  }
+
+  .live-sync-indicator .live-text {
+    display: none !important;
+  }
+}
+
+/* Pantallas intermedias / notebooks pequeños (hasta 1120px) */
+@media (min-width: 769px) and (max-width: 1120px) {
+  .shortcut-key {
+    display: none;
+  }
+
+  .search-bar {
+    width: 95px;
+  }
+
+  .search-bar:focus-within {
+    width: 140px;
+  }
+}
+
+/* Tablets en horizontal / ventanas estrechas (hasta 880px) */
+@media (min-width: 769px) and (max-width: 880px) {
+  .nav-tab-label {
+    display: none;
+  }
+
+  .nav-tab {
+    padding: 6px 8px;
+  }
+
+  .search-bar {
+    width: 85px;
+  }
+}
+
+/* ==========================================================================
+   RESPONSIVO MÓVIL Y TABLET (HASTA 768px)
+   ========================================================================== */
 @media (max-width: 768px) {
   .app-header {
     height: auto;
-    min-height: 56px;
+    min-height: 52px;
     padding: 8px 12px;
+    padding-top: max(8px, env(safe-area-inset-top));
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   }
@@ -622,15 +808,27 @@ body {
   .header-brand {
     flex: 1;
     min-width: 0;
-    gap: 8px;
+    gap: 6px;
   }
 
   .brand-badge {
-    gap: 8px;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .brand-icon-wrap {
+    width: 22px;
+    height: 22px;
+  }
+
+  .brand-icon-wrap i,
+  .brand-icon-wrap svg {
+    width: 13px;
+    height: 13px;
   }
 
   .brand-title {
-    font-size: 0.95rem;
+    font-size: 0.72rem;
     letter-spacing: 0.04em;
     white-space: nowrap;
     overflow: hidden;
@@ -647,7 +845,7 @@ body {
   }
 
   .search-bar {
-    display: none; /* En móvil se prioriza espacio */
+    display: none; /* En móvil se ahorra altura vertical */
   }
 
   .live-sync-indicator {
@@ -662,10 +860,12 @@ body {
     padding: 3px;
     background: var(--bg-surface-elevated);
     border-radius: var(--radius-sm);
+    margin-top: 2px;
   }
 
   .nav-tab {
     flex: 1;
+    min-height: 38px;
     padding: 6px 4px;
     font-size: 0.74rem;
     justify-content: center;
@@ -692,18 +892,48 @@ body {
     min-height: 0;
     height: auto;
     max-height: none;
+    overflow: hidden;
+  }
+
+  .main-content {
+    overflow-x: hidden;
   }
 
   .toast-container {
     left: 12px;
     right: 12px;
-    bottom: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom));
   }
 
   .toast {
     min-width: 0;
     width: 100%;
     max-width: 100%;
+    font-size: 0.8rem;
+    padding: 10px 14px;
+  }
+}
+
+/* Teléfonos muy compactos (< 480px) */
+@media (max-width: 480px) {
+  .app-header {
+    padding: 6px 8px;
+    padding-top: max(6px, env(safe-area-inset-top));
+    gap: 6px;
+  }
+
+  .brand-title {
+    font-size: 0.76rem;
+  }
+
+  .nav-tab {
+    font-size: 0.7rem;
+    padding: 5px 2px;
+  }
+
+  .nav-tab i {
+    width: 13px;
+    height: 13px;
   }
 }
 

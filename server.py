@@ -10,6 +10,7 @@ import os
 import json
 import time
 import re
+import urllib.parse
 from pathlib import Path
 
 # Soporte opcional para PDF y DOCX
@@ -28,26 +29,52 @@ except ImportError:
 PORT = 8080
 BASE_DIR = Path(__file__).resolve().parent
 FUENTES_DIR = BASE_DIR / "fuentes"
+CASOS_DIR = BASE_DIR / "CASOS"
+CASOS_DIR_LOWER = BASE_DIR / "casos"
 DESKTOP_FUENTES_DIR = Path(os.path.expanduser("~")) / "Desktop" / "Fuentes_Grado"
 APUNTES_DIR = DESKTOP_FUENTES_DIR / "APUNTES"
+DESKTOP_CASOS_DIR = DESKTOP_FUENTES_DIR / "CASOS"
+DESKTOP_CASOS_DIR_LOWER = DESKTOP_FUENTES_DIR / "casos"
 CONFIG_FILE = BASE_DIR / "sync_config.json"
 ALL_TOPICS_PATH = BASE_DIR / "all_afg_topics.json"
+ALL_CASES_PATH = BASE_DIR / "all_cases.json"
 DATA_JS_PATH = BASE_DIR / "js" / "data.js"
 
 # Asegurar carpetas
 FUENTES_DIR.mkdir(exist_ok=True)
-DESKTOP_FUENTES_DIR.mkdir(parents=True, exist_ok=True)
-APUNTES_DIR.mkdir(parents=True, exist_ok=True)
+CASOS_DIR.mkdir(exist_ok=True)
+try:
+    DESKTOP_FUENTES_DIR.mkdir(parents=True, exist_ok=True)
+    APUNTES_DIR.mkdir(parents=True, exist_ok=True)
+    DESKTOP_CASOS_DIR.mkdir(parents=True, exist_ok=True)
+except Exception:
+    pass
 
-SUPPORTED_EXTENSIONS = ('.md', '.txt', '.markdown', '.pdf', '.docx')
+SUPPORTED_EXTENSIONS = ('.md', '.txt', '.markdown', '.pdf', '.docx', '.json')
+
+# Políticas de Seguridad y Optimización de Almacenamiento
+MAX_PAYLOAD_SIZE = 131072  # 128 KB máximo de carga útil para prevenir DoS / saturación de memoria
+MAX_AI_PRACTICE_CASES = 10  # Límite FIFO de casos de práctica IA para evitar sobrecarga de almacenamiento
+SAFE_CASE_ID_REGEX = re.compile(r"^caso-ia-[0-9a-zA-Z_-]{4,36}$")
+
 
 def get_watched_directories():
-    """Obtiene las carpetas vigiladas (fuentes local, Escritorio Fuentes_Grado y APUNTES)"""
+    """Obtiene las carpetas vigiladas (fuentes, casos, Escritorio Fuentes_Grado, APUNTES y CASOS)"""
     dirs = [FUENTES_DIR]
+    if CASOS_DIR.exists():
+        dirs.append(CASOS_DIR)
+    elif CASOS_DIR_LOWER.exists():
+        dirs.append(CASOS_DIR_LOWER)
+
     if DESKTOP_FUENTES_DIR.exists():
         dirs.append(DESKTOP_FUENTES_DIR)
     if APUNTES_DIR.exists():
         dirs.append(APUNTES_DIR)
+    if DESKTOP_CASOS_DIR.exists():
+        dirs.append(DESKTOP_CASOS_DIR)
+    elif DESKTOP_CASOS_DIR_LOWER.exists():
+        dirs.append(DESKTOP_CASOS_DIR_LOWER)
+
     if CONFIG_FILE.exists():
         try:
             with open(CONFIG_FILE, "r", encoding="utf-8") as f:
@@ -390,22 +417,48 @@ def get_all_synced_topics():
 
     return []
 
+def get_all_synced_cases():
+    """
+    Obtiene y sincroniza en vivo todos los casos prácticos, pautas y exámenes desde la carpeta CASOS.
+    """
+    if ALL_CASES_PATH.exists():
+        try:
+            with open(ALL_CASES_PATH, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if data and data.get("cases"):
+                    return data
+        except Exception as e:
+            print("Error leyendo all_cases.json:", e)
+
+    try:
+        from parse_casos import scan_and_parse_all_cases
+        return scan_and_parse_all_cases()
+    except Exception as e:
+        print("Error escaneando casos en vivo:", e)
+
+    return {"cases": [], "files": [], "casesCount": 0, "filesCount": 0, "referenceGuides": []}
+
 class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(BASE_DIR), **kwargs)
 
     def do_GET(self):
         # 1. Seguridad: Prevenir acceso a directorios o archivos ocultos (.git, .antigravity, etc.) y código sensible
-        clean_path = self.path.split('?')[0].split('#')[0]
+        raw_clean_path = self.path.split('?')[0].split('#')[0]
+        clean_path = urllib.parse.unquote(raw_clean_path)
         segments = [s.strip() for s in clean_path.split('/') if s.strip()]
         
-        # Bloquear cualquier segmento que comience con punto (.git, .env) o scripts de servidor
-        if any(s.startswith('.') for s in segments) or any(s in ('server.py', 'sync_config.json') for s in segments):
-            self.send_error(403, "Acceso denegado: recurso protegido")
+        # Bloquear cualquier segmento que comience con punto (.git, .env), scripts de servidor
+        # y carpetas/archivos de entrenamiento confidenciales (CASOS, all_cases.json, parse_casos.py)
+        lower_segments = [s.lower() for s in segments]
+        if (any(s.startswith('.') for s in segments) or 
+            any(s in ('server.py', 'sync_config.json', 'parse_casos.py', 'all_cases.json') for s in lower_segments) or
+            'casos' in lower_segments):
+            self.send_error(403, "Acceso denegado: modelo confidencial protegido del Agente IA")
             return
 
         # API 1: Comprobar cambios (Polling ligero para actualización automática)
-        if self.path == "/api/sync-check":
+        if clean_path == "/api/sync-check":
             version_hash = get_files_hash()
             response_bytes = json.dumps({"version": version_hash, "timestamp": time.time()}).encode("utf-8")
             self.send_response(200)
@@ -417,9 +470,82 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         # API 2: Obtener todos los temas parseados y sincronizados en vivo desde APUNTES
-        if self.path == "/api/sync-topics":
+        if clean_path == "/api/sync-topics":
             topics = get_all_synced_topics()
             response_bytes = json.dumps({"topics": topics, "count": len(topics)}, ensure_ascii=False).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(response_bytes)))
+            self.send_header("Cache-Control", "no-cache")
+            self.end_headers()
+            self.wfile.write(response_bytes)
+            return
+
+        # API 3: Obtener casos de práctica creados (los modelos oficiales permanecen confidenciales en el servidor)
+        if clean_path == "/api/sync-cases":
+            all_cases_data = get_all_synced_cases()
+            all_cases = all_cases_data.get("cases", [])
+            now_ts = time.time()
+
+            # Filtrar EXCLUSIVAMENTE los casos generados por el Agente de IA
+            ai_cases = []
+            for c in all_cases:
+                is_ai = c.get("isGeneratedByAI") is True or str(c.get("id", "")).startswith("caso-ia-")
+                if is_ai:
+                    # Comprobar expiración temporal si existe
+                    exp = c.get("expiresAt")
+                    if exp:
+                        exp_sec = exp / 1000.0 if exp > 1e11 else float(exp)
+                        if exp_sec < now_ts:
+                            continue
+                    ai_cases.append(c)
+
+            cases_payload = {
+                "cases": ai_cases,
+                "casesCount": len(ai_cases),
+                "isReferenceModelProtected": True
+            }
+            response_bytes = json.dumps(cases_payload, ensure_ascii=False).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(response_bytes)))
+            self.send_header("Cache-Control", "no-cache")
+            self.end_headers()
+            self.wfile.write(response_bytes)
+            return
+
+        # API 4: Protección de archivos fuente de entrenamiento del Agente
+        if clean_path == "/api/casos-files":
+            files_payload = {
+                "protected": True,
+                "message": "Los modelos de pautas y casos fuente son confidenciales para la nutrición del Agente IA."
+            }
+            response_bytes = json.dumps(files_payload, ensure_ascii=False).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(response_bytes)))
+            self.send_header("Cache-Control", "no-cache")
+            self.end_headers()
+            self.wfile.write(response_bytes)
+            return
+
+        # API 5: Consulta y nutrición dogmática desde la carpeta FUENTES
+        if clean_path == "/api/fuentes":
+            fuentes_data = {}
+            if FUENTES_DIR.exists():
+                for f in sorted(FUENTES_DIR.glob("*.md")):
+                    try:
+                        with open(f, "r", encoding="utf-8") as fp:
+                            fuentes_data[f.name] = {
+                                "filename": f.name,
+                                "stem": f.stem,
+                                "title": f.stem.replace("_", " ").title(),
+                                "content": fp.read()
+                            }
+                    except Exception as e:
+                        print(f"Error leyendo fuente {f}: {e}")
+
+            response_bytes = json.dumps({"ok": True, "fuentes": fuentes_data, "count": len(fuentes_data)}, ensure_ascii=False).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "application/json; charset=utf-8")
             self.send_header("Content-Length", str(len(response_bytes)))
@@ -432,20 +558,45 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
         super().do_GET()
 
     def do_POST(self):
+        # 1. Validación de seguridad preliminar de Content-Length contra DoS y desbordamiento de memoria
+        try:
+            content_length = int(self.headers.get("Content-Length", 0))
+        except (ValueError, TypeError):
+            self.send_response(400)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"ok": False, "error": "Encabezado Content-Length inválido"}).encode("utf-8"))
+            return
+
+        if content_length <= 0:
+            self.send_response(400)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"ok": False, "error": "Cuerpo de solicitud vacío"}).encode("utf-8"))
+            return
+
+        if content_length > MAX_PAYLOAD_SIZE:
+            self.send_response(413)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"ok": False, "error": f"Carga útil excede el límite máximo de seguridad ({MAX_PAYLOAD_SIZE // 1024} KB)"}).encode("utf-8"))
+            return
+
+        # Normalización del encabezado Content-Type y de ruta
+        raw_clean_path = self.path.split('?')[0].split('#')[0]
+        clean_path = urllib.parse.unquote(raw_clean_path)
+        raw_content_type = self.headers.get("Content-Type", "")
+        content_type = raw_content_type.split(";")[0].strip().lower()
+
         # API 3: Configurar carpeta externa (ej: Google Drive o carpeta de apuntes)
-        if self.path == "/api/set-sync-folder":
+        if clean_path == "/api/set-sync-folder":
             # Control de acceso: solo peticiones locales (localhost / 127.0.0.1)
             client_ip = self.client_address[0]
             if client_ip not in ("127.0.0.1", "::1", "localhost"):
-                self.send_error(403, "Configuracion restringida al equipo local")
+                self.send_error(403, "Configuración restringida al equipo local")
                 return
 
-            content_length = int(self.headers.get("Content-Length", 0))
-            if content_length > 65536:
-                self.send_error(413, "Carga demasiado grande")
-                return
-
-            body = self.rfile.read(content_length).decode("utf-8")
+            body = self.rfile.read(content_length).decode("utf-8", errors="replace")
             try:
                 data = json.loads(body)
                 custom_folder = data.get("folder", "").strip()
@@ -472,12 +623,195 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(json.dumps({"ok": True, "message": "Carpeta vinculada correctamente"}).encode("utf-8"))
             except Exception as e:
+                print(f"[ERROR /api/set-sync-folder]: {e}")
                 self.send_response(500)
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
-                self.wfile.write(str(e).encode("utf-8"))
+                self.wfile.write(json.dumps({"ok": False, "error": "Error interno al vincular carpeta"}).encode("utf-8"))
             return
 
-        super().do_POST()
+        # API 4: Guardar caso generado por IA con ciclo de vida FIFO y blindaje contra Path Traversal
+        if clean_path == "/api/ai/save-generated-case":
+            if content_type != "application/json":
+                self.send_response(415)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"ok": False, "error": "Content-Type debe ser application/json"}).encode("utf-8"))
+                return
+
+            body = self.rfile.read(content_length).decode("utf-8", errors="replace")
+            try:
+                new_case = json.loads(body)
+                raw_case_id = str(new_case.get("id", "")).strip()
+
+                # Sanitización estricta y blindaje contra Directory / Path Traversal
+                if not SAFE_CASE_ID_REGEX.match(raw_case_id):
+                    # Generar ID seguro alfanumérico si el ID recibido no cumple el estándar
+                    case_id = f"caso-ia-{int(time.time() * 1000)}"
+                else:
+                    case_id = raw_case_id
+
+                new_case["id"] = case_id
+                new_case["isGeneratedByAI"] = True
+                new_case["createdAt"] = new_case.get("createdAt", time.time())
+
+                # 1. Aplicación de Ciclo de Vida y Retención FIFO en all_cases.json
+                all_cases_data = get_all_synced_cases()
+                existing_cases = all_cases_data.get("cases", [])
+
+                official_cases = []
+                ai_cases = []
+
+                for c in existing_cases:
+                    is_ai = c.get("isGeneratedByAI") is True or str(c.get("id", "")).startswith("caso-ia-")
+                    if is_ai:
+                        # Excluir coincidencia si se está re-guardando el mismo ID
+                        if c.get("id") != case_id:
+                            ai_cases.append(c)
+                    else:
+                        official_cases.append(c)
+
+                # Insertar el nuevo caso como el más reciente de IA
+                ai_cases.insert(0, new_case)
+
+                # Política de retención: Mantener máximo MAX_AI_PRACTICE_CASES casos IA
+                pruned_ai_cases = []
+                if len(ai_cases) > MAX_AI_PRACTICE_CASES:
+                    pruned_ai_cases = ai_cases[MAX_AI_PRACTICE_CASES:]
+                    ai_cases = ai_cases[:MAX_AI_PRACTICE_CASES]
+
+                # Eliminar del disco los archivos .md correspondientes a casos IA podados
+                casos_semanales_dir = (CASOS_DIR / "2_CASOS_SEMANALES").resolve()
+                casos_semanales_dir.mkdir(parents=True, exist_ok=True)
+
+                for p_case in pruned_ai_cases:
+                    p_id = str(p_case.get("id", ""))
+                    if SAFE_CASE_ID_REGEX.match(p_id):
+                        p_file = (casos_semanales_dir / f"{p_id}.md").resolve()
+                        # Verificación canónica: debe estar estrictamente dentro de casos_semanales_dir
+                        if p_file.is_relative_to(casos_semanales_dir) and p_file.exists():
+                            try:
+                                p_file.unlink()
+                            except OSError as err:
+                                print(f"[Aviso] No se pudo eliminar archivo podado {p_file.name}: {err}")
+
+                # Guardar lista actualizada en all_cases.json (conservando 100% de casos oficiales)
+                updated_cases = ai_cases + official_cases
+                all_cases_data["cases"] = updated_cases
+                all_cases_data["casesCount"] = len(updated_cases)
+                with open(ALL_CASES_PATH, "w", encoding="utf-8") as f:
+                    json.dump(all_cases_data, f, ensure_ascii=False, indent=2)
+
+                # 2. Guardar archivo .md en CASOS/2_CASOS_SEMANALES/
+                md_filename = f"{case_id}.md"
+                md_path = (casos_semanales_dir / md_filename).resolve()
+
+                # Comprobación estricta de ruta canónica contra Path Traversal
+                if not md_path.is_relative_to(casos_semanales_dir):
+                    self.send_response(400)
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"ok": False, "error": "Ruta de destino no autorizada"}).encode("utf-8"))
+                    return
+
+                # Composición del Markdown estructurado
+                safe_title = str(new_case.get("title", "Caso Generado por IA")).replace("\n", " ").strip()
+                safe_subjects = [str(s).replace("\n", " ").strip() for s in new_case.get("subjects", ["Civil"])]
+                safe_facts = str(new_case.get("facts", "")).strip()
+
+                md_content = f"""# {safe_title}
+
+> **Materia:** {', '.join(safe_subjects)}  
+> **Dificultad:** {new_case.get('difficulty', 'Grado')}  
+> **Origen:** Agente de IA (Protocolo AFG 2026-20)  
+> **Ciclo de Retención:** Caso de Práctica Activo  
+
+---
+
+## 📌 Hechos Relevantes (Antecedentes)
+{safe_facts}
+
+---
+
+## ❓ Preguntas de Interrogación / Evaluación
+"""
+                for q in new_case.get("questions", []):
+                    q_text = str(q.get("questionText", "")).strip()
+                    md_content += f"\n### Pregunta {q.get('number', 1)}: {q_text}\n"
+                    for opt in q.get("options", []):
+                        md_content += f"- {str(opt.get('id', '')).upper()}) {str(opt.get('text', '')).strip()}\n"
+                    md_content += f"\n*Respuesta Correcta:* Opción {str(q.get('correctAnswer', '')).upper()}\n"
+                    md_content += f"*Explicación Oficial:* {str(q.get('explanation', '')).strip()}\n"
+
+                with open(md_path, "w", encoding="utf-8") as f:
+                    f.write(md_content)
+
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "ok": True,
+                    "caseId": case_id,
+                    "savedFile": str(md_filename),
+                    "prunedCount": len(pruned_ai_cases),
+                    "activeAiCasesCount": len(ai_cases)
+                }).encode("utf-8"))
+            except Exception as e:
+                print(f"[ERROR /api/ai/save-generated-case]: {e}")
+                self.send_response(500)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"ok": False, "error": "Error interno del servidor al procesar el caso"}).encode("utf-8"))
+            return
+
+        # API 5: Purga manual completa de casos de práctica generados por IA
+        if clean_path == "/api/ai/clean-practice-cases":
+            try:
+                all_cases_data = get_all_synced_cases()
+                existing_cases = all_cases_data.get("cases", [])
+
+                official_cases = []
+                deleted_ids = []
+
+                casos_semanales_dir = (CASOS_DIR / "2_CASOS_SEMANALES").resolve()
+
+                for c in existing_cases:
+                    is_ai = c.get("isGeneratedByAI") is True or str(c.get("id", "")).startswith("caso-ia-")
+                    if is_ai:
+                        c_id = str(c.get("id", ""))
+                        deleted_ids.append(c_id)
+                        if SAFE_CASE_ID_REGEX.match(c_id):
+                            p_file = (casos_semanales_dir / f"{c_id}.md").resolve()
+                            if p_file.is_relative_to(casos_semanales_dir) and p_file.exists():
+                                try:
+                                    p_file.unlink()
+                                except OSError as err:
+                                    print(f"[Aviso] No se pudo eliminar archivo {p_file.name}: {err}")
+                    else:
+                        official_cases.append(c)
+
+                all_cases_data["cases"] = official_cases
+                all_cases_data["casesCount"] = len(official_cases)
+                with open(ALL_CASES_PATH, "w", encoding="utf-8") as f:
+                    json.dump(all_cases_data, f, ensure_ascii=False, indent=2)
+
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "ok": True,
+                    "deletedCount": len(deleted_ids),
+                    "officialCasesRemaining": len(official_cases)
+                }).encode("utf-8"))
+            except Exception as e:
+                print(f"[ERROR /api/ai/clean-practice-cases]: {e}")
+                self.send_response(500)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"ok": False, "error": "Error interno al purgar casos"}).encode("utf-8"))
+            return
+
+        self.send_error(404, "Endpoint no encontrado")
 
 if __name__ == "__main__":
     import sys
@@ -487,8 +821,8 @@ if __name__ == "__main__":
     if "--lan" in sys.argv or "-lan" in sys.argv:
         bind_address = "" # Escuchar en todas las interfaces para red local
 
-    socketserver.TCPServer.allow_reuse_address = True
-    with socketserver.TCPServer((bind_address, PORT), AutoSyncHTTPHandler) as httpd:
+    socketserver.ThreadingTCPServer.allow_reuse_address = False
+    with socketserver.ThreadingTCPServer((bind_address, PORT), AutoSyncHTTPHandler) as httpd:
         mode_str = "Red local Wi-Fi (--lan habilitado)" if bind_address == "" else "Localhost seguro (127.0.0.1)"
         print(f"==================================================")
         print(f" Servidor Estudio de Grado con Auto-Sincronizador")

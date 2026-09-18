@@ -161,6 +161,29 @@ const App = {
           this.showToast(`¡Contenidos actualizados automáticamente (${serverTopics.length} cédulas sincronizadas)!`, "success");
         }
       }
+
+      // Sincronizar Casos Prácticos generados por IA (modelos de entrenamiento permanecen confidenciales en servidor)
+      try {
+        const resCases = await fetch("/api/sync-cases");
+        if (resCases.ok) {
+          const casesData = await resCases.json();
+          const serverCases = (casesData.cases || []).filter(c => c.isGeneratedByAI || (c.id && c.id.startsWith("caso-ia-")));
+          const localData = StorageService.getData();
+          
+          // Actualizar lista local reteniendo exclusivamente casos de práctica IA
+          const existingMap = new Map((localData.cases || []).filter(c => c.isGeneratedByAI || (c.id && c.id.startsWith("caso-ia-"))).map(c => [c.id, c]));
+          serverCases.forEach(sc => existingMap.set(sc.id, { ...(existingMap.get(sc.id) || {}), ...sc }));
+          
+          localData.cases = Array.from(existingMap.values());
+          StorageService.saveData(localData);
+
+          if (this.currentView === "cases") {
+            CaseSolver.render();
+          }
+        }
+      } catch (ce) {
+        console.warn("Error sincronizando casos IA:", ce);
+      }
     } catch (e) {
       console.warn("Error en auto-sync:", e);
     } finally {
@@ -259,6 +282,18 @@ const App = {
     }
 
     this.renderCurrentView();
+  },
+
+  openTopic(topicId) {
+    if (!topicId) return;
+    this.currentTopicId = topicId;
+    this.renderSidebar();
+    if (this.currentView !== 'topics') {
+      this.switchView('topics');
+    } else {
+      this.renderTopicViewer();
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   },
 
   renderCurrentView() {
@@ -1116,6 +1151,8 @@ const App = {
         tab.classList.add('active');
         const contentId = `tab-content-${tab.dataset.tab}`;
         document.getElementById(contentId)?.classList.add('active');
+        if (tab.dataset.tab === 'sources') this.renderSourcesList();
+        if (tab.dataset.tab === 'casos') this.renderCasosFilesList();
       });
     });
 
@@ -1358,6 +1395,82 @@ const App = {
     `).join('');
   },
 
+  async renderCasosFilesList() {
+    const container = document.getElementById("casos-files-container");
+    const statsEl = document.getElementById("casos-sync-stats");
+    if (!container) return;
+
+    // Configurar botón de re-escaneo una sola vez si no se ha hecho
+    const btnSync = document.getElementById("btn-force-sync-casos");
+    if (btnSync && !btnSync.dataset.bound) {
+      btnSync.dataset.bound = "true";
+      btnSync.addEventListener("click", async () => {
+        this.showToast("Re-escaneando carpeta CASOS...", "info");
+        await this.syncWithServer();
+        await this.renderCasosFilesList();
+      });
+    }
+
+    container.innerHTML = `<p class="text-muted" style="padding: 16px; text-align: center;"><i data-lucide="loader" class="spin"></i> Escaneando carpeta CASOS...</p>`;
+    if (window.lucide) window.lucide.createIcons();
+
+    try {
+      const res = await fetch("/api/casos-files");
+      if (!res.ok) throw new Error("No se pudo conectar al servidor");
+      const data = await res.json();
+      const files = data.files || [];
+      const casesCount = data.casesCount || 0;
+
+      if (statsEl) {
+        statsEl.innerHTML = `<strong>${files.length}</strong> archivo(s) vigilado(s) · <strong>${casesCount}</strong> caso(s) práctico(s) listos`;
+      }
+
+      if (files.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state-wrap" style="padding: 24px; text-align: center;">
+            <p class="text-muted">No se detectaron archivos en la carpeta <code>CASOS/</code>.</p>
+            <p style="font-size: 0.8rem; color: var(--text-subtle);">Coloca tus archivos .md, .docx, .pdf o .txt en <code>CASOS/</code> (o en <code>Escritorio/Fuentes_Grado/CASOS</code>) y presiona "Re-escanear".</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = files.map(f => {
+        const catBadgeClass = f.category === 'examenes' ? 'filter-constitucional' : (f.category === 'semanales' ? 'filter-civil' : 'filter-procesal');
+        return `
+          <div class="source-item-row">
+            <div class="source-item-info">
+              <i data-lucide="${f.hasCaseParsed ? 'briefcase' : 'file-text'}" style="color: var(--gold-primary);"></i>
+              <div>
+                <div>
+                  <strong>${typeof escapeHTML === 'function' ? escapeHTML(f.name) : f.name}</strong>
+                  <span class="badge-count ${catBadgeClass}" style="font-size: 0.65rem; margin-left: 6px;">${f.categoryLabel}</span>
+                  ${f.hasCaseParsed ? `<span class="badge-count" style="font-size: 0.65rem; margin-left: 4px; background: rgba(34, 197, 94, 0.15); color: #22c55e;">Caso Extraído</span>` : ''}
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">
+                  ${f.parsedCaseTitle ? `Título: "${typeof escapeHTML === 'function' ? escapeHTML(f.parsedCaseTitle) : f.parsedCaseTitle}"` : `Ruta: ${f.relativePath} · ${f.charCount} caracteres`}
+                </div>
+              </div>
+            </div>
+            <span style="font-size: 0.75rem; color: var(--success); font-weight: 600;">Sincronizado</span>
+          </div>
+        `;
+      }).join('');
+
+    } catch (e) {
+      if (statsEl) statsEl.textContent = "Modo autónomo / sin servidor local activo";
+      container.innerHTML = `
+        <div style="padding: 16px; font-size: 0.82rem; color: var(--text-muted); line-height: 1.5;">
+          <p>Para sincronizar en vivo con la carpeta <code>CASOS/</code> ejecuta el servidor local:</p>
+          <pre style="background: var(--bg-surface-elevated); padding: 8px 12px; border-radius: 4px; font-size: 0.8rem; margin: 8px 0;">python server.py</pre>
+          <p>Todos los casos que agregues a <code>CASOS/</code> o <code>Escritorio/Fuentes_Grado/CASOS</code> se sincronizarán al instante.</p>
+        </div>
+      `;
+    }
+
+    if (window.lucide) window.lucide.createIcons();
+  },
+
   openImportModal(tabName = "paste") {
     if (!LicenseService.canManageNotes()) {
       this.showToast("Acceso restringido: Solo el administrador o cuentas con permiso pueden agregar o gestionar apuntes.", "warning");
@@ -1386,16 +1499,14 @@ const App = {
     if (lic && !lic.expired) {
       const scopeLabel = lic.scope === 'all' ? 'Pase Completo' : `Derecho ${lic.scope}`;
       container.innerHTML = `
-        <div class="license-status-badge unlocked" id="badge-license-active" title="Pase activo para ${escapeHTML(lic.studentName)}">
+        <button class="license-status-badge unlocked icon-only" id="badge-license-active" title="Pase activo (${scopeLabel}): ${escapeHTML(lic.studentName)}" aria-label="Pase de Grado Activo">
           <i data-lucide="crown"></i>
-          <span>${scopeLabel} (${escapeHTML(lic.studentName)})</span>
-        </div>
+        </button>
       `;
     } else {
       container.innerHTML = `
-        <button class="license-status-badge demo" id="btn-open-unlock-badge" title="Haz clic para ingresar tu código de activación">
+        <button class="license-status-badge demo icon-only" id="btn-open-unlock-badge" title="Modo Demo: Clic para ingresar código de activación" aria-label="Modo Demo - Activar Pase">
           <i data-lucide="lock"></i>
-          <span>Modo Demo (Activar Pase)</span>
         </button>
       `;
     }
@@ -1403,6 +1514,9 @@ const App = {
     if (window.lucide) window.lucide.createIcons();
 
     document.getElementById("btn-open-unlock-badge")?.addEventListener("click", () => {
+      this.openUnlockModal();
+    });
+    document.getElementById("badge-license-active")?.addEventListener("click", () => {
       this.openUnlockModal();
     });
   },
@@ -1456,9 +1570,10 @@ const App = {
       adminModal.classList.add("hidden");
     });
 
-    btnAdminLogin?.addEventListener("click", () => {
+    btnAdminLogin?.addEventListener("click", async () => {
       const pin = document.getElementById("admin-pin-input")?.value || "";
-      if (pin === LicenseService.ADMIN_PIN) {
+      const isValid = await LicenseService.verifyAdminPin(pin);
+      if (isValid) {
         LicenseService.setAdminMode(true);
         this.renderAdminIndicator();
         this.renderSidebar();
@@ -1510,11 +1625,20 @@ const App = {
 
   renderAdminIndicator() {
     const pill = document.getElementById("admin-mode-pill");
+    const btnAdmin = document.getElementById("btn-open-admin");
     const isAdmin = LicenseService.isAdminMode();
     const canManage = LicenseService.canManageNotes();
 
-    // Indicador "ADMIN" en cabecera
-    if (pill) {
+    // Indicador en cabecera: un solo icono (glowing shield si es admin, shield estándar si no)
+    if (pill && btnAdmin) {
+      if (isAdmin) {
+        pill.classList.remove("hidden");
+        btnAdmin.classList.add("hidden");
+      } else {
+        pill.classList.add("hidden");
+        btnAdmin.classList.remove("hidden");
+      }
+    } else if (pill) {
       if (isAdmin) {
         pill.classList.remove("hidden");
       } else {

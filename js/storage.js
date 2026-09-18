@@ -26,7 +26,7 @@ const StorageService = {
       } else {
         const parsed = JSON.parse(stored);
         // Asegurar que las conexiones dogmáticas actualizadas se reflejen siempre
-        if (INITIAL_DATA && INITIAL_DATA.topics) {
+        if (INITIAL_DATA && INITIAL_DATA.topics && Array.isArray(parsed.topics)) {
           const initMap = new Map(INITIAL_DATA.topics.map(t => [t.id, t]));
           parsed.topics = parsed.topics.map(t => {
             const initTopic = initMap.get(t.id);
@@ -34,6 +34,16 @@ const StorageService = {
               return { ...t, connections: initTopic.connections };
             }
             return t;
+          });
+        }
+
+        // Confidencialidad de Modelos y Expiración Temporal: Solo conservar casos generados por IA no expirados
+        if (parsed.cases && Array.isArray(parsed.cases)) {
+          const now = Date.now();
+          parsed.cases = parsed.cases.filter(c => {
+            const isAi = c.isGeneratedByAI === true || (c.id && c.id.startsWith("caso-ia-"));
+            const notExpired = !c.expiresAt || c.expiresAt > now;
+            return isAi && notExpired;
           });
         }
         return parsed;
@@ -154,6 +164,83 @@ const StorageService = {
   getCaseDraft(caseId) {
     const data = this.getData();
     return (data.caseDrafts && data.caseDrafts[caseId]) || null;
+  },
+
+  /**
+   * Ciclo de vida y retención óptima: Mantiene como máximo 'maxCount' casos de práctica IA
+   * aplicando política FIFO. Los casos oficiales (exámenes y pautas base) son inmunes.
+   * Purga además cualquier borrador huérfano en caseDrafts para liberar memoria en localStorage.
+   */
+  pruneOldAiCases(maxCount = 10) {
+    const data = this.getData();
+    const cases = data.cases || [];
+    
+    // Separar casos oficiales y de práctica generados por IA
+    const officialCases = [];
+    const aiCases = [];
+
+    cases.forEach(c => {
+      const isAi = c.isGeneratedByAI || (c.id && c.id.startsWith("caso-ia-"));
+      if (isAi) {
+        aiCases.push(c);
+      } else {
+        officialCases.push(c);
+      }
+    });
+
+    if (aiCases.length <= maxCount) {
+      return { prunedCount: 0, remainingAiCount: aiCases.length };
+    }
+
+    // Conservar solo los 'maxCount' casos IA más recientes (los primeros en la lista)
+    const keptAiCases = aiCases.slice(0, maxCount);
+    const prunedAiCases = aiCases.slice(maxCount);
+    const prunedIds = new Set(prunedAiCases.map(c => c.id));
+
+    // Reensamblar lista de casos
+    data.cases = [...keptAiCases, ...officialCases];
+
+    // Limpieza de borradores huérfanos en caseDrafts
+    if (data.caseDrafts) {
+      prunedIds.forEach(id => {
+        delete data.caseDrafts[id];
+      });
+    }
+
+    this.saveData(data);
+    return { prunedCount: prunedAiCases.length, remainingAiCount: keptAiCases.length };
+  },
+
+  /**
+   * Purga manual completa de todos los casos de práctica generados por IA y sus borradores,
+   * preservando íntegramente los casos oficiales de la universidad.
+   */
+  clearAllAiPracticeCases() {
+    const data = this.getData();
+    const cases = data.cases || [];
+    
+    const officialCases = [];
+    const prunedIds = [];
+
+    cases.forEach(c => {
+      const isAi = c.isGeneratedByAI || (c.id && c.id.startsWith("caso-ia-"));
+      if (isAi) {
+        prunedIds.push(c.id);
+      } else {
+        officialCases.push(c);
+      }
+    });
+
+    data.cases = officialCases;
+
+    if (data.caseDrafts) {
+      prunedIds.forEach(id => {
+        delete data.caseDrafts[id];
+      });
+    }
+
+    this.saveData(data);
+    return { deletedCount: prunedIds.length, officialCasesCount: officialCases.length };
   },
 
   // Exportar todo a archivo .json descargable

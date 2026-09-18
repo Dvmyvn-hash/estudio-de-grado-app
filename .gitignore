@@ -22,5 +22,25 @@ desktop.ini
 *.log
 sync_config.json
 
-# Scratch / Temporary debugging scripts
+# Scratch / Temporary debugging and test scripts
 scratch_*.py
+test_*.cjs
+test_*.js
+test_*.py
+test_e2e_case_flow.cjs
+
+# Archivos de entorno y credenciales
+.env
+.env.*
+*.key
+*.pem
+
+# 🛡️ CONFIDENCIALIDAD DE MODELOS Y FUENTES DE ENTRENAMIENTO DEL AGENTE IA
+# Se protegen los archivos de pautas, casos de cátedra, exámenes anteriores
+# y la base de datos de casos para que permanezcan confidenciales y no se suban a GitHub.
+CASOS/
+casos/
+all_cases.json
+parse_casos.py
+APUNTES/
+Fuentes_Grado/

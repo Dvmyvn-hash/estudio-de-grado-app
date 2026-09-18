@@ -183,27 +183,33 @@
   background: rgba(245, 158, 11, 0.15);
 }
 
-/* Indicador de Administrador en el Header */
+/* Indicador de Administrador en el Header (Modo Icono Compacto) */
 .admin-active-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: rgba(217, 119, 6, 0.15);
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  background: rgba(217, 119, 6, 0.18);
   border: 1px solid var(--gold-primary);
   color: var(--gold-primary);
-  font-size: 0.72rem;
-  font-weight: 800;
-  padding: 5px 10px;
-  border-radius: var(--radius-sm);
   cursor: pointer;
-  letter-spacing: 0.05em;
-  box-shadow: 0 0 12px rgba(217, 119, 6, 0.25);
+  box-shadow: 0 0 12px rgba(217, 119, 6, 0.35);
   transition: var(--transition-fast);
 }
 
+.admin-active-pill i {
+  width: 17px;
+  height: 17px;
+}
+
 .admin-active-pill:hover {
-  background: rgba(217, 119, 6, 0.25);
-  box-shadow: 0 0 16px rgba(217, 119, 6, 0.4);
+  background: rgba(217, 119, 6, 0.3);
+  box-shadow: 0 0 16px rgba(217, 119, 6, 0.5);
+  transform: translateY(-1px);
 }
 
 .admin-active-pill.hidden {
@@ -485,24 +491,81 @@
   width: 100%;
 }
 
-/* Modo Móvil / Drawer Off-Canvas */
+/* ==========================================================================
+   RESPONSIVO: NOTEBOOKS Y LAPTOPS (1025px a 1366px)
+   ========================================================================== */
+@media (min-width: 1025px) and (max-width: 1366px) {
+  .app-sidebar {
+    width: 260px;
+    min-width: 260px;
+  }
+
+  .sidebar-header {
+    padding: 10px 12px;
+  }
+
+  .sidebar-header-label {
+    font-size: 0.72rem;
+  }
+
+  .subject-filters {
+    gap: 4px;
+    padding: 2px;
+  }
+
+  .filter-pill {
+    padding: 4px 6px;
+    font-size: 0.72rem;
+  }
+
+  .sidebar-meta-stats {
+    padding: 8px 12px;
+  }
+
+  .meta-item {
+    font-size: 0.72rem;
+    margin-bottom: 4px;
+  }
+
+  .tree-category-header {
+    padding: 8px 10px;
+  }
+
+  .tree-category-title {
+    font-size: 0.78rem;
+  }
+
+  .topic-tree-item {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+
+  .topic-title-text {
+    font-size: 0.78rem;
+    line-height: 1.35;
+  }
+}
+
+/* Modo Móvil y Tablet / Drawer Off-Canvas (Hasta 1024px) */
 @media (max-width: 1024px) {
   .app-sidebar {
     position: fixed;
     top: 0;
     left: 0;
     bottom: 0;
-    width: 320px;
-    max-width: 85vw;
+    width: 300px;
+    max-width: 86vw;
     height: 100%;
     height: 100dvh;
     z-index: 100;
     box-shadow: var(--shadow-lg);
     transition: transform var(--transition-normal);
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 
   .app-sidebar.collapsed {
-    width: 320px;
+    width: 300px;
     min-width: 0;
     transform: translateX(-100%);
     pointer-events: none;
@@ -516,5 +579,9 @@
 
   .sidebar-mobile-close-row {
     display: flex;
+  }
+
+  .sidebar-tree {
+    -webkit-overflow-scrolling: touch;
   }
 }

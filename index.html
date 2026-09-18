@@ -36,28 +36,30 @@
           <i data-lucide="menu"></i>
         </button>
         <div class="brand-badge">
-          <i data-lucide="scale" class="brand-icon"></i>
-          <div>
+          <div class="brand-icon-wrap">
+            <i data-lucide="scale" class="brand-icon"></i>
+          </div>
+          <div class="brand-text-block">
             <h1 class="brand-title">ESTUDIO DE GRADO</h1>
-            <span class="brand-subtitle">Derecho Civil · Procesal · Constitucional</span>
+            <span class="brand-subtitle">Civil - Procesal - Consti</span>
           </div>
         </div>
       </div>
 
-      <!-- Pestañas de Vista Principal -->
+      <!-- Pestañas de Vista Principal (Compactas) -->
       <nav class="header-nav" aria-label="Vistas principales">
-        <button class="nav-tab active" data-view="topics" id="tab-topics">
+        <button class="nav-tab active" data-view="topics" id="tab-topics" title="Temario & Apuntes de Grado">
           <i data-lucide="book-open"></i>
-          <span>Temario & Apuntes</span>
+          <span class="nav-tab-label">Apuntes</span>
         </button>
-        <button class="nav-tab" data-view="cases" id="tab-cases">
+        <button class="nav-tab" data-view="cases" id="tab-cases" title="Taller Metodológico de Casos">
           <i data-lucide="briefcase"></i>
-          <span>Taller de Casos</span>
+          <span class="nav-tab-label">Casos</span>
           <span class="badge-count" id="case-count-badge">0</span>
         </button>
-        <button class="nav-tab" data-view="graph" id="tab-graph">
+        <button class="nav-tab" data-view="graph" id="tab-graph" title="Grafo de Instituciones Interconectadas">
           <i data-lucide="git-fork"></i>
-          <span>Grafo de Instituciones</span>
+          <span class="nav-tab-label">Grafo</span>
         </button>
       </nav>
 
@@ -66,35 +68,33 @@
         <!-- Buscador Global Rápido -->
         <div class="search-bar">
           <i data-lucide="search" class="search-icon"></i>
-          <input type="text" id="global-search-input" placeholder="Buscar normas, instituciones, dogmática..." autocomplete="off">
-          <kbd class="shortcut-key">Ctrl + K</kbd>
+          <input type="text" id="global-search-input" placeholder="Buscar..." autocomplete="off">
+          <kbd class="shortcut-key">Ctrl+K</kbd>
           <div id="search-results-dropdown" class="search-dropdown hidden"></div>
         </div>
 
-        <!-- Badge de Estado de Licencia (Modo Demo o Pase Activo) -->
+        <!-- Indicador de Sincronización en Tiempo Real (Icono/Dot Compacto) -->
+        <div class="live-sync-indicator" id="live-sync-badge" title="Sincronización en vivo activa">
+          <span class="live-dot"></span>
+          <span class="live-text">Sync</span>
+        </div>
+
+        <!-- Badge de Estado de Licencia (Candado Demo / Corona Pase Activo en Modo Icono) -->
         <div id="license-badge-container"></div>
 
-        <!-- Indicador de Sincronización en Tiempo Real -->
-        <div class="live-sync-indicator" id="live-sync-badge" title="Sincronización en vivo: cualquier cambio en tus notas se refleja automáticamente">
-          <span class="live-dot"></span>
-          <span class="live-text">Auto-Sync</span>
-        </div>
-
-        <!-- Indicador Administrador Activo -->
-        <div id="admin-mode-pill" class="admin-active-pill hidden" title="Sesión de Administrador Activa">
-          <i data-lucide="shield-check" style="width: 14px; height: 14px;"></i>
-          <span>ADMIN</span>
-        </div>
-
-        <!-- Botón Administrador (Generador de Licencias) -->
-        <button id="btn-open-admin" class="icon-btn" title="Panel de Administrador (Generar Licencias)" aria-label="Admin">
+        <!-- Indicador Administrador Activo (Icono) -->
+        <button id="admin-mode-pill" class="icon-btn admin-active-pill hidden" title="Sesión de Administrador Activa (Clic para panel)" aria-label="Admin Activo">
           <i data-lucide="shield-check"></i>
         </button>
 
+        <!-- Botón Administrador (Generador de Licencias) -->
+        <button id="btn-open-admin" class="icon-btn" title="Panel de Administrador" aria-label="Admin">
+          <i data-lucide="shield"></i>
+        </button>
+
         <!-- Importar / Gestionar NotebookLM (Solo Administrador o Rol Autorizado) -->
-        <button id="btn-open-import" class="btn btn-secondary hidden" style="display: none;" title="Importar o exportar notas de NotebookLM (Solo Administrador)">
+        <button id="btn-open-import" class="icon-btn hidden" style="display: none;" title="Importar o exportar notas de NotebookLM (Solo Administrador)" aria-label="Importar notas">
           <i data-lucide="file-plus-2"></i>
-          <span>Importar Notas</span>
         </button>
 
         <!-- Selector de Tema Claro/Oscuro -->
@@ -204,7 +204,8 @@
       <div class="modal-body">
         <div class="modal-tabs">
           <button class="modal-tab active" data-tab="paste">Pegar Markdown / Texto</button>
-          <button class="modal-tab" data-tab="sources">Archivos de Fuente (.md)</button>
+          <button class="modal-tab" data-tab="sources">Apuntes (FUENTES)</button>
+          <button class="modal-tab" data-tab="casos">Carpeta CASOS & Pautas</button>
           <button class="modal-tab" data-tab="backup">Copia de Seguridad (JSON)</button>
         </div>
 
@@ -277,6 +278,31 @@
           </div>
           <div id="sources-list-container" class="sources-list">
             <!-- Listado de fuentes disponibles -->
+          </div>
+        </div>
+
+        <!-- Pestaña 3: Carpeta CASOS & Pautas -->
+        <div class="modal-tab-content" id="tab-content-casos">
+          <div class="sources-info-box" style="border-color: rgba(212, 175, 55, 0.3);">
+            <i data-lucide="briefcase" style="color: var(--gold-primary);"></i>
+            <div>
+              <strong>Repositorio de Casos, Pautas y Exámenes Anteriores:</strong>
+              <p>Agrega o edita archivos <code>.md</code>, <code>.docx</code>, <code>.pdf</code> o <code>.txt</code> en la carpeta <code>CASOS/</code> del proyecto o en <code>Escritorio/Fuentes_Grado/CASOS</code>. El sistema extraerá automáticamente los hechos, preguntas y pautas docentes para el Taller de Casos.</p>
+            </div>
+          </div>
+          
+          <div class="casos-summary-bar" style="display: flex; gap: 12px; margin: 14px 0; align-items: center; justify-content: space-between;">
+            <div id="casos-sync-stats" style="font-size: 0.82rem; color: var(--text-muted);">
+              Cargando archivos de CASOS...
+            </div>
+            <button id="btn-force-sync-casos" class="btn btn-secondary btn-sm" type="button">
+              <i data-lucide="refresh-cw"></i>
+              <span>Re-escanear CASOS</span>
+            </button>
+          </div>
+
+          <div id="casos-files-container" class="sources-list">
+            <!-- Listado de archivos de CASOS detectados -->
           </div>
         </div>
 
@@ -467,9 +493,11 @@
   <!-- SCRIPTS -->
   <script src="js/data.js"></script>
   <script src="js/storage.js"></script>
+  <script src="js/security-shield.js"></script>
   <script src="js/auth-license.js"></script>
   <script src="js/markdown-parser.js"></script>
   <script src="js/concept-graph.js"></script>
+  <script src="js/case-generator-agent.js"></script>
   <script src="js/case-solver.js"></script>
   <script src="js/app.js"></script>
 </body>

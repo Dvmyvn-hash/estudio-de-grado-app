@@ -4,11 +4,29 @@
  */
 
 const LicenseService = {
-  ADMIN_PIN: "almabaltoamial2020", // Clave de acceso exclusiva de administración
+  // Hash criptográfico SHA-256 de la clave de administración (previene exposición de credenciales en GitHub)
+  ADMIN_PIN_HASH: "75cfc5343b1e254fc0e4f909e980e14cda4d24dc223718749855ba3ec28457d8",
   STORAGE_LICENSE_KEY: "estudio_grado_user_license",
   STORAGE_ALL_CODES_KEY: "estudio_grado_issued_licenses",
 
   STORAGE_ADMIN_KEY: "estudio_grado_admin_session",
+
+  // Verificación criptográfica segura de la clave de administración
+  async verifyAdminPin(enteredPin) {
+    if (!enteredPin || typeof enteredPin !== "string") return false;
+    try {
+      if (typeof crypto !== "undefined" && crypto.subtle) {
+        const msgBuffer = new TextEncoder().encode(enteredPin.trim());
+        const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+        return hashHex === this.ADMIN_PIN_HASH;
+      }
+    } catch (e) {
+      console.warn("Crypto API no disponible para verificación de PIN:", e);
+    }
+    return false;
+  },
 
   // Modo Administrador
   isAdminMode() {
@@ -62,6 +80,11 @@ const LicenseService = {
       if (lic.scope === "all") return true;
       if (item.subject && lic.scope === item.subject) return true;
       if (item.subjects && item.subjects.some(s => s === lic.scope)) return true;
+    }
+
+    // Los casos generados dinámicamente por la IA en el taller de práctica son siempre accesibles
+    if (item.isGeneratedByAI || (item.id && item.id.startsWith("caso-ia-"))) {
+      return true;
     }
 
     // Contenido liberado para Modo Demo (para que prueben la plataforma)

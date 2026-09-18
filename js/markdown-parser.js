@@ -8,7 +8,7 @@ const MarkdownParser = {
   render(text) {
     if (!text) return "";
 
-    let html = text;
+    let html = this.cleanRawText(text);
 
     // 1. Escapar caracteres HTML básicos (excepto si son necesarios)
     html = html
@@ -61,9 +61,15 @@ const MarkdownParser = {
     // 9. Separadores horizontales
     html = html.replace(/^---$/gim, '<hr class="reading-divider">');
 
-    // 10. Listas numeradas y con viñetas
+    // 10. Listas numeradas y con viñetas (con soporte jerárquico multinivel)
     html = html.replace(/^\s*(\d+)[\.\)]\s+(.*$)/gim, '<div class="ol-item"><span class="ol-num">$1.</span> <span class="ol-content">$2</span></div>');
-    html = html.replace(/^\s*[\-\*•▪]\s+(.*$)/gim, '<div class="ul-item"><span class="ul-bullet">▪</span> <span class="ul-content">$1</span></div>');
+    html = html.replace(/^([ \t]*)[\-\*•▪]\s+(.*$)/gim, (match, spaces, content) => {
+      const spaceCount = spaces ? spaces.length : 0;
+      const isNested = spaceCount >= 4;
+      const bulletSymbol = isNested ? '◦' : '▪';
+      const nestedClass = isNested ? ' ul-item-nested' : '';
+      return `<div class="ul-item${nestedClass}"><span class="ul-bullet">${bulletSymbol}</span> <span class="ul-content">${content}</span></div>`;
+    });
 
     // 11. Párrafos (separados por doble salto)
     const paragraphs = html.split(/\n\n+/);
@@ -143,5 +149,42 @@ const MarkdownParser = {
 
     tableHtml += '</tbody></table></div>';
     return tableHtml;
+  },
+
+  /**
+   * Saneamiento preventivo de texto Markdown:
+   * - Elimina números de página aislados heredados de extracción OCR/PDF.
+   * - Suprime cabeceras repetitivas de módulos y materias.
+   * - Suelda frases continuadas interrumpidas erróneamente por viñetas o saltos.
+   */
+  cleanRawText(text) {
+    if (!text) return "";
+    let clean = text;
+
+    // 1. Quitar números de página aislados (PDF artifacts: ej. "\n3\n", "\n48\n")
+    clean = clean.replace(/^[ \t]*\d{1,4}[ \t]*$/gm, "");
+
+    // 2. Quitar encabezados repetidos de módulos o títulos al pie/encabezado de página
+    clean = clean.replace(/^[ \t]*\*\*MÓDULO\s+[IVXLCDM]+:[^\*\n]+\*\*[ \t]*$/gim, "");
+    clean = clean.replace(/^[ \t]*##\s+\*\*ACTO JURÍDICO\s+\(TEORÍA GENERAL DEL NEGOCIO JURÍDICO\)\*\*[ \t]*$/gim, "");
+
+    // 3. Sanar líneas continuadas cortadas por el salto de página o columna
+    for (let i = 0; i < 2; i++) {
+      clean = clean.replace(
+        /([^\n\.\:\;\!\?\#\>])[ \t]*\n+[ \t]*[-*•▪][ \t]+([a-zñáéíóú\)\"\'\`]|_[a-zñáéíóú]|\*\*?[a-zñáéíóú].*)/g,
+        "$1 $2"
+      );
+      clean = clean.replace(
+        /([^\n\.\:\;\!\?\#\>])[ \t]*\n{2,}[ \t]*([a-zñáéíóú].*)/g,
+        "$1 $2"
+      );
+    }
+
+    // 4. Limpiar espacios al final de línea y líneas vacías con espacios
+    clean = clean.replace(/[ \t]+$/gm, "");
+    clean = clean.replace(/^[ \t]+$/gm, "");
+    clean = clean.replace(/\n{3,}/g, "\n\n");
+
+    return clean.trim();
   }
 };

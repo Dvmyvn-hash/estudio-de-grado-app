@@ -2,28 +2,35 @@
    PAYWALL & CONTROL DE ACCESO (MODO DEMO, BLOQUEO Y PANEL ADMIN)
    ========================================================================== */
 
-/* Badge de Estado en la Barra Superior */
+/* Badge de Estado en la Barra Superior (Modo Icono Compacto) */
 .license-status-badge {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 12px;
-  border-radius: var(--radius-full);
-  font-size: 0.75rem;
-  font-weight: 700;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  padding: 0;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: var(--transition-fast);
   user-select: none;
 }
 
+.license-status-badge i {
+  width: 17px;
+  height: 17px;
+}
+
 .license-status-badge.demo {
   background: rgba(239, 68, 68, 0.12);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  border: 1px solid rgba(239, 68, 68, 0.35);
   color: #f87171;
 }
 
 .license-status-badge.demo:hover {
-  background: rgba(239, 68, 68, 0.2);
+  background: rgba(239, 68, 68, 0.22);
+  border-color: rgba(239, 68, 68, 0.5);
   transform: translateY(-1px);
 }
 
@@ -32,6 +39,12 @@
   border: 1px solid var(--gold-border);
   color: var(--gold-primary);
   box-shadow: 0 0 10px var(--gold-glow);
+}
+
+.license-status-badge.unlocked:hover {
+  background: rgba(212, 175, 55, 0.25);
+  border-color: var(--gold-primary);
+  transform: translateY(-1px);
 }
 
 /* Candado en la lista lateral */
@@ -53,9 +66,9 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 60px 30px;
-  max-width: 680px;
-  margin: 40px auto;
+  padding: clamp(24px, 5vw, 44px) clamp(16px, 4vw, 32px);
+  max-width: min(680px, 92%);
+  margin: 24px auto;
   background: var(--bg-surface);
   border: 1px solid var(--gold-border);
   border-radius: var(--radius-lg);
@@ -82,35 +95,36 @@
 }
 
 .paywall-icon-wrap {
-  width: 64px;
-  height: 64px;
+  width: 52px;
+  height: 52px;
   border-radius: var(--radius-full);
   background: var(--gold-glow);
   border: 1px solid var(--gold-border);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 20px;
+  margin-bottom: 14px;
   color: var(--gold-primary);
 }
 
 .paywall-icon-wrap i {
-  width: 32px;
-  height: 32px;
+  width: 26px;
+  height: 26px;
 }
 
 .paywall-title {
   font-family: var(--font-display);
-  font-size: 1.6rem;
+  font-size: clamp(1.15rem, 2.8vw, 1.45rem);
   color: var(--text-main);
-  margin-bottom: 10px;
+  line-height: 1.25;
+  margin-bottom: 8px;
 }
 
 .paywall-subtitle {
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   color: var(--text-muted);
-  line-height: 1.6;
-  margin-bottom: 24px;
+  line-height: 1.55;
+  margin-bottom: 20px;
 }
 
 .paywall-features-list {

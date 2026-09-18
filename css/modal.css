@@ -261,3 +261,80 @@
   cursor: pointer;
   display: inline-flex;
 }
+
+/* ==========================================================================
+   RESPONSIVO: MODALES EN NOTEBOOK Y MÓVIL (Hasta 768px)
+   ========================================================================== */
+@media (max-width: 768px) {
+  .modal-backdrop {
+    padding: 10px;
+  }
+
+  .modal-dialog {
+    max-height: 94vh;
+    border-radius: var(--radius-md);
+  }
+
+  .modal-header {
+    padding: 14px 16px;
+  }
+
+  .modal-header-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .modal-title {
+    font-size: 1.05rem;
+  }
+
+  .modal-subtitle {
+    font-size: 0.74rem;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+
+  .modal-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+    gap: 4px;
+    margin-bottom: 14px;
+  }
+
+  .modal-tab {
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    flex-shrink: 0;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .form-group {
+    margin-bottom: 12px;
+  }
+
+  .drop-zone-box {
+    padding: 16px;
+  }
+
+  .drop-zone-icon {
+    width: 26px;
+    height: 26px;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .modal-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
