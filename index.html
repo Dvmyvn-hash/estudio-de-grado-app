@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estudio de Grado | Derecho Civil, Procesal y Constitucional</title>
+  <meta name="description" content="Plataforma interactiva para preparación de examen de grado en Derecho. Temario interconectado, visualizador de instituciones jurídicas y taller de casos prácticos con metodología dogmática.">
+  
+  <!-- Tipografía moderna para lectura jurídica -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Iconos Lucide CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Estilos -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/sidebar.css">
+  <link rel="stylesheet" href="css/topic-viewer.css">
+  <link rel="stylesheet" href="css/case-workshop.css">
+  <link rel="stylesheet" href="css/concept-graph.css">
+  <link rel="stylesheet" href="css/modal.css">
+  <link rel="stylesheet" href="css/paywall.css">
+</head>
+<body>
+  <div id="app-container" class="app-layout">
+    
+    <!-- BARRA SUPERIOR DE NAVEGACIÓN Y CONTROL -->
+    <header class="app-header">
+      <div class="header-brand">
+        <button id="btn-toggle-sidebar" class="icon-btn" title="Alternar menú lateral" aria-label="Menú">
+          <i data-lucide="menu"></i>
+        </button>
+        <div class="brand-badge">
+          <i data-lucide="scale" class="brand-icon"></i>
+          <div>
+            <h1 class="brand-title">ESTUDIO DE GRADO</h1>
+            <span class="brand-subtitle">Derecho Civil · Procesal · Constitucional</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pestañas de Vista Principal -->
+      <nav class="header-nav" aria-label="Vistas principales">
+        <button class="nav-tab active" data-view="topics" id="tab-topics">
+          <i data-lucide="book-open"></i>
+          <span>Temario & Apuntes</span>
+        </button>
+        <button class="nav-tab" data-view="cases" id="tab-cases">
+          <i data-lucide="briefcase"></i>
+          <span>Taller de Casos</span>
+          <span class="badge-count" id="case-count-badge">0</span>
+        </button>
+        <button class="nav-tab" data-view="graph" id="tab-graph">
+          <i data-lucide="git-fork"></i>
+          <span>Grafo de Instituciones</span>
+        </button>
+      </nav>
+
+      <!-- Acciones de Cabecera -->
+      <div class="header-actions">
+        <!-- Buscador Global Rápido -->
+        <div class="search-bar">
+          <i data-lucide="search" class="search-icon"></i>
+          <input type="text" id="global-search-input" placeholder="Buscar normas, instituciones, dogmática..." autocomplete="off">
+          <kbd class="shortcut-key">Ctrl + K</kbd>
+          <div id="search-results-dropdown" class="search-dropdown hidden"></div>
+        </div>
+
+        <!-- Badge de Estado de Licencia (Modo Demo o Pase Activo) -->
+        <div id="license-badge-container"></div>
+
+        <!-- Indicador de Sincronización en Tiempo Real -->
+        <div class="live-sync-indicator" id="live-sync-badge" title="Sincronización en vivo: cualquier cambio en tus notas se refleja automáticamente">
+          <span class="live-dot"></span>
+          <span class="live-text">Auto-Sync</span>
+        </div>
+
+        <!-- Indicador Administrador Activo -->
+        <div id="admin-mode-pill" class="admin-active-pill hidden" title="Sesión de Administrador Activa">
+          <i data-lucide="shield-check" style="width: 14px; height: 14px;"></i>
+          <span>ADMIN</span>
+        </div>
+
+        <!-- Botón Administrador (Generador de Licencias) -->
+        <button id="btn-open-admin" class="icon-btn" title="Panel de Administrador (Generar Licencias)" aria-label="Admin">
+          <i data-lucide="shield-check"></i>
+        </button>
+
+        <!-- Importar / Gestionar NotebookLM -->
+        <button id="btn-open-import" class="btn btn-secondary" title="Importar o exportar notas de NotebookLM">
+          <i data-lucide="file-plus-2"></i>
+          <span>Importar Notas</span>
+        </button>
+
+        <!-- Selector de Tema Claro/Oscuro -->
+        <button id="btn-toggle-theme" class="icon-btn theme-toggle" title="Cambiar tema claro/oscuro" aria-label="Cambiar tema">
+          <i data-lucide="sun" class="sun-icon"></i>
+          <i data-lucide="moon" class="moon-icon"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- CUERPO PRINCIPAL (SIDEBAR + ÁREA DE TRABAJO) -->
+    <div class="app-body">
+      
+      <!-- BARRA LATERAL (SIDEBAR) -->
+      <aside id="app-sidebar" class="app-sidebar">
+        <div class="sidebar-header">
+          <div class="subject-filters" role="group" aria-label="Filtro por materia">
+            <button class="filter-pill active" data-filter="all">Todas</button>
+            <button class="filter-pill filter-civil" data-filter="civil">I. Civil</button>
+            <button class="filter-pill filter-procesal" data-filter="procesal">II. Proce.</button>
+            <button class="filter-pill filter-constitucional" data-filter="constitucional">III. Público</button>
+          </div>
+          <div class="coverage-filters" role="group" aria-label="Filtro por cobertura de apuntes" style="display: none;">
+            <button class="coverage-pill active" data-coverage="all">Todas (55)</button>
+            <button class="coverage-pill filter-covered" data-coverage="covered">✅ Con Apunte (55)</button>
+            <button class="coverage-pill filter-pending" data-coverage="pending">⚠️ Pendientes (0)</button>
+          </div>
+        </div>
+
+        <div class="sidebar-meta-stats">
+          <div class="meta-item">
+            <span class="meta-label">Estudio Dominado</span>
+            <span class="meta-value" id="stats-mastery">0 / 55 (0%)</span>
+          </div>
+          <div class="meta-progress">
+            <div class="progress-bar" id="mastery-progress-bar" style="width: 0%"></div>
+          </div>
+          <div class="meta-item" id="admin-coverage-stat-row" style="margin-top: 8px; margin-bottom: 0; display: none;">
+            <span class="meta-label">Apuntes Propios Cargados</span>
+            <span class="meta-value" id="stats-coverage" style="color: #10b981;">55 / 55 (100%)</span>
+          </div>
+        </div>
+
+        <!-- Lista Jerárquica de Temas -->
+        <div class="sidebar-tree" id="topics-tree-container">
+          <!-- Generado dinámicamente -->
+        </div>
+
+        <div class="sidebar-footer">
+          <button id="btn-new-topic" class="btn btn-ghost btn-sm">
+            <i data-lucide="plus-circle"></i>
+            <span>Nuevo Tema / Cédula</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- ÁREA DE CONTENIDO DINÁMICA -->
+      <main id="main-content-area" class="main-content">
+        
+        <!-- VISTA 1: TEMARIO & APUNTES -->
+        <section id="view-topics" class="view-section active">
+          <!-- Se inyecta el componente TopicViewer -->
+        </section>
+
+        <!-- VISTA 2: TALLER DE RESOLUCIÓN DE CASOS -->
+        <section id="view-cases" class="view-section">
+          <!-- Se inyecta el componente CaseWorkshop -->
+        </section>
+
+        <!-- VISTA 3: GRAFO DE CONEXIONES INTERDISCIPLINARIAS -->
+        <section id="view-graph" class="view-section">
+          <!-- Se inyecta el componente ConceptGraph -->
+        </section>
+
+      </main>
+
+    </div>
+  </div>
+
+  <!-- MODAL: IMPORTADOR / EXPORTADOR NOTEBOOKLM -->
+  <div id="import-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <i data-lucide="file-text" class="modal-header-icon"></i>
+          <div>
+            <h2 class="modal-title">Gestor de Apuntes y NotebookLM</h2>
+            <p class="modal-subtitle">Importa tus resúmenes de "ESTUDIO DE GRADO" en formato Markdown o texto</p>
+          </div>
+        </div>
+        <button class="icon-btn btn-close-modal" id="btn-close-import-modal" aria-label="Cerrar modal">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-tabs">
+          <button class="modal-tab active" data-tab="paste">Pegar Markdown / Texto</button>
+          <button class="modal-tab" data-tab="sources">Archivos de Fuente (.md)</button>
+          <button class="modal-tab" data-tab="backup">Copia de Seguridad (JSON)</button>
+        </div>
+
+        <!-- Pestaña 1: Pegar desde NotebookLM -->
+        <div class="modal-tab-content active" id="tab-content-paste">
+          <!-- Zona de Arrastrar y Soltar Archivos Directos -->
+          <div id="drop-zone-notebooklm" class="drop-zone-box">
+            <i data-lucide="upload-cloud" class="drop-zone-icon"></i>
+            <div>
+              <strong>Arrastra y suelta aquí un archivo de NotebookLM (.md o .txt)</strong>
+              <p class="text-muted" style="font-size: 0.78rem;">O haz clic para seleccionar un archivo desde tu equipo</p>
+            </div>
+            <input type="file" id="input-file-drop" accept=".md,.txt,.markdown" class="visually-hidden">
+          </div>
+
+          <div class="divider-text" style="text-align: center; margin: 12px 0; font-size: 0.75rem; color: var(--text-subtle);">O PEGA EL TEXTO DIRECTAMENTE</div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="import-subject">Materia Principal:</label>
+              <select id="import-subject" class="form-control">
+                <option value="civil">Derecho Civil</option>
+                <option value="procesal">Derecho Procesal</option>
+                <option value="constitucional">Derecho Constitucional</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="import-category">Módulo / Institución (Opcional si usas divisor automático):</label>
+              <input type="text" id="import-category" class="form-control" placeholder="Ej: Teoría del Acto Jurídico, Recursos, etc.">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="import-title">Título del Tema (o déjalo vacío para que lo extraiga del documento):</label>
+            <input type="text" id="import-title" class="form-control" placeholder="Ej: Efectos del Emplazamiento">
+          </div>
+
+          <div class="form-group">
+            <label for="import-tags">Etiquetas clave (separadas por coma):</label>
+            <input type="text" id="import-tags" class="form-control" placeholder="Ej: Emplazamiento, Notificación, Art. 258 CPC">
+          </div>
+
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <label for="import-markdown">Contenido de NotebookLM:</label>
+              <label class="checkbox-label" style="font-size: 0.75rem; color: var(--gold-primary); cursor: pointer;">
+                <input type="checkbox" id="check-auto-split" checked style="margin-right: 4px;">
+                <span>Dividir automáticamente si contiene múltiples temas (# o ##)</span>
+              </label>
+            </div>
+            <textarea id="import-markdown" class="form-control code-editor" rows="9" placeholder="Pega aquí resúmenes, guías de estudio o respuestas generadas en NotebookLM..."></textarea>
+          </div>
+
+          <div class="modal-actions">
+            <button id="btn-save-imported-topic" class="btn btn-primary">
+              <i data-lucide="save"></i>
+              <span>Procesar e Incorporar al Temario</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Pestaña 2: Fuentes Locales -->
+        <div class="modal-tab-content" id="tab-content-sources">
+          <div class="sources-info-box">
+            <i data-lucide="folder-code"></i>
+            <div>
+              <strong>Fuentes directas en Markdown:</strong>
+              <p>Puedes editar o agregar directamente archivos <code>.md</code> en la carpeta <code>fuentes/</code> del proyecto. La aplicación puede sincronizarse y leer los esquemas.</p>
+            </div>
+          </div>
+          <div id="sources-list-container" class="sources-list">
+            <!-- Listado de fuentes disponibles -->
+          </div>
+        </div>
+
+        <!-- Pestaña 3: Backup y Restauración -->
+        <div class="modal-tab-content" id="tab-content-backup">
+          <p class="text-muted">Exporta todo tu temario, casos y progreso a un archivo JSON para respaldo, o restaura tus datos en cualquier navegador o dispositivo.</p>
+          <div class="backup-actions">
+            <button id="btn-export-json" class="btn btn-secondary">
+              <i data-lucide="download"></i>
+              <span>Exportar Respaldo Completo (.json)</span>
+            </button>
+            <label class="btn btn-outline file-input-label">
+              <i data-lucide="upload"></i>
+              <span>Restaurar desde Respaldo (.json)</span>
+              <input type="file" id="input-restore-json" accept=".json" class="visually-hidden">
+            </label>
+            <button id="btn-reset-defaults" class="btn btn-danger-outline">
+              <i data-lucide="rotate-ccw"></i>
+              <span>Restablecer Datos de Grado Iniciales</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ACTIVACIÓN DE PASE DE GRADO (PARA EL ALUMNO) -->
+  <div id="unlock-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-dialog" style="max-width: 580px;">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <i data-lucide="key-round" class="modal-header-icon"></i>
+          <div>
+            <h2 class="modal-title">Activar Pase de Grado</h2>
+            <p class="modal-subtitle">Ingresa tu código de licencia para desbloquear todo el temario</p>
+          </div>
+        </div>
+        <button class="icon-btn btn-close-modal" id="btn-close-unlock-modal" aria-label="Cerrar">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-body" style="padding: 24px;">
+        <div class="paywall-activation-box">
+          <label style="font-size: 0.85rem; font-weight: 600; color: var(--text-main);">Tu Código de Activación:</label>
+          <div class="activation-input-row">
+            <input type="text" id="input-license-code" placeholder="EJ: GRADO-FULL-XXXX-1234" autocomplete="off">
+            <button id="btn-submit-license" class="btn btn-primary">
+              <i data-lucide="unlock"></i>
+              <span>Desbloquear</span>
+            </button>
+          </div>
+          <div id="license-error-msg" style="font-size: 0.8rem; color: var(--danger); display: none;"></div>
+        </div>
+
+        <div style="text-align: center; margin: 20px 0; border-top: 1px solid var(--border-subtle); padding-top: 18px;">
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">¿Aún no tienes tu código de acceso?</p>
+          <a href="https://wa.me/?text=Hola!%20Me%20gustar%C3%ADa%20adquirir%20el%20Pase%20de%20Grado%20para%20la%20plataforma%20de%20Civil,%20Procesal%20y%20Constitucional." target="_blank" class="btn-whatsapp-buy">
+            <i data-lucide="message-circle"></i>
+            <span>Solicitar mi Pase por WhatsApp</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PANEL DE ADMINISTRADOR (PARA TI) -->
+  <div id="admin-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <i data-lucide="shield-check" class="modal-header-icon"></i>
+          <div>
+            <h2 class="modal-title">Panel de Control: Generador de Licencias</h2>
+            <p class="modal-subtitle">Genera códigos para tus alumnos tras recibir su pago</p>
+          </div>
+        </div>
+        <button class="icon-btn btn-close-modal" id="btn-close-admin-modal" aria-label="Cerrar">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Pantalla de Login con PIN -->
+        <div id="admin-login-screen">
+          <div style="max-width: 320px; margin: 30px auto; text-align: center;">
+            <i data-lucide="lock" style="width: 40px; height: 40px; color: var(--gold-primary); margin-bottom: 12px;"></i>
+            <h3 style="margin-bottom: 8px;">Acceso de Administrador</h3>
+            <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 16px;">Ingresa tu clave de administrador (por defecto: <code>grado2026</code>)</p>
+            <input type="password" id="admin-pin-input" class="form-control" placeholder="Ingresa tu clave PIN" style="text-align: center; margin-bottom: 12px;">
+            <button id="btn-admin-login" class="btn btn-primary" style="width: 100%;">
+              <span>Ingresar al Panel</span>
+            </button>
+            <div id="admin-login-error" style="color: var(--danger); font-size: 0.78rem; margin-top: 8px; display: none;">Clave incorrecta</div>
+          </div>
+        </div>
+
+        <!-- Pantalla de Gestión de Licencias (Visible tras PIN correcto) -->
+        <div id="admin-dashboard-screen" class="hidden">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: rgba(217, 119, 6, 0.1); border: 1px solid rgba(217, 119, 6, 0.3); border-radius: var(--radius-md); margin-bottom: 20px;">
+            <div>
+              <span style="font-weight: 700; color: var(--gold-primary); font-size: 0.85rem;">👑 Sesión de Administrador Activa</span>
+              <p style="font-size: 0.75rem; color: var(--text-muted); margin: 0;">Tienes visibilidad total de los apuntes desarrollados, filtros y generador de licencias.</p>
+            </div>
+            <button id="btn-admin-logout" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; flex-shrink: 0;">
+              <i data-lucide="log-out"></i>
+              <span>Cerrar Sesión Admin</span>
+            </button>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="admin-student-name">Nombre del Alumno / Referencia:</label>
+              <input type="text" id="admin-student-name" class="form-control" placeholder="Ej: Juan Pérez (Pago recibido)">
+            </div>
+            <div class="form-group">
+              <label for="admin-scope-select">Materias a Liberar:</label>
+              <select id="admin-scope-select" class="form-control">
+                <option value="all">Pase Completo (Civil + Procesal + Constitucional)</option>
+                <option value="civil">Solo Derecho Civil</option>
+                <option value="procesal">Solo Derecho Procesal</option>
+                <option value="constitucional">Solo Derecho Constitucional</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="admin-days-select">Duración del Acceso:</label>
+              <select id="admin-days-select" class="form-control">
+                <option value="180">Pase Semestral (180 días / 6 meses)</option>
+                <option value="90">Pase Trimestral (90 días / 3 meses)</option>
+                <option value="30">Pase Mensual (30 días)</option>
+                <option value="0">Pase Perpetuo (Sin límite de tiempo)</option>
+              </select>
+            </div>
+            <div class="form-group" style="justify-content: flex-end;">
+              <button id="btn-generate-code" class="btn btn-primary" style="height: 42px;">
+                <i data-lucide="plus-circle"></i>
+                <span>Generar Código de Licencia</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Historial de Códigos Emitidos -->
+          <div style="margin-top: 24px;">
+            <h4 style="font-size: 0.9rem; color: var(--gold-primary); text-transform: uppercase; margin-bottom: 8px;">
+              Códigos Emitidos Activos
+            </h4>
+            <div style="max-height: 260px; overflow-y: auto; border: 1px solid var(--border-subtle); border-radius: var(--radius-md);">
+              <table class="admin-codes-table">
+                <thead>
+                  <tr>
+                    <th>Código</th>
+                    <th>Alumno</th>
+                    <th>Alcance</th>
+                    <th>Vigencia</th>
+                    <th>% Progreso</th>
+                    <th>Acción</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-codes-tbody">
+                  <!-- Llenado dinámicamente -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATIONS -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- SCRIPTS -->
+  <script src="js/data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/auth-license.js"></script>
+  <script src="js/markdown-parser.js"></script>
+  <script src="js/concept-graph.js"></script>
+  <script src="js/case-solver.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

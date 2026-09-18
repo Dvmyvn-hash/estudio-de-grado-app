@@ -1,0 +1,839 @@
+# -*- coding: utf-8 -*-
+"""
+Generador Maestro de Conexiones Dogmáticas y Aplicaciones Prácticas con IA
+Estudio de Grado 2026 - Cruces Transversales (Civil, Procesal, Constitucional)
+"""
+
+import json
+import os
+
+CONNECTIONS_MAP = {
+    # -------------------------------------------------------------
+    # I. TEORÍA GENERAL DEL ACTO JURÍDICO
+    # -------------------------------------------------------------
+    "civil-acto-1-1": [
+        {
+            "targetTopicId": "civil-clas-2-1",
+            "targetTitle": "Concepto y Estructura del Contrato",
+            "targetSubject": "civil",
+            "crossoverType": "Género y Especie",
+            "whyConnected": "El contrato es la especie más relevante de acto jurídico bilateral (convención que crea obligaciones, art. 1438 CC). Las reglas de elementos de la esencia, naturaleza y accidentales (art. 1444 CC) estructuran directamente la validez de todo contrato particular.",
+            "practicalApplication": "En el examen, la comisión pide calificar cláusulas de un contrato atípico: distinguir si la estipulación pertenece a la naturaleza o es accidental condiciona si la omisión acarrea inexistencia, nulidad o suplencia legal supletoria."
+        },
+        {
+            "targetTopicId": "procesal-proc-2-3",
+            "targetTitle": "Los Actos Jurídicos Procesales",
+            "targetSubject": "procesal",
+            "crossoverType": "Cruce Sustantivo-Procesal",
+            "whyConnected": "El acto procesal es una especie de acto jurídico caracterizado por producir efectos directos en el proceso. La doctrina debate la aplicación analógica supletoria de los vicios del consentimiento y de las clasificaciones del Código Civil a la demanda, contestación y recursos.",
+            "practicalApplication": "Interrogación clásica: ¿Procede alegar error o dolo respecto de una confesión judicial o del allanamiento de la demanda? Se exige articular la revocación de la confesión (art. 402 CPC) como manifestación del error de hecho sustantivo."
+        },
+        {
+            "targetTopicId": "constitucional-cons-2-4",
+            "targetTitle": "Libertades Públicas y Autonomía Privada",
+            "targetSubject": "constitucional",
+            "crossoverType": "Fundamento Constitucional",
+            "whyConnected": "La autonomía de la voluntad del art. 1545 CC tiene anclaje directo en la libertad personal (art. 19 N° 7 CPR) y el derecho a desarrollar actividades económicas (art. 19 N° 21 CPR), con límites en el orden público y las buenas costumbres.",
+            "practicalApplication": "En casos prácticos sobre contratos con cláusulas abusivas o de sumisión a arbitraje forzoso, se evalúa si vulneran la garantía del juez natural (art. 19 N° 3 inc. 5 CPR) o la libertad contractual."
+        }
+    ],
+
+    "civil-acto-1-2": [
+        {
+            "targetTopicId": "civil-clas-2-3",
+            "targetTitle": "Principios Rectores de la Contratación",
+            "targetSubject": "civil",
+            "crossoverType": "Formación del Consentimiento y Buena Fe",
+            "whyConnected": "La formación del consentimiento regulada en los arts. 97 a 108 del Código de Comercio se entrelaza con el principio de buena fe precontractual (responsabilidad in contrahendo y deberes de información previa).",
+            "practicalApplication": "Caso de ruptura intempestiva e injustificada de tratativas preliminares avanzadas: el postulante debe subsumir los hechos en la responsabilidad extracontractual (art. 2314 CC) por infracción al estándar de diligencia y buena fe."
+        },
+        {
+            "targetTopicId": "civil-clas-3-1",
+            "targetTitle": "Contrato de Promesa",
+            "targetSubject": "civil",
+            "crossoverType": "Autonomía de la Voluntad y Perfeccionamiento",
+            "whyConnected": "La promesa posterga el consentimiento definitivo del contrato prometido. Requiere que la voluntad esté exenta de vicios al celebrarse la promesa, y que el contrato futuro esté plenamente determinado (art. 1554 N° 4 CC).",
+            "practicalApplication": "¿Qué ocurre si una de las partes se retracta antes de la escrituración prometida? El alumno debe demandar forzadamente la suscripción del documento conforme al art. 532 CPC (el juez firma en rebeldía)."
+        }
+    ],
+
+    "civil-acto-1-3": [
+        {
+            "targetTopicId": "civil-las -1-1",
+            "targetTitle": "Concepto y Clasificaciones del Objeto de la Obligación",
+            "targetSubject": "civil",
+            "crossoverType": "Dualidad de Objeto (Acto vs Obligación)",
+            "whyConnected": "El objeto del acto jurídico son los derechos y obligaciones que crea, mientras que el objeto de la obligación es la prestación (dar, hacer o no hacer, art. 1460 CC). Ambos exigen determinación, comerciabilidad y posibilidad física y moral.",
+            "practicalApplication": "La comisión pregunta la diferencia entre imposibilidad originaria (acarrea inexistencia o nulidad absoluta por falta de objeto) e imposibilidad sobreviniente (constituye modo de extinguir o incumplimiento resolutorio)."
+        },
+        {
+            "targetTopicId": "civil-acto-1-5",
+            "targetTitle": "Objeto Lícito y Causa Lícita",
+            "targetSubject": "civil",
+            "crossoverType": "Existencia vs Validez",
+            "whyConnected": "La falta de objeto o causa acarrea inexistencia o nulidad absoluta (arts. 1445, 1461, 1467 CC), mientras que la ilicitud del objeto o la causa es causal expresa de nulidad absoluta sustantiva (arts. 1466 y 1682 CC).",
+            "practicalApplication": "En caso de contrato simulado con causa ilícita: el postulante debe distinguir la acción de simulación (declarativa) de la acción de nulidad absoluta, evaluando si el titular tiene interés actual o pecuniario."
+        }
+    ],
+
+    "civil-acto-1-4": [
+        {
+            "targetTopicId": "civil-acto-1-6",
+            "targetTitle": "Teoría de las Ineficacias del Acto Jurídico",
+            "targetSubject": "civil",
+            "crossoverType": "Sanción de Ineficacia (Rescisión)",
+            "whyConnected": "Los vicios del consentimiento (error sustancial, fuerza moral grave y dolo determinante) y la incapacidad relativa son la hipótesis matriz de la nulidad relativa o rescisión (art. 1682 inc. 3 CC).",
+            "practicalApplication": "Pregunta de examen: ¿Quién puede alegar la nulidad relativa y cuál es el cómputo del cuadrienio del art. 1691 CC si se trata de fuerza continuada o incapaces relativos?"
+        },
+        {
+            "targetTopicId": "civil-clas-4-4",
+            "targetTitle": "Rescisión por Lesión Enorme y Vicios Objetivos",
+            "targetSubject": "civil",
+            "crossoverType": "Vicio Subjetivo vs Vicio Objetivo",
+            "whyConnected": "La doctrina discute si la lesión enorme es un vicio del consentimiento o un defecto objetivo de conmutatividad. En Chile no tiene alcance general, sino taxativo en compraventa de inmuebles, permuta, partición, mutuo, anticresis y cláusula penal.",
+            "practicalApplication": "Caso en que se intenta rescindir por lesión un contrato de compraventa de vehículo de alta gama o de acciones comerciales: el estudiante debe rechazar la acción por falta de supuesto de procedencia (art. 1891 CC)."
+        }
+    ],
+
+    "civil-acto-1-5": [
+        {
+            "targetTopicId": "civil-los -1-1",
+            "targetTitle": "Bienes Incomerciables y Tráfico Jurídico",
+            "targetSubject": "civil",
+            "crossoverType": "Objeto Ilícito y Estatuto de Bienes",
+            "whyConnected": "El art. 1464 N° 1 y 2 del CC sanciona con objeto ilícito la enajenación de cosas que no están en el comercio y de los derechos y privilegios intransferibles (como el derecho de uso, habitación o alimentos futuros).",
+            "practicalApplication": "Pregunta de grado de alto impacto: ¿Qué significa 'enajenación' en el art. 1464 CC? ¿Comprende la constitución de hipotecas o la promesa de venta de un bien embargado? (Distinción entre enajenar en sentido estricto y prometer enajenar)."
+        },
+        {
+            "targetTopicId": "procesal-proc-2-6",
+            "targetTitle": "Medidas Cautelares y Precautorias",
+            "targetSubject": "procesal",
+            "crossoverType": "Intersección Sustantiva y Medida Precautoria",
+            "whyConnected": "El art. 1464 N° 3 y 4 del CC vincula el objeto ilícito material con las medidas judiciales de retención, prohibición de celebrar actos y contratos y el embargo procesal (art. 290 CPC).",
+            "practicalApplication": "¿Es válida la venta voluntaria de un inmueble embargado si el juez de la causa o el acreedor consienten? El postulante debe citar la excepción expresa del art. 1464 N° 3 CC y tramitar la autorización incidental."
+        }
+    ],
+
+    "civil-acto-1-6": [
+        {
+            "targetTopicId": "civil-los -1-6",
+            "targetTitle": "Protección del Dominio y Acción Reivindicatoria",
+            "targetSubject": "civil",
+            "crossoverType": "Efectos de la Nulidad contra Terceros",
+            "whyConnected": "La nulidad judicialmente declarada da acción reivindicatoria contra terceros poseedores, sin distinguir si están de buena o mala fe (art. 1689 CC), operando como principio de efecto retroactivo de la ineficacia.",
+            "practicalApplication": "Caso canónico de examen: 'A' vende a 'B' bajo dolo; 'B' vende a 'C' (tercero de buena fe). Si 'A' anula el contrato con 'B', ¿puede recuperar la cosa en poder de 'C'? Se evalúa la aplicación del art. 1689 CC frente a las excepciones (adquisición por prescripción, lesión enorme y resciliación)."
+        },
+        {
+            "targetTopicId": "procesal-proc-2-4",
+            "targetTitle": "Nulidad Procesal Civil",
+            "targetSubject": "procesal",
+            "crossoverType": "Paralelo Dogmático Fundamental",
+            "whyConnected": "La comisión evalúa minuciosamente el paralelo entre nulidad sustantiva (civil) y nulidad procesal: causales taxativas vs principio de trascendencia/perjuicio, titularidad de orden público vs legitimación pasiva y plazo perentorio de 5 días (art. 83 CPC).",
+            "practicalApplication": "¿Puede declararse una nulidad procesal sin perjuicio para las partes? No (art. 83 CPC: 'no hay nulidad sin perjuicio'), a diferencia de la nulidad civil que opera por el solo quebrantamiento de la norma legal imperativa o prohibitiva."
+        }
+    ],
+
+    "civil-acto-1-7": [
+        {
+            "targetTopicId": "procesal-proc-2-2",
+            "targetTitle": "Comparecencia en Juicio y Mandato Judicial",
+            "targetSubject": "procesal",
+            "crossoverType": "Representación Civil vs Representación Procesal",
+            "whyConnected": "La teoría de la representación (art. 1448 CC) es la base dogmática de la personería judicial. Sin embargo, el mandato procesal tiene solemnidades estrictas (art. 6 CPC) y facultades ordinarias y extraordinarias (art. 7 CPC).",
+            "practicalApplication": "¿Puede el mandatario civil general demandar en juicio sin mandato judicial especial? Se evalúa la excepción dilatoria del art. 303 N° 2 CPC (falta de personería o representación legal del actor)."
+        },
+        {
+            "targetTopicId": "civil-las -1-3",
+            "targetTitle": "Obligaciones Sujetas a Modalidad",
+            "targetSubject": "civil",
+            "crossoverType": "Elementos Accidentales y Eficacia",
+            "whyConnected": "Las modalidades (condición, plazo y modo) modifican los efectos normales del acto jurídico, postergando su nacimiento, exigibilidad o extinción (art. 1473 y ss. CC).",
+            "practicalApplication": "Distinción dogmática en examen: ¿La condición suspensiva pendiente suspende la existencia del acto o la exigibilidad del derecho? Nace el germen de derecho que habilita impetrar medidas conservativas (art. 1492 CC)."
+        }
+    ],
+
+    # -------------------------------------------------------------
+    # II. BIENES Y DERECHOS REALES
+    # -------------------------------------------------------------
+    "civil-los -1-1": [
+        {
+            "targetTopicId": "constitucional-cons-2-5",
+            "targetTitle": "Estatuto Constitucional de la Propiedad",
+            "targetSubject": "constitucional",
+            "crossoverType": "Tutela Constitucional del Dominio",
+            "whyConnected": "El concepto civil de dominio del art. 582 CC se proyecta directamente sobre la garantía constitucional del art. 19 N° 24 CPR (derecho de propiedad en sus diversas especies sobre toda clase de bienes corporales o incorporales).",
+            "practicalApplication": "Pregunta sobre 'propietarización de los derechos': cómo los derechos emanados de un contrato o concesión son considerados bienes incorporales amparables por la acción constitucional de protección."
+        },
+        {
+            "targetTopicId": "civil-los -1-6",
+            "targetTitle": "Protección del Dominio y Acciones Reales",
+            "targetSubject": "civil",
+            "crossoverType": "Sustantivo y Acción Protectora",
+            "whyConnected": "El carácter absoluto, exclusivo y perpetuo del dominio dota al propietario de las acciones reales más contundentes: la acción reivindicatoria (art. 889 CC) y las acciones posesorias en favor del poseedor legítimo.",
+            "practicalApplication": "En una copropiedad indivisa: ¿Puede un comunero entablar acción reivindicatoria sobre su cuota o sobre el total de la cosa común? Se evalúa el art. 892 CC (reivindicación de cuota) y la doctrina del mandato tácito y recíproco."
+        }
+    ],
+
+    "civil-los -1-2": [
+        {
+            "targetTopicId": "civil-los -1-3",
+            "targetTitle": "El Modo de Adquirir Tradición y Sistema Registral",
+            "targetSubject": "civil",
+            "crossoverType": "Sistemática de los Modos de Adquirir",
+            "whyConnected": "La tradición es el modo de adquirir derivativo por excelencia entre vivos. Requiere necesariamente un título traslaticio previo y la entrega jurídica con intención de transferir y adquirir el dominio.",
+            "practicalApplication": "Diferenciar en interrogación: ¿Por qué en los modos originarios (ocupación, accesión, prescripción) no opera el principio 'nadie puede transferir más derechos de los que tiene' propio de los modos derivativos?"
+        },
+        {
+            "targetTopicId": "civil-los -1-5",
+            "targetTitle": "Prescripción Adquisitiva (Usucapión)",
+            "targetSubject": "civil",
+            "crossoverType": "Modo Originario vs Posesión",
+            "whyConnected": "Cuando la tradición o el título adolecen de vicios, la prescripción adquisitiva entra a sanear la situación jurídica del poseedor, consolidando el dominio (art. 2492 CC).",
+            "practicalApplication": "¿Puede el adquirente alegar tradición y prescripción al mismo tiempo? Sí, la tradición defectuosa sirve como justo título para poseer y prescribir ordinaria o extraordinariamente (art. 683 CC)."
+        }
+    ],
+
+    "civil-los -1-3": [
+        {
+            "targetTopicId": "civil-clas-4-1",
+            "targetTitle": "Contrato de Compraventa",
+            "targetSubject": "civil",
+            "crossoverType": "Dualidad Título y Modo",
+            "whyConnected": "En el derecho chileno rige el principio romano de la dualidad título-modo. La compraventa genera únicamente obligaciones personales; para hacer nacer el derecho real de dominio se requiere la tradición como modo (arts. 588 y 675 CC).",
+            "practicalApplication": "Pregunta de grado sobre la venta de cosa ajena (art. 1815 CC): la compraventa es plenamente válida como título, pero la tradición que realiza el tradente no transfiere el dominio (art. 682 CC), concediendo solo posesión hábil para ganar por usucapión."
+        },
+        {
+            "targetTopicId": "civil-los -1-4",
+            "targetTitle": "Posesión y Teoría de la Posesión Inscrita",
+            "targetSubject": "civil",
+            "crossoverType": "Inscripción Conservatoria",
+            "whyConnected": "La inscripción en el Registro de Propiedad del Conservador de Bienes Raíces (CBR) cumple una triple función: es tradición de inmuebles (art. 686 CC), requisito y prueba de posesión inscrita (arts. 724 y 924 CC) y garantía de publicidad.",
+            "practicalApplication": "¿Cómo se cancela la posesión inscrita según el art. 728 CC? La comisión exige dominar las tres vías: resciliación por voluntad de las partes, decreto judicial y nueva inscripción en que el poseedor inscrito transfiere su derecho."
+        }
+    ],
+
+    "civil-los -1-4": [
+        {
+            "targetTopicId": "civil-los -1-5",
+            "targetTitle": "Prescripción Adquisitiva",
+            "targetSubject": "civil",
+            "crossoverType": "Posesión como Presupuesto de la Usucapión",
+            "whyConnected": "La posesión continuada y no interrumpida durante el tiempo fijado por la ley es el elemento sustancial que conduce inexorablemente a la prescripción adquisitiva ordinaria (2 o 5 años) o extraordinaria (10 años, art. 2508 y 2511 CC).",
+            "practicalApplication": "Caso en que el poseedor carece de título o tiene título nulo: se analiza la posesión irregular y la suficiencia de la prescripción extraordinaria de 10 años donde no se exige título alguno y se presume la buena fe inicial."
+        },
+        {
+            "targetTopicId": "civil-los -1-6",
+            "targetTitle": "Acciones Posesorias y Querellas",
+            "targetSubject": "civil",
+            "crossoverType": "Tutela Posesoria",
+            "whyConnected": "La posesión de inmuebles está amparada por las acciones posesorias (amparo, restitución y restablecimiento, art. 916 CC), prescindiendo de la prueba del dominio.",
+            "practicalApplication": "¿Cuál es el plazo de prescripción de la querella de restablecimiento frente al despojo violento? Prescribe en 6 meses (art. 928 CC) y compete incluso al mero tenedor, a diferencia de las querellas posesorias comunes de 1 año."
+        }
+    ],
+
+    "civil-los -1-5": [
+        {
+            "targetTopicId": "civil-las -1-5",
+            "targetTitle": "Prescripción Extintiva o Liberatoria",
+            "targetSubject": "civil",
+            "crossoverType": "Institución Común de Prescripción",
+            "whyConnected": "El Título XLII del Libro IV del Código Civil trata conjuntamente la prescripción adquisitiva y la extintiva (art. 2492 CC). Comparten reglas generales: necesidad de ser alegada, renuncia solo tras cumplirse y aplicación equitativa a favor y en contra de todo sujeto.",
+            "practicalApplication": "Pregunta clásica: ¿Cómo se alega la prescripción adquisitiva en juicio? La jurisprudencia unánime exige alegarla como acción (por demanda principal o reconvencional), jamás como mera excepción perentoria, a diferencia de la extintiva (art. 310 CPC)."
+        },
+        {
+            "targetTopicId": "procesal-proc-2-5",
+            "targetTitle": "Interrupción Procesal y Efectos de la Demanda",
+            "targetSubject": "procesal",
+            "crossoverType": "Interrupción Civil de la Prescripción",
+            "whyConnected": "Para que opere la interrupción civil de la prescripción adquisitiva o extintiva (art. 2503 CC), no basta la mera interposición de la demanda; se requiere la notificación válida y legal de la misma antes del vencimiento del plazo.",
+            "practicalApplication": "En un juicio civil donde la demanda se ingresó el último día del plazo pero se notificó meses después: el postulante debe alegar la falta de interrupción oportuna si la notificación no se practicó dentro del término."
+        }
+    ],
+
+    "civil-los -1-6": [
+        {
+            "targetTopicId": "constitucional-cons-1-2",
+            "targetTitle": "Recurso de Protección frente a Turbaciones del Dominio",
+            "targetSubject": "constitucional",
+            "crossoverType": "Protección Sumaria Constitucional vs Juicio Plenario",
+            "whyConnected": "Tanto la acción reivindicatoria como el recurso de protección tutelan la propiedad, pero por vías y naturalezas opuestas: la primera es un juicio ordinario de lato conocimiento; la protección es una cautela sumarísima de urgencia (art. 20 CPR).",
+            "practicalApplication": "¿Procede el recurso de protección si hay discusión sobre quién es el legítimo dueño del inmueble? No; la Corte Suprema rechaza sistemáticamente el recurso porque no es declarativo de derechos controvertidos."
+        },
+        {
+            "targetTopicId": "procesal-proc-2-6",
+            "targetTitle": "Medidas Precautorias en Juicio Reivindicatorio",
+            "targetSubject": "procesal",
+            "crossoverType": "Cautela Procesal del Objeto Litigioso",
+            "whyConnected": "En el juicio reivindicatorio el demandante puede solicitar el secuestro de la cosa corporal mueble (art. 901 CC) o la prohibición de celebrar actos y contratos y medidas conservativas de la cosa inmueble (art. 902 CC y art. 290 CPC).",
+            "practicalApplication": "Estrategia procesal ante el riesgo de deterioro o enajenación por el poseedor demandado durante el juicio: articular la medida precautoria del art. 290 N° 4 CPC o retención para asegurar el resultado de la acción."
+        }
+    ],
+
+    # -------------------------------------------------------------
+    # III. TEORÍA GENERAL DE LAS OBLIGACIONES
+    # -------------------------------------------------------------
+    "civil-las -1-1": [
+        {
+            "targetTopicId": "civil-las -1-6",
+            "targetTitle": "Incumplimiento Contractual y Responsabilidad",
+            "targetSubject": "civil",
+            "crossoverType": "Naturaleza de la Prestación y Cumplimiento Forzado",
+            "whyConnected": "La clasificación de las obligaciones en dar, hacer y no hacer determina el régimen procesal y sustantivo de cumplimiento forzado (arts. 1489, 1553 y 1555 CC).",
+            "practicalApplication": "¿Cómo se ejecuta una obligación de no hacer quebrantada? El art. 1555 CC faculta destruir lo hecho a expensas del deudor o indemnizar perjuicios si la destrucción es imposible."
+        },
+        {
+            "targetTopicId": "procesal-proc-1-1",
+            "targetTitle": "La Pretensión Procesal y el Título Ejecutivo",
+            "targetSubject": "procesal",
+            "crossoverType": "Exigibilidad Sustantiva y Cobro Ejecutivo",
+            "whyConnected": "Para iniciar un juicio ejecutivo (arts. 434 y ss. CPC), la obligación debe ser líquida, actualmente exigible y no prescrita, requisitos que derivan de la configuración del objeto obligacional.",
+            "practicalApplication": "En caso de obligación de dar especie o cuerpo cierto: el acreedor debe embargar la especie misma debida en poder del deudor conforme al art. 438 N° 1 del CPC."
+        }
+    ],
+
+    "civil-las -1-2": [
+        {
+            "targetTopicId": "civil-las -1-4",
+            "targetTitle": "El Pago y la Subrogación Legal",
+            "targetSubject": "civil",
+            "crossoverType": "Solidaridad y Relaciones Internas",
+            "whyConnected": "En las obligaciones solidarias pasivas, extinguida la obligación por el pago que hace uno de los codeudores, nace la fase de contribución a la deuda regida por la subrogación legal del art. 1610 N° 3 y art. 1522 CC.",
+            "practicalApplication": "¿Qué ocurre si el codeudor solidario que pagó no tenía interés en la deuda? Es considerado como fiador (art. 1522 inc. 2 CC) y puede repetir por el 100% contra los demás codeudores interesados."
+        },
+        {
+            "targetTopicId": "procesal-proc-2-1",
+            "targetTitle": "Litisconsorcio Pasivo en Obligaciones Solidarias",
+            "targetSubject": "procesal",
+            "crossoverType": "Solidaridad Procesal",
+            "whyConnected": "La solidaridad pasiva genera un litisconsorcio pasivo facultativo: el acreedor puede dirigir su acción contra todos los deudores conjuntamente o contra cualquiera de ellos a su arbitrio (art. 1514 CC).",
+            "practicalApplication": "Efecto de la cosa juzgada: la sentencia condenatoria dictada contra uno de los codeudores solidarios produce cosa juzgada respecto de los demás, salvo que se funde en excepciones puramente personales del demandado."
+        }
+    ],
+
+    "civil-las -1-3": [
+        {
+            "targetTopicId": "civil-clas-2-2",
+            "targetTitle": "Contratos Bilaterales y Condición Resolutoria Tácita",
+            "targetSubject": "civil",
+            "crossoverType": "Condición Resolutoria Tácita (Art. 1489 CC)",
+            "whyConnected": "En los contratos bilaterales va envuelta la condición resolutoria tácita de no cumplirse por uno de los contratantes lo pactado, naciendo el derecho optativo a exigir el cumplimiento forzado o la resolución del contrato con indemnización.",
+            "practicalApplication": "¿Puede enervarse la acción resolutoria ordinaria pagando en el término de emplazamiento? La doctrina mayoritaria sostiene que sí en juicio ordinario antes de que quede ejecutoriada la sentencia, a diferencia del pacto comisorio calificado del art. 1879 CC (24 horas desde la notificación)."
+        },
+        {
+            "targetTopicId": "civil-los -1-6",
+            "targetTitle": "Efectos de la Resolución en Terceros Poseedores",
+            "targetSubject": "civil",
+            "crossoverType": "Arts. 1490 y 1491 CC",
+            "whyConnected": "A diferencia de la nulidad (que afecta a todo tercero, art. 1689 CC), la resolución solo da acción contra terceros poseedores que estuvieren de mala fe (bienes muebles, art. 1490) o cuando la condición constaba en el título respectivo inscrito (inmuebles, art. 1491 CC).",
+            "practicalApplication": "Pregunta de examen de grado garantizada: resolver el caso de un inmueble vendido con saldo de precio pendiente que es transferido a un tercero; el alumno debe verificar si la condición constaba en el título inscrito para que proceda la reivindicación contra el subadquirente."
+        }
+    ],
+
+    "civil-las -1-4": [
+        {
+            "targetTopicId": "procesal-proc-2-5",
+            "targetTitle": "Excepciones en el Juicio Ejecutivo",
+            "targetSubject": "procesal",
+            "crossoverType": "Pago como Excepción Perentoria",
+            "whyConnected": "El pago efectivo es la excepción perentoria fundamental tanto en el juicio ordinario (art. 309 CPC) como en el juicio ejecutivo (art. 464 N° 9 CPC).",
+            "practicalApplication": "Carga probatoria: conforme al art. 1698 CC, al acreedor le incumbe probar la existencia de la obligación, y al deudor probar su extinción mediante el recibo o comprobante auténtico de pago."
+        },
+        {
+            "targetTopicId": "civil-las -1-2",
+            "targetTitle": "Pago con Subrogación y Cesión de Créditos",
+            "targetSubject": "civil",
+            "crossoverType": "Transmisión de Créditos",
+            "whyConnected": "El pago con subrogación legal o convencional (art. 1608 CC) traspasa al nuevo acreedor todos los derechos, acciones, privilegios, prendas e hipotecas del primitivo acreedor.",
+            "practicalApplication": "Comparar en interrogación: ¿En qué se diferencia el pago con subrogación de la cesión de créditos de los arts. 1901 y ss. CC? (En la subrogación no hay fin de lucro, no requiere notificación solemne previa al deudor para operar y el solvens solo recupera lo efectivamente pagado)."
+        }
+    ],
+
+    "civil-las -1-5": [
+        {
+            "targetTopicId": "civil-las -1-6",
+            "targetTitle": "Teoría de los Riesgos y Pérdida Fortuita",
+            "targetSubject": "civil",
+            "crossoverType": "Imposibilidad Fortuita vs Imputable",
+            "whyConnected": "La pérdida de la cosa debida por caso fortuito extingue la obligación (art. 1670 CC) y activa la regla de la teoría de los riesgos (art. 1550 CC: 'el riesgo del cuerpo cierto cuya entrega se debe es siempre del acreedor').",
+            "practicalApplication": "Crítica dogmática contemporánea en examen: el alumno debe explicar por qué la doctrina moderna cuestiona el art. 1550 CC y prefiere aplicar la interdependencia contractual o la excepción de contrato no cumplido (art. 1552 CC)."
+        },
+        {
+            "targetTopicId": "procesal-proc-2-3",
+            "targetTitle": "Plazos Fatales e Interrupción de Prescripción",
+            "targetSubject": "procesal",
+            "crossoverType": "Cómputo Sustantivo vs Plazos Procesales",
+            "whyConnected": "Los plazos de prescripción extintiva civil se cuentan en días corridos y meses continuos (art. 50 CC), a diferencia de los plazos procesales que son de días hábiles (art. 66 CPC).",
+            "practicalApplication": "¿Cómo impacta un feriado dominical en la prescripción de una letra de cambio o pagaré? El art. 50 CC no prorroga el vencimiento por feriado, salvo disposición especial de la ley cambiaria 18.092."
+        }
+    ],
+
+    "civil-las -1-6": [
+        {
+            "targetTopicId": "civil-clas-1-1",
+            "targetTitle": "Responsabilidad Contractual vs Extracontractual",
+            "targetSubject": "civil",
+            "crossoverType": "Paralelo Sistémico Fundamental",
+            "whyConnected": "Constituye uno de los capítulos nodales del derecho civil: comparar culpa (graduable en tres niveles en sede contractual, art. 44 CC, vs culpa abstracta única de hombre prudente en sede extracontractual), prescripción (5 años vs 4 años) y mora.",
+            "practicalApplication": "Comisión evaluando un caso médico o de transporte: el alumno debe justificar la sede contractual o extracontractual aplicable y argumentar la viabilidad del cúmulo u opción de responsabilidades."
+        },
+        {
+            "targetTopicId": "civil-las -1-7",
+            "targetTitle": "Avaluación del Daño y Mora",
+            "targetSubject": "civil",
+            "crossoverType": "Elementos de la Indemnización",
+            "whyConnected": "El incumplimiento culpable no genera indemnización por sí solo: requiere la constitución en mora (art. 1551 CC) y la prueba fehaciente del daño emergente, lucro cesante y daño moral.",
+            "practicalApplication": "¿Desde cuándo se deben los perjuicios compensatorios y moratorios? Art. 1557 CC: se deben desde que el deudor se ha constituido en mora, o si la obligación es de no hacer, desde el momento de la contravención."
+        }
+    ],
+
+    "civil-las -1-7": [
+        {
+            "targetTopicId": "civil-clas-4-4",
+            "targetTitle": "Cláusula Penal y Avaluación Convencional",
+            "targetSubject": "civil",
+            "crossoverType": "Avaluación de Perjuicios",
+            "whyConnected": "La cláusula penal (art. 1535 CC) es la avaluación anticipada y convencional de los perjuicios. Libera al acreedor de la carga de probar el daño y su cuantía ante los tribunales.",
+            "practicalApplication": "¿Puede cobrarse la pena y la indemnización ordinaria al mismo tiempo? Regla general: no, salvo estipulación expresa (art. 1543 CC). El deudor puede pedir la reducción por cláusula penal enorme (art. 1544 CC)."
+        },
+        {
+            "targetTopicId": "procesal-proc-2-6",
+            "targetTitle": "Medidas Precautorias para Asegurar el Pago de Perjuicios",
+            "targetSubject": "procesal",
+            "crossoverType": "Tutela Cautelar del Crédito Resarcitorio",
+            "whyConnected": "Demandada la indemnización de perjuicios, el actor debe solicitar medidas precautorias (art. 290 CPC) acreditando presunción grave del derecho (fumus boni iuris) y peligro de insolvencia (periculum in mora).",
+            "practicalApplication": "Solicitud de retención de fondos bancarios o prohibición de enajenar sobre bienes del deudor para garantizar la futura sentencia indemnizatoria."
+        }
+    ],
+
+    # -------------------------------------------------------------
+    # IV. RESPONSABILIDAD EXTRACONTRACTUAL Y CONTRATOS
+    # -------------------------------------------------------------
+    "civil-clas-1-1": [
+        {
+            "targetTopicId": "civil-clas-1-3",
+            "targetTitle": "Requisitos Constitutivos de la Responsabilidad Extracontractual",
+            "targetSubject": "civil",
+            "crossoverType": "Dogmática Resarcitoria",
+            "whyConnected": "El principio general de no dañar a otro (alterum non laedere) fundamenta los 5 elementos copulativos de la RCE: capacidad, hecho culpable/doloso, daño, nexo causal y ausencia de causales de justificación.",
+            "practicalApplication": "Ante una excepción de culpa de la víctima: el alumno debe aplicar la reducción de la indemnización por concurrencia de culpas conforme al art. 2330 del Código Civil."
+        },
+        {
+            "targetTopicId": "constitucional-cons-2-2",
+            "targetTitle": "Derechos de la Personalidad e Integridad Psíquica",
+            "targetSubject": "constitucional",
+            "crossoverType": "Tutela Constitucional del Daño Moral",
+            "whyConnected": "La procedencia y reparación integral del daño moral en Chile se fundamenta en la tutela del derecho a la vida, a la integridad física y psíquica y a la honra (art. 19 N° 1 y 4 CPR).",
+            "practicalApplication": "Evolución jurisprudencial: el daño moral ha dejado de concebirse como el mero pretium doloris para abarcar la lesión a derechos fundamentales y la pérdida de la chance."
+        }
+    ],
+
+    "civil-clas-1-2": [
+        {
+            "targetTopicId": "civil-las -1-6",
+            "targetTitle": "Incumplimiento y Elección de Sede",
+            "targetSubject": "civil",
+            "crossoverType": "Doctrina de la Opción de Responsabilidades",
+            "whyConnected": "Frente a un daño derivado de la ejecución de un contrato que a la vez constituye delito o cuasidelito civil, se debate si el acreedor puede optar por la sede extracontractual para eludir cláusulas limitativas o beneficiarse de la solidaridad.",
+            "practicalApplication": "Postura de la Corte Suprema: predomina la tesis de la primacía contractual (el contrato es ley para las partes, art. 1545 CC), impidiendo la opción libre salvo que el hecho constituya a la vez delito penal o exista pacto expreso."
+        },
+        {
+            "targetTopicId": "procesal-proc-2-5",
+            "targetTitle": "Cosa Juzgada Penal en Sede Civil",
+            "targetSubject": "procesal",
+            "crossoverType": "Incidencia Procesal Penal-Civil",
+            "whyConnected": "La sentencia condenatoria penal produce cosa juzgada en el juicio civil de indemnización de perjuicios respecto de la existencia del hecho y de la culpabilidad del reo (arts. 178 a 180 CPC).",
+            "practicalApplication": "En un accidente de tránsito con condena penal por cuasidelito: el actor civil solo debe litigar en sede civil la cuantía del daño y el nexo causal remanente, estando vedado al demandado negar su culpa."
+        }
+    ],
+
+    "civil-clas-1-3": [
+        {
+            "targetTopicId": "civil-clas-1-4",
+            "targetTitle": "Acciones de Indemnización, Eximentes y Prescripción",
+            "targetSubject": "civil",
+            "crossoverType": "Destrucción del Nexo Causal y Eximentes",
+            "whyConnected": "La concurrencia de fuerza mayor, caso fortuito, hecho de un tercero o culpa exclusiva de la víctima fractura el nexo causal o desvirtúa la culpabilidad, eximiendo de responsabilidad civil.",
+            "practicalApplication": "Diferenciar en interrogación: el caso fortuito en materia contractual (art. 1547 CC) extingue la obligación por imposibilidad, mientras que en materia extracontractual destruye la causalidad entre la conducta y el resultado dañoso."
+        }
+    ],
+
+    "civil-clas-1-4": [
+        {
+            "targetTopicId": "procesal-proc-2-5",
+            "targetTitle": "Excepción Perentoria de Prescripción Cuatrienal",
+            "targetSubject": "procesal",
+            "crossoverType": "Prescripción de Corto Tiempo",
+            "whyConnected": "La acción de responsabilidad extracontractual prescribe en el breve plazo de 4 años contados desde la perpetración del acto (art. 2332 CC).",
+            "practicalApplication": "Gran debate dogmático de grado: ¿Se cuenta el plazo desde el hecho material o desde que se manifiesta el daño oculto? La jurisprudencia moderna aplica la teoría del daño continuado o manifestado para no dejar en indefensión a la víctima."
+        }
+    ],
+
+    "civil-clas-2-1": [
+        {
+            "targetTopicId": "civil-clas-2-3",
+            "targetTitle": "Fuerza Obligatoria del Contrato (Art. 1545 CC)",
+            "targetSubject": "civil",
+            "crossoverType": "Efectos del Contrato",
+            "whyConnected": "'Todo contrato legalmente celebrado es una ley para los contratantes': la intangibilidad del contrato impide que el juez o las partes modifiquen unilateralmente sus cláusulas.",
+            "practicalApplication": "Discusión sobre la Teoría de la Imprevisión en el derecho chileno: si el cambio imprevisto de circunstancias habilita al juez a revisar el contrato fundándose en la buena fe objetiva (art. 1546 CC) o si rige el rigor del art. 1545 CC (pacta sunt servanda)."
+        }
+    ],
+
+    "civil-clas-2-2": [
+        {
+            "targetTopicId": "civil-las -1-3",
+            "targetTitle": "Condición Resolutoria en Contratos Bilaterales",
+            "targetSubject": "civil",
+            "crossoverType": "Clasificaciones e Instituciones Propias",
+            "whyConnected": "La distinción entre contratos unilaterales y bilaterales (art. 1439 CC) es la base de instituciones exclusivas: la condición resolutoria tácita (art. 1489 CC), la excepción de contrato no cumplido (art. 1552 CC) y la teoría de los riesgos.",
+            "practicalApplication": "¿Procede la resolución por incumplimiento en un contrato de comodato o mutuo? No, por ser contratos reales y unilaterales: al acreedor solo le asiste la acción de restitución o cumplimiento forzado."
+        }
+    ],
+
+    "civil-clas-2-3": [
+        {
+            "targetTopicId": "constitucional-cons-1-1",
+            "targetTitle": "Efecto Horizontal de los Derechos Fundamentales (Drittwirkung)",
+            "targetSubject": "constitucional",
+            "crossoverType": "Constitucionalización del Derecho Contractual",
+            "whyConnected": "La autonomía privada y la libertad contractual no son absolutas: encuentran su límite en el respeto a los derechos fundamentales consagrados en el art. 19 CPR.",
+            "practicalApplication": "Análisis de contratos bancarios, de salud o de adhesión con cláusulas discriminatorias o renuncia anticipada de acciones: se examina la nulidad por objeto ilícito (infracción al orden público constitucional) o tutela por recurso de protección."
+        }
+    ],
+
+    "civil-clas-3-1": [
+        {
+            "targetTopicId": "civil-clas-3-2",
+            "targetTitle": "Requisitos de Validez del Art. 1554 CC",
+            "targetSubject": "civil",
+            "crossoverType": "Estatuto de Eficacia de la Promesa",
+            "whyConnected": "La promesa es solemne por mandato legal (art. 1554 N° 1) y de eficacia excepcional: la regla general es la no exigibilidad de la promesa salvo concurrencia copulativa de los 4 requisitos legales.",
+            "practicalApplication": "Caso de promesa verbal o por instrumento privado cuando el contrato prometido es compraventa de inmueble (que requiere escritura pública): el contrato de promesa otorgado por instrumento privado es plenamente válido (basta que conste por escrito)."
+        }
+    ],
+
+    "civil-clas-3-2": [
+        {
+            "targetTopicId": "civil-acto-1-5",
+            "targetTitle": "Promesa de Compraventa de Cosas Embargadas",
+            "targetSubject": "civil",
+            "crossoverType": "Cruce Objeto Ilícito y Promesa",
+            "whyConnected": "El art. 1554 N° 2 exige que el contrato prometido no sea de aquellos que las leyes declaran ineficaces, conectándose con el art. 1464 CC.",
+            "practicalApplication": "¿Es válida la promesa de venta de un bien embargado? Sí, siempre que se pacte bajo la condición suspensiva de que el embargo sea alzado judicialmente o el acreedor autorice antes de la suscripción definitiva."
+        }
+    ],
+
+    "civil-clas-3-3": [
+        {
+            "targetTopicId": "procesal-proc-1-1",
+            "targetTitle": "Juicio Ejecutivo de Obligación de Hacer",
+            "targetSubject": "procesal",
+            "crossoverType": "Ejecución Forzada de la Promesa",
+            "whyConnected": "La promesa genera una obligación de hacer (celebrar el contrato futuro). Su incumplimiento habilita el procedimiento ejecutivo del art. 532 CPC.",
+            "practicalApplication": "Si el demandado rebelde se niega a firmar la escritura prometida en la notaría: el juez de la causa suscribe la escritura de compraventa en representación del deudor rebelde."
+        }
+    ],
+
+    "civil-clas-4-1": [
+        {
+            "targetTopicId": "civil-los -1-3",
+            "targetTitle": "Tradición de la Cosa Vendida",
+            "targetSubject": "civil",
+            "crossoverType": "Obligación de Entrega y Título Traslaticio",
+            "whyConnected": "La compraventa es el arquetipo del título traslaticio de dominio (art. 703 CC). La principal obligación del vendedor es la entrega o tradición de la cosa (art. 1824 CC).",
+            "practicalApplication": "¿Se hace dueño el comprador al momento de firmar la escritura de compraventa? No; solo adquiere el derecho personal a exigir la entrega. Se requiere la inscripción en el Registro del Conservador para transferir el dominio de inmuebles."
+        }
+    ],
+
+    "civil-clas-4-2": [
+        {
+            "targetTopicId": "civil-las -1-6",
+            "targetTitle": "Acción Redhibitoria y Remedios por Incumplimiento",
+            "targetSubject": "civil",
+            "crossoverType": "Saneamiento de la Evicción y Vicios Ocultos",
+            "whyConnected": "La obligación de saneamiento ampara la posesión pacífica (evicción) y útil (vicios redhibitorios). En la doctrina contemporánea se debaten como especies de incumplimiento contractual imperfecto.",
+            "practicalApplication": "Plazos de prescripción de las acciones redhibitorias (rescisión o quanti minoris): 6 meses para muebles y 1 año para inmuebles (art. 1866 CC), plazos de caducidad que no se suspenden."
+        }
+    ],
+
+    "civil-clas-4-3": [
+        {
+            "targetTopicId": "civil-las -1-3",
+            "targetTitle": "Pacto Comisorio y Resolución por No Pago del Precio",
+            "targetSubject": "civil",
+            "crossoverType": "Resolución Específica de la Compraventa",
+            "whyConnected": "Si el comprador no paga el precio convenido, el vendedor tiene derecho a pedir la resolución o el precio (art. 1873 CC), con las especialidades del pacto comisorio simple y calificado (arts. 1877 a 1879 CC).",
+            "practicalApplication": "¿Cómo opera el pacto comisorio calificado por no pago del precio? No resuelve ipso facto: requiere demanda judicial y el comprador puede enervar la acción pagando dentro de las 24 horas siguientes a la notificación judicial."
+        }
+    ],
+
+    "civil-clas-4-4": [
+        {
+            "targetTopicId": "civil-acto-1-4",
+            "targetTitle": "Lesión Enorme y Rescisión",
+            "targetSubject": "civil",
+            "crossoverType": "Justiprecio y Sanción Legal",
+            "whyConnected": "La lesión enorme sanciona la desproporción aritmética grave entre el precio pactado y el justo precio al tiempo del contrato (el vendedor recibe menos de la mitad, o el comprador paga más del doble, art. 1889 CC).",
+            "practicalApplication": "¿Puede el comprador demandado de lesión enorme evitar la rescisión? Sí; completando el justo precio con deducción de una décima parte (art. 1890 CC)."
+        }
+    ],
+
+    # -------------------------------------------------------------
+    # V. DERECHO PROCESAL (ORGÁNICO Y NORMAS COMUNES)
+    # -------------------------------------------------------------
+    "procesal-proc-1-1": [
+        {
+            "targetTopicId": "constitucional-cons-2-3",
+            "targetTitle": "Derecho a la Tutela Judicial Efectiva (Art. 19 N° 3 CPR)",
+            "targetSubject": "constitucional",
+            "crossoverType": "Fundamento Constitucional de la Acción",
+            "whyConnected": "El derecho de acción procesal es la garantía constitucional de acceso a la justicia que prohíbe la autotutela privada y asegura el derecho a un proceso con todas las garantías.",
+            "practicalApplication": "Inconstitucionalidad de requisitos que imponen fianzas o depósitos desproporcionados para recurrir: la jurisprudencia del TC los anula por vulnerar el libre acceso a los tribunales."
+        },
+        {
+            "targetTopicId": "civil-las -1-1",
+            "targetTitle": "Acción Civil vs Derecho Sustantivo",
+            "targetSubject": "civil",
+            "crossoverType": "Autonomía de la Acción",
+            "whyConnected": "La acción procesal es autónoma del derecho subjetivo material: se puede tener derecho de acción aunque no se tenga la razón en la pretensión jurídica sustantiva.",
+            "practicalApplication": "Diferenciar en interrogación de grado: acción (derecho cívico abstracto a acudir a los tribunales), pretensión (lo que se pide concretamente en la demanda) y demanda (el vehículo formal procesal)."
+        }
+    ],
+
+    "procesal-proc-1-2": [
+        {
+            "targetTopicId": "constitucional-cons-1-3",
+            "targetTitle": "Poder Judicial y Control Constitucional",
+            "targetSubject": "constitucional",
+            "crossoverType": "Bases de la Jurisdicción",
+            "whyConnected": "El principio de inexcusabilidad (art. 76 inc. 2 CPR y art. 10 COT) obliga a los jueces a resolver todo conflicto legalmente promovido, aun a falta de ley que resuelva la contienda.",
+            "practicalApplication": "¿Qué mecanismo utiliza el juez si no hay ley aplicable? El art. 170 N° 5 del CPC impone fallar conforme a los principios de equidad natural y a los principios generales del derecho."
+        }
+    ],
+
+    "procesal-proc-1-3": [
+        {
+            "targetTopicId": "procesal-proc-2-5",
+            "targetTitle": "Excepción Dilatoria de Incompetencia del Tribunal",
+            "targetSubject": "procesal",
+            "crossoverType": "Reglas de Competencia y Excepciones",
+            "whyConnected": "La infracción a las reglas de competencia absoluta (fuero, materia, cuantía) acarrea nulidad procesal insubsanable; la incompetencia relativa en asuntos civiles contenciosos puede prorrogarse tácitamente si no se reclama en el término de emplazamiento.",
+            "practicalApplication": "Tramitación en examen: cómo formular la excepción de incompetencia por declinatoria (ante el juez incompetente, art. 111 CPC) o por inhibitoria (ante el juez que se considera competente para que oficie al que está conociendo)."
+        }
+    ],
+
+    "procesal-proc-2-1": [
+        {
+            "targetTopicId": "civil-las -1-2",
+            "targetTitle": "Pluralidad de Sujetos y Litisconsorcio",
+            "targetSubject": "civil",
+            "crossoverType": "Parte Sustantiva y Parte Procesal",
+            "whyConnected": "La relación jurídica sustantiva determina la necesidad de un litisconsorcio necesario (ej. juicio de partición de herencia o demarcación) o voluntario (art. 18 a 24 CPC).",
+            "practicalApplication": "¿Qué ocurre si no se emplaza a todos los comuneros en una acción que exige litisconsorcio necesario? La sentencia es inoponible y se genera nulidad procesal por falta de legítimo contradictor."
+        }
+    ],
+
+    "procesal-proc-2-2": [
+        {
+            "targetTopicId": "procesal-proc-2-5",
+            "targetTitle": "Falta de Personería como Excepción Dilatoria",
+            "targetSubject": "procesal",
+            "crossoverType": "Solemnidades de Comparecencia",
+            "whyConnected": "La omisión del patrocinio por abogado habilitado o del mandato judicial (Ley 18.120 y arts. 6 y 7 CPC) acarrea que el escrito se tenga por no presentado o la excepción dilatoria del art. 303 N° 2 CPC.",
+            "practicalApplication": "¿Cuáles son las facultades extraordinarias del art. 7 inc. 2 CPC que requieren mención expresa? Desistirse en primera instancia, allanarse, absolver posiciones, renunciar recursos, transigir, comprometer, otorgar a árbitros facultades de arbitradores y percibir."
+        }
+    ],
+
+    "procesal-proc-2-3": [
+        {
+            "targetTopicId": "constitucional-cons-2-3",
+            "targetTitle": "Debido Proceso y Notificaciones Válidas",
+            "targetSubject": "constitucional",
+            "crossoverType": "Garantía de Emplazamiento",
+            "whyConnected": "La notificación de la demanda es la pieza medular del emplazamiento que garantiza el derecho a la defensa y bilateralidad de la audiencia (art. 19 N° 3 CPR).",
+            "practicalApplication": "Notificación personal subsidiaria del art. 44 CPC: la comisión interroga minuciosamente sus presupuestos (búsquedas positivas en dos días distintos, certificación del receptor de que el demandado se encuentra en el lugar del juicio y que es su morada)."
+        }
+    ],
+
+    "procesal-proc-2-4": [
+        {
+            "targetTopicId": "civil-acto-1-6",
+            "targetTitle": "Nulidad Procesal vs Nulidad Civil",
+            "targetSubject": "civil",
+            "crossoverType": "Paralelo de Ineficacias",
+            "whyConnected": "Mientras la nulidad civil protege el orden público o intereses particulares sancionando el acto en su origen, la nulidad procesal opera bajo el principio de trascendencia, convalidación y preclusión (art. 83 CPC).",
+            "practicalApplication": "El incidente de nulidad procesal por falta de emplazamiento del art. 80 CPC: se puede deducir en cualquier estado del juicio e incluso alegarse tras la sentencia firme si el demandado estuvo en rebeldía involuntaria."
+        }
+    ],
+
+    "procesal-proc-2-5": [
+        {
+            "targetTopicId": "civil-las -1-5",
+            "targetTitle": "Abandono del Procedimiento y Prescripción de la Acción",
+            "targetSubject": "civil",
+            "crossoverType": "Inactividad Procesal y Sustantiva",
+            "whyConnected": "El abandono del procedimiento sanciona la inactividad de las partes durante 6 meses (art. 152 CPC). No extingue la pretensión civil de fondo, pero extingue el proceso y borra el efecto interruptor de la prescripción civil (art. 2503 N° 2 CC).",
+            "practicalApplication": "Consecuencia fatal en examen: si se declara el abandono del procedimiento, la prescripción extintiva de la acción civil corre ininterrumpidamente desde el origen, lo que suele provocar la extinción irremediable del crédito de fondo."
+        }
+    ],
+
+    "procesal-proc-2-6": [
+        {
+            "targetTopicId": "civil-acto-1-5",
+            "targetTitle": "Efectos del Art. 1464 N° 3 y 4 CC en Medidas Precautorias",
+            "targetSubject": "civil",
+            "crossoverType": "Indisponibilidad de Bienes Sujetos a Cautela",
+            "whyConnected": "La medida precautoria de prohibición de celebrar actos y contratos o de retención sobre bienes determinados produce la indisponibilidad de la cosa, sancionando su enajenación voluntaria con objeto ilícito (art. 1464 CC).",
+            "practicalApplication": "¿Requiere inscripción en el Conservador la prohibición de enajenar inmuebles decretada como precautoria? Sí; para que afecte a terceros exige inscripción en el Registro de Interdicciones y Prohibiciones de Enajenar (art. 297 CPC)."
+        },
+        {
+            "targetTopicId": "constitucional-cons-1-2",
+            "targetTitle": "Orden de No Innovar (ONI) en Recursos Constitucionales",
+            "targetSubject": "constitucional",
+            "crossoverType": "Tutela Cautelar Constitucional",
+            "whyConnected": "La Orden de No Innovar (ONI) en el recurso de protección suspende los efectos del acto impugnado, operando con la misma lógica cautelar conservativa que las precautorias civiles.",
+            "practicalApplication": "Comparar: la ONI se concede de plano con el solo mérito del informe o petición fundada, sin exigir caución previa a diferencia de ciertas precautorias civiles prejudiciales."
+        }
+    ],
+
+    # -------------------------------------------------------------
+    # VI. DERECHO CONSTITUCIONAL
+    # -------------------------------------------------------------
+    "constitucional-cons-1-1": [
+        {
+            "targetTopicId": "civil-clas-2-3",
+            "targetTitle": "Límites Constitucionales a la Autonomía Privada",
+            "targetSubject": "civil",
+            "crossoverType": "Supremacía Constitucional en el Tráfico Civil",
+            "whyConnected": "Los principios de supremacía constitucional y fuerza normativa de la Carta Fundamental (art. 6 y 7 CPR) vinculan tanto a los órganos del Estado como a toda persona o grupo en sus relaciones contractuales privadas.",
+            "practicalApplication": "Articulación de la nulidad de pleno derecho de actos de autoridad frente a actos jurídicos privados nulos de nulidad absoluta: paralelo en sede de examen de grado."
+        }
+    ],
+
+    "constitucional-cons-1-2": [
+        {
+            "targetTopicId": "civil-los -1-6",
+            "targetTitle": "Acción de Protección vs Acciones Posesorias Civiles",
+            "targetSubject": "civil",
+            "crossoverType": "Tutela Urgente de Vías de Hecho",
+            "whyConnected": "El recurso de protección (art. 20 CPR) se utiliza frecuentemente para restablecer el imperio del derecho ante turbaciones de hecho a la posesión o tenencia material de un inmueble (cortes de luz, cambios de chapa, desalojos intempestivos sin orden judicial).",
+            "practicalApplication": "La Corte Suprema acoge el recurso de protección contra la autotutela privada señalando que nadie puede hacerse justicia por mano propia, ordenando restablecer las cosas al estado anterior, sin perjuicio del juicio civil posesorio u ordinario que competa."
+        },
+        {
+            "targetTopicId": "procesal-proc-2-6",
+            "targetTitle": "Medidas para Restablecer el Imperio del Derecho",
+            "targetSubject": "procesal",
+            "crossoverType": "Naturaleza Cautelar de la Acción",
+            "whyConnected": "El recurso de protección no es un juicio de cognición ni una instancia de apelación: es una acción cautelar de emergencia donde las facultades de la Corte para adoptar medidas para restablecer el derecho son omnímodas e inmediatas.",
+            "practicalApplication": "Plazo para deducir el recurso: 30 días corridos fatales contados desde la ejecución del acto o desde que se tuvo conocimiento cierto del mismo (Auto Acordado CS)."
+        }
+    ],
+
+    "constitucional-cons-1-3": [
+        {
+            "targetTopicId": "procesal-proc-1-2",
+            "targetTitle": "Control de Constitucionalidad en el Juicio Ordinario",
+            "targetSubject": "procesal",
+            "crossoverType": "Cuestión Prejudicial Constitucional",
+            "whyConnected": "El requerimiento de inaplicabilidad por inconstitucionalidad ante el Tribunal Constitucional (art. 93 N° 6 CPR) incide directamente en una gestión judicial pendiente, facultando la suspensión del procedimiento.",
+            "practicalApplication": "Estrategia procesal: solicitar al TC la suspensión del juicio civil o ejecutivo principal para evitar que se dicte sentencia aplicando una norma legal contraria a la Carta Fundamental."
+        }
+    ],
+
+    "constitucional-cons-1-4": [
+        {
+            "targetTopicId": "constitucional-cons-2-2",
+            "targetTitle": "Restricción de Derechos Fundamentales en Emergencias",
+            "targetSubject": "constitucional",
+            "crossoverType": "Límites Excepcionales a los Derechos",
+            "whyConnected": "Los estados de excepción constitucional permiten suspender o restringir derechos fundamentales (libertad ambulatoria, derecho de reunión, propiedad) bajo control judicial y proporcionalidad estricta.",
+            "practicalApplication": "Interposición del recurso de amparo durante estado de sitio o de catástrofe: el amparo subsiste para revisar la legalidad y razonabilidad de la medida privativa de libertad dispuesta por la autoridad."
+        }
+    ],
+
+    "constitucional-cons-2-1": [
+        {
+            "targetTopicId": "civil-acto-1-4",
+            "targetTitle": "Estatuto Civil de la Persona Natural",
+            "targetSubject": "civil",
+            "crossoverType": "Capacidad y Personalidad",
+            "whyConnected": "El estatuto constitucional de la persona (arts. 10 y 11 CPR: nacionalidad y ciudadanía) se vincula con los atributos de la personalidad del Código Civil (capacidad de goce, estado civil, domicilio y nacionalidad).",
+            "practicalApplication": "¿Afecta la nacionalidad la capacidad para adquirir bienes inmuebles en Chile? Salvo las limitaciones legales en zonas fronterizas (DL 1.939), la ley chilena no reconoce diferencias entre chilenos y extranjeros en cuanto a la adquisición y goce de derechos civiles (art. 57 CC)."
+        }
+    ],
+
+    "constitucional-cons-2-2": [
+        {
+            "targetTopicId": "civil-clas-1-1",
+            "targetTitle": "Integridad Psíquica y Daño Moral",
+            "targetSubject": "civil",
+            "crossoverType": "Tutela Civil de Derechos de la Personalidad",
+            "whyConnected": "La consagración constitucional del derecho a la vida y a la integridad física y psíquica (art. 19 N° 1 CPR) es la matriz de las indemnizaciones por daño corporal, daño a la salud y daño moral por repercusión.",
+            "practicalApplication": "Demanda indemnizatoria por mala praxis médica: se evalúa la lex artis ad hoc como estándar de diligencia debido frente a la vulneración del derecho a la integridad corporal."
+        }
+    ],
+
+    "constitucional-cons-2-3": [
+        {
+            "targetTopicId": "procesal-proc-2-3",
+            "targetTitle": "Bilateralidad de la Audiencia y Derecho a Defensa",
+            "targetSubject": "procesal",
+            "crossoverType": "Debido Proceso Procesal",
+            "whyConnected": "El art. 19 N° 3 inc. 6 de la CPR garantiza un 'procedimiento y una investigación racionales y justos', lo que impone al legislador procesal asegurar el emplazamiento oportuno, la rendición de prueba y el derecho a recurso.",
+            "practicalApplication": "Recurso de casación en la forma por omisión del trámite esencial del emplazamiento o de la recepción de la causa a prueba (art. 768 N° 9 y art. 795 CPC): es la manifestación procesal directa de la infracción al debido proceso."
+        }
+    ],
+
+    "constitucional-cons-2-4": [
+        {
+            "targetTopicId": "civil-clas-2-3",
+            "targetTitle": "Libertad de Conciencia y Orden Público",
+            "targetSubject": "civil",
+            "crossoverType": "Límites al Orden Público Civil",
+            "whyConnected": "Las libertades espirituales y de enseñanza (art. 19 N° 6 y 11 CPR) moldean los límites de la moral, las buenas costumbres y el orden público que condicionan la licitud del objeto y de la causa contractual.",
+            "practicalApplication": "Cláusulas estatutarias o reglamentarias que restrinjan libertades ideológicas o religiosas en colegios o copropiedades: evaluación de su nulidad absoluta civil."
+        }
+    ],
+
+    "constitucional-cons-2-5": [
+        {
+            "targetTopicId": "civil-los -1-1",
+            "targetTitle": "Función Social de la Propiedad (Art. 19 N° 24 CPR)",
+            "targetSubject": "civil",
+            "crossoverType": "Límites Constitucionales al Dominio Civil",
+            "whyConnected": "El carácter absoluto del dominio del art. 582 CC está atemperado constitucionalmente por la función social de la propiedad: intereses generales de la Nación, seguridad nacional, utilidad y salubridad públicas y conservación del patrimonio ambiental.",
+            "practicalApplication": "Distinción de examen entre limitaciones derivadas de la función social (que no dan derecho a indemnización, art. 19 N° 24 inc. 2 CPR) y la privación expropiatoria del dominio o de atributos esenciales (que exige ley expresa e indemnización previa por el daño patrimonial efectivamente causado)."
+        },
+        {
+            "targetTopicId": "civil-clas-4-1",
+            "targetTitle": "Derecho a Desarrollar Actividades Económicas y Contratación",
+            "targetSubject": "civil",
+            "crossoverType": "Orden Público Económico",
+            "whyConnected": "El art. 19 N° 21 CPR garantiza el libre emprendimiento y la libre competencia económica, garantizado por el recurso de amparo económico (Ley 18.971).",
+            "practicalApplication": "¿Procede el amparo económico para reclamar el incumplimiento de un contrato comercial o monopolio? La jurisprudencia limita el amparo económico a infracciones directas al rol del Estado empresario (inc. 2), canalizando la libre competencia al Tribunal de Defensa de la Libre Competencia (TDLC)."
+        }
+    ],
+
+    "constitucional-cons-2-6": [
+        {
+            "targetTopicId": "civil-clas-1-1",
+            "targetTitle": "Daño Ambiental y Responsabilidad Civil",
+            "targetSubject": "civil",
+            "crossoverType": "Responsabilidad por Daño Ambiental",
+            "whyConnected": "El derecho a vivir en un medio ambiente libre de contaminación (art. 19 N° 8 CPR) se articula con la acción de reparación por daño ambiental y la indemnización civil de perjuicios regida por la Ley 19.300 y las reglas generales de la responsabilidad extracontractual.",
+            "practicalApplication": "Competencia: la acción de reparación ambiental se deduce ante los Tribunales Ambientales, mientras que la acción civil indemnizatoria por los daños patrimoniales y personales causados a las víctimas se ventila ante el juez civil competente."
+        }
+    ]
+}
+
+def main():
+    base_dir = r"c:\Users\dpint\.gemini\antigravity-ide\scratch\estudio-de-grado-app"
+    out_file = os.path.join(base_dir, "dogmatic_connections.json")
+    
+    with open(out_file, "w", encoding="utf-8") as f:
+        json.dump(CONNECTIONS_MAP, f, ensure_ascii=False, indent=2)
+    
+    print(f"Generado exitosamente dogmatic_connections.json con {len(CONNECTIONS_MAP)} temas enriquecidos.")
+
+if __name__ == "__main__":
+    main()
