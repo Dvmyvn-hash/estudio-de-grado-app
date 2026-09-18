@@ -4,7 +4,7 @@
  */
 
 const LicenseService = {
-  ADMIN_PIN: "grado2026", // Contraseña por defecto para tu panel de administrador
+  ADMIN_PIN: "almabaltoamial2020", // Clave de acceso exclusiva de administración
   STORAGE_LICENSE_KEY: "estudio_grado_user_license",
   STORAGE_ALL_CODES_KEY: "estudio_grado_issued_licenses",
 
