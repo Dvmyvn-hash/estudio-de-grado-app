@@ -88,8 +88,8 @@
           <i data-lucide="shield-check"></i>
         </button>
 
-        <!-- Importar / Gestionar NotebookLM -->
-        <button id="btn-open-import" class="btn btn-secondary" title="Importar o exportar notas de NotebookLM">
+        <!-- Importar / Gestionar NotebookLM (Solo Administrador o Rol Autorizado) -->
+        <button id="btn-open-import" class="btn btn-secondary hidden" style="display: none;" title="Importar o exportar notas de NotebookLM (Solo Administrador)">
           <i data-lucide="file-plus-2"></i>
           <span>Importar Notas</span>
         </button>
@@ -140,10 +140,11 @@
           <!-- Generado dinámicamente -->
         </div>
 
-        <div class="sidebar-footer">
-          <button id="btn-new-topic" class="btn btn-ghost btn-sm">
+        <!-- Opción bajo el índice: suprimida para alumnos, solo visible para administrador -->
+        <div class="sidebar-footer hidden" id="sidebar-footer-admin" style="display: none;">
+          <button id="btn-new-topic" class="btn btn-ghost btn-sm" title="Solo visible para Administrador o cuentas con permiso">
             <i data-lucide="plus-circle"></i>
-            <span>Nuevo Tema / Cédula</span>
+            <span>Nuevo Tema / Cédula (Admin)</span>
           </button>
         </div>
       </aside>
@@ -361,15 +362,21 @@
 
         <!-- Pantalla de Gestión de Licencias (Visible tras PIN correcto) -->
         <div id="admin-dashboard-screen" class="hidden">
-          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: rgba(217, 119, 6, 0.1); border: 1px solid rgba(217, 119, 6, 0.3); border-radius: var(--radius-md); margin-bottom: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: rgba(217, 119, 6, 0.1); border: 1px solid rgba(217, 119, 6, 0.3); border-radius: var(--radius-md); margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
             <div>
               <span style="font-weight: 700; color: var(--gold-primary); font-size: 0.85rem;">👑 Sesión de Administrador Activa</span>
-              <p style="font-size: 0.75rem; color: var(--text-muted); margin: 0;">Tienes visibilidad total de los apuntes desarrollados, filtros y generador de licencias.</p>
+              <p style="font-size: 0.75rem; color: var(--text-muted); margin: 0;">Control total de apuntes desarrollados, generador de licencias y permisos de edición.</p>
             </div>
-            <button id="btn-admin-logout" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; flex-shrink: 0;">
-              <i data-lucide="log-out"></i>
-              <span>Cerrar Sesión Admin</span>
-            </button>
+            <div style="display: flex; gap: 8px;">
+              <button id="btn-admin-manage-notes" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; flex-shrink: 0;" title="Abrir Gestor de Apuntes y NotebookLM">
+                <i data-lucide="file-plus-2"></i>
+                <span>Gestor de Apuntes</span>
+              </button>
+              <button id="btn-admin-logout" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; flex-shrink: 0;">
+                <i data-lucide="log-out"></i>
+                <span>Cerrar Sesión</span>
+              </button>
+            </div>
           </div>
           <div class="form-grid">
             <div class="form-group">
@@ -403,6 +410,14 @@
                 <span>Generar Código de Licencia</span>
               </button>
             </div>
+          </div>
+
+          <!-- Permiso opcional para rol de gestión de apuntes -->
+          <div style="margin-top: 4px; margin-bottom: 12px; padding: 8px 12px; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);">
+            <label style="display: flex; align-items: center; gap: 10px; font-weight: 500; cursor: pointer; color: var(--text-main); font-size: 0.82rem; margin: 0;">
+              <input type="checkbox" id="admin-grant-notes-perm" style="width: 16px; height: 16px; accent-color: var(--gold-primary); cursor: pointer;">
+              <span>Otorgar rol de gestión/edición de apuntes a esta cuenta (permite agregar, editar e importar notas)</span>
+            </label>
           </div>
 
           <!-- Historial de Códigos Emitidos -->

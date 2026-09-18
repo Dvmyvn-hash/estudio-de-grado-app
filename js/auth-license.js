@@ -23,6 +23,16 @@ const LicenseService = {
     }
   },
 
+  // Permiso para agregar, editar e importar notas (Admin o cuenta con rol gestor)
+  canManageNotes() {
+    if (this.isAdminMode()) return true;
+    const lic = this.getCurrentLicense();
+    if (lic && !lic.expired && (lic.role === 'admin' || lic.role === 'manager' || lic.canManageNotes === true)) {
+      return true;
+    }
+    return false;
+  },
+
   // 1. Obtener la licencia actual del usuario en este navegador
   getCurrentLicense() {
     try {
@@ -89,6 +99,8 @@ const LicenseService = {
       code: found.code,
       scope: found.scope || "all",
       studentName: found.studentName || "Estudiante de Grado",
+      canManageNotes: !!found.canManageNotes,
+      role: found.role || (found.canManageNotes ? "manager" : "student"),
       activatedAt: new Date().toISOString(),
       expiresAt: expiresAt,
       days: found.days
@@ -109,8 +121,11 @@ const LicenseService = {
     const scope = options.scope || "all"; // 'all', 'civil', 'procesal', 'constitucional'
     const days = options.days || 180; // 180 días (semestre de grado) o 0 (perpetua)
     const studentName = options.studentName || "Alumno";
+    const canManageNotes = !!options.canManageNotes;
 
-    const prefix = scope === "all" ? "GRADO-FULL" : `GRADO-${scope.toUpperCase()}`;
+    const prefix = canManageNotes
+      ? "GRADO-DOC"
+      : (scope === "all" ? "GRADO-FULL" : `GRADO-${scope.toUpperCase()}`);
     const randomHex = Math.random().toString(36).substring(2, 6).toUpperCase();
     const randomNum = Math.floor(1000 + Math.random() * 9000);
     const code = `${prefix}-${randomHex}-${randomNum}`;
@@ -120,6 +135,8 @@ const LicenseService = {
       scope,
       days: parseInt(days),
       studentName,
+      canManageNotes,
+      role: canManageNotes ? "manager" : "student",
       createdAt: new Date().toISOString(),
       uses: 0,
       revoked: false
@@ -144,9 +161,22 @@ const LicenseService = {
     // Códigos iniciales de prueba listos para usar
     const initialCodes = [
       {
+        code: "GRADO-DOCENTE-2026",
+        scope: "all",
+        days: 0,
+        canManageNotes: true,
+        role: "manager",
+        studentName: "Profesor / Ayudante Autorizado",
+        createdAt: new Date().toISOString(),
+        uses: 0,
+        revoked: false
+      },
+      {
         code: "GRADO-VIP-2026",
         scope: "all",
         days: 180,
+        canManageNotes: false,
+        role: "student",
         studentName: "Pase Semestral de Grado",
         createdAt: new Date().toISOString(),
         uses: 0,
@@ -156,6 +186,8 @@ const LicenseService = {
         code: "GRADO-CIVIL-PRO",
         scope: "civil",
         days: 90,
+        canManageNotes: false,
+        role: "student",
         studentName: "Pase Especial Derecho Civil",
         createdAt: new Date().toISOString(),
         uses: 0,

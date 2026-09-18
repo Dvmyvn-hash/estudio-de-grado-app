@@ -246,6 +246,9 @@ const App = {
 
     const isAdmin = LicenseService.isAdminMode();
 
+    // Sincronizar controles y visibilidad de roles
+    this.renderAdminIndicator();
+
     // Mostrar u ocultar controles de administrador en el sidebar
     const covFiltersEl = document.querySelector(".coverage-filters");
     if (covFiltersEl) {
@@ -438,9 +441,10 @@ const App = {
     const topic = data.topics.find(t => t.id === this.currentTopicId) || data.topics[0];
 
     if (!topic) {
+      const canManage = LicenseService.canManageNotes();
       container.innerHTML = `<div class="empty-state-wrap" style="padding: 60px; text-align: center;">
-        <h2>No hay temas cargados</h2>
-        <p class="text-muted">Importa tus apuntes de NotebookLM o sincroniza con el temario oficial.</p>
+        <h2>No hay temas seleccionados</h2>
+        <p class="text-muted">${canManage ? 'Importa tus apuntes de NotebookLM o sincroniza con el temario oficial.' : 'Selecciona una cédula del índice temático para comenzar tu estudio.'}</p>
       </div>`;
       return;
     }
@@ -933,6 +937,10 @@ const App = {
 
     // Guardar tema(s) importado(s)
     document.getElementById("btn-save-imported-topic")?.addEventListener("click", () => {
+      if (!LicenseService.canManageNotes()) {
+        this.showToast("Acceso restringido: Solo el administrador o cuentas con permiso pueden agregar apuntes.", "warning");
+        return;
+      }
       const subject = document.getElementById("import-subject").value;
       const categoryDefault = document.getElementById("import-category").value.trim() || "General";
       const titleDefault = document.getElementById("import-title").value.trim();
@@ -990,6 +998,10 @@ const App = {
 
     // Restaurar JSON
     document.getElementById("input-restore-json")?.addEventListener("change", (e) => {
+      if (!LicenseService.canManageNotes()) {
+        this.showToast("Acceso restringido: Solo el administrador o cuentas con permiso pueden restaurar notas.", "warning");
+        return;
+      }
       const file = e.target.files[0];
       if (!file) return;
 
@@ -1009,6 +1021,10 @@ const App = {
 
     // Reset Defaults
     document.getElementById("btn-reset-defaults")?.addEventListener("click", () => {
+      if (!LicenseService.canManageNotes()) {
+        this.showToast("Acceso restringido: Solo el administrador puede restablecer el temario.", "warning");
+        return;
+      }
       if (confirm("¿Estás seguro de restablecer los datos a los valores iniciales de fábrica?")) {
         StorageService.resetToDefaults();
         this.init();
@@ -1130,6 +1146,10 @@ const App = {
   },
 
   openImportModal(tabName = "paste") {
+    if (!LicenseService.canManageNotes()) {
+      this.showToast("Acceso restringido: Solo el administrador o cuentas con permiso pueden agregar o gestionar apuntes.", "warning");
+      return;
+    }
     const modal = document.getElementById("import-modal");
     if (modal) {
       modal.classList.remove("hidden");
@@ -1252,25 +1272,66 @@ const App = {
       this.showToast("Modo Administrador cerrado. Ahora estás viendo la plataforma como un alumno.", "info");
     });
 
+    // Botón de gestión directa de apuntes desde el dashboard de administrador
+    const btnAdminManageNotes = document.getElementById("btn-admin-manage-notes");
+    btnAdminManageNotes?.addEventListener("click", () => {
+      adminModal.classList.add("hidden");
+      this.openImportModal("paste");
+    });
+
     btnGenerate?.addEventListener("click", () => {
       const studentName = document.getElementById("admin-student-name")?.value.trim() || "Alumno";
       const scope = document.getElementById("admin-scope-select")?.value;
       const days = document.getElementById("admin-days-select")?.value;
+      const canManageNotes = !!document.getElementById("admin-grant-notes-perm")?.checked;
 
-      const newLic = LicenseService.generateCode({ studentName, scope, days });
+      const newLic = LicenseService.generateCode({ studentName, scope, days, canManageNotes });
       this.renderAdminCodesTable();
-      this.showToast(`¡Código ${newLic.code} generado! Cópialo para enviárselo a tu alumno.`, "success");
+      const roleMsg = canManageNotes ? " (con permiso de gestor de apuntes)" : "";
+      this.showToast(`¡Código ${newLic.code} generado${roleMsg}! Cópialo para enviárselo a tu alumno.`, "success");
       document.getElementById("admin-student-name").value = "";
+      const permCheck = document.getElementById("admin-grant-notes-perm");
+      if (permCheck) permCheck.checked = false;
     });
   },
 
   renderAdminIndicator() {
     const pill = document.getElementById("admin-mode-pill");
-    if (!pill) return;
-    if (LicenseService.isAdminMode()) {
-      pill.classList.remove("hidden");
-    } else {
-      pill.classList.add("hidden");
+    const isAdmin = LicenseService.isAdminMode();
+    const canManage = LicenseService.canManageNotes();
+
+    // Indicador "ADMIN" en cabecera
+    if (pill) {
+      if (isAdmin) {
+        pill.classList.remove("hidden");
+      } else {
+        pill.classList.add("hidden");
+      }
+    }
+
+    // Botón de cabecera "Importar Notas": solo visible si es Administrador o cuenta con rol gestor
+    const btnImport = document.getElementById("btn-open-import");
+    if (btnImport) {
+      if (canManage) {
+        btnImport.classList.remove("hidden");
+        btnImport.style.display = "inline-flex";
+      } else {
+        btnImport.classList.add("hidden");
+        btnImport.style.display = "none";
+      }
+    }
+
+    // Opción bajo el índice ("Nuevo Tema / Cédula"):
+    // Suprimida totalmente para alumnos normales, solo visible si la cuenta tiene rol de administrador/gestor
+    const sidebarFooter = document.getElementById("sidebar-footer-admin");
+    if (sidebarFooter) {
+      if (canManage) {
+        sidebarFooter.classList.remove("hidden");
+        sidebarFooter.style.display = "block";
+      } else {
+        sidebarFooter.classList.add("hidden");
+        sidebarFooter.style.display = "none";
+      }
     }
   },
 
@@ -1284,7 +1345,10 @@ const App = {
       return `
       <tr style="${c.revoked ? 'opacity: 0.5; text-decoration: line-through;' : ''}">
         <td><span class="code-pill">${escapeHTML(c.code)}</span></td>
-        <td>${escapeHTML(c.studentName || 'Sin asignar')}</td>
+        <td>
+          ${escapeHTML(c.studentName || 'Sin asignar')}
+          ${c.canManageNotes ? '<span class="badge-count" style="font-size: 0.65rem; margin-left: 4px; background: rgba(16, 185, 129, 0.2); color: #10b981;">Gestor Apuntes</span>' : ''}
+        </td>
         <td><span class="badge-count" style="font-size: 0.65rem;">${c.scope}</span></td>
         <td>${c.days === 0 ? 'Perpetua' : `${c.days} días`}</td>
         <td>
@@ -1348,13 +1412,15 @@ const App = {
     if (result.success) {
       document.getElementById("unlock-modal")?.classList.add("hidden");
       this.renderLicenseBadge();
+      this.renderAdminIndicator();
       this.renderSidebar();
       this.renderTopicViewer();
       this.updateCaseBadge();
       if (this.currentView === "cases") {
         CaseSolver.render();
       }
-      this.showToast(`¡Felicitaciones! Has desbloqueado el temario (${result.license.studentName})`, "success");
+      const roleNotice = result.license.canManageNotes ? " [Rol: Gestor de Apuntes]" : "";
+      this.showToast(`¡Felicitaciones! Has desbloqueado el temario (${result.license.studentName})${roleNotice}`, "success");
     } else {
       const errMsg = document.getElementById("license-error-msg");
       if (errMsg) {
