@@ -416,3 +416,110 @@
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* ==========================================================================
+   BARRA SUPERIOR EN MÓVIL PARA CASOS
+   ========================================================================== */
+.case-mobile-header-bar {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.case-mobile-title {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--gold-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+/* ==========================================================================
+   RESPONSIVE: TALLER DE CASOS EN MÓVIL Y TABLET
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .cases-layout {
+    position: relative;
+    width: 100%;
+  }
+
+  /* Si está en modo lista de casos */
+  .cases-layout.view-list .cases-list-panel {
+    width: 100%;
+    min-width: 100%;
+    border-right: none;
+    display: flex;
+  }
+
+  .cases-layout.view-list .case-workbench-panel {
+    display: none !important;
+  }
+
+  /* Si está en modo resolución activa */
+  .cases-layout.view-workbench .cases-list-panel {
+    display: none !important;
+  }
+
+  .cases-layout.view-workbench .case-workbench-panel {
+    width: 100%;
+    min-width: 100%;
+    display: flex;
+  }
+
+  .case-mobile-header-bar {
+    display: flex;
+  }
+
+  .case-workspace-inner {
+    padding: 16px 12px 80px 12px;
+  }
+
+  .methodology-stepper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 10px 14px;
+    scrollbar-width: none;
+  }
+
+  .methodology-stepper::-webkit-scrollbar {
+    display: none;
+  }
+
+  .step-connector {
+    min-width: 16px;
+  }
+
+  .case-fact-card {
+    padding: 18px 16px;
+  }
+
+  .case-fact-title {
+    font-size: 1.25rem;
+  }
+
+  .method-block {
+    padding: 16px;
+  }
+
+  .case-actions-bar {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .case-actions-bar .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

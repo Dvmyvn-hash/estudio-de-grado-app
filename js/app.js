@@ -41,6 +41,10 @@ const App = {
     this.setupLicenseModals();
 
     // Renderizar vista inicial
+    if (window.innerWidth <= 1024) {
+      const sidebar = document.getElementById("app-sidebar");
+      if (sidebar) sidebar.classList.add("collapsed");
+    }
     this.renderSidebar();
     this.renderCurrentView();
 
@@ -194,12 +198,32 @@ const App = {
       });
     });
 
-    // Toggle sidebar
+    // Toggle sidebar & móvil drawer
     const btnSidebar = document.getElementById("btn-toggle-sidebar");
     const sidebar = document.getElementById("app-sidebar");
+    const sidebarBackdrop = document.getElementById("sidebar-backdrop");
+    const btnCloseSidebarMobile = document.getElementById("btn-close-sidebar-mobile");
+
+    const closeSidebarMobile = () => {
+      if (sidebar) sidebar.classList.add("collapsed");
+      if (sidebarBackdrop) sidebarBackdrop.classList.add("hidden");
+    };
+
+    const openSidebarMobile = () => {
+      if (sidebar) sidebar.classList.remove("collapsed");
+      if (sidebarBackdrop && window.innerWidth <= 1024) {
+        sidebarBackdrop.classList.remove("hidden");
+      }
+    };
+
     if (btnSidebar && sidebar) {
       btnSidebar.addEventListener("click", () => {
-        sidebar.classList.toggle("collapsed");
+        const isCollapsed = sidebar.classList.contains("collapsed");
+        if (isCollapsed) {
+          openSidebarMobile();
+        } else {
+          closeSidebarMobile();
+        }
         if (this.currentView === "graph") {
           setTimeout(() => {
             ConceptGraph.resizeCanvas();
@@ -207,6 +231,13 @@ const App = {
           }, 300);
         }
       });
+    }
+
+    if (btnCloseSidebarMobile) {
+      btnCloseSidebarMobile.addEventListener("click", closeSidebarMobile);
+    }
+    if (sidebarBackdrop) {
+      sidebarBackdrop.addEventListener("click", closeSidebarMobile);
     }
   },
 
@@ -457,6 +488,12 @@ const App = {
       item.addEventListener('click', () => {
         this.currentTopicId = item.dataset.topicId;
         this.renderSidebar();
+        if (window.innerWidth <= 1024) {
+          const sidebar = document.getElementById("app-sidebar");
+          const backdrop = document.getElementById("sidebar-backdrop");
+          if (sidebar) sidebar.classList.add("collapsed");
+          if (backdrop) backdrop.classList.add("hidden");
+        }
         if (this.currentView !== 'topics') {
           this.switchView('topics');
         } else {
@@ -574,6 +611,10 @@ const App = {
               
               <div class="topic-actions-group">
                 ${isUnlocked ? `
+                  <button id="btn-toggle-connections-aside" class="btn btn-outline btn-sm" title="Ver o suprimir panel lateral de cruces e instituciones">
+                    <i data-lucide="git-merge"></i>
+                    <span>Cruces (${displayConnections.length})</span>
+                  </button>
                   <button id="btn-toggle-mastery" class="btn ${isMastered ? 'btn-secondary' : 'btn-primary'} btn-sm">
                     <i data-lucide="${isMastered ? 'check-circle' : 'circle'}"></i>
                     <span>${isMastered ? 'Dominado ✅' : 'Marcar como Dominado'}</span>
@@ -596,6 +637,13 @@ const App = {
               `).join('')}
             </div>
 
+            <div class="topic-quick-pills">
+              <button id="btn-toggle-connections-aside-pill" class="quick-pill quick-pill-crossover" title="Ver o suprimir cruces dogmáticos e instituciones vinculadas">
+                <i data-lucide="git-merge"></i>
+                <span>Cruces Dogmáticos (${displayConnections.length})</span>
+              </button>
+            </div>
+
           </div>
 
           <!-- CUERPO DE CONTENIDO REAL DEL APUNTE O PAYWALL -->
@@ -603,6 +651,61 @@ const App = {
             <div class="topic-markdown-body topic-rendered-content" id="topic-markdown-body">
               ${MarkdownParser.render(topic.content)}
             </div>
+
+            <!-- ACORDEÓN INLINE: INSTITUCIONES RELACIONADAS (DENTRO DEL APUNTE) -->
+            ${displayConnections.length > 0 ? `
+              <div class="inline-connections-box">
+                <button type="button" id="btn-toggle-inline-connections" class="btn-toggle-inline" aria-expanded="false">
+                  <div class="btn-toggle-inline-left">
+                    <i data-lucide="git-merge"></i>
+                    <span>Cruces Dogmáticos e Instituciones Vinculadas (${displayConnections.length})</span>
+                  </div>
+                  <div class="inline-toggle-state-text">
+                    <span id="inline-toggle-label">Ver análisis</span>
+                    <i data-lucide="chevron-down"></i>
+                  </div>
+                </button>
+                <div id="inline-connections-body" class="inline-connections-body collapsed">
+                  <p class="aside-section-subtitle" style="margin-bottom: 8px;">Explicación dogmática y aplicación práctica en examen:</p>
+                  ${displayConnections.map(conn => `
+                    <div class="linked-connection-card ${conn.subject}" data-topic-id="${conn.id}" title="Clic para estudiar esta institución vinculada">
+                      <div class="connection-header">
+                        <div class="connection-badges-row">
+                          <span class="connection-crossover-badge">${conn.crossoverType}</span>
+                          <span class="connection-subject-badge ${conn.subject}">
+                            ${conn.subject === 'civil' ? 'Civil' : conn.subject === 'procesal' ? 'Procesal' : 'Constitucional'}
+                          </span>
+                        </div>
+                        <h4 class="connection-target-title">${conn.title}</h4>
+                      </div>
+
+                      <div class="connection-content-body">
+                        <div class="connection-callout reason-box">
+                          <div class="connection-callout-header">
+                            <i data-lucide="lightbulb" class="callout-icon"></i>
+                            <span>¿Por qué se conectan?</span>
+                          </div>
+                          <p class="connection-callout-text">${conn.whyConnected}</p>
+                        </div>
+
+                        <div class="connection-callout app-box">
+                          <div class="connection-callout-header">
+                            <i data-lucide="scale" class="callout-icon"></i>
+                            <span>Aplicación en el Grado / Casos:</span>
+                          </div>
+                          <p class="connection-callout-text">${conn.practicalApplication}</p>
+                        </div>
+                      </div>
+
+                      <div class="connection-action-footer">
+                        <span>Estudiar cédula vinculada</span>
+                        <i data-lucide="arrow-right" class="footer-arrow-icon"></i>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
 
             <!-- TARJETA DE FINALIZACIÓN Y AVANCE DE ESTUDIO -->
             <div class="topic-completion-box" style="margin-top: 40px; padding: 24px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: space-between; gap: 20px;">
@@ -663,8 +766,19 @@ const App = {
 
         </article>
 
-        <!-- PANEL LATERAL DERECHO: CONEXIONES Y CASOS -->
-        <aside class="topic-aside-col">
+        <!-- PANEL LATERAL DERECHO: CONEXIONES Y CASOS (SUPRIMIBLE) -->
+        <aside id="topic-aside-panel" class="topic-aside-col">
+          
+          <div class="aside-panel-header">
+            <div class="aside-panel-header-title">
+              <i data-lucide="git-merge"></i>
+              <span>Cruces Dogmáticos</span>
+            </div>
+            <button id="btn-close-aside-panel" class="btn-close-aside" title="Suprimir o cerrar panel lateral">
+              <i data-lucide="x"></i>
+              <span>Cerrar</span>
+            </button>
+          </div>
           
           <!-- Instituciones Relacionadas con Análisis de IA -->
           <div class="aside-block-section">
@@ -758,6 +872,63 @@ const App = {
     container.querySelector('#btn-toggle-mastery')?.addEventListener('click', handleMasteryClick);
     container.querySelector('#btn-bottom-mastery')?.addEventListener('click', handleMasteryClick);
 
+    // Toggle y supresión del panel lateral de cruces dogmáticos
+    const asidePanel = container.querySelector('#topic-aside-panel');
+    const asideBackdrop = document.getElementById('aside-backdrop');
+    const btnToggleAside = container.querySelector('#btn-toggle-connections-aside');
+    const btnToggleAsidePill = container.querySelector('#btn-toggle-connections-aside-pill');
+    const btnCloseAside = container.querySelector('#btn-close-aside-panel');
+
+    const toggleAside = () => {
+      if (!asidePanel) return;
+      if (window.innerWidth <= 1024) {
+        const isOpen = asidePanel.classList.contains('open');
+        if (isOpen) {
+          asidePanel.classList.remove('open');
+          if (asideBackdrop) asideBackdrop.classList.add('hidden');
+        } else {
+          asidePanel.classList.add('open');
+          asidePanel.classList.remove('collapsed');
+          if (asideBackdrop) asideBackdrop.classList.remove('hidden');
+        }
+      } else {
+        asidePanel.classList.toggle('collapsed');
+      }
+    };
+
+    const closeAside = () => {
+      if (!asidePanel) return;
+      asidePanel.classList.remove('open');
+      asidePanel.classList.add('collapsed');
+      if (asideBackdrop) asideBackdrop.classList.add('hidden');
+    };
+
+    btnToggleAside?.addEventListener('click', toggleAside);
+    btnToggleAsidePill?.addEventListener('click', toggleAside);
+    btnCloseAside?.addEventListener('click', closeAside);
+    asideBackdrop?.addEventListener('click', closeAside);
+
+    // Toggle acordeón inline dentro de los apuntes
+    const btnToggleInline = container.querySelector('#btn-toggle-inline-connections');
+    const inlineBody = container.querySelector('#inline-connections-body');
+    const inlineLabel = container.querySelector('#inline-toggle-label');
+
+    btnToggleInline?.addEventListener('click', () => {
+      if (!inlineBody) return;
+      const isCollapsed = inlineBody.classList.contains('collapsed');
+      if (isCollapsed) {
+        inlineBody.classList.remove('collapsed');
+        btnToggleInline.classList.add('expanded');
+        btnToggleInline.setAttribute('aria-expanded', 'true');
+        if (inlineLabel) inlineLabel.textContent = 'Ocultar análisis';
+      } else {
+        inlineBody.classList.add('collapsed');
+        btnToggleInline.classList.remove('expanded');
+        btnToggleInline.setAttribute('aria-expanded', 'false');
+        if (inlineLabel) inlineLabel.textContent = 'Ver análisis';
+      }
+    });
+
     // Evento activación inline desde la tarjeta de paywall
     container.querySelector('#btn-inline-activate')?.addEventListener('click', () => {
       const code = container.querySelector('#inline-license-code')?.value || '';
@@ -777,6 +948,7 @@ const App = {
       card.addEventListener('click', () => {
         const topicId = card.dataset.topicId;
         if (topicId) {
+          closeAside();
           this.currentTopicId = topicId;
           this.renderSidebar();
           this.renderTopicViewer();

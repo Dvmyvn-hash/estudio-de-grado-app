@@ -2,7 +2,10 @@
 <html lang="es" data-theme="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0c0e14">
   <title>Estudio de Grado | Derecho Civil, Procesal y Constitucional</title>
   <meta name="description" content="Plataforma interactiva para preparación de examen de grado en Derecho. Temario interconectado, visualizador de instituciones jurídicas y taller de casos prácticos con metodología dogmática.">
   
@@ -105,9 +108,19 @@
     <!-- CUERPO PRINCIPAL (SIDEBAR + ÁREA DE TRABAJO) -->
     <div class="app-body">
       
+      <!-- Backdrops para móviles -->
+      <div id="sidebar-backdrop" class="sidebar-backdrop hidden" aria-hidden="true"></div>
+      <div id="aside-backdrop" class="aside-backdrop hidden" aria-hidden="true"></div>
+
       <!-- BARRA LATERAL (SIDEBAR) -->
       <aside id="app-sidebar" class="app-sidebar">
         <div class="sidebar-header">
+          <div class="sidebar-header-top">
+            <span class="sidebar-header-label">ÍNDICE DE CÉDULAS</span>
+            <button id="btn-close-sidebar-mobile" class="icon-btn sidebar-mobile-close" title="Cerrar índice" aria-label="Cerrar menú">
+              <i data-lucide="x"></i>
+            </button>
+          </div>
           <div class="subject-filters" role="group" aria-label="Filtro por materia">
             <button class="filter-pill active" data-filter="all">Todas</button>
             <button class="filter-pill filter-civil" data-filter="civil">I. Civil</button>

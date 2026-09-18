@@ -11,12 +11,16 @@ const CaseSolver = {
   currentCaseId: null,
   activeFilter: "all",
   activeStep: 1,
+  mobileView: "list",
 
   init(containerEl) {
     this.container = containerEl;
     const data = StorageService.getData();
     if (data.cases && data.cases.length > 0) {
       this.currentCaseId = data.cases[0].id;
+    }
+    if (window.innerWidth <= 1024) {
+      this.mobileView = "list";
     }
     this.render();
   },
@@ -29,6 +33,7 @@ const CaseSolver = {
   selectCase(caseId) {
     this.currentCaseId = caseId;
     this.activeStep = 1;
+    this.mobileView = "workbench";
     this.render();
   },
 
@@ -52,7 +57,7 @@ const CaseSolver = {
     const draft = activeCase ? (StorageService.getCaseDraft(activeCase.id) || {}) : {};
 
     this.container.innerHTML = `
-      <div class="cases-layout">
+      <div class="cases-layout ${this.mobileView === 'workbench' ? 'view-workbench' : 'view-list'}">
         
         <!-- PANEL IZQUIERDO: BANCO DE CASOS -->
         <aside class="cases-list-panel">
@@ -122,9 +127,20 @@ const CaseSolver = {
     const isUnlocked = LicenseService.isContentUnlocked(activeCase, 'case');
     const isModelVisible = draft.isModelRevealed || false;
 
+    const mobileHeaderHtml = `
+      <div class="case-mobile-header-bar">
+        <button id="btn-back-to-cases" class="btn btn-secondary btn-sm" title="Volver al banco de casos">
+          <i data-lucide="arrow-left"></i>
+          <span>Volver a Casos</span>
+        </button>
+        <span class="case-mobile-title">${activeCase.title}</span>
+      </div>
+    `;
+
     if (!isUnlocked) {
       return `
         <div class="case-workspace-inner">
+          ${mobileHeaderHtml}
           <div class="paywall-container">
             <div class="paywall-icon-wrap">
               <i data-lucide="lock"></i>
@@ -170,7 +186,7 @@ const CaseSolver = {
 
     return `
       <div class="case-workspace-inner">
-        
+        ${mobileHeaderHtml}
         <!-- STEPPER DE METODOLOGÍA -->
         <div class="methodology-stepper">
           <div class="step-item ${this.activeStep === 1 ? 'active' : ''} ${draft.conflict ? 'completed' : ''}" data-step="1">
@@ -359,6 +375,15 @@ const CaseSolver = {
 
   bindEvents(activeCase) {
     if (!activeCase) return;
+
+    // Volver a la lista de casos en móvil
+    const btnBack = this.container.querySelector('#btn-back-to-cases');
+    if (btnBack) {
+      btnBack.addEventListener('click', () => {
+        this.mobileView = 'list';
+        this.render();
+      });
+    }
 
     // Filtros de materias
     this.container.querySelectorAll('[data-case-filter]').forEach(btn => {

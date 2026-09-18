@@ -110,8 +110,11 @@ body {
   color: var(--text-main);
   line-height: 1.6;
   height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Layout Principal */
@@ -119,7 +122,10 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  width: 100%;
+  max-width: 100vw;
   overflow: hidden;
 }
 
@@ -486,7 +492,8 @@ body {
 .app-body {
   display: flex;
   flex: 1;
-  height: calc(100vh - 64px);
+  min-height: 0;
+  height: auto;
   overflow: hidden;
   position: relative;
 }
@@ -579,3 +586,124 @@ body {
   clip: rect(0, 0, 0, 0);
   border: 0;
 }
+
+/* ==========================================================================
+   RESPONSIVO MÓVIL Y TABLET (SAFARI iOS / IPHONE / ANDROID)
+   ========================================================================== */
+
+/* Backdrops globales para modales y paneles laterales en móvil */
+.sidebar-backdrop, .aside-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 95;
+  transition: opacity 0.2s ease;
+}
+
+.sidebar-backdrop.hidden, .aside-backdrop.hidden {
+  display: none !important;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    height: auto;
+    min-height: 56px;
+    padding: 8px 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .header-brand {
+    flex: 1;
+    min-width: 0;
+    gap: 8px;
+  }
+
+  .brand-badge {
+    gap: 8px;
+  }
+
+  .brand-title {
+    font-size: 0.95rem;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .brand-subtitle {
+    display: none;
+  }
+
+  .header-actions {
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .search-bar {
+    display: none; /* En móvil se prioriza espacio */
+  }
+
+  .live-sync-indicator {
+    display: none; /* Ahorro de espacio en pantallas pequeñas */
+  }
+
+  .header-nav {
+    order: 3;
+    width: 100%;
+    display: flex;
+    gap: 3px;
+    padding: 3px;
+    background: var(--bg-surface-elevated);
+    border-radius: var(--radius-sm);
+  }
+
+  .nav-tab {
+    flex: 1;
+    padding: 6px 4px;
+    font-size: 0.74rem;
+    justify-content: center;
+    gap: 4px;
+    text-align: center;
+  }
+
+  .nav-tab i {
+    width: 14px;
+    height: 14px;
+  }
+
+  .nav-tab span {
+    white-space: nowrap;
+  }
+
+  .badge-count {
+    font-size: 0.6rem;
+    padding: 0 4px;
+  }
+
+  .app-body {
+    flex: 1;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+  }
+
+  .toast-container {
+    left: 12px;
+    right: 12px;
+    bottom: 16px;
+  }
+
+  .toast {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+}
+

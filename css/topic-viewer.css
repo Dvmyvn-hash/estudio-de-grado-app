@@ -385,7 +385,62 @@
   padding: 24px 18px;
   display: flex;
   flex-direction: column;
-  gap: 26px;
+  gap: 24px;
+  transition: transform var(--transition-normal);
+}
+
+.topic-aside-col.collapsed {
+  display: none !important;
+}
+
+/* Encabezado del Panel Lateral con Botón de Cierre / Supresión */
+.aside-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.aside-panel-header-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--gold-primary);
+}
+
+.aside-panel-header-title i {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-close-aside {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.btn-close-aside:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-main);
+  border-color: var(--gold-primary);
+}
+
+.btn-close-aside i {
+  width: 14px;
+  height: 14px;
 }
 
 .aside-block-section {
@@ -1038,5 +1093,182 @@
 
 .callout-concept .callout-title {
   color: #60a5fa;
+}
+
+/* ==========================================================================
+   ACORDEÓN INLINE: INSTITUCIONES RELACIONADAS (DENTRO DEL APUNTE)
+   ========================================================================== */
+.inline-connections-box {
+  margin: 32px 0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-left: 4px solid var(--gold-primary);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-toggle-inline {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: var(--bg-surface-elevated);
+  border: none;
+  border-bottom: 1px solid transparent;
+  color: var(--text-main);
+  cursor: pointer;
+  text-align: left;
+  transition: var(--transition-fast);
+}
+
+.btn-toggle-inline:hover {
+  background: var(--bg-surface-hover);
+}
+
+.btn-toggle-inline-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--gold-primary);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.btn-toggle-inline-left i {
+  width: 18px;
+  height: 18px;
+}
+
+.inline-toggle-state-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.inline-toggle-state-text i {
+  width: 14px;
+  height: 14px;
+  transition: transform var(--transition-fast);
+}
+
+.btn-toggle-inline.expanded .inline-toggle-state-text i {
+  transform: rotate(180deg);
+}
+
+.inline-connections-body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.inline-connections-body.collapsed {
+  display: none;
+}
+
+/* Quick pill destacada para abrir panel de cruces */
+.quick-pill-crossover {
+  background: rgba(212, 175, 55, 0.12) !important;
+  border-color: var(--gold-primary) !important;
+  color: var(--gold-primary) !important;
+  cursor: pointer;
+}
+
+.quick-pill-crossover:hover {
+  background: rgba(212, 175, 55, 0.22) !important;
+}
+
+/* ==========================================================================
+   RESPONSIVE: TOPIC VIEWER EN MÓVIL Y TABLET
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .topic-viewer-container {
+    position: relative;
+  }
+
+  .topic-reading-col {
+    padding: 20px 16px 80px 16px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .reading-h1 {
+    font-size: 1.45rem;
+    margin: 24px 0 14px 0;
+  }
+
+  .reading-h2 {
+    font-size: 1.25rem;
+    margin: 20px 0 12px 0;
+  }
+
+  .reading-h3 {
+    font-size: 1.1rem;
+    margin: 18px 0 10px 0;
+  }
+
+  .reading-p {
+    text-align: left;
+    font-size: 0.98rem;
+    line-height: 1.7;
+  }
+
+  .topic-rendered-content {
+    font-size: 0.98rem;
+  }
+
+  .afg-official-card {
+    padding: 14px 16px;
+    margin: 18px 0 24px 0;
+  }
+
+  .pending-topic-alert-box {
+    flex-direction: column;
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .alert-requirements-list {
+    grid-template-columns: 1fr;
+  }
+
+  /* Panel lateral se convierte en Drawer flotante suprimible */
+  .topic-aside-col {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 380px;
+    max-width: 90vw;
+    height: 100%;
+    height: 100dvh;
+    z-index: 100;
+    background: var(--bg-surface);
+    border-left: 1px solid var(--border-subtle);
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.5);
+    transform: translateX(100%);
+    transition: transform var(--transition-normal);
+    display: flex;
+  }
+
+  .topic-aside-col:not(.open) {
+    transform: translateX(100%);
+    pointer-events: none;
+    display: none;
+  }
+
+  .topic-aside-col.open {
+    transform: translateX(0);
+    pointer-events: auto;
+    display: flex !important;
+  }
 }
 
