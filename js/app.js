@@ -53,31 +53,72 @@ const App = {
     }
   },
 
-  // 0. AUTO-SINCRONIZACIÓN EN TIEMPO REAL CON ARCHIVOS DE FUENTE
+  // 0. AUTO-SINCRONIZACIÓN EN TIEMPO REAL CON ARCHIVOS DE FUENTE / MODO ESTÁTICO GITHUB PAGES
   lastSyncVersion: null,
   isSyncing: false,
+  syncErrorsCount: 0,
+  syncIntervalId: null,
 
   startLiveSync() {
-    // Comprobar cada 3.5 segundos si hay cambios en los archivos de NotebookLM / fuentes
+    const badge = document.getElementById("live-sync-badge");
+    const isGitHubPages = window.location.hostname.endsWith("github.io");
+    const isFileProtocol = window.location.protocol === "file:";
+
+    // En entornos estáticos sin backend Python (GitHub Pages o archivo local)
+    if (isGitHubPages || isFileProtocol) {
+      if (badge) {
+        badge.title = "Plataforma autónoma activa: Todo el temario, casos dogmáticos y grafo operan 100% en tu navegador.";
+        const dot = badge.querySelector(".live-dot");
+        const text = badge.querySelector(".live-text");
+        if (dot) {
+          dot.style.background = "#10b981";
+          dot.style.boxShadow = "0 0 8px rgba(16, 185, 129, 0.6)";
+        }
+        if (text) text.textContent = "Web Activa";
+      }
+      return;
+    }
+
+    // Comprobar si hay cambios en servidor local con Python
     const check = async () => {
       try {
         const res = await fetch("/api/sync-check");
         if (res.ok) {
           const data = await res.json();
+          this.syncErrorsCount = 0;
           if (this.lastSyncVersion === null) {
             this.lastSyncVersion = data.version;
           } else if (this.lastSyncVersion !== data.version) {
             this.lastSyncVersion = data.version;
             await this.syncWithServer();
           }
+        } else {
+          this.syncErrorsCount++;
+          if (this.syncErrorsCount >= 2) {
+            // Servidor estático sin endpoints API
+            if (this.syncIntervalId) clearInterval(this.syncIntervalId);
+            if (badge) {
+              badge.title = "Modo Web Estático: Temario y casos cargados localmente.";
+              const text = badge.querySelector(".live-text");
+              if (text) text.textContent = "Web Activa";
+            }
+          }
         }
       } catch (e) {
-        // Servidor estático sin API o fuera de línea (continúa funcionando normal en local)
+        this.syncErrorsCount++;
+        if (this.syncErrorsCount >= 2) {
+          if (this.syncIntervalId) clearInterval(this.syncIntervalId);
+          if (badge) {
+            badge.title = "Modo Autónomo: Datos almacenados en el navegador.";
+            const text = badge.querySelector(".live-text");
+            if (text) text.textContent = "Web Activa";
+          }
+        }
       }
     };
 
     check();
-    setInterval(check, 3500);
+    this.syncIntervalId = setInterval(check, 3500);
   },
 
   async syncWithServer() {
