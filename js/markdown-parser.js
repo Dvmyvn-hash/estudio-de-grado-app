@@ -18,7 +18,7 @@ const MarkdownParser = {
 
     // 2. Wikilinks [[Institución]]
     html = html.replace(/\[\[(.*?)\]\]/g, (match, p1) => {
-      const cleanTarget = p1.trim();
+      const cleanTarget = p1.trim().replace(/"/g, '&quot;').replace(/'/g, '&#39;');
       return `<span class="wikilink" data-wikilink="${cleanTarget}" title="Ver institución jurídica">${cleanTarget}</span>`;
     });
 

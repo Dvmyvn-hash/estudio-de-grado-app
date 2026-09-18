@@ -232,7 +232,7 @@ const CaseSolver = {
               </div>
               <span class="method-badge-pill">¿Qué se controvierte?</span>
             </div>
-            <textarea class="method-textarea" id="input-conflict" placeholder="Define con precisión la litis o conflicto de intereses con relevancia jurídica...">${draft.conflict || ''}</textarea>
+            <textarea class="method-textarea" id="input-conflict" placeholder="Define con precisión la litis o conflicto de intereses con relevancia jurídica...">${typeof escapeHTML === 'function' ? escapeHTML(draft.conflict || '') : (draft.conflict || '')}</textarea>
           </div>
 
           <!-- Dimensión 2: Fundamento Normativo -->
@@ -244,7 +244,7 @@ const CaseSolver = {
               </div>
               <span class="method-badge-pill">Artículos e Instituciones Positivas</span>
             </div>
-            <textarea class="method-textarea" id="input-normative" placeholder="Cita las normas aplicables (ej. Art. 1454 CC, Art. 309 CPC, Art. 19 N° 24 CPR...)...">${draft.normative || ''}</textarea>
+            <textarea class="method-textarea" id="input-normative" placeholder="Cita las normas aplicables (ej. Art. 1454 CC, Art. 309 CPC, Art. 19 N° 24 CPR...)...">${typeof escapeHTML === 'function' ? escapeHTML(draft.normative || '') : (draft.normative || '')}</textarea>
           </div>
 
           <!-- Dimensión 3: Razonamiento y Subsunción -->
@@ -256,7 +256,7 @@ const CaseSolver = {
               </div>
               <span class="method-badge-pill">¿Cómo se encajan los hechos en la norma?</span>
             </div>
-            <textarea class="method-textarea" id="input-reasoning" style="min-height: 120px;" placeholder="Desarrolla el silogismo jurídico y argumentación técnica paso a paso...">${draft.reasoning || ''}</textarea>
+            <textarea class="method-textarea" id="input-reasoning" style="min-height: 120px;" placeholder="Desarrolla el silogismo jurídico y argumentación técnica paso a paso...">${typeof escapeHTML === 'function' ? escapeHTML(draft.reasoning || '') : (draft.reasoning || '')}</textarea>
           </div>
 
           <!-- Dimensión 4: Dogmática y Doctrina Jurídica -->
@@ -268,7 +268,7 @@ const CaseSolver = {
               </div>
               <span class="method-badge-pill">Teorías, Principios y Criterios</span>
             </div>
-            <textarea class="method-textarea" id="input-dogmatic" placeholder="Ej: Teoría de los actos propios, eficacia horizontal (Drittwirkung), principio de congruencia, buena fe objetiva...">${draft.dogmatic || ''}</textarea>
+            <textarea class="method-textarea" id="input-dogmatic" placeholder="Ej: Teoría de los actos propios, eficacia horizontal (Drittwirkung), principio de congruencia, buena fe objetiva...">${typeof escapeHTML === 'function' ? escapeHTML(draft.dogmatic || '') : (draft.dogmatic || '')}</textarea>
           </div>
 
         </div>

@@ -8,11 +8,8 @@ import os
 import re
 import json
 
-BASE_DIR = r"C:\Users\dpint\antigravity-ide\scratch\estudio-de-grado-app"
-if not os.path.exists(BASE_DIR):
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-APUNTES_DIR = r"C:\Users\dpint\Desktop\Fuentes_Grado\APUNTES"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+APUNTES_DIR = os.path.join(os.path.expanduser("~"), "Desktop", "Fuentes_Grado", "APUNTES")
 ALL_TOPICS_PATH = os.path.join(BASE_DIR, "all_afg_topics.json")
 DATA_JS_PATH = os.path.join(BASE_DIR, "js", "data.js")
 

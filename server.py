@@ -395,6 +395,15 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
         super().__init__(*args, directory=str(BASE_DIR), **kwargs)
 
     def do_GET(self):
+        # 1. Seguridad: Prevenir acceso a directorios o archivos ocultos (.git, .antigravity, etc.) y código sensible
+        clean_path = self.path.split('?')[0].split('#')[0]
+        segments = [s.strip() for s in clean_path.split('/') if s.strip()]
+        
+        # Bloquear cualquier segmento que comience con punto (.git, .env) o scripts de servidor
+        if any(s.startswith('.') for s in segments) or any(s in ('server.py', 'sync_config.json') for s in segments):
+            self.send_error(403, "Acceso denegado: recurso protegido")
+            return
+
         # API 1: Comprobar cambios (Polling ligero para actualización automática)
         if self.path == "/api/sync-check":
             version_hash = get_files_hash()
@@ -423,25 +432,45 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
         super().do_GET()
 
     def do_POST(self):
-        # API 3: Configurar carpeta externa (ej: Google Drive o carpeta en red)
+        # API 3: Configurar carpeta externa (ej: Google Drive o carpeta de apuntes)
         if self.path == "/api/set-sync-folder":
+            # Control de acceso: solo peticiones locales (localhost / 127.0.0.1)
+            client_ip = self.client_address[0]
+            if client_ip not in ("127.0.0.1", "::1", "localhost"):
+                self.send_error(403, "Configuracion restringida al equipo local")
+                return
+
             content_length = int(self.headers.get("Content-Length", 0))
+            if content_length > 65536:
+                self.send_error(413, "Carga demasiado grande")
+                return
+
             body = self.rfile.read(content_length).decode("utf-8")
             try:
                 data = json.loads(body)
                 custom_folder = data.get("folder", "").strip()
-                if custom_folder and os.path.isdir(custom_folder):
-                    with open(CONFIG_FILE, "w", encoding="utf-8") as f:
-                        json.dump({"custom_sync_folder": custom_folder}, f, indent=2)
-                    self.send_response(200)
-                    self.send_header("Content-Type", "application/json")
-                    self.end_headers()
-                    self.wfile.write(json.dumps({"ok": True, "message": "Carpeta vinculada correctamente"}).encode("utf-8"))
-                else:
+                if not custom_folder or not os.path.isdir(custom_folder):
                     self.send_response(400)
                     self.send_header("Content-Type", "application/json")
                     self.end_headers()
                     self.wfile.write(json.dumps({"ok": False, "error": "Ruta inválida o inaccesible"}).encode("utf-8"))
+                    return
+
+                # Restricción de seguridad: no permitir carpetas raíz o del sistema
+                norm_path = os.path.normpath(custom_folder).lower()
+                if norm_path in ("c:\\", "c:", "/", "\\") or any(f in norm_path for f in ("windows", "system32")):
+                    self.send_response(403)
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"ok": False, "error": "Acceso denegado a rutas del sistema"}).encode("utf-8"))
+                    return
+
+                with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+                    json.dump({"custom_sync_folder": custom_folder}, f, indent=2)
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"ok": True, "message": "Carpeta vinculada correctamente"}).encode("utf-8"))
             except Exception as e:
                 self.send_response(500)
                 self.end_headers()
@@ -451,11 +480,20 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
         super().do_POST()
 
 if __name__ == "__main__":
+    import sys
+    # Seguridad por defecto: enlazar únicamente a localhost (127.0.0.1).
+    # Si se desea conectar el celular por Wi-Fi, ejecutar con el flag --lan: python server.py --lan
+    bind_address = "127.0.0.1"
+    if "--lan" in sys.argv or "-lan" in sys.argv:
+        bind_address = "" # Escuchar en todas las interfaces para red local
+
     socketserver.TCPServer.allow_reuse_address = True
-    with socketserver.TCPServer(("", PORT), AutoSyncHTTPHandler) as httpd:
+    with socketserver.TCPServer((bind_address, PORT), AutoSyncHTTPHandler) as httpd:
+        mode_str = "Red local Wi-Fi (--lan habilitado)" if bind_address == "" else "Localhost seguro (127.0.0.1)"
         print(f"==================================================")
         print(f" Servidor Estudio de Grado con Auto-Sincronizador")
-        print(f" URL: http://localhost:{PORT}")
+        print(f" Modo: {mode_str}")
+        print(f" URL: http://{'localhost' if bind_address else '192.168.1.130'}:{PORT}")
         print(f" Monitoreando carpeta: {APUNTES_DIR}")
         print(f"==================================================")
         try:

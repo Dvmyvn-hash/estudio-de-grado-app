@@ -827,7 +827,7 @@ CONNECTIONS_MAP = {
 }
 
 def main():
-    base_dir = r"c:\Users\dpint\.gemini\antigravity-ide\scratch\estudio-de-grado-app"
+    base_dir = os.path.dirname(os.path.abspath(__file__))
     out_file = os.path.join(base_dir, "dogmatic_connections.json")
     
     with open(out_file, "w", encoding="utf-8") as f:

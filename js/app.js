@@ -3,6 +3,16 @@
  * Orquesta vistas, temario, visor de apuntes, búsqueda global, importador y temas.
  */
 
+function escapeHTML(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 const App = {
   currentView: "topics",
   currentTopicId: null,
@@ -797,7 +807,7 @@ const App = {
       ).slice(0, 3);
 
       if (matchedTopics.length === 0 && matchedCases.length === 0) {
-        dropdown.innerHTML = `<div style="padding: 12px; font-size: 0.8rem; color: var(--text-muted); text-align: center;">No se encontraron resultados para "${q}"</div>`;
+        dropdown.innerHTML = `<div style="padding: 12px; font-size: 0.8rem; color: var(--text-muted); text-align: center;">No se encontraron resultados para "${escapeHTML(q)}"</div>`;
         dropdown.classList.remove("hidden");
         return;
       }
@@ -1143,9 +1153,9 @@ const App = {
     if (lic && !lic.expired) {
       const scopeLabel = lic.scope === 'all' ? 'Pase Completo' : `Derecho ${lic.scope}`;
       container.innerHTML = `
-        <div class="license-status-badge unlocked" id="badge-license-active" title="Pase activo para ${lic.studentName}">
+        <div class="license-status-badge unlocked" id="badge-license-active" title="Pase activo para ${escapeHTML(lic.studentName)}">
           <i data-lucide="crown"></i>
-          <span>${scopeLabel} (${lic.studentName})</span>
+          <span>${scopeLabel} (${escapeHTML(lic.studentName)})</span>
         </div>
       `;
     } else {
@@ -1273,8 +1283,8 @@ const App = {
       const stStats = StorageService.calculateProgress(c.code, 'all');
       return `
       <tr style="${c.revoked ? 'opacity: 0.5; text-decoration: line-through;' : ''}">
-        <td><span class="code-pill">${c.code}</span></td>
-        <td>${c.studentName || 'Sin asignar'}</td>
+        <td><span class="code-pill">${escapeHTML(c.code)}</span></td>
+        <td>${escapeHTML(c.studentName || 'Sin asignar')}</td>
         <td><span class="badge-count" style="font-size: 0.65rem;">${c.scope}</span></td>
         <td>${c.days === 0 ? 'Perpetua' : `${c.days} días`}</td>
         <td>

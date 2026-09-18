@@ -1,6 +1,6 @@
 import os, re
 
-apuntes_dir = r"C:\Users\dpint\Desktop\Fuentes_Grado\APUNTES"
+apuntes_dir = os.path.join(os.path.expanduser("~"), "Desktop", "Fuentes_Grado", "APUNTES")
 files = {}
 for fname in sorted(os.listdir(apuntes_dir)):
     p = os.path.join(apuntes_dir, fname)

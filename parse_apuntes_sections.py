@@ -2,7 +2,7 @@ import os
 import re
 import json
 
-APUNTES_DIR = r"C:\Users\dpint\Desktop\Fuentes_Grado\APUNTES"
+APUNTES_DIR = os.path.join(os.path.expanduser("~"), "Desktop", "Fuentes_Grado", "APUNTES")
 
 FILES_INFO = [
     {
