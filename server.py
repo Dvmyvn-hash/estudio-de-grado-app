@@ -11,7 +11,13 @@ import json
 import time
 import re
 import urllib.parse
+import urllib.request
+import hmac
+import hashlib
+import base64
+import random
 from pathlib import Path
+from typing import Optional, Tuple, Dict, Any
 
 # Soporte opcional para PDF y DOCX
 try:
@@ -26,8 +32,68 @@ try:
 except ImportError:
     HAS_DOCX = False
 
+# Soporte opcional para Google Auth SDK (fallback nativo vía urllib / tokeninfo)
+try:
+    import google.auth
+    import google.oauth2.id_token
+    HAS_GOOGLE_AUTH = True
+except ImportError:
+    HAS_GOOGLE_AUTH = False
+
+import db
+
 PORT = 8080
 BASE_DIR = Path(__file__).resolve().parent
+DB_PATH = BASE_DIR / "estudio_grado.db"
+
+def get_or_create_auth_secret() -> str:
+    """Obtiene el secreto HMAC desde variable de entorno o genera uno criptográfico de 256 bits."""
+    env_secret = os.environ.get("AUTH_SECRET_KEY")
+    if env_secret and len(env_secret.strip()) >= 32:
+        return env_secret.strip()
+
+    secret_file = BASE_DIR / ".auth_secret"
+    if secret_file.exists():
+        try:
+            with open(secret_file, "r", encoding="utf-8") as f:
+                content = f.read().strip()
+                if len(content) >= 32:
+                    return content
+        except Exception:
+            pass
+
+    import secrets
+    new_secret = secrets.token_hex(32)
+    try:
+        with open(secret_file, "w", encoding="utf-8") as f:
+            f.write(new_secret)
+        try:
+            os.chmod(secret_file, 0o600)
+        except Exception:
+            pass
+    except Exception as e:
+        print(f"[Aviso Seguridad] No se pudo persistir .auth_secret: {e}")
+    return new_secret
+
+def load_google_client_id() -> str:
+    """Carga el Client ID de Google desde variable de entorno o auth_config.json."""
+    env_id = os.environ.get("GOOGLE_CLIENT_ID", "").strip()
+    if env_id:
+        return env_id
+    config_file = BASE_DIR / "auth_config.json"
+    if config_file.exists():
+        try:
+            with open(config_file, "r", encoding="utf-8") as f:
+                cfg = json.load(f)
+                return cfg.get("google_client_id", "").strip()
+        except Exception:
+            pass
+    return ""
+
+AUTH_SECRET_KEY = get_or_create_auth_secret()
+ALLOW_TEST_AUTH = os.environ.get("ALLOW_TEST_AUTH", "").strip().lower() in ("1", "true", "yes")
+GOOGLE_CLIENT_ID = load_google_client_id()
+db.init_db(DB_PATH)
 FUENTES_DIR = BASE_DIR / "fuentes"
 CASOS_DIR = BASE_DIR / "CASOS"
 CASOS_DIR_LOWER = BASE_DIR / "casos"
@@ -436,24 +502,324 @@ def get_all_synced_cases():
     except Exception as e:
         print("Error escaneando casos en vivo:", e)
 
-    return {"cases": [], "files": [], "casesCount": 0, "filesCount": 0, "referenceGuides": []}
+# ==========================================
+# UTILIDADES DE AUTENTICACIÓN Y SESIONES
+# ==========================================
+
+class SecurityRateLimiter:
+    """
+    Controlador de frecuencia (Rate Limiter) en memoria con poda automática
+    y límites acotados para prevenir agotamiento de recursos, ataques DoS y fuerza bruta.
+    """
+    def __init__(self, max_entries: int = 5000):
+        self.max_entries = max_entries
+        self.records: Dict[str, list] = {}
+
+    def _prune(self, now: float, max_age: float):
+        """Poda entradas antiguas y evita crecimiento ilimitado de memoria."""
+        keys_to_delete = []
+        for k, timestamps in list(self.records.items()):
+            valid = [t for t in timestamps if now - t < max_age]
+            if not valid:
+                keys_to_delete.append(k)
+            else:
+                self.records[k] = valid
+        for k in keys_to_delete:
+            self.records.pop(k, None)
+
+        if len(self.records) > self.max_entries:
+            sorted_keys = sorted(self.records.keys(), key=lambda k: self.records[k][-1] if self.records[k] else 0)
+            for k in sorted_keys[: len(self.records) - self.max_entries]:
+                self.records.pop(k, None)
+
+    def check_fixed_limit(self, key: str, max_requests: int = 30, window_seconds: float = 60.0) -> Tuple[bool, float]:
+        """
+        Límite de ventana fija: max_requests por window_seconds.
+        Retorna (permitido, segundos_restantes_para_reintentar).
+        """
+        now = time.time()
+        if len(self.records) > self.max_entries or random.random() < 0.05:
+            self._prune(now, window_seconds)
+
+        timestamps = [t for t in self.records.get(key, []) if now - t < window_seconds]
+        if len(timestamps) >= max_requests:
+            oldest = timestamps[0]
+            retry_after = max(1.0, window_seconds - (now - oldest))
+            return False, retry_after
+
+        timestamps.append(now)
+        self.records[key] = timestamps
+        return True, 0.0
+
+    def check_exponential_backoff(self, key: str, max_free_attempts: int = 5, window_seconds: float = 900.0) -> Tuple[bool, float]:
+        """
+        Límite con retroceso exponencial (para intentos de códigos de invitación):
+        Permite hasta max_free_attempts dentro de window_seconds.
+        Posteriormente exige espera exponencial 2^(intentos - max_free_attempts) + jitter.
+        """
+        now = time.time()
+        if len(self.records) > self.max_entries or random.random() < 0.05:
+            self._prune(now, window_seconds)
+
+        history = [t for t in self.records.get(key, []) if now - t < window_seconds]
+        self.records[key] = history
+
+        if len(history) >= max_free_attempts:
+            wait_seconds = (2 ** (len(history) - max_free_attempts)) + random.uniform(0.0, 0.5)
+            last_attempt = history[-1] if history else now
+            elapsed = now - last_attempt
+            if elapsed < wait_seconds:
+                return False, wait_seconds - elapsed
+        return True, 0.0
+
+    def record_attempt(self, key: str) -> None:
+        now = time.time()
+        history = self.records.get(key, [])
+        history.append(now)
+        self.records[key] = history
+
+    def reset(self, key: str) -> None:
+        self.records.pop(key, None)
+
+LINK_CODE_LIMITER = SecurityRateLimiter(max_entries=2000)
+GOOGLE_AUTH_LIMITER = SecurityRateLimiter(max_entries=5000)
+
+def create_session_token(sub: str) -> str:
+    """Crea un token de sesión firmado con HMAC-SHA256 y expiración a 30 días."""
+    payload = {
+        "sub": str(sub),
+        "exp": int(time.time() + (30 * 86400))  # 30 días
+    }
+    payload_bytes = json.dumps(payload, separators=(',', ':')).encode('utf-8')
+    payload_b64 = base64.urlsafe_b64encode(payload_bytes).decode('ascii').rstrip('=')
+    sig = hmac.new(
+        AUTH_SECRET_KEY.encode('utf-8'),
+        payload_b64.encode('utf-8'),
+        hashlib.sha256
+    ).digest()
+    sig_b64 = base64.urlsafe_b64encode(sig).decode('ascii').rstrip('=')
+    return f"{payload_b64}.{sig_b64}"
+
+def verify_session_token(token: str) -> Optional[str]:
+    """Verifica la firma HMAC-SHA256 y la vigencia del token de sesión. Retorna el 'sub'."""
+    try:
+        parts = token.split(".")
+        if len(parts) != 2:
+            return None
+        payload_b64, sig_b64 = parts
+
+        expected_sig = hmac.new(
+            AUTH_SECRET_KEY.encode('utf-8'),
+            payload_b64.encode('utf-8'),
+            hashlib.sha256
+        ).digest()
+
+        rem_sig = len(sig_b64) % 4
+        padded_sig = sig_b64 + ("=" * (4 - rem_sig) if rem_sig else "")
+        actual_sig = base64.urlsafe_b64decode(padded_sig.encode('ascii'))
+
+        if not hmac.compare_digest(expected_sig, actual_sig):
+            return None
+
+        rem_p = len(payload_b64) % 4
+        padded_p = payload_b64 + ("=" * (4 - rem_p) if rem_p else "")
+        payload_bytes = base64.urlsafe_b64decode(padded_p.encode('ascii'))
+        payload = json.loads(payload_bytes.decode('utf-8'))
+
+        if payload.get("exp", 0) < time.time():
+            return None
+
+        return str(payload.get("sub", ""))
+    except Exception:
+        return None
+
+def make_session_cookie(token: str) -> str:
+    """Genera la cookie httpOnly; Secure; SameSite=Lax requerida por la arquitectura."""
+    return f"session_token={token}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age={30 * 86400}"
+
+def make_logout_cookie() -> str:
+    """Genera la cookie de invalidación inmediata."""
+    return "session_token=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT"
+
+GOOGLE_TOKEN_REGEX = re.compile(r"^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$")
+
+def verify_google_id_token(id_token: str) -> Optional[dict]:
+    """
+    Verifica el ID token de Google Identity Services con validación estricta:
+    1. Si es un token de prueba en entorno local/test (prefijo 'mock-google-token:' o 'test-token:'),
+       SOLO se acepta si ALLOW_TEST_AUTH está expresamente activado en el entorno.
+    2. Valida longitud máxima (4096 caracteres) y formato JWT de 3 segmentos.
+    3. Si google-auth está disponible, usa google.oauth2.id_token.verify_oauth2_token.
+    4. Fallback tolerante con urllib nativo contra https://oauth2.googleapis.com/tokeninfo con
+       validación de expiración, audiencia (aud), emisor (iss) y correo verificado (email_verified).
+    """
+    if not id_token or not isinstance(id_token, str):
+        return None
+
+    # Límite estricto de longitud de token para prevenir ataques DoS / saturación de memoria
+    if len(id_token) > 4096:
+        print("[Aviso Seguridad] Token de Google excede la longitud máxima permitida (4096)")
+        return None
+
+    # Modo de prueba local/test (estrictamente restringido a entorno de pruebas con ALLOW_TEST_AUTH)
+    if id_token.startswith("mock-google-token:") or id_token.startswith("test-token:"):
+        if not ALLOW_TEST_AUTH:
+            print("[Aviso Seguridad] Intento de usar token mock bloqueado porque ALLOW_TEST_AUTH no está activo")
+            return None
+        parts = id_token.split(":")
+        sub = parts[1] if len(parts) > 1 and parts[1] else f"mock-sub-{int(time.time()*1000)}"
+        email = parts[2] if len(parts) > 2 and parts[2] else f"{sub}@example.com"
+        name = parts[3] if len(parts) > 3 and parts[3] else "Postulante de Grado"
+        picture = parts[4] if len(parts) > 4 and parts[4] else ""
+        return {"sub": sub, "email": email, "name": name, "picture": picture}
+
+    # Para tokens reales de Google, validar formato canónico JWT (3 partes base64url separadas por punto)
+    if not GOOGLE_TOKEN_REGEX.match(id_token):
+        print("[Aviso Seguridad] Token de Google no cumple con el formato estándar JWT")
+        return None
+
+    # Intentar con google-auth oficial si está instalado
+    if HAS_GOOGLE_AUTH:
+        try:
+            from google.oauth2 import id_token as g_id_token
+            from google.auth.transport import requests as g_requests
+            id_info = g_id_token.verify_oauth2_token(
+                id_token,
+                g_requests.Request(),
+                GOOGLE_CLIENT_ID if GOOGLE_CLIENT_ID else None
+            )
+            sub = str(id_info.get("sub", "")).strip()
+            if not sub:
+                return None
+            return {
+                "sub": sub,
+                "email": id_info.get("email", ""),
+                "name": id_info.get("name", ""),
+                "picture": id_info.get("picture", "")
+            }
+        except Exception as e:
+            print(f"[AUTH google-auth fallo]: {e}")
+            return None
+
+    # Fallback con urllib.request estándar a endpoint público de Google
+    try:
+        url = f"https://oauth2.googleapis.com/tokeninfo?id_token={urllib.parse.quote(id_token)}"
+        req = urllib.request.Request(url, headers={"User-Agent": "estudio-de-grado-app"})
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            if GOOGLE_CLIENT_ID and data.get("aud") != GOOGLE_CLIENT_ID:
+                print(f"[AUTH aud mismatch]: {data.get('aud')} != {GOOGLE_CLIENT_ID}")
+                return None
+
+            # Validar emisor oficial de Google
+            iss = data.get("iss", "")
+            if iss not in ("accounts.google.com", "https://accounts.google.com"):
+                print(f"[AUTH iss inválido]: {iss}")
+                return None
+
+            # Validar que el correo esté verificado por Google
+            email_verified = data.get("email_verified")
+            if email_verified not in (True, "true", "True", 1, "1"):
+                print("[AUTH correo no verificado por Google]")
+                return None
+
+            if float(data.get("exp", 0)) < time.time():
+                print("[AUTH tokeninfo expirado]")
+                return None
+
+            sub = str(data.get("sub", "")).strip()
+            if not sub:
+                return None
+
+            return {
+                "sub": sub,
+                "email": data.get("email", ""),
+                "name": data.get("name", ""),
+                "picture": data.get("picture", "")
+            }
+    except Exception as e:
+        print(f"[AUTH tokeninfo error]: {e}")
+        return None
+
 
 class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(BASE_DIR), **kwargs)
 
+    def end_headers(self):
+        """Inyecta encabezados de seguridad HTTP estándar de defensa en profundidad."""
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("X-Frame-Options", "DENY")
+        self.send_header("Referrer-Policy", "strict-origin-when-cross-origin")
+        self.send_header("Permissions-Policy", "geolocation=(), camera=(), microphone=()")
+        super().end_headers()
+
+    def send_json_response(self, data, status_code=200, headers=None):
+        """Envía respuesta JSON con encabezados de seguridad y Content-Length exacto."""
+        response_bytes = json.dumps(data, ensure_ascii=False).encode("utf-8")
+        self.send_response(status_code)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(response_bytes)))
+        self.send_header("Cache-Control", "no-cache")
+        if headers:
+            for k, v in headers.items():
+                self.send_header(k, v)
+        self.end_headers()
+        self.wfile.write(response_bytes)
+
+    def get_authenticated_user(self):
+        """Extrae y valida la cookie de sesión, retornando el registro del usuario o None."""
+        cookie_header = self.headers.get("Cookie", "")
+        if not cookie_header:
+            return None
+        cookies = {}
+        for item in cookie_header.split(";"):
+            if "=" in item:
+                k, v = item.strip().split("=", 1)
+                cookies[k.strip()] = v.strip()
+        token = cookies.get("session_token")
+        if not token:
+            return None
+        sub = verify_session_token(token)
+        if not sub:
+            return None
+        return db.get_user_by_sub(sub)
+
     def do_GET(self):
-        # 1. Seguridad: Prevenir acceso a directorios o archivos ocultos (.git, .antigravity, etc.) y código sensible
         raw_clean_path = self.path.split('?')[0].split('#')[0]
-        clean_path = urllib.parse.unquote(raw_clean_path)
+
+        # 1. Detección y bloqueo de bytes nulos (%00 o \x00)
+        if "\x00" in raw_clean_path or "%00" in raw_clean_path.lower():
+            self.send_error(400, "Solicitud inválida: byte nulo detectado")
+            return
+
+        # 2. Detección de intento de evasión por doble codificación URL (%25)
+        decoded_once = urllib.parse.unquote(raw_clean_path)
+        decoded_twice = urllib.parse.unquote(decoded_once)
+        if decoded_once != decoded_twice and ("%" in decoded_once or ".." in decoded_twice):
+            self.send_error(400, "Solicitud inválida: intento de evasión por doble codificación")
+            return
+
+        clean_path = decoded_once
         segments = [s.strip() for s in clean_path.split('/') if s.strip()]
-        
-        # Bloquear cualquier segmento que comience con punto (.git, .env), scripts de servidor
-        # y carpetas/archivos de entrenamiento confidenciales (CASOS, all_cases.json, parse_casos.py)
         lower_segments = [s.lower() for s in segments]
+
+        # 3. Bloquear cualquier segmento que intente path traversal relativo
+        if any(s in ('..', '.') for s in segments):
+            self.send_error(403, "Acceso denegado: ruta no permitida")
+            return
+
+        # 4. Bloquear archivos y extensiones sensibles (Zero Exposure)
+        BLOCKED_FILES = {
+            'server.py', 'sync_config.json', 'parse_casos.py', 'all_cases.json',
+            'manage_access_codes.py', 'db.py', 'test_e2e_case_flow.cjs', 'package.json'
+        }
+        BLOCKED_EXTENSIONS = ('.db', '.sqlite', '.db-wal', '.db-shm', '.key', '.pem', '.secret')
+
         if (any(s.startswith('.') for s in segments) or 
-            any(s in ('server.py', 'sync_config.json', 'parse_casos.py', 'all_cases.json') for s in lower_segments) or
-            'casos' in lower_segments):
+            any(s in BLOCKED_FILES for s in lower_segments) or
+            any(any(s.endswith(ext) for ext in BLOCKED_EXTENSIONS) for s in lower_segments) or
+            'casos' in lower_segments or '1_pautas_evaluacion' in lower_segments):
             self.send_error(403, "Acceso denegado: modelo confidencial protegido del Agente IA")
             return
 
@@ -549,9 +915,37 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", "application/json; charset=utf-8")
             self.send_header("Content-Length", str(len(response_bytes)))
-            self.send_header("Cache-Control", "no-cache")
-            self.end_headers()
-            self.wfile.write(response_bytes)
+        # API 6: Consultar estado de sesión del usuario actual
+        if clean_path == "/api/auth/me":
+            user = self.get_authenticated_user()
+            if user:
+                self.send_json_response({
+                    "ok": True,
+                    "user": {
+                        "id": user["id"],
+                        "email": user["email"],
+                        "name": user["name"],
+                        "picture_url": user["picture_url"],
+                        "access_code": user["access_code"]
+                    },
+                    "googleClientId": GOOGLE_CLIENT_ID
+                })
+            else:
+                self.send_json_response({
+                    "ok": False,
+                    "error": "No autenticado",
+                    "googleClientId": GOOGLE_CLIENT_ID
+                }, status_code=401)
+            return
+
+        # API 7: Obtener todo el progreso sincronizado del usuario autenticado
+        if clean_path == "/api/user/progress":
+            user = self.get_authenticated_user()
+            if not user:
+                self.send_json_response({"ok": False, "error": "No autenticado"}, status_code=401)
+                return
+            progress = db.get_all_user_progress(user["id"])
+            self.send_json_response({"ok": True, "progress": progress})
             return
 
         # Servir archivos estáticos normales
@@ -568,6 +962,18 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps({"ok": False, "error": "Encabezado Content-Length inválido"}).encode("utf-8"))
             return
 
+        # Normalización del encabezado Content-Type y de ruta
+        raw_clean_path = self.path.split('?')[0].split('#')[0]
+        clean_path = urllib.parse.unquote(raw_clean_path)
+        raw_content_type = self.headers.get("Content-Type", "")
+        content_type = raw_content_type.split(";")[0].strip().lower()
+
+        # API: Cerrar Sesión (Invalidar Cookie, no requiere cuerpo)
+        if clean_path == "/api/auth/logout":
+            cookie = make_logout_cookie()
+            self.send_json_response({"ok": True, "message": "Sesión finalizada correctamente"}, headers={"Set-Cookie": cookie})
+            return
+
         if content_length <= 0:
             self.send_response(400)
             self.send_header("Content-Type", "application/json")
@@ -582,11 +988,149 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps({"ok": False, "error": f"Carga útil excede el límite máximo de seguridad ({MAX_PAYLOAD_SIZE // 1024} KB)"}).encode("utf-8"))
             return
 
-        # Normalización del encabezado Content-Type y de ruta
-        raw_clean_path = self.path.split('?')[0].split('#')[0]
-        clean_path = urllib.parse.unquote(raw_clean_path)
-        raw_content_type = self.headers.get("Content-Type", "")
-        content_type = raw_content_type.split(";")[0].strip().lower()
+        # API: Autenticación con Google (Login directo o detección de código requerido)
+        if clean_path == "/api/auth/google":
+            client_ip = self.client_address[0]
+            allowed, retry_sec = GOOGLE_AUTH_LIMITER.check_fixed_limit(client_ip, max_requests=30, window_seconds=60.0)
+            if not allowed:
+                self.send_json_response({
+                    "ok": False,
+                    "error": f"Demasiadas solicitudes de autenticación. Por favor espera {int(retry_sec) + 1} segundos."
+                }, status_code=429)
+                return
+
+            body = self.rfile.read(content_length).decode("utf-8", errors="replace")
+            try:
+                req_data = json.loads(body)
+            except Exception:
+                self.send_json_response({"ok": False, "error": "Cuerpo JSON inválido"}, status_code=400)
+                return
+
+            id_token = req_data.get("idToken", "").strip()
+            token_info = verify_google_id_token(id_token)
+            if not token_info:
+                self.send_json_response({"ok": False, "error": "Token de Google inválido o expirado"}, status_code=401)
+                return
+
+            sub = token_info["sub"]
+            email = token_info["email"]
+            name = token_info["name"]
+            picture = token_info["picture"]
+
+            user = db.get_user_by_sub(sub)
+            if user:
+                # Login directo de usuario ya registrado
+                db.update_user_last_login(user["id"], name=name, picture_url=picture, email=email)
+                token = create_session_token(sub)
+                progress = db.get_all_user_progress(user["id"])
+                cookie = make_session_cookie(token)
+                self.send_json_response({
+                    "ok": True,
+                    "user": {
+                        "id": user["id"],
+                        "email": email or user["email"],
+                        "name": name or user["name"],
+                        "picture_url": picture or user["picture_url"],
+                        "access_code": user["access_code"]
+                    },
+                    "progress": progress
+                }, headers={"Set-Cookie": cookie})
+            else:
+                # Usuario nuevo no vinculado: solicitar código de invitación
+                self.send_json_response({
+                    "ok": False,
+                    "requiresAccessCode": True,
+                    "message": "Se requiere un código de acceso de invitación para vincular tu cuenta de Google.",
+                    "userPreview": {"email": email, "name": name, "picture": picture}
+                }, status_code=403)
+            return
+
+        # API: Vincular Código de Acceso a Cuenta de Google
+        if clean_path == "/api/auth/link-code":
+            client_ip = self.client_address[0]
+            allowed, wait_sec = LINK_CODE_LIMITER.check_exponential_backoff(client_ip, max_free_attempts=5, window_seconds=900.0)
+            if not allowed:
+                self.send_json_response({
+                    "ok": False,
+                    "error": f"Demasiados intentos fallidos. Por favor espera {int(wait_sec) + 1} segundos."
+                }, status_code=429)
+                return
+
+            body = self.rfile.read(content_length).decode("utf-8", errors="replace")
+            try:
+                req_data = json.loads(body)
+            except Exception:
+                self.send_json_response({"ok": False, "error": "Cuerpo JSON inválido"}, status_code=400)
+                return
+
+            id_token = req_data.get("idToken", "").strip()
+            code = req_data.get("code", "").strip()
+
+            token_info = verify_google_id_token(id_token)
+            if not token_info:
+                LINK_CODE_LIMITER.record_attempt(client_ip)
+                self.send_json_response({"ok": False, "error": "Token de Google inválido o expirado"}, status_code=401)
+                return
+
+            ok, reason, user = db.create_user_with_code(
+                google_sub=token_info["sub"],
+                email=token_info["email"],
+                name=token_info["name"],
+                picture_url=token_info["picture"],
+                code=code
+            )
+
+            if not ok or not user:
+                LINK_CODE_LIMITER.record_attempt(client_ip)
+                self.send_json_response({"ok": False, "error": reason}, status_code=400)
+                return
+
+            LINK_CODE_LIMITER.reset(client_ip)
+            token = create_session_token(token_info["sub"])
+            cookie = make_session_cookie(token)
+            self.send_json_response({
+                "ok": True,
+                "user": {
+                    "id": user["id"],
+                    "email": user["email"],
+                    "name": user["name"],
+                    "picture_url": user["picture_url"],
+                    "access_code": user["access_code"]
+                }
+            }, headers={"Set-Cookie": cookie})
+            return
+
+        # API: Guardar / Actualizar Progreso de Usuario (Multi-dispositivo)
+        if clean_path == "/api/user/progress":
+            user = self.get_authenticated_user()
+            if not user:
+                self.send_json_response({"ok": False, "error": "No autenticado"}, status_code=401)
+                return
+
+            body = self.rfile.read(content_length).decode("utf-8", errors="replace")
+            try:
+                req_data = json.loads(body)
+            except Exception:
+                self.send_json_response({"ok": False, "error": "Cuerpo JSON inválido"}, status_code=400)
+                return
+
+            case_id = str(req_data.get("caseId", "")).strip()
+            data = req_data.get("data")
+            if not case_id or data is None:
+                self.send_json_response({"ok": False, "error": "Campos 'caseId' y 'data' obligatorios"}, status_code=400)
+                return
+
+            if not re.match(r"^[a-zA-Z0-9_\-]{1,64}$", case_id):
+                self.send_json_response({"ok": False, "error": "Identificador de caso 'caseId' inválido"}, status_code=400)
+                return
+
+            if not isinstance(data, dict):
+                self.send_json_response({"ok": False, "error": "El campo 'data' debe ser un objeto JSON válido"}, status_code=400)
+                return
+
+            ok, updated_at = db.upsert_user_progress(user["id"], case_id, data)
+            self.send_json_response({"ok": True, "caseId": case_id, "updatedAt": updated_at})
+            return
 
         # API 3: Configurar carpeta externa (ej: Google Drive o carpeta de apuntes)
         if clean_path == "/api/set-sync-folder":

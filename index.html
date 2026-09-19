@@ -17,6 +17,9 @@
   <!-- Iconos Lucide CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
+  <!-- Google Identity Services (GSI) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
   <!-- Estilos -->
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/sidebar.css">
@@ -81,6 +84,9 @@
 
         <!-- Badge de Estado de Licencia (Candado Demo / Corona Pase Activo en Modo Icono) -->
         <div id="license-badge-container"></div>
+
+        <!-- Contenedor de Autenticación Google / Perfil de Usuario -->
+        <div id="auth-user-container" class="auth-user-container"></div>
 
         <!-- Indicador Administrador Activo (Icono) -->
         <button id="admin-mode-pill" class="icon-btn admin-active-pill hidden" title="Sesión de Administrador Activa (Clic para panel)" aria-label="Admin Activo">
@@ -487,6 +493,50 @@
     </div>
   </div>
 
+  <!-- MODAL: VINCULACIÓN DE CÓDIGO DE ACCESO (BETA CERRADA) -->
+  <div id="access-code-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-dialog" style="max-width: 520px;">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <i data-lucide="shield-alert" class="modal-header-icon" style="color: var(--gold-primary);"></i>
+          <div>
+            <h2 class="modal-title">Acceso Beta Cerrada</h2>
+            <p class="modal-subtitle">Vinculación de cuenta de Google con código de invitación</p>
+          </div>
+        </div>
+        <button class="icon-btn btn-close-modal" id="btn-close-access-modal" aria-label="Cerrar">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-body" style="padding: 24px;">
+        <div id="access-code-user-greeting" style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 16px; line-height: 1.5;">
+          ¡Bienvenido! Para acceder a la beta privada, vincula tu código de invitación.
+        </div>
+        
+        <div class="paywall-activation-box">
+          <label for="input-access-code" style="font-size: 0.85rem; font-weight: 600; color: var(--text-main); display: block; margin-bottom: 8px;">
+            Código de Invitación:
+          </label>
+          <div class="activation-input-row">
+            <input type="text" id="input-access-code" placeholder="EJ: GRADO-BETA-XXXX-YYYY" autocomplete="off" style="text-transform: uppercase;">
+            <button id="btn-submit-access-code" class="btn btn-primary">
+              <i data-lucide="link"></i>
+              <span>Vincular y Comenzar</span>
+            </button>
+          </div>
+          <div id="access-code-error-msg" style="font-size: 0.8rem; color: var(--danger); margin-top: 10px; display: none;"></div>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px;">¿No cuentas con un código de acceso?</p>
+          <p style="font-size: 0.78rem; color: var(--text-muted);">
+            Esta plataforma opera en modalidad beta cerrada. Solicita tu código directamente al administrador de la cátedra.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST NOTIFICATIONS -->
   <div id="toast-container" class="toast-container" aria-live="polite"></div>
 
@@ -494,6 +544,8 @@
   <script src="js/data.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/security-shield.js"></script>
+  <script src="js/auth-config.js"></script>
+  <script src="js/auth-service.js"></script>
   <script src="js/auth-license.js"></script>
   <script src="js/markdown-parser.js"></script>
   <script src="js/concept-graph.js"></script>

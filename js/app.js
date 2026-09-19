@@ -28,6 +28,11 @@ const App = {
     this.setupImportModal();
     this.setupKeyboardShortcuts();
 
+    // Inicializar autenticación con Google y códigos de invitación
+    if (typeof AuthService !== "undefined" && typeof AuthService.init === "function") {
+      AuthService.init();
+    }
+
     // Cargar datos
     const data = StorageService.getData();
     if (data.topics && data.topics.length > 0) {

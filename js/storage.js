@@ -154,11 +154,91 @@ const StorageService = {
   saveCaseDraft(caseId, draftData) {
     const data = this.getData();
     if (!data.caseDrafts) data.caseDrafts = {};
-    data.caseDrafts[caseId] = {
+    const nowIso = new Date().toISOString();
+    const nowEpoch = Date.now();
+    const draft = {
       ...draftData,
-      updatedAt: new Date().toISOString()
+      updatedAt: nowIso,
+      updatedAtEpoch: nowEpoch
     };
+    data.caseDrafts[caseId] = draft;
     this.saveData(data);
+
+    // Sincronización en segundo plano con el backend SQLite si hay sesión de usuario activa
+    this.syncPushCaseDraft(caseId, draft);
+  },
+
+  // Envía el borrador al servidor para sincronización multi-dispositivo
+  async syncPushCaseDraft(caseId, draftData) {
+    if (typeof AuthService === "undefined" || !AuthService.currentUser) return;
+    try {
+      await fetch("/api/user/progress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          caseId: caseId,
+          data: draftData
+        })
+      });
+    } catch (e) {
+      console.warn("[StorageService] Error enviando progreso al servidor (offline cache activo):", e);
+    }
+  },
+
+  // Sincroniza el progreso completo con el servidor aplicando estrategia Last-Write-Wins (LWW)
+  async syncPullProgress() {
+    if (typeof AuthService === "undefined" || !AuthService.currentUser) return;
+    try {
+      const res = await fetch("/api/user/progress", {
+        headers: { "Accept": "application/json" }
+      });
+      if (!res.ok) return;
+      const json = await res.json();
+      if (!json.ok || !json.progress) return;
+
+      const serverProgress = json.progress;
+      const data = this.getData();
+      if (!data.caseDrafts) data.caseDrafts = {};
+
+      let hasChanges = false;
+      const pendingPushes = [];
+
+      // 1. Integrar datos del servidor hacia el cliente
+      for (const [caseId, serverDraft] of Object.entries(serverProgress)) {
+        const localDraft = data.caseDrafts[caseId];
+        const serverTs = serverDraft.updatedAtEpoch || (serverDraft.updatedAt ? new Date(serverDraft.updatedAt).getTime() : 0);
+        const localTs = localDraft ? (localDraft.updatedAtEpoch || (localDraft.updatedAt ? new Date(localDraft.updatedAt).getTime() : 0)) : 0;
+
+        if (!localDraft || serverTs >= localTs) {
+          data.caseDrafts[caseId] = serverDraft;
+          hasChanges = true;
+        } else if (localTs > serverTs) {
+          // El borrador local es más reciente (ej. generado offline)
+          pendingPushes.push({ caseId, data: localDraft });
+        }
+      }
+
+      // 2. Si existen borradores locales no presentes en el servidor, enviarlos
+      for (const [caseId, localDraft] of Object.entries(data.caseDrafts)) {
+        if (!serverProgress[caseId]) {
+          pendingPushes.push({ caseId, data: localDraft });
+        }
+      }
+
+      if (hasChanges) {
+        this.saveData(data);
+        if (typeof CaseSolver !== "undefined" && CaseSolver.activeCaseId && typeof CaseSolver.loadCaseDraft === "function") {
+          CaseSolver.loadCaseDraft(CaseSolver.activeCaseId);
+        }
+      }
+
+      // 3. Despachar actualizaciones locales pendientes
+      for (const item of pendingPushes) {
+        this.syncPushCaseDraft(item.caseId, item.data);
+      }
+    } catch (e) {
+      console.warn("[StorageService] Error sincronizando progreso:", e);
+    }
   },
 
   getCaseDraft(caseId) {
@@ -278,3 +358,8 @@ const StorageService = {
     return this.getData();
   }
 };
+
+if (typeof window !== "undefined") window.StorageService = StorageService;
+if (typeof globalThis !== "undefined") globalThis.StorageService = StorageService;
+if (typeof module !== "undefined" && module.exports) module.exports = StorageService;
+

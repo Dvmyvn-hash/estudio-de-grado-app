@@ -937,3 +937,100 @@ body {
   }
 }
 
+/* ==========================================================================
+   ESTILOS DE PERFIL DE USUARIO Y AUTENTICACIÓN GOOGLE (AuthService)
+   ========================================================================== */
+.auth-user-container {
+  display: flex;
+  align-items: center;
+}
+
+.user-profile-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  padding: 3px 8px 3px 4px;
+  font-size: 0.8rem;
+  color: var(--text-main);
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.user-profile-pill:hover {
+  border-color: var(--gold-primary);
+}
+
+.user-avatar-img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--gold-primary);
+}
+
+.user-avatar-placeholder {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(212, 160, 23, 0.15);
+  color: var(--gold-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+}
+
+.user-profile-name {
+  font-weight: 500;
+  max-width: 130px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btn-user-logout {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 50%;
+  transition: color 0.15s, background-color 0.15s;
+}
+
+.btn-user-logout:hover {
+  color: var(--danger);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.google-btn-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.auth-login-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--gold-primary);
+  color: var(--gold-primary);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.auth-login-btn:hover {
+  background: var(--gold-primary);
+  color: #0c0e14;
+}
+
+

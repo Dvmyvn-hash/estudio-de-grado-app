@@ -21,6 +21,9 @@ desktop.ini
 # Logs and runtime files
 *.log
 sync_config.json
+*.db*
+*.sqlite*
+.auth_secret*
 
 # Scratch / Temporary debugging and test scripts
 scratch_*.py

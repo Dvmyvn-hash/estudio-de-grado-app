@@ -1,0 +1,11 @@
+{
+  "google_client_id": "1084268194723-8c4v8vhf2rghk0n3k0t3q3j3j3j3j3j3.apps.googleusercontent.com",
+  "allowed_origins": [
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "https://dvmyvn-hash.github.io"
+  ],
+  "comment": "Reemplaza google_client_id con tu Client ID de Google Cloud Console según GOOGLE_AUTH_SETUP.md"
+}
