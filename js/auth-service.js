@@ -12,7 +12,7 @@ var AuthService = {
   currentUser: null,
   authMode: "register", // "register" | "login"
   loginRequiresCaptcha: false,
-  turnstileSiteKey: (typeof window !== "undefined" && window.AUTH_CONFIG && window.AUTH_CONFIG.turnstileSiteKey) || "1x00000000000000000000AA",
+  turnstileSiteKey: (typeof window !== "undefined" && window.AUTH_CONFIG && window.AUTH_CONFIG.turnstileSiteKey) || "0x4AAAAAAAE9e7tJ25CKz1YqH",
   turnstileWidgetId: null,
   currentTurnstileToken: null,
   isInitialized: false,
@@ -134,9 +134,11 @@ var AuthService = {
   // Obtener token de Turnstile de forma resiliente
   getTurnstileToken() {
     if (this.currentTurnstileToken) return this.currentTurnstileToken;
-    if (typeof window !== "undefined" && window.turnstile && this.turnstileWidgetId !== null) {
+    if (typeof window !== "undefined" && window.turnstile) {
       try {
-        const t = window.turnstile.getResponse(this.turnstileWidgetId);
+        const t = this.turnstileWidgetId !== null
+          ? window.turnstile.getResponse(this.turnstileWidgetId)
+          : window.turnstile.getResponse();
         if (t) {
           this.currentTurnstileToken = t;
           return t;
@@ -144,7 +146,8 @@ var AuthService = {
       } catch (e) {}
     }
     if (typeof document !== "undefined") {
-      const respInput = document.querySelector("#unlock-captcha-container input[name='cf-turnstile-response']");
+      const respInput = document.querySelector("#unlock-captcha-container input[name='cf-turnstile-response']") ||
+                        document.querySelector("input[name='cf-turnstile-response']");
       if (respInput && respInput.value) {
         this.currentTurnstileToken = respInput.value;
         return respInput.value;
@@ -156,8 +159,16 @@ var AuthService = {
   // Inicializar Cloudflare Turnstile
   initTurnstile() {
     if (typeof window === "undefined" || typeof document === "undefined") return;
+
     const container = document.getElementById("unlock-captcha-container");
     if (!container) return;
+
+    // Actualizar siteKey dinámica desde AUTH_CONFIG si está configurada o atributo data-sitekey
+    if (typeof window.AUTH_CONFIG !== "undefined" && window.AUTH_CONFIG.turnstileSiteKey) {
+      this.turnstileSiteKey = window.AUTH_CONFIG.turnstileSiteKey;
+    } else if (container.getAttribute("data-sitekey")) {
+      this.turnstileSiteKey = container.getAttribute("data-sitekey");
+    }
 
     // Si el modal está oculto, no renderizar hasta que se abra para asegurar dimensiones reales en el DOM
     const modal = document.getElementById("unlock-modal");
@@ -202,6 +213,12 @@ var AuthService = {
         theme: "dark",
         callback: (token) => {
           this.currentTurnstileToken = token;
+          // Limpiar mensaje de advertencia si el usuario intentó enviar antes de resolver el captcha
+          const errEl = document.getElementById("register-error-msg");
+          if (errEl && errEl.textContent && errEl.textContent.includes("captcha")) {
+            errEl.style.display = "none";
+            errEl.textContent = "";
+          }
           this.validateFormInputs();
         },
         "expired-callback": () => {

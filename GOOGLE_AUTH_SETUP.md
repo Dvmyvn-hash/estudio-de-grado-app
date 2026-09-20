@@ -23,9 +23,9 @@ El sistema cuenta con una arquitectura de **Autenticación Autónoma con Correo 
 
 ---
 
-## 🔑 2. Configurar Cloudflare Turnstile para Producción (Opcional)
+## 🔑 2. Configuración de Cloudflare Turnstile
 
-El proyecto viene preconfigurado con las claves de prueba oficiales de Cloudflare (`1x00000000000000000000AA`), que funcionan de inmediato en `localhost`, entornos de desarrollo y GitHub Pages.
+El proyecto viene configurado con la clave de sitio pública de producción (`0x4AAAAAAAE9e7tJ25CKz1YqH`), con respaldo automático a la clave de pruebas de Cloudflare (`1x00000000000000000000AA`) y tokens de contingencia offline si se detectan bloqueos de red o adblockers.
 
 Si deseas utilizar tus propias claves de Cloudflare en tu dominio personalizado:
 
