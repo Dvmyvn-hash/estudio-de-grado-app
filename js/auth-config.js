@@ -1,15 +1,15 @@
 /**
- * CONFIGURACIÓN DE AUTENTICACIÓN GOOGLE & CÓDIGOS DE ACCESO
+ * CONFIGURACIÓN DE AUTENTICACIÓN (CORREO + CONTRASEÑA + CAPTCHA) & CÓDIGOS DE ACCESO
  * Plataforma de Preparación para el Examen de Grado (Derecho)
  * 
  * Funciona de forma automática tanto en servidor local (server.py)
  * como en GitHub Pages (modo estático SPA).
  */
 
-window.AUTH_CONFIG = {
-  // Client ID de Google OAuth 2.0 Web para Google Identity Services (GSI).
-  // Puedes actualizarlo con tu propio Client ID desde Google Cloud Console (ver GOOGLE_AUTH_SETUP.md).
-  googleClientId: "1084268194723-8c4v8vhf2rghk0n3k0t3q3j3j3j3j3j3.apps.googleusercontent.com",
+const authConfig = {
+  // Clave pública (Site Key) de Cloudflare Turnstile.
+  // 1x00000000000000000000AA es la clave de prueba oficial de Cloudflare (pasa siempre con éxito).
+  turnstileSiteKey: "1x00000000000000000000AA",
 
   // Códigos de acceso de invitación activos para la beta cerrada en GitHub Pages / modo estático
   invitationCodes: [
@@ -27,13 +27,18 @@ window.AUTH_CONFIG = {
     "http://localhost:8000",
     "http://127.0.0.1:8000",
     "https://dvmyvn-hash.github.io"
-  ],
-
-  // Habilitar acceso de prueba asistido si Google Identity no está configurado aún en Google Cloud Console
-  allowDemoLogin: true
+  ]
 };
+
+if (typeof window !== "undefined") {
+  window.AUTH_CONFIG = authConfig;
+}
+
+if (typeof globalThis !== "undefined") {
+  globalThis.AUTH_CONFIG = authConfig;
+}
 
 // Exportación modular para entornos Node.js / pruebas
 if (typeof module !== "undefined" && module.exports) {
-  module.exports = window.AUTH_CONFIG;
+  module.exports = authConfig;
 }

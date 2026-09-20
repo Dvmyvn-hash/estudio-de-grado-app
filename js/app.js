@@ -19,6 +19,171 @@ const App = {
   activeSidebarFilter: "all",
   coverageFilter: "all",
 
+  openUnlockModal() {
+    const modal = document.getElementById("unlock-modal");
+    if (!modal) return;
+    this.updateUnlockModalState();
+    modal.classList.remove("hidden");
+    if (window.lucide) window.lucide.createIcons();
+  },
+
+  updateUnlockModalState() {
+    const modal = document.getElementById("unlock-modal");
+    if (!modal) return;
+
+    const stepLogin = document.getElementById("unlock-step-login");
+    const stepConvalidate = document.getElementById("unlock-step-convalidate");
+    const stepActive = document.getElementById("unlock-step-active");
+    const modalTitle = document.getElementById("unlock-modal-title");
+    const modalSubtitle = document.getElementById("unlock-modal-subtitle");
+    const headerIcon = document.getElementById("unlock-modal-header-icon");
+    const errorMsg = document.getElementById("license-error-msg");
+
+    if (errorMsg) {
+      errorMsg.style.display = "none";
+      errorMsg.textContent = "";
+    }
+
+    const user = typeof AuthService !== "undefined" ? AuthService.currentUser : null;
+    const lic = typeof LicenseService !== "undefined" ? LicenseService.getCurrentLicense() : null;
+    const isConvalidated = lic && !lic.expired && (!user || !user.isDemo || user.access_code);
+
+    if (!user) {
+      // 1. SIN SESIÓN: Mostrar Paso 1 (Registro / Login con Correo + Contraseña + Captcha)
+      if (stepLogin) stepLogin.classList.remove("hidden");
+      if (stepConvalidate) stepConvalidate.classList.add("hidden");
+      if (stepActive) stepActive.classList.add("hidden");
+
+      if (modalTitle) modalTitle.textContent = "Activar Pase de Grado";
+      if (modalSubtitle) modalSubtitle.textContent = "Paso 1: Identifícate con tu correo y contraseña";
+      if (headerIcon) headerIcon.setAttribute("data-lucide", "lock");
+
+      if (typeof AuthService !== "undefined") {
+        if (AuthService.setAuthMode) {
+          AuthService.setAuthMode(AuthService.authMode || "register");
+        }
+        if (AuthService.initTurnstile) {
+          AuthService.initTurnstile();
+        }
+      }
+    } else if (!isConvalidated) {
+      // 2. SESIÓN EN VERSIÓN DEMO: Mostrar Paso 2 (Convalidar Cuenta con Código)
+      if (stepLogin) stepLogin.classList.add("hidden");
+      if (stepConvalidate) stepConvalidate.classList.remove("hidden");
+      if (stepActive) stepActive.classList.add("hidden");
+
+      if (modalTitle) modalTitle.textContent = "Convalidar Cuenta";
+      if (modalSubtitle) modalSubtitle.textContent = "Paso 2: Convalida tu cuenta para activar el Pase de Grado";
+      if (headerIcon) headerIcon.setAttribute("data-lucide", "key-round");
+
+      const nameEl = document.getElementById("unlock-user-name");
+      const emailEl = document.getElementById("unlock-user-email");
+      const avatarEl = document.getElementById("unlock-user-avatar");
+      const placeholderEl = document.getElementById("unlock-user-avatar-placeholder");
+
+      const safeName = user.name || (user.email ? user.email.split("@")[0] : "Estudiante");
+      const safeEmail = user.email || "";
+
+      if (nameEl) nameEl.textContent = safeName;
+      if (emailEl) emailEl.textContent = safeEmail;
+
+      if (avatarEl) avatarEl.style.display = "none";
+      if (placeholderEl) placeholderEl.style.display = "flex";
+
+      const inputCode = document.getElementById("input-license-code");
+      if (inputCode) {
+        setTimeout(() => inputCode.focus(), 150);
+      }
+    } else {
+      // 3. CUENTA YA CONVALIDADA / PASE ACTIVO
+      if (stepLogin) stepLogin.classList.add("hidden");
+      if (stepConvalidate) stepConvalidate.classList.add("hidden");
+      if (stepActive) stepActive.classList.remove("hidden");
+
+      if (modalTitle) modalTitle.textContent = "Pase de Grado Activo";
+      if (modalSubtitle) modalSubtitle.textContent = "Tu cuenta está convalidada con acceso completo";
+      if (headerIcon) headerIcon.setAttribute("data-lucide", "crown");
+
+      const nameEl = document.getElementById("unlock-active-name");
+      const emailEl = document.getElementById("unlock-active-email");
+      const avatarEl = document.getElementById("unlock-active-avatar");
+      const placeholderEl = document.getElementById("unlock-active-avatar-placeholder");
+      const scopeTitleEl = document.getElementById("unlock-active-scope-title");
+
+      const safeName = (lic && lic.studentName) || user.name || "Estudiante de Grado";
+      const safeEmail = user.email || "";
+
+      if (nameEl) nameEl.textContent = safeName;
+      if (emailEl) emailEl.textContent = safeEmail;
+
+      if (avatarEl) avatarEl.style.display = "none";
+      if (placeholderEl) placeholderEl.style.display = "flex";
+
+      if (scopeTitleEl) {
+        scopeTitleEl.textContent = (lic && lic.scope === "all") ? "Pase de Grado Completo" : `Pase de Derecho ${lic ? lic.scope : "Completo"}`;
+      }
+    }
+
+    if (window.lucide) window.lucide.createIcons();
+  },
+
+  async processActivation(code) {
+    if (!code || !code.trim()) {
+      const errMsg = document.getElementById("license-error-msg");
+      if (errMsg) {
+        errMsg.textContent = "Por favor ingresa un código de activación.";
+        errMsg.style.display = "block";
+      }
+      return;
+    }
+
+    const cleanCode = code.trim().toUpperCase();
+
+    // 1. Si no hay sesión iniciada, guiar al usuario a identificarse primero
+    if (!AuthService.currentUser || !AuthService.currentUser.email) {
+      this.openUnlockModal();
+      this.showToast("Primero debes identificarte para convalidar tu cuenta.", "warning");
+      return;
+    }
+
+    const btnSubmit = document.getElementById("btn-submit-license");
+    if (btnSubmit) {
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML = '<span>Convalidando...</span>';
+    }
+
+    // 2. Convalidar y vincular código a la cuenta activa
+    const res = await AuthService.convalidateAccount(cleanCode);
+
+    if (btnSubmit) {
+      btnSubmit.disabled = false;
+      btnSubmit.innerHTML = '<i data-lucide="check-circle"></i><span>Convalidar Cuenta</span>';
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    if (res && res.ok) {
+      document.getElementById("unlock-modal")?.classList.add("hidden");
+      this.renderLicenseBadge();
+      this.renderAdminIndicator();
+      this.renderSidebar();
+      this.renderTopicViewer();
+      this.updateCaseBadge();
+      if (this.currentView === "cases") {
+        CaseSolver.render();
+      }
+      const safeEmail = AuthService.currentUser.email;
+      this.showToast(`¡Cuenta ${safeEmail} convalidada con éxito! Pase de Grado activado.`, "success");
+    } else {
+      const errMsg = document.getElementById("license-error-msg");
+      if (errMsg) {
+        errMsg.textContent = (res && res.error) || "Código de activación inválido o expirado.";
+        errMsg.style.display = "block";
+      } else {
+        alert((res && res.error) || "Código no válido.");
+      }
+    }
+  },
+
   init() {
     console.log("Inicializando Estudio de Grado App...");
     this.setupTheme();
@@ -31,6 +196,15 @@ const App = {
     // Inicializar autenticación con Google y códigos de invitación
     if (typeof AuthService !== "undefined" && typeof AuthService.init === "function") {
       AuthService.init();
+      AuthService.onAuthStateChanged(() => {
+        this.renderLicenseBadge();
+        this.renderAdminIndicator();
+        this.renderSidebar();
+        this.renderTopicViewer();
+        if (typeof this.updateUnlockModalState === "function") {
+          this.updateUnlockModalState();
+        }
+      });
     }
 
     // Cargar datos
@@ -1527,18 +1701,38 @@ const App = {
   },
 
   setupLicenseModals() {
-    // Modal Desbloqueo Alumno
+    // Modal Desbloqueo Alumno (Google Auth -> Convalidación Demo)
     const unlockModal = document.getElementById("unlock-modal");
     const btnCloseUnlock = document.getElementById("btn-close-unlock-modal");
     const btnSubmit = document.getElementById("btn-submit-license");
+    const inputLicense = document.getElementById("input-license-code");
 
     btnCloseUnlock?.addEventListener("click", () => {
       unlockModal.classList.add("hidden");
     });
 
     btnSubmit?.addEventListener("click", () => {
-      const code = document.getElementById("input-license-code")?.value || "";
+      const code = inputLicense?.value || "";
       this.processActivation(code);
+    });
+
+    inputLicense?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const code = inputLicense.value || "";
+        this.processActivation(code);
+      }
+    });
+
+    inputLicense?.addEventListener("input", () => {
+      inputLicense.value = inputLicense.value.toUpperCase();
+    });
+
+    // Botón de Google dentro del modal de activación (Paso 1)
+    document.getElementById("btn-modal-trigger-google")?.addEventListener("click", () => {
+      if (typeof AuthService !== "undefined" && AuthService.triggerGoogleLogin) {
+        AuthService.triggerGoogleLogin();
+      }
     });
 
     // Modal Administrador
@@ -1733,45 +1927,6 @@ const App = {
         }
       });
     });
-  },
-
-  openUnlockModal() {
-    const modal = document.getElementById("unlock-modal");
-    if (modal) {
-      modal.classList.remove("hidden");
-      document.getElementById("input-license-code")?.focus();
-      document.getElementById("license-error-msg").style.display = "none";
-    }
-  },
-
-  processActivation(code) {
-    if (!code) {
-      alert("Por favor ingresa un código de activación.");
-      return;
-    }
-
-    const result = LicenseService.activateCode(code);
-    if (result.success) {
-      document.getElementById("unlock-modal")?.classList.add("hidden");
-      this.renderLicenseBadge();
-      this.renderAdminIndicator();
-      this.renderSidebar();
-      this.renderTopicViewer();
-      this.updateCaseBadge();
-      if (this.currentView === "cases") {
-        CaseSolver.render();
-      }
-      const roleNotice = result.license.canManageNotes ? " [Rol: Gestor de Apuntes]" : "";
-      this.showToast(`¡Felicitaciones! Has desbloqueado el temario (${result.license.studentName})${roleNotice}`, "success");
-    } else {
-      const errMsg = document.getElementById("license-error-msg");
-      if (errMsg) {
-        errMsg.textContent = result.error;
-        errMsg.style.display = "block";
-      } else {
-        alert(result.error);
-      }
-    }
   },
 
   // 8. ATAJOS DE TECLADO

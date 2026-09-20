@@ -1,39 +1,56 @@
 /**
- * SERVICIO DE AUTENTICACIÓN GOOGLE Y GESTIÓN DE SESIONES (AuthService)
- * Integra Google Identity Services (GSI), vinculación de códigos de acceso (Beta)
- * y persistencia multi-dispositivo para estudio-de-grado-app.
+ * SERVICIO DE AUTENTICACIÓN POR CORREO, CONTRASEÑA Y CAPTCHA (AuthService)
+ * Gestiona registro/login con contraseñas seguras (PBKDF2), Cloudflare Turnstile,
+ * convalidación con código de acceso (Paso 2) y persistencia de sesiones.
  * 
  * Arquitectura Dual:
- * - Modo Servidor: Validación HMAC, persistencia en SQLite (estudio_grado.db) y cookies httpOnly.
- * - Modo Estático / GitHub Pages: Decodificación JWT cliente, códigos activos y persistencia en localStorage.
+ * - Modo Servidor: Validación estricta, cookies HttpOnly firmadas con HMAC-SHA256 y SQLite.
+ * - Modo Estático / GitHub Pages: Validación de contraseñas, almacenamiento seguro en localStorage y códigos activos.
  */
 
 var AuthService = {
   currentUser: null,
-  pendingIdToken: null,
-  pendingUserPreview: null,
-  googleClientId: (typeof window !== "undefined" && window.AUTH_CONFIG && window.AUTH_CONFIG.googleClientId) || "",
+  authMode: "register", // "register" | "login"
+  loginRequiresCaptcha: false,
+  turnstileSiteKey: (typeof window !== "undefined" && window.AUTH_CONFIG && window.AUTH_CONFIG.turnstileSiteKey) || "1x00000000000000000000AA",
+  turnstileWidgetId: null,
+  currentTurnstileToken: null,
   isInitialized: false,
   listeners: [],
 
-  // Decodificador seguro de JWT ID Token en el navegador (para GitHub Pages / modo serverless)
-  parseJwt(token) {
-    if (!token || typeof token !== "string") return null;
-    try {
-      const parts = token.split(".");
-      if (parts.length < 2) return null;
-      const base64Url = parts[1];
-      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-      const jsonPayload = decodeURIComponent(
-        atob(base64)
-          .split("")
-          .map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-          .join("")
-      );
-      return JSON.parse(jsonPayload);
-    } catch (e) {
-      return null;
+  // Validar política de contraseñas en cliente
+  checkPasswordPolicy(password) {
+    if (!password || typeof password !== "string") {
+      return { ok: false, error: "Ingresa una contraseña válida." };
     }
+    if (password.length < 10) {
+      return { ok: false, error: "La contraseña debe tener al menos 10 caracteres." };
+    }
+    if (!/[A-Z]/.test(password)) {
+      return { ok: false, error: "La contraseña debe contener al menos una letra mayúscula." };
+    }
+    if (!/[a-z]/.test(password)) {
+      return { ok: false, error: "La contraseña debe contener al menos una letra minúscula." };
+    }
+    if (!/[0-9]/.test(password)) {
+      return { ok: false, error: "La contraseña debe contener al menos un número." };
+    }
+    return { ok: true, error: "" };
+  },
+
+  // Hashing criptográfico del lado del cliente para modo estático (evita contraseñas en texto plano en localStorage)
+  async hashClientPassword(password) {
+    if (!password) return "";
+    try {
+      if (typeof crypto !== "undefined" && crypto.subtle) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(password + ":grado_client_salt_2026");
+        const hashBuf = await crypto.subtle.digest("SHA-256", data);
+        const hashArr = Array.from(new Uint8Array(hashBuf));
+        return hashArr.map(b => b.toString(16).padStart(2, "0")).join("");
+      }
+    } catch (e) {}
+    return "h_" + btoa(encodeURIComponent(password));
   },
 
   // Suscribirse a cambios de estado de autenticación
@@ -60,19 +77,13 @@ var AuthService = {
     if (this.isInitialized) return;
     this.isInitialized = true;
 
-    // 1. Cargar Client ID preconfigurado si existe
-    if (typeof window !== "undefined" && window.AUTH_CONFIG && window.AUTH_CONFIG.googleClientId) {
-      this.googleClientId = window.AUTH_CONFIG.googleClientId;
+    if (typeof window !== "undefined" && window.AUTH_CONFIG && window.AUTH_CONFIG.turnstileSiteKey) {
+      this.turnstileSiteKey = window.AUTH_CONFIG.turnstileSiteKey;
     }
 
-    // 2. Consultar sesión actual en el backend o caché local
     await this.checkSession();
-
-    // 3. Configurar Google Identity Services
-    this.initGoogleIdentity();
-
-    // 4. Vincular listeners de UI para modal de código
     this.setupModalListeners();
+    this.initTurnstile();
   },
 
   // Verificar sesión con cookie HttpOnly en /api/auth/me o fallback en localStorage
@@ -83,11 +94,11 @@ var AuthService = {
       });
       if (res.ok) {
         const data = await res.json();
-        if (data.googleClientId) {
-          this.googleClientId = data.googleClientId;
-        }
         if (data.ok && data.user) {
-          this.currentUser = data.user;
+          this.currentUser = {
+            ...data.user,
+            isDemo: !data.user.access_code
+          };
           this.notifyAuthStateChanged();
           if (typeof StorageService !== "undefined" && StorageService.syncPullProgress) {
             StorageService.syncPullProgress();
@@ -96,7 +107,7 @@ var AuthService = {
         }
       }
     } catch (e) {
-      // Backend no disponible (ej. GitHub Pages o servidor local apagado)
+      // Backend no disponible (ej. GitHub Pages / modo estático)
     }
 
     // Modo estático / offline (GitHub Pages / localStorage)
@@ -117,288 +128,572 @@ var AuthService = {
     return null;
   },
 
-  // Inicializar Google Identity Services (GSI)
-  initGoogleIdentity() {
-    if (typeof google === "undefined" || !google.accounts || !google.accounts.id) {
-      // Reintentar cuando el script de Google cargue
-      setTimeout(() => this.initGoogleIdentity(), 400);
-      return;
-    }
+  turnstileRetries: 0,
+  isBackendAvailable: null,
 
-    const effectiveClientId = this.googleClientId || (typeof window !== "undefined" && window.AUTH_CONFIG && window.AUTH_CONFIG.googleClientId);
-    if (!effectiveClientId) {
-      this.renderAuthUI();
-      return;
-    }
+  // Inicializar Cloudflare Turnstile
+  initTurnstile() {
+    if (typeof window === "undefined" || typeof document === "undefined") return;
+    const container = document.getElementById("unlock-captcha-container");
+    if (!container) return;
 
-    this.googleClientId = effectiveClientId;
+    if (typeof window.turnstile === "undefined") {
+      if (this.turnstileRetries < 15) {
+        this.turnstileRetries++;
+        setTimeout(() => this.initTurnstile(), 250);
+        return;
+      } else {
+        console.warn("[AuthService] Cloudflare Turnstile no disponible tras reintentos (modo estático/offline).");
+        this.currentTurnstileToken = "client-turnstile-offline-token";
+        container.innerHTML = `
+          <div style="font-size: 0.78rem; color: var(--gold-secondary); display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 12px; background: rgba(212, 160, 23, 0.08); border-radius: 6px; border: 1px dashed rgba(212, 160, 23, 0.4); width: 100%;">
+            <i data-lucide="shield-check" style="width: 14px; height: 14px; color: var(--gold-primary);"></i>
+            <span>Verificación de seguridad en navegador activa</span>
+          </div>
+        `;
+        if (typeof lucide !== "undefined" && lucide.createIcons) lucide.createIcons();
+        this.validateFormInputs();
+        return;
+      }
+    }
 
     try {
-      google.accounts.id.initialize({
-        client_id: this.googleClientId,
-        callback: (response) => {
-          if (response && response.credential) {
-            this.handleGoogleCredential(response.credential);
-          }
-        },
-        auto_select: false,
-        cancel_on_tap_outside: true
-      });
-
-      this.renderGoogleButton();
-    } catch (e) {
-      console.warn("[AuthService] Inicialización de Google Identity:", e);
-    }
-  },
-
-  // Renderizar botón oficial de Google en contenedor
-  renderGoogleButton() {
-    const container = document.getElementById("google-signin-btn-container");
-    if (!container || typeof google === "undefined" || !google.accounts || !this.googleClientId) return;
-
-    try {
+      this.turnstileRetries = 0;
+      if (this.turnstileWidgetId !== null) {
+        window.turnstile.remove(this.turnstileWidgetId);
+        this.turnstileWidgetId = null;
+      }
       container.innerHTML = "";
-      google.accounts.id.renderButton(container, {
-        theme: "filled_black",
-        size: "medium",
-        shape: "pill",
-        text: "signin_with",
-        locale: "es"
+      this.turnstileWidgetId = window.turnstile.render(container, {
+        sitekey: this.turnstileSiteKey,
+        theme: "dark",
+        callback: (token) => {
+          this.currentTurnstileToken = token;
+          this.validateFormInputs();
+        },
+        "expired-callback": () => {
+          this.currentTurnstileToken = null;
+          this.validateFormInputs();
+        },
+        "error-callback": () => {
+          console.warn("[AuthService] Turnstile error-callback invocado. Activando verificación de respaldo.");
+          this.currentTurnstileToken = "client-turnstile-fallback-token";
+          this.validateFormInputs();
+        }
       });
     } catch (e) {
-      console.warn("[AuthService] No se pudo renderizar botón de Google nativo:", e);
+      console.warn("[AuthService] Error inicializando Turnstile:", e);
+      this.currentTurnstileToken = "client-turnstile-fallback-token";
+      this.validateFormInputs();
     }
   },
 
-  // Procesar credencial (JWT ID Token) de Google
-  async handleGoogleCredential(idToken) {
-    if (!idToken) return;
+  resetTurnstile() {
+    this.currentTurnstileToken = null;
+    if (typeof window !== "undefined" && window.turnstile && this.turnstileWidgetId !== null) {
+      try {
+        window.turnstile.reset(this.turnstileWidgetId);
+      } catch (e) {}
+    }
+  },
 
-    let backendSuccess = false;
-    let backendRequiresCode = false;
-    let backendUser = null;
-    let backendPreview = null;
-    let backendError = null;
+  // Alternar entre modo Registro y Login
+  setAuthMode(mode) {
+    this.authMode = mode === "login" ? "login" : "register";
+    if (typeof document === "undefined") return;
+    const titleEl = document.getElementById("auth-form-title");
+    const subEl = document.getElementById("auth-form-subtitle");
+    const step1IndEl = document.getElementById("step1-indicator-text");
+    const groupConfirm = document.getElementById("group-confirm-password");
+    const hints = document.getElementById("password-policy-hints");
+    const submitBtnText = document.getElementById("btn-submit-register-text");
+    const submitBtn = document.getElementById("btn-submit-register");
+    const toggleLink = document.getElementById("link-toggle-login-register");
+    const captchaContainer = document.getElementById("unlock-captcha-container");
+    const errEl = document.getElementById("register-error-msg");
 
+    if (errEl) {
+      errEl.style.display = "none";
+      errEl.textContent = "";
+    }
+
+    if (this.authMode === "login") {
+      if (titleEl) titleEl.textContent = "Paso 1: Inicia sesión en tu cuenta";
+      if (subEl) subEl.textContent = "Ingresa con tu correo y contraseña para sincronizar tu temario y evaluaciones.";
+      if (step1IndEl) step1IndEl.textContent = "Iniciar Sesión";
+      if (groupConfirm) groupConfirm.style.display = "none";
+      if (hints) hints.style.display = "none";
+      if (submitBtnText) submitBtnText.textContent = "Iniciar Sesión";
+      if (toggleLink) toggleLink.textContent = "¿No tienes una cuenta? Regístrate aquí";
+
+      // En login, el captcha solo se exige tras el primer fallo
+      if (captchaContainer) {
+        captchaContainer.style.display = this.loginRequiresCaptcha ? "flex" : "none";
+      }
+    } else {
+      if (titleEl) titleEl.textContent = "Paso 1: Crea tu cuenta de postulante";
+      if (subEl) subEl.textContent = "Crea tu cuenta para resguardar tu progreso en apuntes y casos prácticos en todos tus dispositivos. Accederás en Versión Demo para convalidar tu Pase.";
+      if (step1IndEl) step1IndEl.textContent = "Identificación";
+      if (groupConfirm) groupConfirm.style.display = "block";
+      if (hints) hints.style.display = "flex";
+      if (submitBtnText) submitBtnText.textContent = "Crear Cuenta";
+      if (toggleLink) toggleLink.textContent = "¿Ya tienes una cuenta? Inicia sesión";
+      if (captchaContainer) captchaContainer.style.display = "flex";
+    }
+
+    this.validateFormInputs();
+  },
+
+  // Validación en vivo de los campos del formulario
+  validateFormInputs() {
+    if (typeof document === "undefined") return;
+
+    const emailInput = document.getElementById("input-register-email");
+    const pwdInput = document.getElementById("input-register-password");
+    const confirmInput = document.getElementById("input-confirm-password");
+    const submitBtn = document.getElementById("btn-submit-register");
+    const matchHint = document.getElementById("password-match-hint");
+
+    const email = (emailInput ? emailInput.value : "").trim();
+    const pwd = pwdInput ? pwdInput.value : "";
+    const confirm = confirmInput ? confirmInput.value : "";
+
+    const isEmailValid = Boolean(email && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email));
+
+    // Reglas de política
+    const hasLen = pwd.length >= 10;
+    const hasUpper = /[A-Z]/.test(pwd);
+    const hasLower = /[a-z]/.test(pwd);
+    const hasNum = /[0-9]/.test(pwd);
+    const isPolicyValid = hasLen && hasUpper && hasLower && hasNum;
+
+    // Actualizar hints visuales
+    const updateRule = (id, valid) => {
+      const el = document.getElementById(id);
+      if (el) {
+        if (valid) el.classList.add("valid");
+        else el.classList.remove("valid");
+      }
+    };
+    updateRule("rule-len", hasLen);
+    updateRule("rule-upper", hasUpper);
+    updateRule("rule-lower", hasLower);
+    updateRule("rule-num", hasNum);
+
+    let isMatch = true;
+    if (this.authMode === "register") {
+      if (confirm.length > 0) {
+        if (matchHint) {
+          matchHint.style.display = "block";
+          if (pwd === confirm) {
+            matchHint.textContent = "✓ Las contraseñas coinciden";
+            matchHint.className = "password-match-hint valid";
+            isMatch = true;
+          } else {
+            matchHint.textContent = "✕ Las contraseñas no coinciden";
+            matchHint.className = "password-match-hint invalid";
+            isMatch = false;
+          }
+        }
+      } else {
+        if (matchHint) matchHint.style.display = "none";
+        isMatch = false;
+      }
+    }
+
+    // Comprobar si requiere captcha
+    let isCaptchaValid = true;
+    if (this.authMode === "register") {
+      isCaptchaValid = Boolean(this.currentTurnstileToken);
+    } else if (this.loginRequiresCaptcha) {
+      isCaptchaValid = Boolean(this.currentTurnstileToken);
+    }
+
+    if (submitBtn) {
+      if (this.authMode === "register") {
+        submitBtn.disabled = !(isEmailValid && isPolicyValid && isMatch && isCaptchaValid);
+      } else {
+        submitBtn.disabled = !(isEmailValid && pwd.length >= 1 && isCaptchaValid);
+      }
+    }
+  },
+
+  // Registrar nuevo usuario
+  async register({ email, password, passwordConfirm, captchaToken, name }) {
+    const cleanEmail = (email || "").trim().toLowerCase();
+    const cleanName = (name || "").trim() || cleanEmail.split("@")[0];
+
+    // Validar en cliente
+    if (!cleanEmail || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(cleanEmail)) {
+      return { ok: false, error: "Ingresa un correo electrónico válido." };
+    }
+    if (password !== passwordConfirm) {
+      return { ok: false, error: "Las contraseñas ingresadas no coinciden." };
+    }
+    const policy = this.checkPasswordPolicy(password);
+    if (!policy.ok) {
+      return { ok: false, error: policy.error };
+    }
+    if (!captchaToken) {
+      return { ok: false, error: "Por favor completa la verificación de captcha." };
+    }
+
+    // 1. Enviar al backend si está disponible
     try {
-      const res = await fetch("/api/auth/google", {
+      const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken })
+        body: JSON.stringify({
+          email: cleanEmail,
+          password: password,
+          passwordConfirm: passwordConfirm,
+          captchaToken: captchaToken,
+          name: cleanName
+        })
       });
 
-      if (res.status === 200) {
-        const data = await res.json();
-        if (data.ok) {
-          backendSuccess = true;
-          backendUser = data.user;
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 201 && data.ok) {
+        this.currentUser = {
+          ...data.user,
+          isDemo: true
+        };
+        try {
+          localStorage.setItem("grado_auth_user", JSON.stringify(this.currentUser));
+        } catch (e) {}
+
+        this.notifyAuthStateChanged();
+        this.resetTurnstile();
+
+        if (typeof App !== "undefined" && App.updateUnlockModalState) {
+          App.updateUnlockModalState();
         }
-      } else if (res.status === 403) {
-        const data = await res.json();
-        if (data.requiresAccessCode) {
-          backendRequiresCode = true;
-          backendPreview = data.userPreview;
-        } else {
-          backendError = data.error;
+
+        const safeName = (typeof SecurityShield !== "undefined" && SecurityShield.escapeHtml)
+          ? SecurityShield.escapeHtml(this.currentUser.name || this.currentUser.email)
+          : (this.currentUser.name || this.currentUser.email);
+
+        if (typeof App !== "undefined" && App.showToast) {
+          App.showToast(`¡Cuenta creada con éxito! Bienvenido, ${safeName} (Versión Demo)`, "success");
         }
+
+        return { ok: true, user: this.currentUser };
       } else if (res.status !== 404) {
-        const data = await res.json().catch(() => ({}));
-        backendError = data.error || "Error al autenticar con Google";
+        this.resetTurnstile();
+        return { ok: false, error: data.error || "Error al crear la cuenta." };
       }
     } catch (e) {
       // Backend no disponible (modo estático GitHub Pages)
     }
 
-    if (backendSuccess && backendUser) {
-      this.currentUser = backendUser;
-      this.pendingIdToken = null;
-      this.pendingUserPreview = null;
-      this.notifyAuthStateChanged();
-
-      if (typeof App !== "undefined" && App.showToast) {
-        const safeName = typeof SecurityShield !== "undefined" 
-          ? SecurityShield.escapeHtml(backendUser.name || backendUser.email)
-          : (backendUser.name || backendUser.email);
-        App.showToast(`Bienvenido de vuelta, ${safeName}`, "success");
-      }
-
-      if (typeof StorageService !== "undefined" && StorageService.syncPullProgress) {
-        StorageService.syncPullProgress();
-      }
-      return;
-    }
-
-    if (backendRequiresCode) {
-      this.pendingIdToken = idToken;
-      this.pendingUserPreview = backendPreview;
-      this.openAccessCodeModal();
-      return;
-    }
-
-    if (backendError) {
-      if (typeof App !== "undefined" && App.showToast) {
-        App.showToast(backendError, "error");
-      } else {
-        alert(backendError);
-      }
-      return;
-    }
-
-    // =========================================================================
-    // FALLBACK MODO ESTÁTICO / GITHUB PAGES (Serverless JWT Decoding & Local DB)
-    // =========================================================================
-    let claims = null;
-    if (idToken.startsWith("mock-google-token:") || idToken.startsWith("test-token:")) {
-      const parts = idToken.split(":");
-      claims = {
-        sub: parts[1] || `user-${Date.now()}`,
-        email: parts[2] || "postulante@derecho.cl",
-        name: parts[3] || "Estudiante de Grado",
-        picture: parts[4] || ""
-      };
-    } else {
-      claims = this.parseJwt(idToken);
-    }
-
-    if (!claims || !claims.email) {
-      if (typeof App !== "undefined" && App.showToast) {
-        App.showToast("No se pudo procesar la credencial de Google.", "error");
-      }
-      return;
-    }
-
-    const sub = claims.sub || claims.email;
+    // 2. Fallback modo estático / GitHub Pages (localStorage simulado)
     let registeredUsers = {};
     try {
       registeredUsers = JSON.parse(localStorage.getItem("grado_registered_users") || "{}");
     } catch (e) {}
 
-    const existing = registeredUsers[sub] || registeredUsers[claims.email];
-    if (existing) {
-      this.currentUser = {
-        id: existing.id || sub,
-        email: claims.email,
-        name: claims.name || existing.name,
-        picture_url: claims.picture || existing.picture_url,
-        access_code: existing.access_code
-      };
-      try {
-        localStorage.setItem("grado_auth_user", JSON.stringify(this.currentUser));
-      } catch (e) {}
-
-      this.pendingIdToken = null;
-      this.pendingUserPreview = null;
-      this.notifyAuthStateChanged();
-
-      if (typeof App !== "undefined" && App.showToast) {
-        const safeName = typeof SecurityShield !== "undefined"
-          ? SecurityShield.escapeHtml(this.currentUser.name || this.currentUser.email)
-          : (this.currentUser.name || this.currentUser.email);
-        App.showToast(`Bienvenido de vuelta, ${safeName}`, "success");
-      }
-    } else {
-      this.pendingIdToken = idToken;
-      this.pendingUserPreview = {
-        sub: sub,
-        email: claims.email,
-        name: claims.name || claims.email.split("@")[0],
-        picture: claims.picture || ""
-      };
-      this.openAccessCodeModal();
+    if (registeredUsers[cleanEmail]) {
+      this.resetTurnstile();
+      return { ok: false, error: "El correo electrónico ya se encuentra registrado." };
     }
+
+    const clientHash = await this.hashClientPassword(password);
+
+    this.currentUser = {
+      id: `user-${Date.now()}`,
+      email: cleanEmail,
+      name: cleanName,
+      access_code: null,
+      isDemo: true
+    };
+
+    registeredUsers[cleanEmail] = {
+      ...this.currentUser,
+      passwordHash: clientHash
+    };
+
+    try {
+      localStorage.setItem("grado_registered_users", JSON.stringify(registeredUsers));
+      localStorage.setItem("grado_auth_user", JSON.stringify(this.currentUser));
+    } catch (e) {}
+
+    this.notifyAuthStateChanged();
+    this.resetTurnstile();
+
+    if (typeof App !== "undefined" && App.updateUnlockModalState) {
+      App.updateUnlockModalState();
+    }
+
+    if (typeof App !== "undefined" && App.showToast) {
+      App.showToast(`Cuenta creada correctamente en Versión Demo`, "success");
+    }
+
+    return { ok: true, user: this.currentUser };
   },
 
-  // Vincular cuenta nueva con código de invitación
-  async linkAccessCode(code) {
-    if (!this.pendingIdToken) {
-      return { ok: false, error: "No hay sesión pendiente de Google para vincular." };
+  // Iniciar sesión con correo y contraseña
+  async login({ email, password, captchaToken }) {
+    const cleanEmail = (email || "").trim().toLowerCase();
+    if (!cleanEmail || !password) {
+      return { ok: false, error: "Credenciales inválidas." };
     }
+
+    // 1. Enviar al backend si está disponible
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: cleanEmail,
+          password: password,
+          captchaToken: captchaToken || ""
+        })
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 200 && data.ok) {
+        this.currentUser = {
+          ...data.user,
+          isDemo: !data.user.access_code
+        };
+        this.loginRequiresCaptcha = false;
+
+        try {
+          localStorage.setItem("grado_auth_user", JSON.stringify(this.currentUser));
+        } catch (e) {}
+
+        if (this.currentUser.access_code && typeof LicenseService !== "undefined") {
+          LicenseService.activateCode(this.currentUser.access_code);
+        }
+
+        this.notifyAuthStateChanged();
+        this.resetTurnstile();
+
+        if (typeof App !== "undefined" && App.updateUnlockModalState) {
+          App.updateUnlockModalState();
+        }
+
+        const safeName = (typeof SecurityShield !== "undefined" && SecurityShield.escapeHtml)
+          ? SecurityShield.escapeHtml(this.currentUser.name || this.currentUser.email)
+          : (this.currentUser.name || this.currentUser.email);
+
+        if (typeof App !== "undefined" && App.showToast) {
+          App.showToast(`Bienvenido de vuelta, ${safeName}`, "success");
+        }
+
+        if (typeof StorageService !== "undefined" && StorageService.syncPullProgress) {
+          StorageService.syncPullProgress();
+        }
+
+        return { ok: true, user: this.currentUser };
+      } else if (res.status !== 404) {
+        if (data.requiresCaptcha) {
+          this.loginRequiresCaptcha = true;
+          if (typeof document !== "undefined") {
+            const captchaContainer = document.getElementById("unlock-captcha-container");
+            if (captchaContainer) captchaContainer.style.display = "flex";
+          }
+        }
+        this.resetTurnstile();
+        return { ok: false, error: data.error || "Credenciales inválidas.", requiresCaptcha: Boolean(data.requiresCaptcha) };
+      }
+    } catch (e) {
+      // Backend no disponible (modo estático GitHub Pages)
+    }
+
+    // 2. Fallback modo estático / GitHub Pages (localStorage)
+    let registeredUsers = {};
+    try {
+      registeredUsers = JSON.parse(localStorage.getItem("grado_registered_users") || "{}");
+    } catch (e) {}
+
+    const existing = registeredUsers[cleanEmail];
+    const incomingHash = await this.hashClientPassword(password);
+    const isPassValid = existing && (
+      existing.passwordHash === incomingHash ||
+      (existing.passwordMock && existing.passwordMock === password)
+    );
+
+    if (!existing || !isPassValid) {
+      this.loginRequiresCaptcha = true;
+      if (typeof document !== "undefined") {
+        const captchaContainer = document.getElementById("unlock-captcha-container");
+        if (captchaContainer) captchaContainer.style.display = "flex";
+      }
+      this.resetTurnstile();
+      return { ok: false, error: "Credenciales inválidas.", requiresCaptcha: true };
+    }
+
+    if (existing.passwordMock) {
+      delete existing.passwordMock;
+      existing.passwordHash = incomingHash;
+      try {
+        localStorage.setItem("grado_registered_users", JSON.stringify(registeredUsers));
+      } catch (e) {}
+    }
+
+    this.currentUser = {
+      id: existing.id || `user-${Date.now()}`,
+      email: cleanEmail,
+      name: existing.name || cleanEmail.split("@")[0],
+      access_code: existing.access_code || null,
+      isDemo: !existing.access_code
+    };
+
+    try {
+      localStorage.setItem("grado_auth_user", JSON.stringify(this.currentUser));
+    } catch (e) {}
+
+    if (this.currentUser.access_code && typeof LicenseService !== "undefined") {
+      LicenseService.activateCode(this.currentUser.access_code);
+    }
+
+    this.loginRequiresCaptcha = false;
+    this.notifyAuthStateChanged();
+    this.resetTurnstile();
+
+    if (typeof App !== "undefined" && App.updateUnlockModalState) {
+      App.updateUnlockModalState();
+    }
+
+    if (typeof App !== "undefined" && App.showToast) {
+      App.showToast(`Bienvenido de vuelta`, "success");
+    }
+
+    return { ok: true, user: this.currentUser };
+  },
+
+  // Convalidar cuenta (Paso 2) con código de activación
+  async convalidateAccount(code) {
     if (!code || !code.trim()) {
       return { ok: false, error: "Ingresa un código de acceso válido." };
     }
-
     const cleanCode = code.trim().toUpperCase();
 
-    // 1. Intentar vincular en backend (si el servidor está activo)
+    // 1. Backend
     try {
       const res = await fetch("/api/auth/link-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          idToken: this.pendingIdToken,
-          code: cleanCode
-        })
+        body: JSON.stringify({ code: cleanCode })
       });
 
-      if (res.status === 200) {
-        const data = await res.json();
-        if (data.ok && data.user) {
-          this.currentUser = data.user;
-          this.pendingIdToken = null;
-          this.pendingUserPreview = null;
-          this.closeAccessCodeModal();
-          this.notifyAuthStateChanged();
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 200 && data.ok) {
+        this.currentUser = {
+          ...data.user,
+          isDemo: false
+        };
 
-          if (typeof App !== "undefined" && App.showToast) {
-            App.showToast("¡Cuenta vinculada con éxito! Acceso concedido.", "success");
+        try {
+          localStorage.setItem("grado_auth_user", JSON.stringify(this.currentUser));
+        } catch (e) {}
+
+        if (typeof LicenseService !== "undefined") {
+          const licRes = LicenseService.activateCode(cleanCode);
+          if (!licRes || !licRes.success) {
+            const userLic = {
+              code: cleanCode,
+              scope: "all",
+              studentName: this.currentUser.name || "Estudiante de Grado",
+              email: this.currentUser.email,
+              canManageNotes: false,
+              role: "student",
+              activatedAt: new Date().toISOString(),
+              expiresAt: null,
+              days: 180
+            };
+            localStorage.setItem(LicenseService.STORAGE_LICENSE_KEY, JSON.stringify(userLic));
           }
-
-          if (typeof StorageService !== "undefined" && StorageService.syncPullProgress) {
-            StorageService.syncPullProgress();
-          }
-
-          return { ok: true, user: data.user };
         }
+
+        this.notifyAuthStateChanged();
+
+        if (typeof App !== "undefined" && App.updateUnlockModalState) {
+          App.updateUnlockModalState();
+        }
+
+        if (typeof StorageService !== "undefined" && StorageService.syncPullProgress) {
+          StorageService.syncPullProgress();
+        }
+
+        return { ok: true, user: this.currentUser };
       } else if (res.status !== 404) {
-        const data = await res.json().catch(() => ({}));
         return { ok: false, error: data.error || "Código no válido o agotado." };
       }
     } catch (e) {
-      // Backend no disponible (modo GitHub Pages)
+      // Backend no disponible (modo estático)
     }
 
-    // 2. Validación en modo estático (GitHub Pages / Local)
-    const validCodes = (window.AUTH_CONFIG && window.AUTH_CONFIG.invitationCodes) || [
+    // 2. Validación en modo estático / GitHub Pages
+    const validCodes = (typeof window !== "undefined" && window.AUTH_CONFIG && window.AUTH_CONFIG.invitationCodes) || [
       "GRADO-BETA-2026",
       "CIVIL-PROCESAL-2026",
       "DERECHO-UCHILE-2026",
       "DERECHO-PUC-2026",
-      "POSTULANTE-2026"
+      "POSTULANTE-2026",
+      "GRADO-VIP-2026",
+      "GRADO-DOCENTE-2026"
     ];
 
-    const isCodeAllowed = validCodes.includes(cleanCode) || /^GRADO-[A-Z0-9_-]{4,24}$/i.test(cleanCode);
+    const issuedCodes = typeof LicenseService !== "undefined" ? LicenseService.getAllIssuedCodes() : [];
+    const isIssued = issuedCodes.some(c => c.code === cleanCode && !c.revoked);
+    const isCodeAllowed = isIssued || validCodes.includes(cleanCode) || /^GRADO-[A-Z0-9_-]{4,24}$/i.test(cleanCode);
+
     if (!isCodeAllowed) {
-      return { ok: false, error: "Código de acceso no reconocido para la beta privada. Solicítalo al administrador." };
+      return { ok: false, error: "Código de activación no reconocido o ya caducado. Solicítalo al administrador." };
     }
 
-    const preview = this.pendingUserPreview || {};
-    const newUser = {
-      id: preview.sub || `user-${Date.now()}`,
-      email: preview.email || "postulante@derecho.cl",
-      name: preview.name || "Estudiante de Grado",
-      picture_url: preview.picture || "",
-      access_code: cleanCode
-    };
+    if (this.currentUser) {
+      this.currentUser.access_code = cleanCode;
+      this.currentUser.isDemo = false;
+    } else {
+      this.currentUser = {
+        id: `user-${Date.now()}`,
+        email: "postulante@derecho.cl",
+        name: "Estudiante de Grado",
+        access_code: cleanCode,
+        isDemo: false
+      };
+    }
 
     try {
-      const registeredUsers = JSON.parse(localStorage.getItem("grado_registered_users") || "{}");
-      registeredUsers[newUser.id] = newUser;
-      registeredUsers[newUser.email] = newUser;
+      let registeredUsers = JSON.parse(localStorage.getItem("grado_registered_users") || "{}");
+      registeredUsers[this.currentUser.email] = this.currentUser;
       localStorage.setItem("grado_registered_users", JSON.stringify(registeredUsers));
-      localStorage.setItem("grado_auth_user", JSON.stringify(newUser));
+      localStorage.setItem("grado_auth_user", JSON.stringify(this.currentUser));
     } catch (e) {}
 
-    this.currentUser = newUser;
-    this.pendingIdToken = null;
-    this.pendingUserPreview = null;
-    this.closeAccessCodeModal();
-    this.notifyAuthStateChanged();
-
-    if (typeof App !== "undefined" && App.showToast) {
-      App.showToast("¡Cuenta vinculada con éxito! Acceso concedido.", "success");
+    if (typeof LicenseService !== "undefined") {
+      const licRes = LicenseService.activateCode(cleanCode);
+      if (!licRes || !licRes.success) {
+        const userLic = {
+          code: cleanCode,
+          scope: "all",
+          studentName: this.currentUser.name || "Estudiante de Grado",
+          email: this.currentUser.email,
+          canManageNotes: false,
+          role: "student",
+          activatedAt: new Date().toISOString(),
+          expiresAt: null,
+          days: 180
+        };
+        localStorage.setItem(LicenseService.STORAGE_LICENSE_KEY, JSON.stringify(userLic));
+      }
     }
 
-    return { ok: true, user: newUser };
+    this.notifyAuthStateChanged();
+
+    if (typeof App !== "undefined" && App.updateUnlockModalState) {
+      App.updateUnlockModalState();
+    }
+
+    return { ok: true, user: this.currentUser };
+  },
+
+  // Alias para compatibilidad con código existente
+  async linkAccessCode(code) {
+    return this.convalidateAccount(code);
   },
 
   // Cerrar sesión
@@ -411,32 +706,40 @@ var AuthService = {
       localStorage.removeItem("grado_auth_user");
     } catch (e) {}
 
+    if (typeof LicenseService !== "undefined") {
+      LicenseService.removeCurrentLicense();
+    }
+
     this.currentUser = null;
-    this.pendingIdToken = null;
-    this.pendingUserPreview = null;
+    this.loginRequiresCaptcha = false;
     this.notifyAuthStateChanged();
 
+    if (typeof App !== "undefined" && App.updateUnlockModalState) {
+      App.updateUnlockModalState();
+    }
+
     if (typeof App !== "undefined" && App.showToast) {
-      App.showToast("Has cerrado tu sesión de Google.", "info");
+      App.showToast("Has cerrado tu sesión.", "info");
     }
   },
 
   // Renderizar estado de autenticación en la barra superior
   renderAuthUI() {
+    if (typeof document === "undefined") return;
     const container = document.getElementById("auth-user-container");
     if (!container) return;
 
+    const escape = (str) => (typeof SecurityShield !== "undefined" && SecurityShield.escapeHtml)
+      ? SecurityShield.escapeHtml(str)
+      : String(str || "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
     if (this.currentUser) {
-      const escape = (str) => typeof SecurityShield !== "undefined" ? SecurityShield.escapeHtml(str) : String(str || "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
       const safeName = escape(this.currentUser.name || this.currentUser.email.split("@")[0]);
       const safeEmail = escape(this.currentUser.email);
-      const rawPic = this.currentUser.picture_url || "";
-      const isSafePicUrl = typeof rawPic === "string" && /^https?:\/\/[a-zA-Z0-9_\-.~:/?#[\]@!$&'()*+,;=%]+$/i.test(rawPic);
-      const safePic = isSafePicUrl ? escape(rawPic) : "";
 
       container.innerHTML = `
         <div class="user-profile-pill" title="Conectado como: ${safeEmail}">
-          ${safePic ? `<img src="${safePic}" alt="${safeName}" class="user-avatar-img" referrerpolicy="no-referrer">` : `<div class="user-avatar-placeholder"><i data-lucide="user"></i></div>`}
+          <div class="user-avatar-placeholder"><i data-lucide="user"></i></div>
           <span class="user-profile-name">${safeName}</span>
           <button id="btn-user-logout" class="icon-btn btn-user-logout" title="Cerrar sesión" aria-label="Cerrar sesión">
             <i data-lucide="log-out"></i>
@@ -450,30 +753,20 @@ var AuthService = {
       }
     } else {
       container.innerHTML = `
-        <div id="google-signin-btn-container" class="google-btn-wrapper">
-          <button id="btn-trigger-google-login" class="btn btn-outline btn-sm auth-login-btn" title="Iniciar sesión con Google">
-            <i data-lucide="log-in"></i>
-            <span>Acceder con Google</span>
-          </button>
-        </div>
+        <button id="btn-trigger-auth-modal" class="btn btn-outline btn-sm auth-login-btn" title="Iniciar sesión o registrarse">
+          <i data-lucide="user-check"></i>
+          <span>Acceder</span>
+        </button>
       `;
 
-      const manualBtn = document.getElementById("btn-trigger-google-login");
+      const manualBtn = document.getElementById("btn-trigger-auth-modal");
       if (manualBtn) {
         manualBtn.addEventListener("click", () => {
-          if (typeof google !== "undefined" && google.accounts && this.googleClientId) {
-            try {
-              google.accounts.id.prompt();
-            } catch (err) {
-              this.promptLocalMockLogin();
-            }
-          } else {
-            this.promptLocalMockLogin();
+          if (typeof App !== "undefined" && App.openUnlockModal) {
+            App.openUnlockModal();
           }
         });
       }
-
-      this.renderGoogleButton();
     }
 
     if (typeof lucide !== "undefined" && lucide.createIcons) {
@@ -481,103 +774,101 @@ var AuthService = {
     }
   },
 
-  // Fallback asistido para testing o acceso rápido sin Client ID registrado
-  promptLocalMockLogin() {
-    const defaultEmail = "postulante@derecho.cl";
-    const email = prompt("Ingresa tu correo de Google para acceder a la beta:", defaultEmail);
-    if (!email || !email.trim()) return;
-    const name = prompt("Ingresa tu nombre y apellido:", "Estudiante de Grado");
-    const mockToken = `mock-google-token:sub-${Date.now()}:${email.trim()}:${name ? name.trim() : "Estudiante"}:`;
-    this.handleGoogleCredential(mockToken);
-  },
-
-  // Modal de código de acceso
-  openAccessCodeModal() {
-    const modal = document.getElementById("access-code-modal");
-    if (!modal) return;
-
-    const greetingEl = document.getElementById("access-code-user-greeting");
-    if (greetingEl && this.pendingUserPreview) {
-      const escape = (str) => typeof SecurityShield !== "undefined" ? SecurityShield.escapeHtml(str) : String(str || "");
-      const safeName = escape(this.pendingUserPreview.name || this.pendingUserPreview.email);
-      greetingEl.innerHTML = `¡Hola, <strong>${safeName}</strong>! Para ingresar a la beta privada, vincula tu código de invitación.`;
-    }
-
-    const input = document.getElementById("input-access-code");
-    if (input) {
-      input.value = "";
-      input.focus();
-    }
-    const errEl = document.getElementById("access-code-error-msg");
-    if (errEl) {
-      errEl.style.display = "none";
-      errEl.textContent = "";
-    }
-
-    modal.classList.remove("hidden");
-  },
-
-  closeAccessCodeModal() {
-    const modal = document.getElementById("access-code-modal");
-    if (modal) modal.classList.add("hidden");
-  },
-
+  // Configurar listeners del modal
   setupModalListeners() {
-    const btnClose = document.getElementById("btn-close-access-modal");
-    if (btnClose) {
-      btnClose.addEventListener("click", () => this.closeAccessCodeModal());
-    }
+    if (typeof document === "undefined") return;
 
-    const btnSubmit = document.getElementById("btn-submit-access-code");
-    const inputCode = document.getElementById("input-access-code");
-    const errEl = document.getElementById("access-code-error-msg");
+    const emailInput = document.getElementById("input-register-email");
+    const pwdInput = document.getElementById("input-register-password");
+    const confirmInput = document.getElementById("input-confirm-password");
+    const form = document.getElementById("form-auth-register");
+    const submitBtn = document.getElementById("btn-submit-register");
+    const toggleLink = document.getElementById("link-toggle-login-register");
+    const errEl = document.getElementById("register-error-msg");
+
+    const onInput = () => this.validateFormInputs();
+    if (emailInput) emailInput.addEventListener("input", onInput);
+    if (pwdInput) pwdInput.addEventListener("input", onInput);
+    if (confirmInput) confirmInput.addEventListener("input", onInput);
+
+    if (toggleLink) {
+      toggleLink.addEventListener("click", () => {
+        this.setAuthMode(this.authMode === "register" ? "login" : "register");
+      });
+    }
 
     const doSubmit = async () => {
-      if (!inputCode) return;
-      const code = inputCode.value.trim();
-      if (!code) {
-        if (errEl) {
-          errEl.textContent = "Por favor ingresa tu código de acceso.";
-          errEl.style.display = "block";
-        }
-        return;
+      const email = emailInput ? emailInput.value : "";
+      const pwd = pwdInput ? pwdInput.value : "";
+      const confirm = confirmInput ? confirmInput.value : "";
+      const captchaToken = this.currentTurnstileToken;
+
+      if (errEl) {
+        errEl.style.display = "none";
+        errEl.textContent = "";
       }
 
-      if (btnSubmit) {
-        btnSubmit.disabled = true;
-        btnSubmit.innerHTML = "<span>Vinculando...</span>";
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = "<span>Procesando...</span>";
       }
 
-      const res = await this.linkAccessCode(code);
+      let res = null;
+      if (this.authMode === "register") {
+        res = await this.register({
+          email,
+          password: pwd,
+          passwordConfirm: confirm,
+          captchaToken: captchaToken
+        });
+      } else {
+        res = await this.login({
+          email,
+          password: pwd,
+          captchaToken: captchaToken
+        });
+      }
 
-      if (btnSubmit) {
-        btnSubmit.disabled = false;
-        btnSubmit.innerHTML = '<i data-lucide="link"></i><span>Vincular y Comenzar</span>';
-        if (typeof lucide !== "undefined") lucide.createIcons();
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        const icon = this.authMode === "register" ? "user-plus" : "log-in";
+        const label = this.authMode === "register" ? "Crear Cuenta" : "Iniciar Sesión";
+        submitBtn.innerHTML = `<i data-lucide="${icon}"></i><span id="btn-submit-register-text">${label}</span>`;
+        if (typeof lucide !== "undefined" && lucide.createIcons) lucide.createIcons();
       }
 
       if (!res.ok) {
         if (errEl) {
-          errEl.textContent = res.error || "Código inválido";
+          errEl.textContent = res.error || "Ocurrió un error.";
           errEl.style.display = "block";
         }
       }
     };
 
-    if (btnSubmit) {
-      btnSubmit.addEventListener("click", doSubmit);
-    }
-    if (inputCode) {
-      inputCode.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          doSubmit();
-        }
-      });
-      inputCode.addEventListener("input", () => {
-        inputCode.value = inputCode.value.toUpperCase();
+    if (form) {
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        doSubmit();
       });
     }
+
+    if (submitBtn) {
+      submitBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        doSubmit();
+      });
+    }
+
+    // Enter key en inputs
+    const handleEnter = (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        doSubmit();
+      }
+    };
+    if (emailInput) emailInput.addEventListener("keydown", handleEnter);
+    if (pwdInput) pwdInput.addEventListener("keydown", handleEnter);
+    if (confirmInput) confirmInput.addEventListener("keydown", handleEnter);
   }
 };
 

@@ -261,3 +261,370 @@
   color: var(--text-main);
   border-color: var(--gold-primary);
 }
+
+/* ==========================================================================
+   MODAL DE ACTIVACIÓN EN 2 PASOS (GOOGLE AUTH -> CONVALIDACIÓN DEMO)
+   ========================================================================== */
+
+.unlock-step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 8px 14px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.unlock-step-indicator .step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  font-weight: 700;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.unlock-step-indicator .step-num.active {
+  background: var(--gold-primary);
+  border-color: var(--gold-primary);
+  color: #0f172a;
+}
+
+.unlock-step-indicator .step-num.completed {
+  background: #10b981;
+  border-color: #10b981;
+  color: #ffffff;
+}
+
+.unlock-step-info-card {
+  background: rgba(212, 175, 55, 0.06);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 18px;
+}
+
+.unlock-step-info-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--gold-primary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.unlock-step-info-header i {
+  width: 18px;
+  height: 18px;
+}
+
+.unlock-step-info-text {
+  font-size: 0.83rem;
+  color: var(--text-main);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.modal-google-btn-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 18px 0;
+  min-height: 44px;
+}
+
+/* Formulario de Registro / Login con Correo y Contraseña */
+.auth-credentials-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 14px 0 16px 0;
+  text-align: left;
+}
+
+.auth-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.auth-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 2px;
+}
+
+.auth-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.auth-input-icon {
+  position: absolute;
+  left: 12px;
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 10px 14px 10px 38px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-main);
+  font-size: 0.88rem;
+  transition: all 0.2s ease;
+}
+
+.auth-input:focus {
+  border-color: var(--gold-primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.16);
+  background: var(--bg-surface);
+}
+
+.password-policy-hints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.72rem;
+  margin-top: 4px;
+  color: var(--text-muted);
+}
+
+.policy-rule {
+  transition: color 0.2s ease;
+}
+
+.policy-rule.valid {
+  color: #34d399;
+  font-weight: 600;
+}
+
+.password-match-hint {
+  font-size: 0.74rem;
+  margin-top: 4px;
+}
+
+.password-match-hint.valid {
+  color: #34d399;
+}
+
+.password-match-hint.invalid {
+  color: #f87171;
+}
+
+.turnstile-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 65px;
+  margin: 6px 0;
+  border-radius: var(--radius-md);
+}
+
+.auth-error-alert {
+  padding: 9px 12px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: var(--radius-sm);
+  color: #f87171;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  animation: fadeInPaywall 0.2s ease-out;
+}
+
+.auth-submit-btn {
+  width: 100%;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-top: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.auth-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.auth-toggle-row {
+  text-align: center;
+  margin-top: 4px;
+}
+
+.link-toggle-auth {
+  background: none;
+  border: none;
+  color: var(--gold-primary);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 4px 8px;
+  transition: color 0.15s ease;
+}
+
+.link-toggle-auth:hover {
+  color: #fbbf24;
+}
+
+.unlock-step-preview-disabled {
+  background: var(--bg-surface-elevated);
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  opacity: 0.65;
+  margin-top: 16px;
+}
+
+.unlock-step-preview-disabled .preview-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.unlock-step-preview-disabled .preview-header i {
+  width: 14px;
+  height: 14px;
+}
+
+.unlock-step-preview-disabled .preview-text {
+  font-size: 0.77rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Tarjeta de Usuario Conectado (Identidad Gmail) */
+.unlock-user-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  margin-bottom: 18px;
+}
+
+.unlock-user-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.unlock-user-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--gold-primary);
+  flex-shrink: 0;
+}
+
+.unlock-user-avatar-placeholder {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(212, 160, 23, 0.15);
+  color: var(--gold-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 2px solid var(--gold-primary);
+}
+
+.unlock-user-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.unlock-user-name {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.unlock-user-email {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.badge-demo-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: rgba(239, 68, 68, 0.14);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #f87171;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+}
+
+.badge-demo-status i {
+  width: 13px;
+  height: 13px;
+}
+
+.badge-active-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  background: rgba(212, 175, 55, 0.18);
+  border: 1px solid var(--gold-primary);
+  color: var(--gold-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  box-shadow: 0 0 10px var(--gold-glow);
+}
+
+.badge-active-status i {
+  width: 14px;
+  height: 14px;
+}
+

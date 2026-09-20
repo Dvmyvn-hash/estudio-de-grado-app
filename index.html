@@ -17,8 +17,8 @@
   <!-- Iconos Lucide CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- Google Identity Services (GSI) -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- Cloudflare Turnstile Captcha -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
   <!-- Estilos -->
   <link rel="stylesheet" href="css/main.css">
@@ -83,7 +83,11 @@
         </div>
 
         <!-- Badge de Estado de Licencia (Candado Demo / Corona Pase Activo en Modo Icono) -->
-        <div id="license-badge-container"></div>
+        <div id="license-badge-container">
+          <button class="license-status-badge demo icon-only" id="btn-open-unlock-badge" title="Modo Demo: Clic para ingresar código de activación" aria-label="Modo Demo - Activar Pase">
+            <i data-lucide="lock"></i>
+          </button>
+        </div>
 
         <!-- Contenedor de Autenticación Google / Perfil de Usuario -->
         <div id="auth-user-container" class="auth-user-container"></div>
@@ -335,15 +339,15 @@
     </div>
   </div>
 
-  <!-- MODAL: ACTIVACIÓN DE PASE DE GRADO (PARA EL ALUMNO) -->
+  <!-- MODAL: ACTIVACIÓN DE PASE DE GRADO (GOOGLE AUTH -> CONVALIDACIÓN DEMO) -->
   <div id="unlock-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
     <div class="modal-dialog" style="max-width: 580px;">
       <div class="modal-header">
         <div class="modal-title-wrap">
-          <i data-lucide="key-round" class="modal-header-icon"></i>
+          <i data-lucide="lock" class="modal-header-icon" id="unlock-modal-header-icon"></i>
           <div>
-            <h2 class="modal-title">Activar Pase de Grado</h2>
-            <p class="modal-subtitle">Ingresa tu código de licencia para desbloquear todo el temario</p>
+            <h2 class="modal-title" id="unlock-modal-title">Activar Pase de Grado</h2>
+            <p class="modal-subtitle" id="unlock-modal-subtitle">Conecta tu cuenta y convalida tu código de acceso</p>
           </div>
         </div>
         <button class="icon-btn btn-close-modal" id="btn-close-unlock-modal" aria-label="Cerrar">
@@ -351,20 +355,156 @@
         </button>
       </div>
       <div class="modal-body" style="padding: 24px;">
-        <div class="paywall-activation-box">
-          <label style="font-size: 0.85rem; font-weight: 600; color: var(--text-main);">Tu Código de Activación:</label>
-          <div class="activation-input-row">
-            <input type="text" id="input-license-code" placeholder="EJ: GRADO-FULL-XXXX-1234" autocomplete="off">
-            <button id="btn-submit-license" class="btn btn-primary">
-              <i data-lucide="unlock"></i>
-              <span>Desbloquear</span>
-            </button>
+
+        <!-- PASO 1: Registro / Inicio de Sesión Propio con Turnstile Captcha -->
+        <div id="unlock-step-login" class="unlock-step">
+          <div class="unlock-step-indicator">
+            <span class="step-num active">1</span> <span id="step1-indicator-text">Identificación</span> &nbsp;→&nbsp; <span class="step-num">2</span> Convalidar Cuenta
           </div>
-          <div id="license-error-msg" style="font-size: 0.8rem; color: var(--danger); display: none;"></div>
+
+          <div class="unlock-step-info-card">
+            <div class="unlock-step-info-header">
+              <i data-lucide="shield-check"></i>
+              <span id="auth-form-title">Paso 1: Crea tu cuenta de postulante</span>
+            </div>
+            <p class="unlock-step-info-text" id="auth-form-subtitle">
+              Crea tu cuenta para resguardar tu progreso en apuntes y casos prácticos en todos tus dispositivos. Al registrarte accederás en <strong>Versión Demo</strong> para convalidar tu Pase de Grado.
+            </p>
+          </div>
+
+          <!-- Formulario de Registro / Login -->
+          <form id="form-auth-register" class="auth-credentials-form" onsubmit="return false;">
+            <div class="form-group auth-field-group">
+              <label for="input-register-email" class="auth-label">Correo electrónico:</label>
+              <div class="auth-input-wrapper">
+                <i data-lucide="mail" class="auth-input-icon"></i>
+                <input type="email" id="input-register-email" class="form-control auth-input" placeholder="tu.correo@derecho.cl" autocomplete="email" required>
+              </div>
+            </div>
+
+            <div class="form-group auth-field-group">
+              <label for="input-register-password" class="auth-label">Contraseña:</label>
+              <div class="auth-input-wrapper">
+                <i data-lucide="lock" class="auth-input-icon"></i>
+                <input type="password" id="input-register-password" class="form-control auth-input" placeholder="Mínimo 10 caracteres (Mayús, minús y núm)" autocomplete="new-password" required>
+              </div>
+              <div id="password-policy-hints" class="password-policy-hints">
+                <span class="policy-rule" id="rule-len">• Mín. 10 carac.</span>
+                <span class="policy-rule" id="rule-upper">• Mayúscula</span>
+                <span class="policy-rule" id="rule-lower">• Minúscula</span>
+                <span class="policy-rule" id="rule-num">• Número</span>
+              </div>
+            </div>
+
+            <div class="form-group auth-field-group" id="group-confirm-password">
+              <label for="input-confirm-password" class="auth-label">Confirmar contraseña:</label>
+              <div class="auth-input-wrapper">
+                <i data-lucide="check-check" class="auth-input-icon"></i>
+                <input type="password" id="input-confirm-password" class="form-control auth-input" placeholder="Repite tu contraseña exactamente" autocomplete="new-password">
+              </div>
+              <div id="password-match-hint" class="password-match-hint" style="display: none;"></div>
+            </div>
+
+            <!-- Widget Cloudflare Turnstile -->
+            <div id="unlock-captcha-container" class="turnstile-container"></div>
+
+            <div id="register-error-msg" class="auth-error-alert" style="display: none;"></div>
+
+            <button type="submit" id="btn-submit-register" class="btn btn-primary auth-submit-btn" disabled>
+              <i data-lucide="user-plus"></i>
+              <span id="btn-submit-register-text">Crear Cuenta</span>
+            </button>
+
+            <div class="auth-toggle-row">
+              <button type="button" id="link-toggle-login-register" class="link-toggle-auth">
+                ¿Ya tienes una cuenta? Inicia sesión
+              </button>
+            </div>
+          </form>
+
+          <div class="unlock-step-preview-disabled">
+            <div class="preview-header">
+              <i data-lucide="lock"></i>
+              <span>Paso 2: Convalidar cuenta con código de activación</span>
+            </div>
+            <p class="preview-text">
+              Se habilitará inmediatamente tras identificarte. Tu cuenta quedará registrada en <strong>Versión Demo</strong> y podrás pegar tu código de invitación para convalidarla.
+            </p>
+          </div>
         </div>
 
-        <div style="text-align: center; margin: 20px 0; border-top: 1px solid var(--border-subtle); padding-top: 18px;">
-          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">¿Aún no tienes tu código de acceso?</p>
+        <!-- PASO 2: Convalidar Código con Cuenta (Visible cuando el usuario ya tiene sesión en Versión Demo) -->
+        <div id="unlock-step-convalidate" class="unlock-step hidden">
+          <div class="unlock-step-indicator">
+            <span class="step-num completed">✓</span> Identificación &nbsp;→&nbsp; <span class="step-num active">2</span> Convalidar Cuenta
+          </div>
+
+          <div id="unlock-user-card" class="unlock-user-card">
+            <div class="unlock-user-left">
+              <img id="unlock-user-avatar" src="" alt="Avatar" class="unlock-user-avatar" style="display: none;" referrerpolicy="no-referrer">
+              <div id="unlock-user-avatar-placeholder" class="unlock-user-avatar-placeholder">
+                <i data-lucide="user"></i>
+              </div>
+              <div class="unlock-user-meta">
+                <span id="unlock-user-name" class="unlock-user-name">Estudiante de Grado</span>
+                <span id="unlock-user-email" class="unlock-user-email">usuario@correo.cl</span>
+              </div>
+            </div>
+            <span class="badge-demo-status" id="unlock-user-status-badge">
+              <i data-lucide="sparkles"></i>
+              <span>Versión Demo</span>
+            </span>
+          </div>
+
+          <p style="font-size: 0.86rem; color: var(--text-main); margin-bottom: 12px; line-height: 1.5;">
+            Sesión activa en <strong>Versión Demo</strong>. Pega a continuación tu código de acceso de invitación para convalidar esta cuenta y desbloquear el temario completo de Grado:
+          </p>
+
+          <div class="paywall-activation-box">
+            <label for="input-license-code" style="font-size: 0.85rem; font-weight: 600; color: var(--text-main);">Tu Código de Activación:</label>
+            <div class="activation-input-row">
+              <input type="text" id="input-license-code" placeholder="EJ: GRADO-BETA-XXXX-YYYY" autocomplete="off" style="text-transform: uppercase;">
+              <button id="btn-submit-license" class="btn btn-primary">
+                <i data-lucide="check-circle"></i>
+                <span>Convalidar Cuenta</span>
+              </button>
+            </div>
+            <div id="license-error-msg" style="font-size: 0.82rem; color: var(--danger); margin-top: 10px; display: none;"></div>
+          </div>
+        </div>
+
+        <!-- PASO 3: Cuenta Convalidada y Pase Activo (Visible si ya tiene Pase Activo) -->
+        <div id="unlock-step-active" class="unlock-step hidden">
+          <div class="unlock-user-card">
+            <div class="unlock-user-left">
+              <img id="unlock-active-avatar" src="" alt="Avatar" class="unlock-user-avatar" style="display: none;" referrerpolicy="no-referrer">
+              <div id="unlock-active-avatar-placeholder" class="unlock-user-avatar-placeholder">
+                <i data-lucide="crown"></i>
+              </div>
+              <div class="unlock-user-meta">
+                <span id="unlock-active-name" class="unlock-user-name">Estudiante de Grado</span>
+                <span id="unlock-active-email" class="unlock-user-email">usuario@correo.cl</span>
+              </div>
+            </div>
+            <span class="badge-active-status">
+              <i data-lucide="crown"></i>
+              <span>Pase Activo</span>
+            </span>
+          </div>
+
+          <div class="unlock-step-info-card" style="margin-top: 16px;">
+            <div class="unlock-step-info-header" style="color: var(--gold-primary);">
+              <i data-lucide="badge-check"></i>
+              <span id="unlock-active-scope-title">Pase de Grado Completo</span>
+            </div>
+            <p class="unlock-step-info-text" id="unlock-active-desc">
+              Tu cuenta está convalidada y tienes acceso total e ilimitado a todas las cédulas de Derecho Civil, Derecho Procesal y Derecho Constitucional, así como al taller interactivo de casos prácticos con IA.
+            </p>
+          </div>
+        </div>
+
+        <div style="text-align: center; margin: 20px 0 0 0; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">¿Aún no tienes tu código de acceso para convalidar?</p>
           <a href="https://wa.me/?text=Hola!%20Me%20gustar%C3%ADa%20adquirir%20el%20Pase%20de%20Grado%20para%20la%20plataforma%20de%20Civil,%20Procesal%20y%20Constitucional." target="_blank" class="btn-whatsapp-buy">
             <i data-lucide="message-circle"></i>
             <span>Solicitar mi Pase por WhatsApp</span>
@@ -501,7 +641,7 @@
           <i data-lucide="shield-alert" class="modal-header-icon" style="color: var(--gold-primary);"></i>
           <div>
             <h2 class="modal-title">Acceso Beta Cerrada</h2>
-            <p class="modal-subtitle">Vinculación de cuenta de Google con código de invitación</p>
+            <p class="modal-subtitle">Vinculación de tu cuenta con código de invitación</p>
           </div>
         </div>
         <button class="icon-btn btn-close-modal" id="btn-close-access-modal" aria-label="Cerrar">

@@ -67,6 +67,21 @@ const LicenseService = {
     } catch (e) {
       console.warn("Error leyendo licencia:", e);
     }
+    // Comprobar si el usuario conectado con Google tiene cuenta convalidada
+    if (typeof AuthService !== "undefined" && AuthService.currentUser && AuthService.currentUser.access_code && !AuthService.currentUser.isDemo) {
+      return {
+        code: AuthService.currentUser.access_code,
+        scope: "all",
+        studentName: AuthService.currentUser.name || "Estudiante de Grado",
+        email: AuthService.currentUser.email,
+        canManageNotes: false,
+        role: "student",
+        activatedAt: new Date().toISOString(),
+        expiresAt: null,
+        days: 180
+      };
+    }
+
     return null; // Sin licencia = Modo Demo
   },
 
@@ -244,3 +259,7 @@ const LicenseService = {
     localStorage.removeItem(this.STORAGE_LICENSE_KEY);
   }
 };
+
+if (typeof window !== "undefined") window.LicenseService = LicenseService;
+if (typeof globalThis !== "undefined") globalThis.LicenseService = LicenseService;
+if (typeof module !== "undefined" && module.exports) module.exports = LicenseService;

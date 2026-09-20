@@ -1,90 +1,71 @@
-# 🔑 Guía Rápida: Activar Autenticación con Google en GitHub y Local
+# 🛡️ Guía de Autenticación Autónoma y Despliegue Público (GitHub Pages y Local)
 
-Esta guía te permite dejar operativa la autenticación con **Google Identity Services (GSI)** tanto en tu computadora local como en **GitHub Pages** (`https://dvmyvn-hash.github.io/estudio-de-grado-app`).
+Plataforma de Preparación para el Examen de Grado (`estudio-de-grado-app`)
 
----
-
-## ⚡ 1. Arquitectura Dual Lista para Usar
-
-La aplicación ya cuenta con una **arquitectura híbrida inteligente**:
-- **En Local / Servidor (`python server.py`)**: Valida firmas HMAC-SHA256, sincroniza en tiempo real con SQLite (`estudio_grado.db`) y gestiona cookies `httpOnly; Secure; SameSite=Lax`.
-- **En GitHub Pages (Modo Estático Serverless)**: Al subirse a GitHub, la aplicación decodifica de forma segura el JWT firmado por Google en el navegador, valida los códigos de acceso de la beta privada y persiste los avances de casos en `localStorage`.
+El sistema cuenta con una arquitectura de **Autenticación Autónoma con Correo Electrónico, Contraseña (PBKDF2-HMAC-SHA256) y Captcha Cloudflare Turnstile**, diseñada para operar de manera inmediata tanto en **servidor local (`server.py`)** como en **GitHub Pages (modo estático público SPA)**.
 
 ---
 
-## 🛠️ 2. Cómo Obtener tu Google Client ID (2 Minutos)
+## 🚀 1. Arquitectura Dual Lista para Producción
 
-Google exige que cada aplicación web registre su dominio para permitir el inicio de sesión. Sigue estos 3 pasos:
+1. **Modo Servidor Local / Docker / Producción (`python server.py`):**
+   - Hashing con **PBKDF2-HMAC-SHA256 (210.000 iteraciones)** y salt criptográfico de 16 bytes.
+   - Verificación fail-closed de **Cloudflare Turnstile** en registro y tras fallos en login.
+   - Bloqueo temporal (*Account Lockout*) por 15 minutos tras 5 intentos fallidos consecutivos.
+   - Sesiones persistidas en cookies `HttpOnly; Secure; SameSite=Lax` firmadas con HMAC-SHA256.
+   - Base de datos relacional SQLite `estudio_grado.db` con blindaje contra Zero-Exposure (**HTTP 403**).
 
-### Paso 1: Ingresar a Google Cloud Console
-1. Abre [Google Cloud Console - Credenciales](https://console.cloud.google.com/apis/credentials).
-2. Si no tienes un proyecto, haz clic en **"Crear proyecto"** (ej: *"Estudio de Grado"*).
-3. En la pestaña **"Pantalla de consentimiento de OAuth"** (*OAuth consent screen*):
-   - Tipo de usuario: **Externo** (External).
-   - Nombre de la app: `Estudio de Grado`.
-   - Correo de asistencia: Tu correo personal.
-   - En *Permisos/Scopes*, solo necesitas los básicos por defecto: `email`, `profile`, `openid`.
-
-### Paso 2: Crear el ID de Cliente OAuth 2.0
-1. Ve a **"Credenciales"** -> **"+ Crear credenciales"** -> **"ID de cliente de OAuth"**.
-2. Tipo de aplicación: **Aplicación web** (*Web application*).
-3. Nombre: `Estudio de Grado Web`.
-4. En la sección **"Orígenes autorizados de JavaScript"** (*Authorized JavaScript origins*), agrega:
-   ```text
-   http://localhost:8080
-   http://127.0.0.1:8080
-   http://localhost:8000
-   http://127.0.0.1:8000
-   https://dvmyvn-hash.github.io
-   ```
-   *(Nota: Google requiere la URL base sin barra final ni subcarpetas).*
-5. Haz clic en **"Crear"**.
-6. Copia el valor de **"ID de cliente"** (termina en `.apps.googleusercontent.com`).
+2. **Modo Estático / GitHub Pages (`https://dvmyvn-hash.github.io/estudio-de-grado-app`):**
+   - Operación 100% *serverless* y autónoma en el navegador.
+   - Hashing del lado del cliente mediante Web Crypto API (`crypto.subtle.digest("SHA-256")`) para **nunca almacenar contraseñas en texto plano** en `localStorage`.
+   - Soporte para códigos de activación de la beta privada (`GRADO-BETA-2026`, etc.).
+   - Resiliencia automática: si un adblocker o política de red bloquea Cloudflare Turnstile, se activa la verificación local sin interrumpir al postulante.
 
 ---
 
-## 📝 3. Pegar tu Client ID en el Proyecto
+## 🔑 2. Configurar Cloudflare Turnstile para Producción (Opcional)
 
-Abre los dos archivos de configuración y pega tu ID:
+El proyecto viene preconfigurado con las claves de prueba oficiales de Cloudflare (`1x00000000000000000000AA`), que funcionan de inmediato en `localhost`, entornos de desarrollo y GitHub Pages.
 
-### Archivo 1: `js/auth-config.js` (Frontend / GitHub Pages)
-```javascript
-window.AUTH_CONFIG = {
-  googleClientId: "TU_CLIENT_ID_AQUI.apps.googleusercontent.com",
-  ...
-};
-```
+Si deseas utilizar tus propias claves de Cloudflare en tu dominio personalizado:
 
-### Archivo 2: `auth_config.json` (Backend Python)
-```json
-{
-  "google_client_id": "TU_CLIENT_ID_AQUI.apps.googleusercontent.com"
-}
-```
+1. Ingresa a tu panel de [Cloudflare Turnstile](https://dash.cloudflare.com/?to=/:account/turnstile).
+2. Haz clic en **"Add site"** / **"Agregar sitio"**:
+   - Nombre: `Estudio de Grado`.
+   - Dominios autorizados:
+     - `dvmyvn-hash.github.io`
+     - `localhost`
+     - `127.0.0.1`
+   - Modo de widget: **Managed** (Recomendado) o **Invisible**.
+3. Copia tu **Site Key** y tu **Secret Key**:
+   - En `js/auth-config.js`: Reemplaza `turnstileSiteKey: "TU_SITE_KEY_AQUI"`.
+   - En `auth_config.json`: Reemplaza `"turnstile_site_key": "TU_SITE_KEY_AQUI"`.
+   - En el servidor: Exporta la variable de entorno:
+     ```powershell
+     $env:TURNSTILE_SECRET_KEY="TU_SECRET_KEY_AQUI"
+     ```
 
 ---
 
-## 🎟️ 4. Códigos de Invitación Activos para la Beta
+## 🔒 3. Códigos de Invitación Preconfigurados (Beta Cerrada)
 
-Cuando un nuevo usuario inicie sesión con su cuenta de Google, el sistema le solicitará un código de invitación. En GitHub Pages vienen precargados los siguientes códigos:
-
-- `GRADO-BETA-2026`
-- `CIVIL-PROCESAL-2026`
-- `DERECHO-UCHILE-2026`
-- `DERECHO-PUC-2026`
-- `POSTULANTE-2026`
+Para convalidar una cuenta de Versión Demo a Pase Activo de Grado, se encuentran pre-sembrados los siguientes códigos:
+- `GRADO-BETA-2026`: Acceso completo a Civil, Procesal y Constitucional.
+- `CIVIL-PROCESAL-2026`: Cohorte de Civil y Procesal.
+- `GRADO-VIP-2026`: Acceso institucional prioritario.
+- `GRADO-DOCENTE-2026`: Cuenta con perfil evaluador.
 
 *(En local con `server.py` puedes generar y gestionar códigos ilimitados con `python manage_access_codes.py create --code TU-CODIGO`).*
 
 ---
 
-## 🚀 5. Subir a GitHub
+## 🚀 4. Subir a GitHub y Publicar
 
-Para publicar todos los cambios:
+Para publicar los cambios en tu repositorio público:
 
 ```bash
 git add .
-git commit -m "Activar Google Auth Dual-Mode y despliegue a GitHub Pages"
+git commit -m "feat: autenticacion autonoma con PBKDF2, Turnstile y blindaje de seguridad v4.0"
 git push origin main
 ```
 
@@ -93,7 +74,7 @@ El flujo de GitHub Actions desplegará la plataforma automáticamente en:
 
 ---
 
-## 💡 Modo de Prueba Inmediato (Sin Google Cloud Console)
-
-Si aún no has creado tu Client ID en Google Cloud, la aplicación cuenta con un **asistente de acceso directo**:
-- Al hacer clic en **"Acceder con Google"**, podrás ingresar tu correo de prueba y uno de los códigos de la beta (`GRADO-BETA-2026`) para experimentar toda la interfaz, avatar y sincronización de inmediato.
+## 🛡️ 5. Blindaje de Ciberseguridad Activo
+- **Zero Exposure:** Ningún archivo de base de datos (`.db`, `.sqlite`), secreto criptográfico (`.auth_secret`), archivo `.py` ni script de prueba (`.cjs`) es accesible vía web.
+- **Defensa contra Clickjacking y Sniffing:** Encabezados `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff` y `Referrer-Policy: strict-origin-when-cross-origin`.
+- **Integridad de Modelos IA:** Las pautas de evaluación y modelos fuente en `CASOS/` permanecen bajo HTTP 403 Forbidden.

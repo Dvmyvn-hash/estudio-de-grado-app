@@ -582,7 +582,71 @@ class SecurityRateLimiter:
         self.records.pop(key, None)
 
 LINK_CODE_LIMITER = SecurityRateLimiter(max_entries=2000)
+AUTH_LIMITER = SecurityRateLimiter(max_entries=5000)
+LOGIN_BACKOFF_LIMITER = SecurityRateLimiter(max_entries=5000)
 GOOGLE_AUTH_LIMITER = SecurityRateLimiter(max_entries=5000)
+
+TURNSTILE_SECRET_KEY = os.environ.get("TURNSTILE_SECRET_KEY", "1x0000000000000000000000000000000AA").strip()
+
+
+def verify_turnstile_token(token: str, remote_ip: str = "") -> bool:
+    """
+    Verificación fail-closed de Cloudflare Turnstile contra https://challenges.cloudflare.com/turnstile/v0/siteverify:
+    - En test (ALLOW_TEST_AUTH=1): tokens 'mock-turnstile-token' o 'test-turnstile-token' son válidos.
+    - Si token vacío o 'invalid-token': fail-closed (False).
+    - Si la solicitud da error, timeout o success != true: fail-closed (False).
+    """
+    if not token or not isinstance(token, str):
+        return False
+    clean_token = token.strip()
+    if not clean_token:
+        return False
+    if ALLOW_TEST_AUTH and clean_token in ("mock-turnstile-token", "test-turnstile-token", "test-token"):
+        return True
+    if clean_token == "invalid-token" or clean_token.startswith("invalid-"):
+        return False
+
+    try:
+        post_data = urllib.parse.urlencode({
+            "secret": TURNSTILE_SECRET_KEY,
+            "response": clean_token,
+            "remoteip": remote_ip
+        }).encode("utf-8")
+        req = urllib.request.Request(
+            "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+            data=post_data,
+            headers={
+                "Content-Type": "application/x-www-form-urlencoded",
+                "User-Agent": "estudio-de-grado-app"
+            }
+        )
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            if resp.status != 200:
+                return False
+            data = json.loads(resp.read().decode("utf-8"))
+            return bool(data.get("success") is True)
+    except Exception as e:
+        print(f"[Aviso Seguridad] Verificación Turnstile falló (fail-closed): {e}")
+        return False
+
+
+def validate_password_policy(password: str) -> Tuple[bool, str]:
+    """
+    Valida la política de contraseñas:
+    - Mínimo 10 caracteres.
+    - Al menos una mayúscula.
+    - Al menos una minúscula.
+    - Al menos un número.
+    """
+    if not password or len(password) < 10:
+        return False, "La contraseña debe tener al menos 10 caracteres."
+    if not re.search(r"[A-Z]", password):
+        return False, "La contraseña debe contener al menos una letra mayúscula."
+    if not re.search(r"[a-z]", password):
+        return False, "La contraseña debe contener al menos una letra minúscula."
+    if not re.search(r"[0-9]", password):
+        return False, "La contraseña debe contener al menos un número."
+    return True, ""
 
 def create_session_token(sub: str) -> str:
     """Crea un token de sesión firmado con HMAC-SHA256 y expiración a 30 días."""
@@ -812,9 +876,10 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
         # 4. Bloquear archivos y extensiones sensibles (Zero Exposure)
         BLOCKED_FILES = {
             'server.py', 'sync_config.json', 'parse_casos.py', 'all_cases.json',
-            'manage_access_codes.py', 'db.py', 'test_e2e_case_flow.cjs', 'package.json'
+            'manage_access_codes.py', 'db.py', 'test_e2e_case_flow.cjs', 'test_unlock_auth_flow.cjs',
+            'package.json', 'agents.md'
         }
-        BLOCKED_EXTENSIONS = ('.db', '.sqlite', '.db-wal', '.db-shm', '.key', '.pem', '.secret')
+        BLOCKED_EXTENSIONS = ('.db', '.sqlite', '.db-wal', '.db-shm', '.key', '.pem', '.secret', '.cjs')
 
         if (any(s.startswith('.') for s in segments) or 
             any(s in BLOCKED_FILES for s in lower_segments) or
@@ -924,17 +989,15 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                     "user": {
                         "id": user["id"],
                         "email": user["email"],
-                        "name": user["name"],
-                        "picture_url": user["picture_url"],
-                        "access_code": user["access_code"]
-                    },
-                    "googleClientId": GOOGLE_CLIENT_ID
+                        "name": user["name"] or user["email"].split("@")[0],
+                        "access_code": user["access_code"],
+                        "isDemo": not bool(user["access_code"])
+                    }
                 })
             else:
                 self.send_json_response({
                     "ok": False,
-                    "error": "No autenticado",
-                    "googleClientId": GOOGLE_CLIENT_ID
+                    "error": "No autenticado"
                 }, status_code=401)
             return
 
@@ -988,16 +1051,18 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps({"ok": False, "error": f"Carga útil excede el límite máximo de seguridad ({MAX_PAYLOAD_SIZE // 1024} KB)"}).encode("utf-8"))
             return
 
-        # API: Autenticación con Google (Login directo o detección de código requerido)
-        if clean_path == "/api/auth/google":
+        # API: Registro de Usuario (Correo + Contraseña + Cloudflare Turnstile)
+        if clean_path == "/api/auth/register":
             client_ip = self.client_address[0]
-            allowed, retry_sec = GOOGLE_AUTH_LIMITER.check_fixed_limit(client_ip, max_requests=30, window_seconds=60.0)
-            if not allowed:
-                self.send_json_response({
-                    "ok": False,
-                    "error": f"Demasiadas solicitudes de autenticación. Por favor espera {int(retry_sec) + 1} segundos."
-                }, status_code=429)
-                return
+            is_test = os.environ.get("ALLOW_TEST_AUTH") == "1"
+            if not is_test:
+                allowed, retry_sec = AUTH_LIMITER.check_fixed_limit(client_ip, max_requests=20, window_seconds=60.0)
+                if not allowed:
+                    self.send_json_response({
+                        "ok": False,
+                        "error": f"Demasiadas solicitudes de registro. Por favor espera {int(retry_sec) + 1} segundos."
+                    }, status_code=429)
+                    return
 
             body = self.rfile.read(content_length).decode("utf-8", errors="replace")
             try:
@@ -1006,98 +1071,269 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_json_response({"ok": False, "error": "Cuerpo JSON inválido"}, status_code=400)
                 return
 
-            id_token = req_data.get("idToken", "").strip()
-            token_info = verify_google_id_token(id_token)
-            if not token_info:
-                self.send_json_response({"ok": False, "error": "Token de Google inválido o expirado"}, status_code=401)
+            email = req_data.get("email", "").strip().lower()
+            password = req_data.get("password", "")
+            password_confirm = req_data.get("passwordConfirm", "")
+            captcha_token = req_data.get("captchaToken", "").strip()
+            name = req_data.get("name", "").strip()
+
+            if not email or not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
+                self.send_json_response({"ok": False, "error": "Formato de correo electrónico inválido."}, status_code=400)
                 return
 
-            sub = token_info["sub"]
-            email = token_info["email"]
-            name = token_info["name"]
-            picture = token_info["picture"]
-
-            user = db.get_user_by_sub(sub)
-            if user:
-                # Login directo de usuario ya registrado
-                db.update_user_last_login(user["id"], name=name, picture_url=picture, email=email)
-                token = create_session_token(sub)
-                progress = db.get_all_user_progress(user["id"])
-                cookie = make_session_cookie(token)
-                self.send_json_response({
-                    "ok": True,
-                    "user": {
-                        "id": user["id"],
-                        "email": email or user["email"],
-                        "name": name or user["name"],
-                        "picture_url": picture or user["picture_url"],
-                        "access_code": user["access_code"]
-                    },
-                    "progress": progress
-                }, headers={"Set-Cookie": cookie})
-            else:
-                # Usuario nuevo no vinculado: solicitar código de invitación
-                self.send_json_response({
-                    "ok": False,
-                    "requiresAccessCode": True,
-                    "message": "Se requiere un código de acceso de invitación para vincular tu cuenta de Google.",
-                    "userPreview": {"email": email, "name": name, "picture": picture}
-                }, status_code=403)
-            return
-
-        # API: Vincular Código de Acceso a Cuenta de Google
-        if clean_path == "/api/auth/link-code":
-            client_ip = self.client_address[0]
-            allowed, wait_sec = LINK_CODE_LIMITER.check_exponential_backoff(client_ip, max_free_attempts=5, window_seconds=900.0)
-            if not allowed:
-                self.send_json_response({
-                    "ok": False,
-                    "error": f"Demasiados intentos fallidos. Por favor espera {int(wait_sec) + 1} segundos."
-                }, status_code=429)
+            if password != password_confirm:
+                self.send_json_response({"ok": False, "error": "Las contraseñas no coinciden."}, status_code=400)
                 return
 
-            body = self.rfile.read(content_length).decode("utf-8", errors="replace")
-            try:
-                req_data = json.loads(body)
-            except Exception:
-                self.send_json_response({"ok": False, "error": "Cuerpo JSON inválido"}, status_code=400)
+            valid_pwd, pwd_err = validate_password_policy(password)
+            if not valid_pwd:
+                self.send_json_response({"ok": False, "error": pwd_err}, status_code=400)
                 return
 
-            id_token = req_data.get("idToken", "").strip()
-            code = req_data.get("code", "").strip()
-
-            token_info = verify_google_id_token(id_token)
-            if not token_info:
-                LINK_CODE_LIMITER.record_attempt(client_ip)
-                self.send_json_response({"ok": False, "error": "Token de Google inválido o expirado"}, status_code=401)
+            if not verify_turnstile_token(captcha_token, client_ip):
+                self.send_json_response({"ok": False, "error": "Verificación de captcha inválida o no completada."}, status_code=400)
                 return
 
-            ok, reason, user = db.create_user_with_code(
-                google_sub=token_info["sub"],
-                email=token_info["email"],
-                name=token_info["name"],
-                picture_url=token_info["picture"],
-                code=code
-            )
-
+            ok, reason, user = db.create_user(email=email, password=password, name=name)
             if not ok or not user:
-                LINK_CODE_LIMITER.record_attempt(client_ip)
                 self.send_json_response({"ok": False, "error": reason}, status_code=400)
                 return
 
-            LINK_CODE_LIMITER.reset(client_ip)
-            token = create_session_token(token_info["sub"])
+            token = create_session_token(str(user["id"]))
             cookie = make_session_cookie(token)
             self.send_json_response({
                 "ok": True,
                 "user": {
                     "id": user["id"],
                     "email": user["email"],
-                    "name": user["name"],
-                    "picture_url": user["picture_url"],
-                    "access_code": user["access_code"]
+                    "name": user["name"] or user["email"].split("@")[0],
+                    "access_code": None,
+                    "isDemo": True
+                }
+            }, status_code=201, headers={"Set-Cookie": cookie})
+            return
+
+        # API: Inicio de Sesión (Correo + Contraseña + Captcha tras fallo previo)
+        if clean_path == "/api/auth/login":
+            client_ip = self.client_address[0]
+            is_test = os.environ.get("ALLOW_TEST_AUTH") == "1"
+            if not is_test:
+                allowed, wait_sec = LOGIN_BACKOFF_LIMITER.check_exponential_backoff(client_ip, max_free_attempts=5, window_seconds=900.0)
+                if not allowed:
+                    self.send_json_response({
+                        "ok": False,
+                        "error": f"Demasiados intentos de acceso fallidos. Por favor espera {int(wait_sec) + 1} segundos."
+                    }, status_code=429)
+                    return
+
+            body = self.rfile.read(content_length).decode("utf-8", errors="replace")
+            try:
+                req_data = json.loads(body)
+            except Exception:
+                self.send_json_response({"ok": False, "error": "Cuerpo JSON inválido"}, status_code=400)
+                return
+
+            email = req_data.get("email", "").strip().lower()
+            password = req_data.get("password", "")
+            captcha_token = req_data.get("captchaToken", "").strip()
+
+            user = db.get_user_by_email(email)
+
+            # Verificar si la cuenta está bloqueada temporalmente
+            now_ms = int(time.time() * 1000)
+            if user and user.get("locked_until") and user["locked_until"] > now_ms:
+                remaining_mins = max(1, int((user["locked_until"] - now_ms) / 60000) + 1)
+                self.send_json_response({
+                    "ok": False,
+                    "error": f"Cuenta bloqueada temporalmente por seguridad. Reintenta en {remaining_mins} minutos.",
+                    "requiresCaptcha": True
+                }, status_code=423)
+                return
+
+            # Captcha exigido tras el primer intento fallido
+            if user and (user.get("failed_login_attempts") or 0) >= 1:
+                if not verify_turnstile_token(captcha_token, client_ip):
+                    self.send_json_response({
+                        "ok": False,
+                        "requiresCaptcha": True,
+                        "error": "Verificación de captcha requerida tras intento fallido previo."
+                    }, status_code=400)
+                    return
+
+            if not user:
+                LOGIN_BACKOFF_LIMITER.record_attempt(client_ip)
+                # Resistencia a ataques de temporización (timing attacks)
+                dummy_hash, dummy_salt = "bWlncmF0ZWRoYXNoMTIzNDU2Nzg5MDEyMzQ1Njc4OTA=", "bWlncmF0ZWRzYWx0MTIzNA=="
+                db.verify_password(password, dummy_hash, dummy_salt)
+                self.send_json_response({
+                    "ok": False,
+                    "error": "Credenciales inválidas.",
+                    "requiresCaptcha": True
+                }, status_code=401)
+                return
+
+            is_valid = db.verify_password(password, user["password_hash"], user["password_salt"])
+            if not is_valid:
+                LOGIN_BACKOFF_LIMITER.record_attempt(client_ip)
+                attempts, locked_until = db.record_login_failure(user["id"])
+                if locked_until:
+                    self.send_json_response({
+                        "ok": False,
+                        "error": "Cuenta bloqueada temporalmente por 15 minutos debido a 5 intentos fallidos consecutivos.",
+                        "requiresCaptcha": True
+                    }, status_code=423)
+                    return
+                self.send_json_response({
+                    "ok": False,
+                    "error": "Credenciales inválidas.",
+                    "requiresCaptcha": True
+                }, status_code=401)
+                return
+
+            LOGIN_BACKOFF_LIMITER.reset(client_ip)
+            db.record_login_success(user["id"])
+            token = create_session_token(str(user["id"]))
+            cookie = make_session_cookie(token)
+            progress = db.get_all_user_progress(user["id"])
+            self.send_json_response({
+                "ok": True,
+                "user": {
+                    "id": user["id"],
+                    "email": user["email"],
+                    "name": user["name"] or user["email"].split("@")[0],
+                    "access_code": user["access_code"],
+                    "isDemo": not bool(user["access_code"])
+                },
+                "progress": progress
+            }, headers={"Set-Cookie": cookie})
+            return
+
+        # API: Convalidar Código de Acceso (Paso 2)
+        if clean_path in ("/api/auth/link-code", "/api/auth/convalidate"):
+            client_ip = self.client_address[0]
+            is_test = os.environ.get("ALLOW_TEST_AUTH") == "1"
+            if not is_test:
+                allowed, wait_sec = LINK_CODE_LIMITER.check_exponential_backoff(client_ip, max_free_attempts=5, window_seconds=900.0)
+                if not allowed:
+                    self.send_json_response({
+                        "ok": False,
+                        "error": f"Demasiados intentos fallidos. Por favor espera {int(wait_sec) + 1} segundos."
+                    }, status_code=429)
+                    return
+
+            body = self.rfile.read(content_length).decode("utf-8", errors="replace")
+            try:
+                req_data = json.loads(body)
+            except Exception:
+                self.send_json_response({"ok": False, "error": "Cuerpo JSON inválido"}, status_code=400)
+                return
+
+            code = req_data.get("code", "").strip()
+
+            # Identificar usuario: por cookie de sesión o por idToken (modo test)
+            user = self.get_authenticated_user()
+            if not user and is_test and req_data.get("idToken"):
+                id_token = req_data.get("idToken", "").strip()
+                token_info = verify_google_id_token(id_token)
+                if token_info:
+                    ok, reason, user = db.create_user_with_code(
+                        google_sub=token_info["sub"],
+                        email=token_info["email"],
+                        name=token_info["name"],
+                        picture_url=token_info["picture"],
+                        code=code
+                    )
+                    if not ok or not user:
+                        LINK_CODE_LIMITER.record_attempt(client_ip)
+                        self.send_json_response({"ok": False, "error": reason}, status_code=400)
+                        return
+                    LINK_CODE_LIMITER.reset(client_ip)
+                    token = create_session_token(str(user["id"]))
+                    cookie = make_session_cookie(token)
+                    self.send_json_response({
+                        "ok": True,
+                        "user": {
+                            "id": user["id"],
+                            "email": user["email"],
+                            "name": user["name"] or user["email"].split("@")[0],
+                            "access_code": user["access_code"],
+                            "isDemo": False
+                        }
+                    }, headers={"Set-Cookie": cookie})
+                    return
+
+            if not user:
+                self.send_json_response({"ok": False, "error": "No autenticado. Inicia sesión primero."}, status_code=401)
+                return
+
+            ok, reason, updated_user = db.link_user_code(user["id"], code)
+            if not ok or not updated_user:
+                LINK_CODE_LIMITER.record_attempt(client_ip)
+                self.send_json_response({"ok": False, "error": reason}, status_code=400)
+                return
+
+            LINK_CODE_LIMITER.reset(client_ip)
+            token = create_session_token(str(updated_user["id"]))
+            cookie = make_session_cookie(token)
+            self.send_json_response({
+                "ok": True,
+                "user": {
+                    "id": updated_user["id"],
+                    "email": updated_user["email"],
+                    "name": updated_user["name"] or updated_user["email"].split("@")[0],
+                    "access_code": updated_user["access_code"],
+                    "isDemo": False
                 }
             }, headers={"Set-Cookie": cookie})
+            return
+
+        # API: Autenticación con Google (Compatibilidad para pruebas E2E con ALLOW_TEST_AUTH)
+        if clean_path == "/api/auth/google":
+            client_ip = self.client_address[0]
+            is_test = os.environ.get("ALLOW_TEST_AUTH") == "1"
+            if not is_test:
+                self.send_json_response({"ok": False, "error": "Autenticación Google deshabilitada. Usa /api/auth/login o /api/auth/register."}, status_code=410)
+                return
+
+            body = self.rfile.read(content_length).decode("utf-8", errors="replace")
+            try:
+                req_data = json.loads(body)
+            except Exception:
+                self.send_json_response({"ok": False, "error": "Cuerpo JSON inválido"}, status_code=400)
+                return
+
+            id_token = req_data.get("idToken", "").strip()
+            token_info = verify_google_id_token(id_token)
+            if not token_info:
+                self.send_json_response({"ok": False, "error": "Token de Google inválido o expirado"}, status_code=401)
+                return
+
+            email = token_info["email"]
+            name = token_info["name"]
+            user = db.get_user_by_email(email)
+
+            if user and user.get("access_code"):
+                token = create_session_token(str(user["id"]))
+                progress = db.get_all_user_progress(user["id"])
+                cookie = make_session_cookie(token)
+                self.send_json_response({
+                    "ok": True,
+                    "user": {
+                        "id": user["id"],
+                        "email": user["email"],
+                        "name": user["name"] or user["email"].split("@")[0],
+                        "access_code": user["access_code"],
+                        "isDemo": False
+                    },
+                    "progress": progress
+                }, headers={"Set-Cookie": cookie})
+            else:
+                self.send_json_response({
+                    "ok": False,
+                    "requiresAccessCode": True,
+                    "message": "Se requiere un código de acceso de invitación para vincular tu cuenta.",
+                    "userPreview": {"email": email, "name": name}
+                }, status_code=403)
             return
 
         # API: Guardar / Actualizar Progreso de Usuario (Multi-dispositivo)
