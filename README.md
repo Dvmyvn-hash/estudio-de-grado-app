@@ -40,17 +40,26 @@ Sube este repositorio a tu cuenta de GitHub (público o privado).
    - **Instance Type:** `Free` ($0/mes)
 
 ### Paso 3: Variables de Entorno (Environment Variables)
-En la sección **"Environment"** añade:
+En la sección **"Environment"** de Render Dashboard añade:
 | Clave (Key) | Valor (Value) | Descripción |
 | :--- | :--- | :--- |
 | `PYTHON_VERSION` | `3.11.8` | Versión recomendada de Python |
 | `SESSION_SECRET` | *(Haz clic en "Generate")* | Secreto criptográfico de 32+ caracteres para firmar cookies de sesión |
-| `SMTP_HOST` | `smtp.resend.com` (o tu proveedor) | Servidor SMTP para envío de códigos de verificación |
-| `SMTP_PORT` | `587` | Puerto SMTP (587 para TLS/STARTTLS o 465 para SSL) |
-| `SMTP_USER` | `resend` (o tu usuario) | Usuario de autenticación SMTP |
-| `SMTP_PASS` | `re_...` (o tu contraseña/token) | Contraseña o API key del servicio de correo |
-| `EMAIL_FROM` | `no-reply@tudominio.com` | Dirección remitente de los correos |
+| `SMTP_HOST` | `smtp.gmail.com` | Servidor SMTP (ej: Gmail o tu proveedor) |
+| `SMTP_PORT` | `587` | Puerto SMTP con cifrado STARTTLS (recomendado 587) |
+| `SMTP_USER` | `tu_cuenta@gmail.com` | Correo electrónico de la cuenta remitente |
+| `SMTP_PASS` | `tu_app_password_de_16_caracteres` | Contraseña de Aplicación de Google (ver instrucciones abajo) |
+| `EMAIL_FROM` | `GRADOMANÍA <tu_cuenta@gmail.com>` | Nombre visible y dirección del remitente |
 | `PORT` | `8080` | Render lo configura automáticamente |
+
+> [!TIP]
+> **Cómo generar la Contraseña de Aplicación (App Password) en Gmail:**
+> 1. Ve a tu [Cuenta de Google](https://myaccount.google.com/) -> pestaña **Seguridad**.
+> 2. Asegúrate de tener activada la **Verificación en 2 pasos**.
+> 3. En la barra de búsqueda de la cuenta, escribe **"Contraseñas de aplicaciones"** (o accede a `https://myaccount.google.com/apppasswords`).
+> 4. Crea una nueva contraseña indicando la app (ej: *"GRADOMANÍA"*).
+> 5. Copia la clave de 16 caracteres generada y pégala en `SMTP_PASS` (en tu archivo local `.env` o en las variables de Render).
+> 6. *Nota de seguridad:* Nunca comitees credenciales a Git; `render.yaml` declara las claves con `sync: false` para que las configures privadamente.
 
 ### Paso 4: Desplegar y listo
 Haz clic en **"Create Web Service"**. En un par de minutos, Render completará el build y te entregará una URL pública segura HTTPS (ej: `https://gradomania.onrender.com`).

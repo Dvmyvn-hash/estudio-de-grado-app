@@ -23,29 +23,35 @@ El sistema cuenta con una arquitectura de **Autenticación Autónoma con Correo 
 
 ---
 
-## 📧 2. Configuración de Envío de Correos (SMTP)
+## 📧 2. Configuración de Envío de Correos (SMTP con Gmail o Proveedor)
 
-El sistema utiliza la biblioteca estándar de Python (`smtplib`) sin dependencias externas. Para enviar correos de verificación en producción o desarrollo:
+El sistema utiliza la biblioteca estándar de Python (`smtplib` con STARTTLS en puerto 587) sin dependencias externas. Para enviar correos de verificación reales en producción o desarrollo local:
 
-1. Configura las siguientes variables de entorno:
-   - `SMTP_HOST`: Dirección del servidor SMTP (ej: `smtp.resend.com`, `smtp.gmail.com`, `smtp.sendgrid.net`).
-   - `SMTP_PORT`: Puerto SMTP (ej: `587` para STARTTLS o `465` para SSL). Por defecto es `587`.
-   - `SMTP_USER`: Nombre de usuario o API Key del servicio de correo.
-   - `SMTP_PASS`: Contraseña o clave secreta de la cuenta SMTP.
-   - `EMAIL_FROM`: Dirección remitente (ej: `no-reply@tudominio.com`).
+1. **Uso de Archivo Local `.env` (Ignorado en Git):**
+   Copia el archivo `.env.example` como `.env` en la raíz del proyecto y completa los campos:
+   ```env
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=587
+   SMTP_USER=gradomaniacos@gmail.com
+   SMTP_PASS=tu_app_password_de_16_caracteres
+   EMAIL_FROM=GRADOMANÍA <gradomaniacos@gmail.com>
+   ```
 
-2. En entorno local (PowerShell):
+2. **Obtención de Contraseña de Aplicación de Google (App Password):**
+   - Accede a tu [Cuenta de Google](https://myaccount.google.com/) -> **Seguridad**.
+   - Activa la **Verificación en 2 pasos**.
+   - Ve a **Contraseñas de aplicaciones** (`https://myaccount.google.com/apppasswords`).
+   - Genera una nueva clave seleccionando app *"Correo"*, nombrando *"GRADOMANÍA"*.
+   - Pega los 16 caracteres en `SMTP_PASS` dentro de tu `.env` o en las Environment Variables de Render.
+
+3. **Verificación Manual de Envío (Script Aislado):**
+   Puedes verificar el despacho real de correos sin pasar por el formulario web ejecutando:
    ```powershell
-   $env:SMTP_HOST="smtp.resend.com"
-   $env:SMTP_PORT="587"
-   $env:SMTP_USER="resend"
-   $env:SMTP_PASS="re_..."
-   $env:EMAIL_FROM="no-reply@tudominio.com"
-   python server.py
+   python scripts/test_smtp_manual.py tu_correo_personal@ejemplo.com
    ```
 
 > [!NOTE]
-> **Modo Desarrollo (Sin SMTP):** Si no defines `SMTP_HOST`, `server.py` registrará el código de verificación en la consola (`[SMTP Dev] Código de verificación para user@ejemplo.com: 123456`) permitiendo probar el flujo completo localmente sin configurar un servidor de correos.
+> **Modo Desarrollo (Sin SMTP):** Si no defines `SMTP_HOST` en `.env` ni en el entorno, `server.py` activará el modo dev (`[SMTP Dev]`), registrando el código numérico directamente en la consola sin fallar ni requerir conexión a internet.
 
 ---
 

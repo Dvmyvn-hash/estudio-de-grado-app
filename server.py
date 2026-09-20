@@ -45,8 +45,30 @@ except ImportError:
 
 import db
 
-PORT = int(os.environ.get("PORT", 8080))
 BASE_DIR = Path(__file__).resolve().parent
+
+def load_env_file():
+    """Carga variables desde archivo .env local si existe, sin sobreescribir las ya definidas."""
+    env_file = BASE_DIR / ".env"
+    if env_file.exists():
+        try:
+            with open(env_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    if "=" in line:
+                        k, v = line.split("=", 1)
+                        k = k.strip()
+                        v = v.strip().strip("'\"")
+                        if k and k not in os.environ:
+                            os.environ[k] = v
+        except Exception as e:
+            print(f"[Aviso] No se pudo leer .env: {e}")
+
+load_env_file()
+
+PORT = int(os.environ.get("PORT", 8080))
 DB_PATH = BASE_DIR / "estudio_grado.db"
 
 def get_or_create_auth_secret() -> str:
@@ -589,51 +611,74 @@ AUTH_LIMITER = SecurityRateLimiter(max_entries=5000)
 LOGIN_BACKOFF_LIMITER = SecurityRateLimiter(max_entries=5000)
 GOOGLE_AUTH_LIMITER = SecurityRateLimiter(max_entries=5000)
 
-# Configuración de Servidor de Correo (SMTP) para Verificación
-SMTP_HOST = os.environ.get("SMTP_HOST", "").strip()
-SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
-SMTP_USER = os.environ.get("SMTP_USER", "").strip()
-SMTP_PASS = os.environ.get("SMTP_PASS", "").strip()
-EMAIL_FROM = os.environ.get("EMAIL_FROM", "").strip() or SMTP_USER or "no-reply@gradomania.cl"
+def get_smtp_config() -> Tuple[str, int, str, str, str]:
+    """Obtiene la configuración SMTP actual desde variables de entorno."""
+    host = os.environ.get("SMTP_HOST", "").strip()
+    try:
+        port = int(os.environ.get("SMTP_PORT", "587"))
+    except ValueError:
+        port = 587
+    user = os.environ.get("SMTP_USER", "").strip()
+    password = os.environ.get("SMTP_PASS", "").strip()
+    from_addr = os.environ.get("EMAIL_FROM", "").strip() or user or "no-reply@gradomania.cl"
+    return host, port, user, password, from_addr
 
 
-def send_verification_email(to_email: str, code: str) -> bool:
+def send_verification_email(to_email: str, code: str) -> Tuple[bool, str]:
     """
-    Envía código de verificación de 6 dígitos mediante SMTP.
+    Envía código de verificación de 6 dígitos mediante SMTP (soporte Gmail STARTTLS / puerto 587).
     Si SMTP_HOST no está configurado (entorno local de desarrollo o pruebas),
     registra el código en consola y simula envío exitoso.
+    Retorna (éxito: bool, mensaje_error: str).
     """
-    subject = f"Tu código de verificación de GRADOMANÍA es: {code}"
-    body = f"Tu código de verificación de GRADOMANÍA es: {code}. Vence en 15 minutos."
+    host, port, user, password, from_addr = get_smtp_config()
 
-    if not SMTP_HOST:
+    if not host:
         print(f"[SMTP Dev] Código de verificación para {to_email}: {code} (Vence en 15 minutos)")
-        return True
+        return True, ""
+
+    subject = f"Tu código de verificación de GRADOMANÍA es: {code}"
+    body = (
+        f"Hola,\n\n"
+        f"Tu código de verificación de GRADOMANÍA es: {code}\n\n"
+        f"Este código vence en 15 minutos. Ingrésalo en la plataforma para activar tu cuenta.\n\n"
+        f"Si no solicitaste este código, puedes desestimar este mensaje con total seguridad.\n"
+    )
 
     try:
         msg = MIMEText(body, "plain", "utf-8")
         msg["Subject"] = subject
-        msg["From"] = EMAIL_FROM
+        msg["From"] = from_addr
         msg["To"] = to_email
 
-        if SMTP_PORT == 465:
-            with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=10) as server:
-                if SMTP_USER and SMTP_PASS:
-                    server.login(SMTP_USER, SMTP_PASS)
+        if port == 465:
+            with smtplib.SMTP_SSL(host, port, timeout=15) as server:
+                if user and password:
+                    server.login(user, password)
                 server.send_message(msg)
         else:
-            with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=10) as server:
-                try:
-                    server.starttls()
-                except Exception:
-                    pass
-                if SMTP_USER and SMTP_PASS:
-                    server.login(SMTP_USER, SMTP_PASS)
+            with smtplib.SMTP(host, port, timeout=15) as server:
+                server.ehlo()
+                server.starttls()
+                server.ehlo()
+                if user and password:
+                    server.login(user, password)
                 server.send_message(msg)
-        return True
+
+        print(f"[SMTP Producción] Correo de verificación despachado exitosamente a {to_email}")
+        return True, ""
+
+    except smtplib.SMTPAuthenticationError as e:
+        print(f"[Aviso SMTP] Fallo de autenticación en {host} con usuario '{user}': "
+              f"Verifique si 2FA está activo y se está utilizando una Contraseña de Aplicación (App Password) de 16 letras de Google. "
+              f"Detalle: {e.smtp_code} {e.smtp_error}")
+        return False, "Error de autenticación con el servidor de correo."
+    except (smtplib.SMTPException, OSError) as e:
+        print(f"[Aviso SMTP] Error de conexión o transporte SMTP al enviar a {to_email}: {type(e).__name__} - {e}")
+        return False, "No se pudo conectar con el servidor de correo."
     except Exception as e:
-        print(f"[Aviso SMTP] Error al enviar correo de verificación a {to_email}: {e}")
-        return False
+        print(f"[Aviso SMTP] Error inesperado en envío SMTP a {to_email}: {type(e).__name__} - {e}")
+        return False, "Error inesperado al despachar el correo."
 
 
 def validate_password_policy(password: str) -> Tuple[bool, str]:
@@ -1114,7 +1159,13 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                 return
 
             # Enviar correo mediante SMTP
-            send_verification_email(email, verification_code)
+            email_sent, email_err = send_verification_email(email, verification_code)
+            if not email_sent:
+                self.send_json_response({
+                    "ok": False,
+                    "error": "No pudimos enviar el correo de verificación. Por favor intenta nuevamente en unos minutos."
+                }, status_code=503)
+                return
 
             resp_payload = {
                 "ok": True,
@@ -1247,7 +1298,13 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                 now_ms = int(time.time() * 1000)
                 new_expires_at = now_ms + (15 * 60 * 1000)
                 db.update_verification_code(user["id"], new_code, new_expires_at)
-                send_verification_email(email, new_code)
+                email_sent, email_err = send_verification_email(email, new_code)
+                if not email_sent:
+                    self.send_json_response({
+                        "ok": False,
+                        "error": "No pudimos enviar el correo de verificación. Por favor intenta nuevamente en unos minutos."
+                    }, status_code=503)
+                    return
 
             resp_payload = {
                 "ok": True,

@@ -31,10 +31,12 @@ test_*.cjs
 test_*.js
 test_*.py
 test_e2e_case_flow.cjs
+!scripts/test_smtp_manual.py
 
 # Archivos de entorno y credenciales
 .env
 .env.*
+!.env.example
 *.key
 *.pem
 
