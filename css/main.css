@@ -4,8 +4,11 @@
    ========================================================================== */
 
 :root {
-  /* Fuente */
-  --font-display: 'Cinzel', serif;
+  color-scheme: dark;
+
+  /* Tipografías: Serif Jurídica Diploma (Playfair Display) + Lectura Prolongada (Plus Jakarta Sans) */
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-display: 'Playfair Display', 'Cinzel', Georgia, serif;
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
@@ -43,10 +46,23 @@
 
   /* Feedback */
   --success: #10b981;
+  --success-text: #34d399;
   --success-bg: rgba(16, 185, 129, 0.12);
+  --success-border: rgba(16, 185, 129, 0.35);
+
   --danger: #ef4444;
+  --danger-text: #f87171;
   --danger-bg: rgba(239, 68, 68, 0.12);
+  --danger-border: rgba(239, 68, 68, 0.35);
+
+  --warning-text: #fbbf24;
+  --warning-bg: rgba(251, 191, 36, 0.12);
+  --warning-border: rgba(251, 191, 36, 0.35);
+
   --info: #0ea5e9;
+  --info-text: #38bdf8;
+  --info-bg: rgba(56, 189, 248, 0.12);
+  --info-border: rgba(56, 189, 248, 0.35);
 
   /* Sombras y Efectos */
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.25);
@@ -67,36 +83,58 @@
   --font-h4: clamp(0.9rem, 1.1vw, 1.02rem);
 }
 
-/* Tema Claro (Ivory & Antique Paper) */
+/* Tema Claro (Ivory & Antique Paper - Alto Contraste WCAG AA) */
 [data-theme="light"] {
+  color-scheme: light;
+
   --bg-app: #f8fafc;
   --bg-surface: #ffffff;
   --bg-surface-elevated: #f1f5f9;
   --bg-surface-hover: #e2e8f0;
   --border-subtle: #cbd5e1;
-  --border-focus: #b45309;
+  --border-focus: #92400e;
 
   --text-main: #0f172a;
+  --text-secondary: #334155;
   --text-muted: #475569;
   --text-subtle: #64748b;
   --text-inverse: #ffffff;
 
-  --gold-primary: #b45309;
-  --gold-hover: #92400e;
-  --gold-glow: rgba(180, 83, 9, 0.15);
-  --gold-border: rgba(180, 83, 9, 0.35);
+  --gold-primary: #92400e;
+  --gold-hover: #78350f;
+  --gold-glow: rgba(146, 64, 14, 0.15);
+  --gold-border: rgba(146, 64, 14, 0.35);
 
-  --civil-color: #0284c7;
-  --civil-bg: rgba(2, 132, 199, 0.08);
-  --civil-border: rgba(2, 132, 199, 0.25);
+  --civil-color: #0369a1;
+  --civil-bg: rgba(3, 105, 161, 0.08);
+  --civil-border: rgba(3, 105, 161, 0.28);
 
-  --procesal-color: #7e22ce;
-  --procesal-bg: rgba(126, 34, 206, 0.08);
-  --procesal-border: rgba(126, 34, 206, 0.25);
+  --procesal-color: #6b21a8;
+  --procesal-bg: rgba(107, 33, 168, 0.08);
+  --procesal-border: rgba(107, 33, 168, 0.28);
 
-  --constitucional-color: #d97706;
-  --constitucional-bg: rgba(217, 119, 6, 0.08);
-  --constitucional-border: rgba(217, 119, 6, 0.25);
+  --constitucional-color: #b45309;
+  --constitucional-bg: rgba(180, 83, 9, 0.08);
+  --constitucional-border: rgba(180, 83, 9, 0.28);
+
+  --success: #047857;
+  --success-text: #047857;
+  --success-bg: rgba(4, 120, 87, 0.09);
+  --success-border: rgba(4, 120, 87, 0.28);
+
+  --danger: #b91c1c;
+  --danger-text: #b91c1c;
+  --danger-bg: rgba(185, 28, 28, 0.09);
+  --danger-border: rgba(185, 28, 28, 0.28);
+
+  --warning-text: #92400e;
+  --warning-bg: rgba(146, 64, 14, 0.09);
+  --warning-border: rgba(146, 64, 14, 0.28);
+
+  --info: #0284c7;
+  --info-text: #0284c7;
+  --info-bg: rgba(2, 132, 199, 0.09);
+  --info-border: rgba(2, 132, 199, 0.28);
 
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
   --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.08);
@@ -215,16 +253,17 @@ body {
 }
 
 .brand-title {
-  font-family: var(--font-display);
-  font-size: 0.76rem !important;
-  font-weight: 700;
-  letter-spacing: 0.05em;
+  font-family: var(--font-serif);
+  font-size: 0.84rem !important;
+  font-weight: 800;
+  letter-spacing: 0.07em;
   color: var(--gold-primary);
   line-height: 1.15;
   white-space: nowrap !important;
   word-break: keep-all !important;
   margin: 0;
   padding: 0;
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.22);
 }
 
 .brand-subtitle {
@@ -844,6 +883,11 @@ body {
     flex-shrink: 0;
   }
 
+  .header-actions .icon-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
   .search-bar {
     display: none; /* En móvil se ahorra altura vertical */
   }
@@ -865,7 +909,7 @@ body {
 
   .nav-tab {
     flex: 1;
-    min-height: 38px;
+    min-height: 44px;
     padding: 6px 4px;
     font-size: 0.74rem;
     justify-content: center;

@@ -131,11 +131,39 @@ var AuthService = {
   turnstileRetries: 0,
   isBackendAvailable: null,
 
+  // Obtener token de Turnstile de forma resiliente
+  getTurnstileToken() {
+    if (this.currentTurnstileToken) return this.currentTurnstileToken;
+    if (typeof window !== "undefined" && window.turnstile && this.turnstileWidgetId !== null) {
+      try {
+        const t = window.turnstile.getResponse(this.turnstileWidgetId);
+        if (t) {
+          this.currentTurnstileToken = t;
+          return t;
+        }
+      } catch (e) {}
+    }
+    if (typeof document !== "undefined") {
+      const respInput = document.querySelector("#unlock-captcha-container input[name='cf-turnstile-response']");
+      if (respInput && respInput.value) {
+        this.currentTurnstileToken = respInput.value;
+        return respInput.value;
+      }
+    }
+    return null;
+  },
+
   // Inicializar Cloudflare Turnstile
   initTurnstile() {
     if (typeof window === "undefined" || typeof document === "undefined") return;
     const container = document.getElementById("unlock-captcha-container");
     if (!container) return;
+
+    // Si el modal está oculto, no renderizar hasta que se abra para asegurar dimensiones reales en el DOM
+    const modal = document.getElementById("unlock-modal");
+    if (modal && modal.classList.contains("hidden")) {
+      return;
+    }
 
     if (typeof window.turnstile === "undefined") {
       if (this.turnstileRetries < 15) {
@@ -155,6 +183,11 @@ var AuthService = {
         this.validateFormInputs();
         return;
       }
+    }
+
+    // Si ya existe un widget y ya generó token, no destruirlo
+    if (this.turnstileWidgetId !== null && this.currentTurnstileToken) {
+      return;
     }
 
     try {
@@ -301,19 +334,16 @@ var AuthService = {
       }
     }
 
-    // Comprobar si requiere captcha
-    let isCaptchaValid = true;
-    if (this.authMode === "register") {
-      isCaptchaValid = Boolean(this.currentTurnstileToken);
-    } else if (this.loginRequiresCaptcha) {
-      isCaptchaValid = Boolean(this.currentTurnstileToken);
-    }
-
+    // Comprobar estado de habilitación del botón
     if (submitBtn) {
       if (this.authMode === "register") {
-        submitBtn.disabled = !(isEmailValid && isPolicyValid && isMatch && isCaptchaValid);
+        // En modo registro, el botón se habilita de forma reactiva cuando el usuario ingresa datos válidos:
+        // Correo sintácticamente correcto, contraseña que cumple la política de 4 reglas y confirmación coincidente.
+        submitBtn.disabled = !(isEmailValid && isPolicyValid && isMatch);
       } else {
-        submitBtn.disabled = !(isEmailValid && pwd.length >= 1 && isCaptchaValid);
+        const token = this.getTurnstileToken();
+        const captchaOk = !this.loginRequiresCaptcha || Boolean(token);
+        submitBtn.disabled = !(isEmailValid && pwd.length >= 1 && captchaOk);
       }
     }
   },
@@ -801,11 +831,20 @@ var AuthService = {
       const email = emailInput ? emailInput.value : "";
       const pwd = pwdInput ? pwdInput.value : "";
       const confirm = confirmInput ? confirmInput.value : "";
-      const captchaToken = this.currentTurnstileToken;
+      const captchaToken = this.getTurnstileToken();
 
       if (errEl) {
         errEl.style.display = "none";
         errEl.textContent = "";
+      }
+
+      // Si en registro aún no se obtiene token de captcha, advertir al usuario claramente
+      if (this.authMode === "register" && !captchaToken) {
+        if (errEl) {
+          errEl.textContent = "Por favor completa la verificación de seguridad (captcha) para continuar.";
+          errEl.style.display = "block";
+        }
+        return;
       }
 
       if (submitBtn) {

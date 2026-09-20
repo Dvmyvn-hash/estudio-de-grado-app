@@ -171,6 +171,68 @@ const ConceptGraph = {
       const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
       this.scale = Math.max(0.4, Math.min(3, this.scale * zoomFactor));
     }, { passive: false });
+
+    // EVENTOS TÁCTILES MÓVILES (Pan, Arrastre de Nodos y Pinch-to-Zoom con 2 dedos)
+    let initialPinchDist = null;
+    let initialPinchScale = 1;
+
+    this.canvas.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        const touch = e.touches[0];
+        const rect = this.canvas.getBoundingClientRect();
+        const touchX = (touch.clientX - rect.left - this.panX) / this.scale;
+        const touchY = (touch.clientY - rect.top - this.panY) / this.scale;
+
+        const clickedNode = this.findNodeAt(touchX, touchY);
+        if (clickedNode) {
+          this.draggedNode = clickedNode;
+          this.selectNode(clickedNode);
+        } else {
+          this.isDragging = true;
+          this.startMouseX = touch.clientX - this.panX;
+          this.startMouseY = touch.clientY - this.panY;
+        }
+      } else if (e.touches.length === 2) {
+        this.isDragging = false;
+        this.draggedNode = null;
+        initialPinchDist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        initialPinchScale = this.scale;
+      }
+    }, { passive: false });
+
+    window.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 1) {
+        const touch = e.touches[0];
+        if (this.draggedNode) {
+          const rect = this.canvas.getBoundingClientRect();
+          this.draggedNode.x = (touch.clientX - rect.left - this.panX) / this.scale;
+          this.draggedNode.y = (touch.clientY - rect.top - this.panY) / this.scale;
+          this.draggedNode.vx = 0;
+          this.draggedNode.vy = 0;
+        } else if (this.isDragging) {
+          this.panX = touch.clientX - this.startMouseX;
+          this.panY = touch.clientY - this.startMouseY;
+        }
+      } else if (e.touches.length === 2 && initialPinchDist) {
+        const currentDist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        if (initialPinchDist > 0) {
+          const factor = currentDist / initialPinchDist;
+          this.scale = Math.max(0.4, Math.min(3, initialPinchScale * factor));
+        }
+      }
+    }, { passive: false });
+
+    window.addEventListener('touchend', () => {
+      this.draggedNode = null;
+      this.isDragging = false;
+      initialPinchDist = null;
+    });
   },
 
   findNodeAt(x, y) {

@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: gradomania-app
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python server.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.8
+      - key: PORT
+        value: 8080
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: TURNSTILE_SECRET_KEY
+        sync: false
+      - key: ALLOW_TEST_AUTH
+        value: "0"

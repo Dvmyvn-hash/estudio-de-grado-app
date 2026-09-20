@@ -7,9 +7,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  min-width: 34px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   padding: 0;
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -23,14 +24,14 @@
 }
 
 .license-status-badge.demo {
-  background: rgba(239, 68, 68, 0.12);
-  border: 1px solid rgba(239, 68, 68, 0.35);
-  color: #f87171;
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  color: var(--danger-text);
 }
 
 .license-status-badge.demo:hover {
   background: rgba(239, 68, 68, 0.22);
-  border-color: rgba(239, 68, 68, 0.5);
+  border-color: var(--danger-text);
   transform: translateY(-1px);
 }
 
@@ -55,7 +56,7 @@
 .topic-lock-icon {
   width: 13px;
   height: 13px;
-  color: #f87171;
+  color: var(--danger-text);
   flex-shrink: 0;
   margin-left: 4px;
 }
@@ -414,7 +415,7 @@
 }
 
 .policy-rule.valid {
-  color: #34d399;
+  color: var(--success-text);
   font-weight: 600;
 }
 
@@ -424,11 +425,13 @@
 }
 
 .password-match-hint.valid {
-  color: #34d399;
+  color: var(--success-text);
+  font-weight: 600;
 }
 
 .password-match-hint.invalid {
-  color: #f87171;
+  color: var(--danger-text);
+  font-weight: 600;
 }
 
 .turnstile-container {
@@ -442,10 +445,11 @@
 
 .auth-error-alert {
   padding: 9px 12px;
-  background: rgba(239, 68, 68, 0.12);
-  border: 1px solid rgba(239, 68, 68, 0.35);
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
   border-radius: var(--radius-sm);
-  color: #f87171;
+  color: var(--danger-text);
+  font-weight: 600;
   font-size: 0.8rem;
   line-height: 1.4;
   animation: fadeInPaywall 0.2s ease-out;
@@ -453,7 +457,8 @@
 
 .auth-submit-btn {
   width: 100%;
-  height: 42px;
+  height: 44px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -594,9 +599,9 @@
   gap: 5px;
   padding: 4px 10px;
   border-radius: var(--radius-full);
-  background: rgba(239, 68, 68, 0.14);
-  border: 1px solid rgba(239, 68, 68, 0.35);
-  color: #f87171;
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  color: var(--danger-text);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.03em;
@@ -626,5 +631,62 @@
 .badge-active-status i {
   width: 14px;
   height: 14px;
+}
+
+/* ==========================================================================
+   RESPONSIVO MÓVIL Y ACCESIBILIDAD TÁCTIL (PAYWALL Y MODAL DE ACTIVACIÓN)
+   ========================================================================== */
+@media (max-width: 768px) {
+  .license-status-badge {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .turnstile-container {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 480px) {
+  #unlock-modal .modal-dialog {
+    max-width: 100%;
+    margin: 0;
+  }
+
+  #unlock-modal .modal-body {
+    padding: 16px 14px !important;
+  }
+
+  .unlock-step-info-card {
+    padding: 12px 14px;
+  }
+
+  .unlock-user-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .auth-input {
+    font-size: 16px; /* Previene auto-zoom molesto en iOS Safari */
+    height: 44px;
+  }
+
+  .link-toggle-auth {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+  }
+
+  .auth-submit-btn {
+    min-height: 46px;
+    height: 46px;
+    font-size: 0.95rem;
+  }
 }
 

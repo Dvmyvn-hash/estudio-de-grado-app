@@ -1,53 +1,106 @@
-# ⚖️ ESTUDIO DE GRADO - PLATAFORMA DE PREPARACIÓN INTERACTIVA
+# ⚖️ GRADOMANÍA — Plataforma Inteligente para el Examen de Grado en Derecho
 ### Derecho Civil · Derecho Procesal · Derecho Constitucional
 
-Plataforma interactiva diseñada para la preparación del Examen de Grado en Derecho, basada en apuntes de **NotebookLM ("ESTUDIO DE GRADO")**, con interconexión de instituciones jurídicas, grafo visual de conceptos y un taller de resolución de casos prácticos con metodología dogmática.
+**GRADOMANÍA** es una plataforma web de alto rendimiento diseñada para la preparación integral del Examen de Grado en Derecho. Integra el temario completo basado en cédulas oficiales, un visor de apuntes Markdown enriquecido, un grafo visual interactivo de conceptos jurídicos interconectados, un taller metodológico de casos prácticos con rúbrica AIME 2026-20 y un sistema de autenticación seguro con control de acceso convalidable.
 
 ---
 
-## 🚀 Cómo Iniciar la Aplicación
+## 🏗️ Arquitectura Dual: Nube / Local / Estática
 
-Tienes dos opciones muy sencillas:
+La aplicación opera bajo una arquitectura dual perfectamente desacoplada:
 
-### Opción A: Abrir directamente en el navegador (Sin requerir servidores)
-Haz doble clic sobre el archivo `index.html` o ábrelo en tu navegador favorito (Chrome, Edge, Opera, Firefox).
+1. **Modo Servidor Completo (Render.com / Local con Python)**:
+   - Servidor HTTP multi-hilo (`server.py`) con API REST para autenticación (PBKDF2-SHA256), protección anti-fuerza bruta con backoff exponencial, verificación fail-closed de Cloudflare Turnstile y sincronización multi-dispositivo con SQLite (`db.py`).
+   - Monitoreo en vivo de fuentes y apuntes con auto-recarga inteligente en el navegador.
 
-### Opción B: Ejecutar con el servidor local de Python
-Abre una terminal PowerShell en esta carpeta y ejecuta:
+2. **Modo Autónomo / Estático (GitHub Pages / Navegador Offline)**:
+   - Si no hay backend Python disponible o se aloja en GitHub Pages, la aplicación entra automáticamente en modo autónomo: todo el temario dogmático, el visor Markdown, el grafo interactivo y los casos de prueba cargan directamente desde memoria (`js/data.js`) y guardan el progreso en `localStorage`.
+
+---
+
+## 🚀 Despliegue Público Gratuito en Render.com
+
+Puedes desplegar **GRADOMANÍA** completamente gratis en [Render.com](https://render.com) en menos de 3 minutos:
+
+### Paso 1: Subir el proyecto a GitHub
+Sube este repositorio a tu cuenta de GitHub (público o privado).
+
+### Paso 2: Crear el Web Service en Render
+1. Inicia sesión en [Render Dashboard](https://dashboard.render.com).
+2. Haz clic en **"New +"** y selecciona **"Web Service"**.
+3. Conecta tu repositorio de GitHub `estudio-de-grado-app`.
+4. Configura los siguientes parámetros:
+   - **Name:** `gradomania` (o el nombre que prefieras)
+   - **Region:** Elige la más cercana (ej: `Oregon (US West)` u `Ohio`)
+   - **Branch:** `main` (o tu rama activa)
+   - **Root Directory:** *(dejar en blanco si el repo está en la raíz)*
+   - **Runtime:** `Python 3`
+   - **Build Command:** `pip install -r requirements.txt`
+   - **Start Command:** `python server.py`
+   - **Instance Type:** `Free` ($0/mes)
+
+### Paso 3: Variables de Entorno (Environment Variables)
+En la sección **"Environment"** añade:
+| Clave (Key) | Valor (Value) | Descripción |
+| :--- | :--- | :--- |
+| `PYTHON_VERSION` | `3.11.8` | Versión recomendada de Python |
+| `SESSION_SECRET` | *(Haz clic en "Generate")* | Secreto criptográfico de 32+ caracteres para firmar cookies de sesión |
+| `TURNSTILE_SECRET_KEY` | Tu Secret Key de Cloudflare Turnstile | Si dejas la clave demo de Cloudflare (`1x0000000000000000000000000000000AA`), funcionará en modo de desarrollo |
+| `PORT` | `8080` | Render lo configura automáticamente |
+
+### Paso 4: Desplegar y listo
+Haz clic en **"Create Web Service"**. En un par de minutos, Render completará el build y te entregará una URL pública segura HTTPS (ej: `https://gradomania.onrender.com`).
+
+> [!NOTE]
+> **Persistencia en el Plan Gratuito de Render:**
+> En el plan Free de Render, el disco es efímero (los datos de SQLite se restablecen si el contenedor entra en reposo prolongado). Para generar códigos de invitación válidos en producción:
+> 1. Ve a la pestaña **"Shell"** de tu servicio en Render.
+> 2. Ejecuta: `python manage_access_codes.py` para emitir tus códigos de activación.
+> *(Si deseas persistencia 24/7 sin reinicios de base de datos, puedes activar el plan Starter de $7/mes y adjuntar un Persistent Disk montado en `/data`).*
+
+---
+
+## 💻 Ejecución en Entorno Local
+
+### Opción A: Servidor Inteligente con Python (Recomendado)
+```powershell
+python server.py
+```
+Abre en tu navegador: [http://localhost:8080](http://localhost:8080)
+
+*Para conectar tu teléfono o tablet mediante la misma red Wi-Fi:*
+```powershell
+python server.py --lan
+```
+
+### Opción B: Modo Estático (Sin Servidor)
+Haz doble clic sobre `index.html` o usa cualquier servidor estático:
 ```powershell
 python -m http.server 8000
 ```
-Luego abre tu navegador en: [http://localhost:8000](http://localhost:8000)
 
 ---
 
-## 📚 Módulos y Funcionalidades Principales
+## 🔑 Gestión de Códigos de Invitación (Pase de Grado)
 
-### 1. Temario & Apuntes (Knowledge Hub)
-- **Navegación por Cédulas:** Filtra por materia (*Civil*, *Procesal*, *Constitucional*) o revisa todas las instituciones.
-- **Visualizador Markdown Enriquecido:** Citas doctrinales, artículos destacados y enlaces internos estilo `[[Wikilink]]`.
-- **Panel Lateral de Conexiones:** Muestra al instante qué otras instituciones se cruzan con el tema que estás estudiando y qué casos prácticos lo aplican.
-- **Control de Dominio:** Marca temas como *"Dominado"* o *"Por repasar"* para monitorear tu porcentaje de avance hacia el grado.
-
-### 2. Taller Metodológico de Casos Prácticos (4 Dimensiones)
-Resuelve casos reales de examen de grado siguiendo la metodología dogmática requerida por las comisiones:
-1. **Hechos Relevantes & Conflicto Jurídico:** Identificación de la litis.
-2. **Fundamento Normativo:** Artículos de los Códigos (Civil, CPC) y de la Constitución Política.
-3. **Subsunción y Razonamiento:** Encaje fáctico y silogismo jurídico paso a paso.
-4. **Dogmática y Doctrina Jurídica:** Categorías doctrinales en juego (*Drittwirkung*, teoría de la imprevisión, principio de congruencia, culpa in contrahendo, etc.).
-- **Comparación con Solución Modelo:** Contrasta tus respuestas escritas con el criterio de corrección y argumentación de grado.
-
-### 3. Grafo de Instituciones Jurídicas
-- Visualizador interactivo de red con física de fuerzas.
-- Arrastra nodos, haz zoom y haz clic en cualquier institución para inspeccionar sus vínculos cruzados entre ramas del derecho y saltar a los apuntes.
-
-### 4. Gestor de Apuntes y NotebookLM
-- **Importar Notas:** Pega resúmenes o notas generadas en tu cuaderno de NotebookLM para incorporarlas instantáneamente al temario y al buscador.
-- **Fuentes en Markdown:** Los archivos en la carpeta `fuentes/` (`civil.md`, `procesal.md`, `constitucional.md`) sirven como repositorio de texto estructurado.
-- **Respaldos:** Exporta e importa copias de seguridad en archivo `.json` para nunca perder tus avances o notas.
+Para crear, listar o revocar códigos de acceso para tus alumnos o para ti mismo:
+```powershell
+python manage_access_codes.py
+```
+El asistente de terminal te permitirá:
+1. Crear un código nuevo (con límite de usos y fecha de expiración opcional).
+2. Listar todos los códigos activos y ver cuántos usuarios lo han convalidado.
+3. Desactivar o eliminar códigos.
 
 ---
 
-## ⌨️ Atajos Útiles
-- **`Ctrl + K`**: Abre el buscador global instantáneo para localizar normas, instituciones, cédulas o casos prácticos.
-- **`Esc`**: Cierra modales o resultados de búsqueda.
+## 📚 Módulos y Metodología Jurídica
+
+1. **Temario & Visor Dogmático:** Cédulas estructuradas de Civil, Procesal y Constitucional con referencias doctrinales y normativas.
+2. **Grafo de Instituciones Interconectadas:** Red de relaciones jurídicas transversales (ej: cómo la teoría del acto jurídico se relaciona con las nulidades procesales y las garantías constitucionales). Totalmente interactivo con soporte táctil (pan y pinch-to-zoom).
+3. **Taller de Casos Prácticos con Rúbrica AIME 2026-20:** Calificación en 4 dimensiones de excelencia:
+   - Dimensión 1: Marco Jurídico (citas normativas pertinentes).
+   - Dimensión 2: Hechos Relevantes (discriminación de datos sustantivos).
+   - Dimensión 3: Subsunción y Razonamiento (silogismo y justificación de alternativas).
+   - Dimensión 4: Claridad y Precisión Técnica (lenguaje dogmático riguroso).
+4. **Modos Claro y Oscuro Accesibles:** Cumplimiento de contraste WCAG AA en ambos temas visuales.

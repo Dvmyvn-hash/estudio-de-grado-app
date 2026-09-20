@@ -139,6 +139,24 @@ def init_db(db_path: Optional[Path] = None) -> None:
             cursor.execute("DROP TABLE users_old")
             conn.execute("PRAGMA foreign_keys = ON;")
 
+        cursor.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='user_progress'")
+        up_row = cursor.fetchone()
+        if up_row and "users_old" in (up_row[0] or ""):
+            conn.execute("PRAGMA foreign_keys = OFF;")
+            cursor.execute("ALTER TABLE user_progress RENAME TO user_progress_old")
+            cursor.execute("""
+            CREATE TABLE user_progress (
+              user_id INTEGER REFERENCES users(id),
+              case_id TEXT NOT NULL,
+              data_json TEXT NOT NULL,
+              updated_at INTEGER NOT NULL,
+              PRIMARY KEY (user_id, case_id)
+            );
+            """)
+            cursor.execute("INSERT OR IGNORE INTO user_progress SELECT * FROM user_progress_old")
+            cursor.execute("DROP TABLE user_progress_old")
+            conn.execute("PRAGMA foreign_keys = ON;")
+
         cursor.executescript("""
         CREATE TABLE IF NOT EXISTS user_progress (
           user_id INTEGER REFERENCES users(id),

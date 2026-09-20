@@ -42,13 +42,13 @@ except ImportError:
 
 import db
 
-PORT = 8080
+PORT = int(os.environ.get("PORT", 8080))
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "estudio_grado.db"
 
 def get_or_create_auth_secret() -> str:
     """Obtiene el secreto HMAC desde variable de entorno o genera uno criptográfico de 256 bits."""
-    env_secret = os.environ.get("AUTH_SECRET_KEY")
+    env_secret = os.environ.get("SESSION_SECRET") or os.environ.get("AUTH_SECRET_KEY")
     if env_secret and len(env_secret.strip()) >= 32:
         return env_secret.strip()
 
@@ -601,10 +601,14 @@ def verify_turnstile_token(token: str, remote_ip: str = "") -> bool:
     clean_token = token.strip()
     if not clean_token:
         return False
-    if ALLOW_TEST_AUTH and clean_token in ("mock-turnstile-token", "test-turnstile-token", "test-token"):
-        return True
     if clean_token == "invalid-token" or clean_token.startswith("invalid-"):
         return False
+    if (ALLOW_TEST_AUTH or TURNSTILE_SECRET_KEY == "1x0000000000000000000000000000000AA") and clean_token in (
+        "mock-turnstile-token", "test-turnstile-token", "test-token",
+        "client-turnstile-offline-token", "client-turnstile-fallback-token",
+        "XXXX.DUMMY.TOKEN.XXXX"
+    ):
+        return True
 
     try:
         post_data = urllib.parse.urlencode({
@@ -1595,19 +1599,26 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
 
 if __name__ == "__main__":
     import sys
-    # Seguridad por defecto: enlazar únicamente a localhost (127.0.0.1).
-    # Si se desea conectar el celular por Wi-Fi, ejecutar con el flag --lan: python server.py --lan
+    # Seguridad: Enlazar a 127.0.0.1 en desarrollo local.
+    # En Render o nube (PORT en entorno) o con flag --lan: enlazar a 0.0.0.0
     bind_address = "127.0.0.1"
-    if "--lan" in sys.argv or "-lan" in sys.argv:
-        bind_address = "" # Escuchar en todas las interfaces para red local
+    is_cloud_or_lan = (
+        "--lan" in sys.argv or
+        "-lan" in sys.argv or
+        bool(os.environ.get("RENDER")) or
+        "PORT" in os.environ
+    )
+    if is_cloud_or_lan:
+        bind_address = "0.0.0.0"
 
-    socketserver.ThreadingTCPServer.allow_reuse_address = False
+    socketserver.ThreadingTCPServer.allow_reuse_address = True
     with socketserver.ThreadingTCPServer((bind_address, PORT), AutoSyncHTTPHandler) as httpd:
-        mode_str = "Red local Wi-Fi (--lan habilitado)" if bind_address == "" else "Localhost seguro (127.0.0.1)"
+        mode_str = "Nube / Red Pública (0.0.0.0)" if bind_address == "0.0.0.0" else "Localhost seguro (127.0.0.1)"
         print(f"==================================================")
-        print(f" Servidor Estudio de Grado con Auto-Sincronizador")
+        print(f" Servidor GRADOMANÍA con Auto-Sincronizador")
         print(f" Modo: {mode_str}")
-        print(f" URL: http://{'localhost' if bind_address else '192.168.1.130'}:{PORT}")
+        print(f" Puerto: {PORT}")
+        print(f" URL: http://{'localhost' if bind_address == '127.0.0.1' else '0.0.0.0'}:{PORT}")
         print(f" Monitoreando carpeta: {APUNTES_DIR}")
         print(f"==================================================")
         try:

@@ -22,8 +22,8 @@ const App = {
   openUnlockModal() {
     const modal = document.getElementById("unlock-modal");
     if (!modal) return;
-    this.updateUnlockModalState();
     modal.classList.remove("hidden");
+    this.updateUnlockModalState();
     if (window.lucide) window.lucide.createIcons();
   },
 
@@ -185,7 +185,7 @@ const App = {
   },
 
   init() {
-    console.log("Inicializando Estudio de Grado App...");
+    console.log("Inicializando GRADOMANÍA...");
     this.setupTheme();
     this.setupNavigation();
     this.setupSidebar();
@@ -1442,7 +1442,7 @@ const App = {
           this.closeImportModal();
           this.init();
         } else {
-          alert("El archivo JSON seleccionado no tiene un formato válido de Estudio de Grado.");
+          alert("El archivo JSON seleccionado no tiene un formato válido de GRADOMANÍA.");
         }
       };
       reader.readAsText(file);

@@ -115,8 +115,8 @@
   color: var(--text-muted);
 }
 
-.case-difficulty-badge.alta { color: #f87171; }
-.case-difficulty-badge.media { color: #fbbf24; }
+.case-difficulty-badge.alta { color: var(--danger-text); }
+.case-difficulty-badge.media { color: var(--warning-text); }
 .case-difficulty-badge.grado { color: var(--gold-primary); font-weight: 700; }
 
 .case-card-title {
@@ -764,10 +764,10 @@
 }
 
 .fact-box-header.principales { color: var(--gold-primary); }
-.fact-box-header.secundarios { color: #38bdf8; }
-.fact-box-header.distractores { color: #f87171; }
-.fact-box-header.partes { color: #a855f7; }
-.fact-box-header.instituciones { color: #10b981; }
+.fact-box-header.secundarios { color: var(--info-text); }
+.fact-box-header.distractores { color: var(--danger-text); }
+.fact-box-header.partes { color: var(--procesal-color); }
+.fact-box-header.instituciones { color: var(--success-text); }
 
 .fact-box-list {
   margin: 0;
@@ -1120,7 +1120,8 @@
 }
 
 .criterio-excluyente-body strong {
-  color: #fca5a5;
+  color: var(--danger-text);
+  font-weight: 700;
 }
 
 /* TARJETA DE EVALUACIÓN Y RÚBRICA OFICIAL */
@@ -1266,10 +1267,10 @@
   text-transform: uppercase;
 }
 
-.level-name.destacado { color: #10b981; }
-.level-name.suficiente { color: #38bdf8; }
-.level-name.basico { color: #fbbf24; }
-.level-name.insuficiente { color: #f87171; }
+.level-name.destacado { color: var(--success-text); }
+.level-name.suficiente { color: var(--info-text); }
+.level-name.basico { color: var(--warning-text); }
+.level-name.insuficiente { color: var(--danger-text); }
 
 .level-pts {
   font-size: 0.75rem;
@@ -1542,8 +1543,9 @@
 .inst-incomp-badge {
   font-size: 0.68rem;
   font-weight: 700;
-  color: #f87171;
-  background: rgba(239, 68, 68, 0.15);
+  color: var(--danger-text);
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
   padding: 2px 6px;
   border-radius: var(--radius-sm);
   margin-top: 4px;
