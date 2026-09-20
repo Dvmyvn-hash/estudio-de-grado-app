@@ -398,26 +398,28 @@ Cuando el sistema se conecte con APIs de LLM externas (ej. Gemini API, Cloud Run
 
 ---
 
-## 6. Autenticación Autónoma (Correo + Contraseña PBKDF2), Captcha Cloudflare Turnstile y Sincronización Multi-Dispositivo
+## 6. Autenticación Autónoma (Correo + Contraseña PBKDF2), Verificación de Correo con Código de 6 Dígitos (SMTP) y Sincronización Multi-Dispositivo
 
 ### 6.1. Arquitectura de Identidad y Seguridad
-La plataforma implementa un esquema de autenticación resiliente y autónomo:
+La plataforma implementa un esquema de autenticación resiliente, autónomo y sin dependencias externas:
 1. **Modo Servidor Local / Producción (`server.py` y `db.py`):**
-   * **Identidad Autónoma:** Registro e inicio de sesión mediante Correo Electrónico y Contraseña, eliminando dependencias externas de Google Identity Services (GIS).
+   * **Identidad Autónoma:** Registro e inicio de sesión mediante Correo Electrónico y Contraseña, eliminando dependencias externas de Google Identity Services (GIS) y de Cloudflare Turnstile.
    * **Hashing Criptográfico Estándar:** Implementación nativa en Python estándar (`hashlib`, `secrets`, `base64`, `hmac`) con **PBKDF2-HMAC-SHA256**, 210.000 iteraciones y salt criptográfico único de 16 bytes codificado en Base64.
-   * **Verificación Fail-Closed de Captcha:** Integración con **Cloudflare Turnstile** (`https://challenges.cloudflare.com/turnstile/v0/siteverify`). En caso de timeout, error de red o token inválido, la solicitud se rechaza preventivamente (**HTTP 400**).
-   * **Defensa Proactiva en Login:** El captcha es obligatorio en todo registro y se exige en login a partir del primer intento fallido (`requiresCaptcha: true`).
-   * **Bloqueo Temporal de Cuenta (*Account Lockout*):** Tras 5 intentos fallidos consecutivos, la cuenta queda bloqueada temporalmente por 15 minutos en base de datos (`locked_until` en SQLite, respondiendo **HTTP 423 Locked**).
+   * **Verificación Nativa por Correo Electrónico:** Flujo de validación mediante código numérico criptográficamente seguro de 6 dígitos (`secrets.choice`), con caducidad estricta de 15 minutos (`verification_code_expires_at` en epoch ms) y límite defensivo de 5 intentos fallidos (`verification_attempts`).
+   * **Transporte de Correo mediante SMTP Estándar:** Módulo `smtplib` y `email.mime.text.MIMEText` sin librerías externas. Configuración flexible mediante variables de entorno (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM`) con soporte para STARTTLS (puerto 587) y SSL (puerto 465). Si no se define `SMTP_HOST`, el servidor entra en modo de desarrollo y registra el código directamente en la consola (`[SMTP Dev] Código de verificación para user@...: XXXXXX`).
+   * **Reenvío Seguro con Throttling:** Endpoint `POST /api/auth/resend-code` con rate limiting (10 req/min), generación de nuevo código, reset de intentos a 0 y respuesta genérica uniforme para prevenir la enumeración de usuarios.
+   * **Defensa Proactiva en Login:** Si una cuenta no ha completado la verificación de correo (`is_verified = 0`), el endpoint `POST /api/auth/login` responde **HTTP 403 Forbidden** con `{ ok: false, unverified: true, email: ... }` sin crear sesión, guiando al postulante a la subvista de ingreso de código.
+   * **Bloqueo Temporal de Cuenta (*Account Lockout*):** Tras 5 intentos fallidos consecutivos de contraseña en login, la cuenta queda bloqueada temporalmente por 15 minutos en base de datos (`locked_until` en SQLite, respondiendo **HTTP 423 Locked**).
    * **Mitigación de Ataques de Temporización (*Timing Attacks*):** En caso de consultar un usuario inexistente en login, el servidor ejecuta una verificación simulada de PBKDF2 con salt ficticio para igualar el tiempo de respuesta.
    * **Sesiones Seguras Firmadas:** Emisión de tokens firmados con **HMAC-SHA256** persistidos en cookies `session_token` con atributos `HttpOnly; Secure; SameSite=Lax`.
-   * **Persistencia Relacional SQLite:** Base de datos `estudio_grado.db` con tablas `users` (con `email`, `password_hash`, `password_salt`, `name`, `access_code`, `failed_login_attempts`, `locked_until`), `access_codes` y `user_progress`.
+   * **Persistencia Relacional SQLite:** Base de datos `estudio_grado.db` con tablas `users` (con `email`, `password_hash`, `password_salt`, `name`, `access_code`, `is_verified`, `verification_code`, `verification_code_expires_at`, `verification_attempts`, `failed_login_attempts`, `locked_until`), `access_codes` y `user_progress`. Auto-migración idempotente en `init_db()`.
    * **Protección Zero Exposure:** Bloqueo absoluto (**HTTP 403 Forbidden**) de acceso directo a archivos `.db`, `.py`, scripts y secretos criptográficos.
-   * **Compatibilidad de Pruebas E2E:** Soporte condicional controlado por variable de entorno `ALLOW_TEST_AUTH=1` para tokens mock de Turnstile y compatibilidad con suites de integración existentes.
+   * **Compatibilidad de Pruebas E2E:** Soporte condicional controlado por variable de entorno `ALLOW_TEST_AUTH=1` para emitir `testVerificationCode` en respuestas de registro y reenvío, permitiendo pruebas automatizadas deterministas sin servicios de correo externos.
 
 2. **Modo Estático / GitHub Pages (`auth-service.js`):**
    * Registro y login en cliente con persistencia en `localStorage` (`grado_registered_users` y `grado_auth_user`).
    * Validación en cliente de política de contraseñas y coincidencia de confirmación.
-   * Gestión del ciclo de vida del widget de Cloudflare Turnstile (`render`, `reset`, tokens).
+   * Flujo de verificación de 6 dígitos simulado en navegador para pruebas offline y despliegues estáticos.
    * Validación de códigos de invitación preconfigurados en `js/auth-config.js` (`AUTH_CONFIG`).
 
 ---
@@ -427,7 +429,7 @@ La plataforma implementa un esquema de autenticación resiliente y autónomo:
 ### 7.1. Dinámica del Flujo de Acceso
 El botón de estado de licencia (icono de candado `#btn-open-unlock-badge` en la cabecera superior y tarjetas de paywall) opera como la puerta de entrada unificada para la activación del Pase de Grado:
 
-1. **Paso 1: Identificación con Correo y Contraseña + Turnstile:**
+1. **Paso 1: Identificación y Verificación de Correo (Sub-estado de Código 6 Dígitos):**
    * Al presionar el candado, si el usuario **no cuenta con una sesión activa**, se despliega el modal `#unlock-modal` en la vista `#unlock-step-login`.
    * Se presenta el formulario de credenciales (`#form-auth-register`) con campos de correo (`#input-register-email`), contraseña (`#input-register-password`) y confirmación (`#input-confirm-password`).
    * Validación en vivo de la política de contraseñas mediante `#password-policy-hints`:
@@ -436,12 +438,17 @@ El botón de estado de licencia (icono de candado `#btn-open-unlock-badge` en la
      * Al menos una letra minúscula (`#rule-lower`).
      * Al menos un número (`#rule-num`).
    * Indicador dinámico de coincidencia de contraseñas (`#password-match-hint`).
-   * Widget de Cloudflare Turnstile en `#unlock-captcha-container`.
    * Enlace interactivo `#link-toggle-login-register` para conmutar ágilmente entre modo Registro y modo Iniciar Sesión.
-   * El campo de ingreso de código de activación permanece bloqueado hasta completar la autenticación.
+   * **Subvista de Verificación (`#unlock-step-verify-code`):** Al registrar una cuenta nueva o intentar iniciar sesión en una cuenta pendiente de verificación, el formulario `#form-auth-register` se oculta y se despliega la subvista de verificación:
+     * Muestra el correo destinatario en `#verify-email-display`.
+     * Campo `#input-verification-code` con máscara numérica, longitud de 6 caracteres y filtrado automático de caracteres no numéricos.
+     * Botón `#btn-submit-verify-code` habilitado únicamente al alcanzar exactamente 6 dígitos.
+     * Enlace de reenvío `#link-resend-code` con cuenta regresiva visual de 30 segundos (*throttling* defensivo).
+     * Enlace `#link-back-to-register` para retornar en cualquier momento al formulario de credenciales.
+   * Al verificar exitosamente el código de 6 dígitos, el usuario queda **autenticado de inmediato con cookie de sesión activa** y transita directamente al Paso 2 (`#unlock-step-convalidate`) en **Versión Demo**, sin requerir un inicio de sesión intermedio.
 
 2. **Inicio Predeterminado en Versión Demo:**
-   * Al registrarse o iniciar sesión, el postulante accede **con la sesión iniciada en Versión Demo por defecto** (`isDemo = true`, `access_code = null`).
+   * Tras la verificación del código o login de cuenta verificada, el postulante accede **con la sesión iniciada en Versión Demo por defecto** (`isDemo = true`, `access_code = null`).
    * La cabecera muestra el nombre o correo del alumno (`#auth-user-container`), mientras el candado permanece en estado demo rojo.
    * El postulante puede explorar de inmediato las cédulas y casos liberados para prueba.
 
@@ -464,9 +471,13 @@ El botón de estado de licencia (icono de candado `#btn-open-unlock-badge` en la
 ```mermaid
 stateDiagram-v2
     [*] --> SinSesion: Clic en Candado (#btn-open-unlock-badge)
-    SinSesion --> Paso1_Credenciales: Renderiza #unlock-step-login
-    Paso1_Credenciales --> Paso1_Credenciales: Fallo de validación / Captcha no resuelto
-    Paso1_Credenciales --> Paso2_Demo: Registro/Login exitoso + Turnstile verificado (isDemo: true)
+    SinSesion --> Paso1_Credenciales: Renderiza #unlock-step-login (#form-auth-register)
+    Paso1_Credenciales --> Paso1_Credenciales: Error validación credenciales / contraseñas
+    Paso1_Credenciales --> Paso1_VerificacionCodigo: Registro exitoso (201) o Login no verificado (403)
+    Paso1_VerificacionCodigo --> Paso1_Credenciales: Clic en Volver (#link-back-to-register)
+    Paso1_VerificacionCodigo --> Paso1_VerificacionCodigo: Código erróneo / Reenviar código (#link-resend-code)
+    Paso1_VerificacionCodigo --> Paso2_Demo: Código de 6 dígitos verificado (Sesión creada, isDemo: true)
+    Paso1_Credenciales --> Paso2_Demo: Login exitoso de cuenta ya verificada (isDemo: true)
     Paso2_Demo --> Convalidando: Ingreso de Código (#input-license-code) + Clic #btn-submit-license
     Convalidando --> Paso2_Demo: Código inválido o expirado (Toast error)
     Convalidando --> PaseActivo: Código válido vinculado a la cuenta (isDemo: false)
@@ -478,7 +489,7 @@ stateDiagram-v2
 | :--- | :--- | :--- |
 | `#unlock-modal` | Contenedor Modal | Diálogo principal de activación con backdrop difuminado. |
 | `.unlock-step-indicator` | Barra de Progreso | Muestra los estados visuales `1. Identificación` y `2. Convalidación`. |
-| `#unlock-step-login` | Vista de Paso 1 | Formulario de Registro e Inicio de Sesión autónomo. |
+| `#unlock-step-login` | Vista de Paso 1 | Contenedor principal de identificación y verificación. |
 | `#auth-form-title` | Encabezado | Título dinámico ("Paso 1: Crea tu cuenta..." o "Paso 1: Inicia sesión..."). |
 | `#form-auth-register` | Formulario | Formulario con prevención de submit por defecto y validación reactiva. |
 | `#input-register-email` | Input Email | Entrada para correo electrónico del postulante. |
@@ -486,10 +497,16 @@ stateDiagram-v2
 | `#input-confirm-password` | Input Password | Entrada de confirmación de contraseña (modo Registro). |
 | `#password-policy-hints` | Contenedor Hints | Indicadores visuales de cumplimiento de reglas (`#rule-len`, `#rule-upper`, `#rule-lower`, `#rule-num`). |
 | `#password-match-hint` | Hint Coincidencia | Feedback en tiempo real sobre coincidencia entre contraseña y confirmación. |
-| `#unlock-captcha-container` | Contenedor Turnstile | Contenedor para renderizar el widget de Cloudflare Turnstile con atributo `data-sitekey="0x4AAAAAAAE9e7tJ25CKz1YqH"`. |
 | `#btn-submit-register` | Botón Submit | Botón dinámico ("Crear Cuenta" o "Iniciar Sesión") con icono reactivo. |
 | `#link-toggle-login-register` | Enlace Toggle | Conmutador interactivo entre modo Registro y modo Login. |
 | `#register-error-msg` | Alerta de Error | Banner de alerta para desplegar errores de autenticación sanitizados. |
+| `#unlock-step-verify-code` | Subvista Paso 1 | Subvista para el ingreso y validación del código numérico de 6 dígitos. |
+| `#verify-email-display` | Texto | Despliega la dirección de correo a la que fue enviado el código. |
+| `#input-verification-code` | Input Código | Entrada numérica de 6 dígitos con máscara y auto-validación. |
+| `#btn-submit-verify-code` | Botón Submit | Botón "Verificar y Continuar" que envía el código al servidor. |
+| `#link-resend-code` | Botón Acción | Botón de reenvío de código con temporizador de enfriamiento de 30 segundos. |
+| `#link-back-to-register` | Enlace Toggle | Retorna al formulario de registro/login si el postulante desea corregir su correo. |
+| `#verify-error-msg` | Alerta de Error | Banner de retroalimentación para códigos inválidos, expirados o confirmación de reenvío. |
 | `#unlock-step-convalidate` | Vista de Paso 2 | Desplegada cuando existe sesión activa en Versión Demo (`currentUser.isDemo = true`). |
 | `#unlock-user-card` | Tarjeta de Identidad | Despliega la cuenta de usuario vinculada. |
 | `#unlock-user-name` | Texto | Nombre y apellidos o identificador del postulante (`name`). |
@@ -502,11 +519,11 @@ stateDiagram-v2
 ---
 
 ### 7.3. Contratos de Seguridad y Pruebas Automatizadas
-* **Suite de Autenticación Autónoma (`test_unlock_auth_flow.cjs`):** Ejecuta 49 pruebas cubriendo estado inicial, validación de política de contraseñas, rechazo por discrepancia, verificación fail-closed de Turnstile, registro, prevención de duplicados, login fallido, exigencia de captcha tras error, bloqueo por 5 fallos consecutivos (15 min), login exitoso, convalidación de código de activación, desbloqueo integral de materias en `LicenseService`, y **pruebas de regresión reactivas para el botón `#btn-submit-register`** (habilitación inmediata al cumplir datos válidos, feedback explícito ante ausencia de captcha, y aceptación de tokens de contingencia offline/fallback).
+* **Suite de Autenticación Autónoma (`test_unlock_auth_flow.cjs`):** Ejecuta 63 pruebas cubriendo estado inicial, validación de política de contraseñas, rechazo por discrepancia, registro con emisión de código de verificación, prevención de duplicados, login fallido de cuenta no verificada (HTTP 403), verificación con código erróneo, invalidación tras 5 intentos fallidos, reenvío de nuevo código con reseteo de intentos, verificación exitosa con código válido, autenticación directa en Versión Demo, convalidación con código de activación, desbloqueo integral de materias en `LicenseService`, cierre de sesión, login exitoso con credenciales correctas tras verificación, y pruebas de regresión reactivas para el botón `#btn-submit-register` y la subvista `#unlock-step-verify-code`.
 * **Suite de Regresión e Integración (`test_e2e_case_flow.cjs`):** Ejecuta 65 pruebas integrales que verifican la confidencialidad de modelos docentes, casos IA, rúbrica AIME 2026-20, ciberseguridad y sincronización multi-dispositivo sin regresiones.
 * **Sanitización Defensiva y Prevención XSS:** Todos los datos de usuario son escapados contra inyección XSS mediante `SecurityShield.escapeHtml` y los mensajes de error se renderizan estrictamente con `textContent` en el DOM.
 * **Hashing Seguro en Cliente (Modo Estático / GitHub Pages):** La función `AuthService.hashClientPassword()` emplea la Web Crypto API (`crypto.subtle.digest("SHA-256")`) con salt local, asegurando que **nunca se almacenen contraseñas en texto plano** en `localStorage`.
-* **Resiliencia contra Bloqueadores de Anuncios / Adblockers:** `AuthService.initTurnstile()` implementa un límite finito de 15 reintentos (~3.7 segundos) y maneja `error-callback` para evitar bucles infinitos en el navegador y garantizar que la plataforma opere de forma accesible en GitHub Pages.
+* **Resiliencia y Modo Desarrollo SMTP:** Si `SMTP_HOST` no está configurado en el servidor, `server.py` no falla ni interrumpe la ejecución; imprime el código de verificación en consola con la etiqueta `[SMTP Dev]` permitiendo pruebas locales transparentes.
 * **Accesibilidad Visual WCAG AA y Contraste Real:** Tokens semánticos tipográficos y de estado (`--gold-primary: #92400e;`, `--danger-text: #b91c1c;`, `--warning-text: #92400e;`, `--success-text: #047857;`, `--info-text: #0284c7;`) que garantizan relaciones de contraste superiores a 4.5:1 (texto normal) y 7:1 (encabezados/estados) contra fondos claros, eliminando colores amarillos pálidos o rojos claros inaccesibles.
 * **Experiencia y Accesibilidad Táctil Móvil:** Dimensiones mínimas de touch targets $\ge 44 \times 44\text{ px}$ en botones de navegación, badges de estado e interactores de formulario; entradas de texto a 16px para evitar auto-zoom indeseado en iOS Safari; y propiedad `touch-action: none;` con gestos multitáctiles (pan y pinch-to-zoom de 2 dedos) en el visor de instituciones interconectadas (`ConceptGraph`).
 
@@ -517,27 +534,28 @@ stateDiagram-v2
 | Archivo / Ruta | Tipo | Responsabilidad Arquitectónica |
 | :--- | :--- | :--- |
 | `CONTEXT.md` | Documentación | **Fuente canónica inmutable de verdad.** Debe actualizarse tras cada cambio. |
-| `README.md` | Documentación | Manual de usuario, arquitectura dual, guía paso a paso para Render.com y administración CLI. |
-| `index.html` | Estructura | Workbench jurídico, visor de cédulas, visor de casos y modal unificado de acceso `#unlock-modal` con Turnstile. |
-| `css/paywall.css` | Estilos | Estilos del formulario de credenciales, hints de contraseña, Turnstile, paywall, insignias de estado y responsive móvil. |
+| `README.md` | Documentación | Manual de usuario, arquitectura dual, guía paso a paso para Render.com y administración CLI con variables SMTP. |
+| `GOOGLE_AUTH_SETUP.md` | Documentación | Guía de arquitectura de autenticación autónoma, configuración de SMTP y despliegue público. |
+| `index.html` | Estructura | Workbench jurídico, visor de cédulas, visor de casos y modal unificado de acceso `#unlock-modal` con subvista de verificación `#unlock-step-verify-code`. |
+| `css/paywall.css` | Estilos | Estilos del formulario de credenciales, hints de contraseña, subvista de código 6 dígitos, paywall, insignias de estado y responsive móvil. |
 | `css/main.css` | Estilos | Sistema de diseño *Dark Academy*, variables tipográficas (`Playfair Display`, `Plus Jakarta Sans`), tokens WCAG AA y header responsive. |
 | `css/modal.css` | Estilos | Diálogos modales, backdrop difuminado y estructura responsive para dispositivos móviles. |
 | `css/concept-graph.css` | Estilos | Lienzo de grafo HTML5 con `touch-action: none;` y controles flotantes adaptados a pantallas táctiles. |
 | `css/case-workshop.css` | Estilos | Taller de casos prácticos, rúbrica AIME 2026-20 y badges con tokens de contraste accesibles. |
 | `js/app.js` | Orquestador | Controlador principal de GRADOMANÍA, navegación, vinculación del candado y auto-sincronizador de fuentes. |
-| `js/auth-service.js` | Servicio | Autenticación autónoma (registro, login, logout), hashing seguro cliente con Web Crypto, gestión de Turnstile, validación reactiva y sesiones. |
+| `js/auth-service.js` | Servicio | Autenticación autónoma (registro, verificación de código de 6 dígitos, reenvío con throttling, login, logout), hashing seguro cliente con Web Crypto, validación reactiva y sesiones. |
 | `js/auth-license.js` | Servicio | Lógica de licencias (`LicenseService`), cálculo de materias desbloqueadas y persistencia local. |
-| `js/auth-config.js` | Configuración | Clave pública de Cloudflare Turnstile (`turnstileSiteKey`), códigos de invitación para modo estático y parámetros de sesión. |
+| `js/auth-config.js` | Configuración | Configuración de cliente, códigos de invitación para modo estático y parámetros de sesión. |
 | `js/concept-graph.js` | Visualizador | Grafo interactivo con física de fuerzas y soporte móvil completo (arrastre de nodos, pan y pinch-to-zoom con dos dedos). |
 | `js/case-generator-agent.js` | Agente IA | Síntesis dogmática de casos inéditos, matriz de compatibilidad y poda FIFO. |
 | `js/case-solver.js` | Workbench | Interrogación, compuertas excluyentes, rúbrica AIME 2026-20 y evaluación de justificaciones. |
 | `js/security-shield.js` | Ciberseguridad | Detección de prompt injection, anti-XSS, escape seguro y cuotas de caracteres. |
-| `server.py` | Backend | Servidor HTTP Python multi-hilo, enlace dinámico (0.0.0.0 en nube/Render, 127.0.0.1 en local), soporte `PORT`/`SESSION_SECRET`, Turnstile fail-closed, Zero Exposure y rate limiting. |
-| `db.py` | Base de Datos | Conexión relacional SQLite (`estudio_grado.db`), hashing PBKDF2, esquema de usuarios con lockout y códigos de acceso. Auto-sanación en migraciones. |
+| `server.py` | Backend | Servidor HTTP Python multi-hilo, enlace dinámico (0.0.0.0 en nube/Render, 127.0.0.1 en local), soporte `PORT`/`SESSION_SECRET`, correo SMTP nativo con `smtplib`, endpoints `/api/auth/register`, `/api/auth/verify-code`, `/api/auth/resend-code`, `/api/auth/login`, Zero Exposure y rate limiting. |
+| `db.py` | Base de Datos | Conexión relacional SQLite (`estudio_grado.db`), hashing PBKDF2, esquema de usuarios con `is_verified`, `verification_code`, `verification_code_expires_at`, `verification_attempts`, lockout y códigos de acceso. Auto-sanación y auto-migración en `init_db()`. |
 | `manage_access_codes.py` | CLI Admin | Generador y administrador de códigos de invitación tipo beta cerrada. |
 | `requirements.txt` | Dependencias | Paquetes de producción mínimos (`pypdf`, `python-docx`, `google-auth`) para despliegues en contenedores e infraestructura cloud. |
-| `render.yaml` | Infraestructura | Blueprint declarativo de infraestructura como código para despliegue automatizado en Render.com. |
-| `test_unlock_auth_flow.cjs` | Test E2E | Suite de 49 pruebas que valida el flujo Candado -> Correo/Contraseña/Turnstile -> Demo -> Convalidación -> Pase Activo y regresión reactiva. |
+| `render.yaml` | Infraestructura | Blueprint declarativo de infraestructura como código para despliegue automatizado en Render.com con variables SMTP. |
+| `test_unlock_auth_flow.cjs` | Test E2E | Suite de 63 pruebas que valida el flujo Candado -> Correo/Contraseña -> Verificación 6 Dígitos -> Demo -> Convalidación -> Pase Activo y regresión reactiva. |
 | `test_e2e_case_flow.cjs` | Test E2E | Suite integral de 65 pruebas (casos IA, seguridad, rúbrica, confidencialidad y multi-dispositivo). |
 
 ---
@@ -555,5 +573,12 @@ stateDiagram-v2
 * **v4.2 (Corrección Bug Habilitación de "Crear Cuenta", Renderizado de Turnstile y Resiliencia):** Identificación y resolución de causa raíz en la validación del formulario de registro: desacoplamiento del flag `isCaptchaValid` del cálculo reactivo del atributo `disabled` de `#btn-submit-register`, permitiendo que el botón se habilite de inmediato al completar correo válido, contraseña cumpliendo la política de 4 reglas y confirmación coincidente; si el captcha no ha resuelto al momento del submit, `doSubmit()` despliega un mensaje claro y visible en `#register-error-msg` ("Por favor completa la verificación de seguridad (captcha) para continuar.") en vez de dejar el botón inerte y bloqueado; reordenamiento en `App.openUnlockModal()` para retirar `.hidden` del modal antes de renderizar Turnstile, asegurando dimensiones reales en el DOM; método unificado `getTurnstileToken()` con lectura de fallback en `window.turnstile.getResponse()` e `input[name="cf-turnstile-response"]`; soporte en `server.py` (`verify_turnstile_token`) para admitir tokens de contingencia de desarrollo (`client-turnstile-offline-token`, `client-turnstile-fallback-token`) cuando se opera con la clave de pruebas oficial; incorporación de 12 nuevos casos de prueba de regresión DOM/reactividad en `test_unlock_auth_flow.cjs` (totalizando 49 pruebas); aprobación del 100% de las suites `test_unlock_auth_flow.cjs` (49/49) y `test_e2e_case_flow.cjs` (65/65).
 * **v5.0 (Rebranding "GRADOMANÍA", Modo Claro Accesible WCAG AA, Optimización Móvil y Preparación Render.com):** Rebranding integral visible a **GRADOMANÍA** sin alterar variables/funciones internas (`CaseGeneratorAgent`, `AuthService`, etc.); incorporación de tipografía serif jurídica (`Playfair Display`) para identidad y encabezados junto con tipografía funcional (`Plus Jakarta Sans`) para lectura técnica; favicon SVG estilizado con balanza de la justicia y birrete académico; meta tags Open Graph y Twitter Cards; remediación completa de contraste en Modo Claro con tokens semánticos accesibles WCAG AA (`--gold-primary: #92400e`, `--danger-text: #b91c1c`, `--warning-text: #92400e`, `--success-text: #047857`, `--info-text: #0284c7`), eliminando colores tenues sobre fondos blancos en badges de dificultad, criterios excluyentes y paywall; optimización de accesibilidad móvil con touch targets mínimos de $44 \times 44\text{ px}$ en badges y botones, prevención de zoom automático en iOS Safari (entradas a 16px) y soporte de gestos táctiles fluidos (arrastre de nodos, paneo y pinch-to-zoom de 2 dedos con `touch-action: none;`) en el visualizador `ConceptGraph`; preparación de despliegue en la nube para Render.com mediante lectura dinámica de `PORT` y enlace a `0.0.0.0`, `requirements.txt` ligero, blueprint declarativo `render.yaml` y documentación completa en `README.md`; auto-reparación preventiva en `db.py` ante claves foráneas heredadas en SQLite; 100% de aprobación en suites automatizadas `test_unlock_auth_flow.cjs` (49/49) y `test_e2e_case_flow.cjs` (65/65).
 * **v5.1 (Actualización de Clave Pública Cloudflare Turnstile para Producción):** Despliegue e implementación de la clave pública oficial de Cloudflare Turnstile (`0x4AAAAAAAE9e7tJ25CKz1YqH`) en la capa de interfaz y configuración: configuración activa en `js/auth-config.js` (`TURNSTILE_PRODUCTION_SITE_KEY`), sincronización en `auth_config.json` (`turnstile_site_key`), integración directa como atributo `data-sitekey` en el contenedor `#unlock-captcha-container` de `index.html`, y fallback dinámico en `js/auth-service.js` con lectura reactiva del DOM; actualización documental en `GOOGLE_AUTH_SETUP.md`; preservación del 100% de aprobación en suites automatizadas `test_unlock_auth_flow.cjs` (49/49) y `test_e2e_case_flow.cjs` (65/65).
+* **v6.0 (Eliminación de Cloudflare Turnstile y Verificación Nativa por Código de Correo de 6 Dígitos vía SMTP):**
+  - **Eliminación Total de Turnstile:** Desacoplamiento absoluto de la dependencia de Cloudflare Turnstile en backend (`server.py`), interfaz DOM (`index.html`), capa de estilos (`css/paywall.css`), cliente JavaScript (`js/auth-service.js`, `js/auth-config.js`), archivos de configuración (`auth_config.json`) e infraestructura (`render.yaml`).
+  - **Verificación Criptográfica por Correo Electrónico:** Generación de códigos numéricos aleatorios de 6 dígitos mediante `secrets.choice` en `server.py`; persistencia en SQLite (`db.py`) con campos `is_verified` (0/1), `verification_code`, `verification_code_expires_at` (15 minutos en epoch ms) y `verification_attempts` (máximo 5 intentos fallidos antes de invalidación automática); auto-migración de base de datos idempotente y segura en `init_db()`.
+  - **Transporte de Correo SMTP Estándar:** Implementación nativa con `smtplib` y `MIMEText` sin librerías externas; soporte de variables de entorno (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM`) con STARTTLS y SSL; modo fallback para desarrollo que imprime el código en consola (`[SMTP Dev]`) cuando no se declara un host SMTP externo.
+  - **Subvista de Verificación en Modal Unificado (#unlock-modal):** Inclusión de `#unlock-step-verify-code` como sub-estado dentro del Paso 1 (`#unlock-step-login`), reemplazando `#form-auth-register` al momento del registro exitoso o ante un intento de login de cuenta no verificada (**HTTP 403**); campo `#input-verification-code` con filtrado numérico estricto y auto-activación de botón; botón `#btn-submit-verify-code`; acción de reenvío `#link-resend-code` con throttling defensivo visual de 30s; y botón de retorno `#link-back-to-register`.
+  - **Transición Fluida a Paso 2 (Demo):** La verificación exitosa del código de 6 dígitos (`POST /api/auth/verify-code`) autentica al usuario directamente con cookie de sesión HMAC, asigna el rol `isDemo: true`, emite evento de autenticación y transita inmediatamente a `#unlock-step-convalidate` en Versión Demo sin requerir que el usuario pase por una pantalla intermedia de inicio de sesión.
+  - **Aprobación del 100% de Pruebas Automatizadas:** 63/63 pruebas exitosas en la suite de autenticación actualizada `test_unlock_auth_flow.cjs` y 65/65 pruebas exitosas en la suite integral de casos prácticos IA y ciberseguridad `test_e2e_case_flow.cjs`. Actualización completa y canónica de `CONTEXT.md`.
 
 

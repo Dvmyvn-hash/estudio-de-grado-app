@@ -10,7 +10,7 @@
 La aplicación opera bajo una arquitectura dual perfectamente desacoplada:
 
 1. **Modo Servidor Completo (Render.com / Local con Python)**:
-   - Servidor HTTP multi-hilo (`server.py`) con API REST para autenticación (PBKDF2-SHA256), protección anti-fuerza bruta con backoff exponencial, verificación fail-closed de Cloudflare Turnstile y sincronización multi-dispositivo con SQLite (`db.py`).
+   - Servidor HTTP multi-hilo (`server.py`) con API REST para autenticación (PBKDF2-SHA256), protección anti-fuerza bruta con backoff exponencial, verificación nativa de código por correo electrónico (6 dígitos) vía SMTP y sincronización multi-dispositivo con SQLite (`db.py`).
    - Monitoreo en vivo de fuentes y apuntes con auto-recarga inteligente en el navegador.
 
 2. **Modo Autónomo / Estático (GitHub Pages / Navegador Offline)**:
@@ -45,7 +45,11 @@ En la sección **"Environment"** añade:
 | :--- | :--- | :--- |
 | `PYTHON_VERSION` | `3.11.8` | Versión recomendada de Python |
 | `SESSION_SECRET` | *(Haz clic en "Generate")* | Secreto criptográfico de 32+ caracteres para firmar cookies de sesión |
-| `TURNSTILE_SECRET_KEY` | Tu Secret Key de Cloudflare Turnstile | Si dejas la clave demo de Cloudflare (`1x0000000000000000000000000000000AA`), funcionará en modo de desarrollo |
+| `SMTP_HOST` | `smtp.resend.com` (o tu proveedor) | Servidor SMTP para envío de códigos de verificación |
+| `SMTP_PORT` | `587` | Puerto SMTP (587 para TLS/STARTTLS o 465 para SSL) |
+| `SMTP_USER` | `resend` (o tu usuario) | Usuario de autenticación SMTP |
+| `SMTP_PASS` | `re_...` (o tu contraseña/token) | Contraseña o API key del servicio de correo |
+| `EMAIL_FROM` | `no-reply@tudominio.com` | Dirección remitente de los correos |
 | `PORT` | `8080` | Render lo configura automáticamente |
 
 ### Paso 4: Desplegar y listo

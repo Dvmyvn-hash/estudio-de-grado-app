@@ -16,6 +16,9 @@ import hmac
 import hashlib
 import base64
 import random
+import secrets
+import smtplib
+from email.mime.text import MIMEText
 from pathlib import Path
 from typing import Optional, Tuple, Dict, Any
 
@@ -586,51 +589,50 @@ AUTH_LIMITER = SecurityRateLimiter(max_entries=5000)
 LOGIN_BACKOFF_LIMITER = SecurityRateLimiter(max_entries=5000)
 GOOGLE_AUTH_LIMITER = SecurityRateLimiter(max_entries=5000)
 
-TURNSTILE_SECRET_KEY = os.environ.get("TURNSTILE_SECRET_KEY", "1x0000000000000000000000000000000AA").strip()
+# Configuración de Servidor de Correo (SMTP) para Verificación
+SMTP_HOST = os.environ.get("SMTP_HOST", "").strip()
+SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
+SMTP_USER = os.environ.get("SMTP_USER", "").strip()
+SMTP_PASS = os.environ.get("SMTP_PASS", "").strip()
+EMAIL_FROM = os.environ.get("EMAIL_FROM", "").strip() or SMTP_USER or "no-reply@gradomania.cl"
 
 
-def verify_turnstile_token(token: str, remote_ip: str = "") -> bool:
+def send_verification_email(to_email: str, code: str) -> bool:
     """
-    Verificación fail-closed de Cloudflare Turnstile contra https://challenges.cloudflare.com/turnstile/v0/siteverify:
-    - En test (ALLOW_TEST_AUTH=1): tokens 'mock-turnstile-token' o 'test-turnstile-token' son válidos.
-    - Si token vacío o 'invalid-token': fail-closed (False).
-    - Si la solicitud da error, timeout o success != true: fail-closed (False).
+    Envía código de verificación de 6 dígitos mediante SMTP.
+    Si SMTP_HOST no está configurado (entorno local de desarrollo o pruebas),
+    registra el código en consola y simula envío exitoso.
     """
-    if not token or not isinstance(token, str):
-        return False
-    clean_token = token.strip()
-    if not clean_token:
-        return False
-    if clean_token == "invalid-token" or clean_token.startswith("invalid-"):
-        return False
-    if (ALLOW_TEST_AUTH or TURNSTILE_SECRET_KEY == "1x0000000000000000000000000000000AA") and clean_token in (
-        "mock-turnstile-token", "test-turnstile-token", "test-token",
-        "client-turnstile-offline-token", "client-turnstile-fallback-token",
-        "XXXX.DUMMY.TOKEN.XXXX"
-    ):
+    subject = f"Tu código de verificación de GRADOMANÍA es: {code}"
+    body = f"Tu código de verificación de GRADOMANÍA es: {code}. Vence en 15 minutos."
+
+    if not SMTP_HOST:
+        print(f"[SMTP Dev] Código de verificación para {to_email}: {code} (Vence en 15 minutos)")
         return True
 
     try:
-        post_data = urllib.parse.urlencode({
-            "secret": TURNSTILE_SECRET_KEY,
-            "response": clean_token,
-            "remoteip": remote_ip
-        }).encode("utf-8")
-        req = urllib.request.Request(
-            "https://challenges.cloudflare.com/turnstile/v0/siteverify",
-            data=post_data,
-            headers={
-                "Content-Type": "application/x-www-form-urlencoded",
-                "User-Agent": "estudio-de-grado-app"
-            }
-        )
-        with urllib.request.urlopen(req, timeout=5) as resp:
-            if resp.status != 200:
-                return False
-            data = json.loads(resp.read().decode("utf-8"))
-            return bool(data.get("success") is True)
+        msg = MIMEText(body, "plain", "utf-8")
+        msg["Subject"] = subject
+        msg["From"] = EMAIL_FROM
+        msg["To"] = to_email
+
+        if SMTP_PORT == 465:
+            with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=10) as server:
+                if SMTP_USER and SMTP_PASS:
+                    server.login(SMTP_USER, SMTP_PASS)
+                server.send_message(msg)
+        else:
+            with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=10) as server:
+                try:
+                    server.starttls()
+                except Exception:
+                    pass
+                if SMTP_USER and SMTP_PASS:
+                    server.login(SMTP_USER, SMTP_PASS)
+                server.send_message(msg)
+        return True
     except Exception as e:
-        print(f"[Aviso Seguridad] Verificación Turnstile falló (fail-closed): {e}")
+        print(f"[Aviso SMTP] Error al enviar correo de verificación a {to_email}: {e}")
         return False
 
 
@@ -1055,7 +1057,7 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps({"ok": False, "error": f"Carga útil excede el límite máximo de seguridad ({MAX_PAYLOAD_SIZE // 1024} KB)"}).encode("utf-8"))
             return
 
-        # API: Registro de Usuario (Correo + Contraseña + Cloudflare Turnstile)
+        # API: Registro de Usuario (Correo + Contraseña + Verificación por Código de 6 Dígitos)
         if clean_path == "/api/auth/register":
             client_ip = self.client_address[0]
             is_test = os.environ.get("ALLOW_TEST_AUTH") == "1"
@@ -1078,7 +1080,6 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
             email = req_data.get("email", "").strip().lower()
             password = req_data.get("password", "")
             password_confirm = req_data.get("passwordConfirm", "")
-            captcha_token = req_data.get("captchaToken", "").strip()
             name = req_data.get("name", "").strip()
 
             if not email or not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
@@ -1094,15 +1095,110 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_json_response({"ok": False, "error": pwd_err}, status_code=400)
                 return
 
-            if not verify_turnstile_token(captcha_token, client_ip):
-                self.send_json_response({"ok": False, "error": "Verificación de captcha inválida o no completada."}, status_code=400)
-                return
+            # Generar código de 6 dígitos numérico con secrets.choice (no random)
+            digits = "0123456789"
+            verification_code = "".join(secrets.choice(digits) for _ in range(6))
+            now_ms = int(time.time() * 1000)
+            verification_expires_at = now_ms + (15 * 60 * 1000)  # 15 minutos
 
-            ok, reason, user = db.create_user(email=email, password=password, name=name)
+            ok, reason, user = db.create_user(
+                email=email,
+                password=password,
+                name=name,
+                is_verified=0,
+                verification_code=verification_code,
+                verification_code_expires_at=verification_expires_at
+            )
             if not ok or not user:
                 self.send_json_response({"ok": False, "error": reason}, status_code=400)
                 return
 
+            # Enviar correo mediante SMTP
+            send_verification_email(email, verification_code)
+
+            resp_payload = {
+                "ok": True,
+                "needsVerification": True,
+                "email": user["email"],
+                "message": "Tu cuenta ha sido creada. Por favor ingresa el código de 6 dígitos enviado a tu correo."
+            }
+            if is_test:
+                resp_payload["testVerificationCode"] = verification_code
+
+            self.send_json_response(resp_payload, status_code=201)
+            return
+
+        # API: Verificar Código de 6 Dígitos
+        if clean_path == "/api/auth/verify-code":
+            client_ip = self.client_address[0]
+            is_test = os.environ.get("ALLOW_TEST_AUTH") == "1"
+            if not is_test:
+                allowed, retry_sec = AUTH_LIMITER.check_fixed_limit(client_ip, max_requests=30, window_seconds=60.0)
+                if not allowed:
+                    self.send_json_response({
+                        "ok": False,
+                        "error": f"Demasiados intentos. Por favor espera {int(retry_sec) + 1} segundos."
+                    }, status_code=429)
+                    return
+
+            body = self.rfile.read(content_length).decode("utf-8", errors="replace")
+            try:
+                req_data = json.loads(body)
+            except Exception:
+                self.send_json_response({"ok": False, "error": "Cuerpo JSON inválido"}, status_code=400)
+                return
+
+            email = req_data.get("email", "").strip().lower()
+            code = str(req_data.get("code", "")).strip()
+
+            if not email or not code:
+                self.send_json_response({"ok": False, "error": "Correo y código de verificación son requeridos."}, status_code=400)
+                return
+
+            user = db.get_user_by_email(email)
+            if not user:
+                self.send_json_response({"ok": False, "error": "Código de verificación inválido o usuario no encontrado."}, status_code=400)
+                return
+
+            if user.get("is_verified") == 1:
+                self.send_json_response({"ok": False, "error": "La cuenta ya ha sido verificada. Inicia sesión directamente."}, status_code=400)
+                return
+
+            attempts = user.get("verification_attempts") or 0
+            if attempts >= 5 or not user.get("verification_code"):
+                db.invalidate_verification_code(user["id"])
+                self.send_json_response({
+                    "ok": False,
+                    "error": "Has alcanzado el límite máximo de intentos (5). Solicita un nuevo código de verificación."
+                }, status_code=400)
+                return
+
+            now_ms = int(time.time() * 1000)
+            expires_at = user.get("verification_code_expires_at")
+            if not expires_at or now_ms > expires_at:
+                self.send_json_response({
+                    "ok": False,
+                    "error": "El código de verificación ha expirado (vence en 15 minutos). Por favor solicita uno nuevo."
+                }, status_code=410)
+                return
+
+            if code != str(user.get("verification_code", "")).strip():
+                new_attempts = db.increment_verification_attempts(user["id"])
+                if new_attempts >= 5:
+                    db.invalidate_verification_code(user["id"])
+                    self.send_json_response({
+                        "ok": False,
+                        "error": "Has alcanzado el límite de 5 intentos fallidos. El código ha sido invalidado; solicita uno nuevo."
+                    }, status_code=400)
+                    return
+                self.send_json_response({
+                    "ok": False,
+                    "error": f"Código de verificación incorrecto. Intento {new_attempts} de 5."
+                }, status_code=400)
+                return
+
+            # Código correcto: marcar verificado y crear sesión activa en Versión Demo
+            db.mark_user_verified(user["id"])
             token = create_session_token(str(user["id"]))
             cookie = make_session_cookie(token)
             self.send_json_response({
@@ -1111,13 +1207,59 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                     "id": user["id"],
                     "email": user["email"],
                     "name": user["name"] or user["email"].split("@")[0],
-                    "access_code": None,
-                    "isDemo": True
-                }
-            }, status_code=201, headers={"Set-Cookie": cookie})
+                    "access_code": user.get("access_code"),
+                    "isDemo": not bool(user.get("access_code"))
+                },
+                "message": "Correo verificado exitosamente."
+            }, status_code=200, headers={"Set-Cookie": cookie})
             return
 
-        # API: Inicio de Sesión (Correo + Contraseña + Captcha tras fallo previo)
+        # API: Reenviar Código de Verificación de 6 Dígitos
+        if clean_path == "/api/auth/resend-code":
+            client_ip = self.client_address[0]
+            is_test = os.environ.get("ALLOW_TEST_AUTH") == "1"
+            if not is_test:
+                allowed, retry_sec = AUTH_LIMITER.check_fixed_limit(client_ip, max_requests=10, window_seconds=60.0)
+                if not allowed:
+                    self.send_json_response({
+                        "ok": False,
+                        "error": f"Demasiadas solicitudes de reenvío. Espera {int(retry_sec) + 1} segundos."
+                    }, status_code=429)
+                    return
+
+            body = self.rfile.read(content_length).decode("utf-8", errors="replace")
+            try:
+                req_data = json.loads(body)
+            except Exception:
+                self.send_json_response({"ok": False, "error": "Cuerpo JSON inválido"}, status_code=400)
+                return
+
+            email = req_data.get("email", "").strip().lower()
+            if not email or not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
+                self.send_json_response({"ok": False, "error": "Correo electrónico inválido."}, status_code=400)
+                return
+
+            user = db.get_user_by_email(email)
+            new_code = None
+            if user and not user.get("is_verified"):
+                digits = "0123456789"
+                new_code = "".join(secrets.choice(digits) for _ in range(6))
+                now_ms = int(time.time() * 1000)
+                new_expires_at = now_ms + (15 * 60 * 1000)
+                db.update_verification_code(user["id"], new_code, new_expires_at)
+                send_verification_email(email, new_code)
+
+            resp_payload = {
+                "ok": True,
+                "message": "Si el correo corresponde a una cuenta pendiente de verificación, recibirás un nuevo código en unos momentos."
+            }
+            if is_test and new_code:
+                resp_payload["testVerificationCode"] = new_code
+
+            self.send_json_response(resp_payload, status_code=200)
+            return
+
+        # API: Inicio de Sesión (Correo + Contraseña con Lockout de 15 min y Verificación de Cuenta)
         if clean_path == "/api/auth/login":
             client_ip = self.client_address[0]
             is_test = os.environ.get("ALLOW_TEST_AUTH") == "1"
@@ -1139,7 +1281,6 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
 
             email = req_data.get("email", "").strip().lower()
             password = req_data.get("password", "")
-            captcha_token = req_data.get("captchaToken", "").strip()
 
             user = db.get_user_by_email(email)
 
@@ -1149,20 +1290,9 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                 remaining_mins = max(1, int((user["locked_until"] - now_ms) / 60000) + 1)
                 self.send_json_response({
                     "ok": False,
-                    "error": f"Cuenta bloqueada temporalmente por seguridad. Reintenta en {remaining_mins} minutos.",
-                    "requiresCaptcha": True
+                    "error": f"Cuenta bloqueada temporalmente por seguridad. Reintenta en {remaining_mins} minutos."
                 }, status_code=423)
                 return
-
-            # Captcha exigido tras el primer intento fallido
-            if user and (user.get("failed_login_attempts") or 0) >= 1:
-                if not verify_turnstile_token(captcha_token, client_ip):
-                    self.send_json_response({
-                        "ok": False,
-                        "requiresCaptcha": True,
-                        "error": "Verificación de captcha requerida tras intento fallido previo."
-                    }, status_code=400)
-                    return
 
             if not user:
                 LOGIN_BACKOFF_LIMITER.record_attempt(client_ip)
@@ -1171,8 +1301,7 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                 db.verify_password(password, dummy_hash, dummy_salt)
                 self.send_json_response({
                     "ok": False,
-                    "error": "Credenciales inválidas.",
-                    "requiresCaptcha": True
+                    "error": "Credenciales inválidas."
                 }, status_code=401)
                 return
 
@@ -1183,15 +1312,23 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                 if locked_until:
                     self.send_json_response({
                         "ok": False,
-                        "error": "Cuenta bloqueada temporalmente por 15 minutos debido a 5 intentos fallidos consecutivos.",
-                        "requiresCaptcha": True
+                        "error": "Cuenta bloqueada temporalmente por 15 minutos debido a 5 intentos fallidos consecutivos."
                     }, status_code=423)
                     return
                 self.send_json_response({
                     "ok": False,
-                    "error": "Credenciales inválidas.",
-                    "requiresCaptcha": True
+                    "error": "Credenciales inválidas."
                 }, status_code=401)
+                return
+
+            # Verificar si la cuenta está verificada por correo
+            if not user.get("is_verified"):
+                self.send_json_response({
+                    "ok": False,
+                    "unverified": True,
+                    "email": user["email"],
+                    "error": "Tu cuenta aún no ha sido verificada. Ingresa el código de 6 dígitos enviado a tu correo para activarla."
+                }, status_code=403)
                 return
 
             LOGIN_BACKOFF_LIMITER.reset(client_ip)

@@ -29,9 +29,6 @@
   <!-- Iconos Lucide CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- Cloudflare Turnstile Captcha -->
-  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-
   <!-- Estilos -->
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/sidebar.css">
@@ -417,9 +414,6 @@
               <div id="password-match-hint" class="password-match-hint" style="display: none;"></div>
             </div>
 
-            <!-- Widget Cloudflare Turnstile -->
-            <div id="unlock-captcha-container" class="turnstile-container" data-sitekey="0x4AAAAAAAE9e7tJ25CKz1YqH"></div>
-
             <div id="register-error-msg" class="auth-error-alert" style="display: none;"></div>
 
             <button type="submit" id="btn-submit-register" class="btn btn-primary auth-submit-btn" disabled>
@@ -433,6 +427,41 @@
               </button>
             </div>
           </form>
+
+          <!-- Subvista de Verificación de Código de 6 Dígitos (Paso 1 - Oculta por defecto) -->
+          <div id="unlock-step-verify-code" class="auth-credentials-form hidden" style="display: none;">
+            <div class="verify-code-header">
+              <div class="verify-code-icon">📬</div>
+              <h3 class="verify-code-title">Verifica tu correo electrónico</h3>
+              <p class="verify-code-desc">
+                Hemos enviado un código numérico de 6 dígitos a <strong id="verify-email-display">tu correo</strong>. Vence en 15 minutos.
+              </p>
+            </div>
+
+            <div class="form-group auth-field-group">
+              <label for="input-verification-code" class="auth-label">Código de 6 dígitos:</label>
+              <div class="auth-input-wrapper">
+                <i data-lucide="key-round" class="auth-input-icon"></i>
+                <input type="text" id="input-verification-code" class="form-control auth-input input-verification-code" placeholder="••••••" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" autocomplete="one-time-code">
+              </div>
+            </div>
+
+            <div id="verify-error-msg" class="auth-error-alert" style="display: none;"></div>
+
+            <button type="button" id="btn-submit-verify-code" class="btn btn-primary auth-submit-btn" disabled>
+              <i data-lucide="check-circle-2"></i>
+              <span id="btn-submit-verify-code-text">Verificar y Continuar</span>
+            </button>
+
+            <div class="auth-toggle-row verify-actions-row">
+              <button type="button" id="link-resend-code" class="link-toggle-auth btn-resend-code">
+                ¿No recibiste el código? Reenviar código
+              </button>
+              <button type="button" id="link-back-to-register" class="link-toggle-auth btn-back-auth">
+                ← Volver al formulario de inicio / registro
+              </button>
+            </div>
+          </div>
 
           <div class="unlock-step-preview-disabled">
             <div class="preview-header">

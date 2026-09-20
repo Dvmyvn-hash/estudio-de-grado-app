@@ -11,10 +11,8 @@
 var AuthService = {
   currentUser: null,
   authMode: "register", // "register" | "login"
-  loginRequiresCaptcha: false,
-  turnstileSiteKey: (typeof window !== "undefined" && window.AUTH_CONFIG && window.AUTH_CONFIG.turnstileSiteKey) || "0x4AAAAAAAE9e7tJ25CKz1YqH",
-  turnstileWidgetId: null,
-  currentTurnstileToken: null,
+  pendingVerificationEmail: null,
+  resendCooldownTimer: null,
   isInitialized: false,
   listeners: [],
 
@@ -77,13 +75,74 @@ var AuthService = {
     if (this.isInitialized) return;
     this.isInitialized = true;
 
-    if (typeof window !== "undefined" && window.AUTH_CONFIG && window.AUTH_CONFIG.turnstileSiteKey) {
-      this.turnstileSiteKey = window.AUTH_CONFIG.turnstileSiteKey;
-    }
-
     await this.checkSession();
     this.setupModalListeners();
-    this.initTurnstile();
+  },
+
+  // Métodos no-op para compatibilidad defensiva
+  initTurnstile() {},
+  getTurnstileToken() { return null; },
+  resetTurnstile() {},
+
+  // Mostrar subvista de ingreso de código de 6 dígitos dentro del Paso 1
+  showVerifyCodeStep(email, errorMsg = "") {
+    this.pendingVerificationEmail = email;
+    if (typeof document === "undefined") return;
+
+    const form = document.getElementById("form-auth-register");
+    const verifyView = document.getElementById("unlock-step-verify-code");
+    const emailDisplay = document.getElementById("verify-email-display");
+    const codeInput = document.getElementById("input-verification-code");
+    const errEl = document.getElementById("verify-error-msg");
+    const submitBtn = document.getElementById("btn-submit-verify-code");
+
+    if (form) form.style.display = "none";
+    if (verifyView) {
+      verifyView.classList.remove("hidden");
+      verifyView.style.display = "block";
+    }
+    if (emailDisplay) emailDisplay.textContent = email;
+    if (codeInput) {
+      codeInput.value = "";
+      setTimeout(() => codeInput.focus(), 150);
+    }
+    if (submitBtn) submitBtn.disabled = true;
+
+    if (errEl) {
+      if (errorMsg) {
+        errEl.textContent = errorMsg;
+        errEl.className = "auth-error-alert";
+        errEl.style.display = "block";
+        errEl.style.color = "";
+        errEl.style.borderColor = "";
+        errEl.style.background = "";
+      } else {
+        errEl.textContent = "";
+        errEl.style.display = "none";
+      }
+    }
+
+    if (typeof lucide !== "undefined" && lucide.createIcons) {
+      lucide.createIcons();
+    }
+  },
+
+  // Ocultar subvista de verificación y restaurar formulario de registro / login
+  hideVerifyCodeStep() {
+    if (typeof document === "undefined") return;
+    const form = document.getElementById("form-auth-register");
+    const verifyView = document.getElementById("unlock-step-verify-code");
+    const errEl = document.getElementById("verify-error-msg");
+
+    if (form) form.style.display = "block";
+    if (verifyView) {
+      verifyView.classList.add("hidden");
+      verifyView.style.display = "none";
+    }
+    if (errEl) {
+      errEl.textContent = "";
+      errEl.style.display = "none";
+    }
   },
 
   // Verificar sesión con cookie HttpOnly en /api/auth/me o fallback en localStorage
@@ -128,128 +187,10 @@ var AuthService = {
     return null;
   },
 
-  turnstileRetries: 0,
-  isBackendAvailable: null,
-
-  // Obtener token de Turnstile de forma resiliente
-  getTurnstileToken() {
-    if (this.currentTurnstileToken) return this.currentTurnstileToken;
-    if (typeof window !== "undefined" && window.turnstile) {
-      try {
-        const t = this.turnstileWidgetId !== null
-          ? window.turnstile.getResponse(this.turnstileWidgetId)
-          : window.turnstile.getResponse();
-        if (t) {
-          this.currentTurnstileToken = t;
-          return t;
-        }
-      } catch (e) {}
-    }
-    if (typeof document !== "undefined") {
-      const respInput = document.querySelector("#unlock-captcha-container input[name='cf-turnstile-response']") ||
-                        document.querySelector("input[name='cf-turnstile-response']");
-      if (respInput && respInput.value) {
-        this.currentTurnstileToken = respInput.value;
-        return respInput.value;
-      }
-    }
-    return null;
-  },
-
-  // Inicializar Cloudflare Turnstile
-  initTurnstile() {
-    if (typeof window === "undefined" || typeof document === "undefined") return;
-
-    const container = document.getElementById("unlock-captcha-container");
-    if (!container) return;
-
-    // Actualizar siteKey dinámica desde AUTH_CONFIG si está configurada o atributo data-sitekey
-    if (typeof window.AUTH_CONFIG !== "undefined" && window.AUTH_CONFIG.turnstileSiteKey) {
-      this.turnstileSiteKey = window.AUTH_CONFIG.turnstileSiteKey;
-    } else if (container.getAttribute("data-sitekey")) {
-      this.turnstileSiteKey = container.getAttribute("data-sitekey");
-    }
-
-    // Si el modal está oculto, no renderizar hasta que se abra para asegurar dimensiones reales en el DOM
-    const modal = document.getElementById("unlock-modal");
-    if (modal && modal.classList.contains("hidden")) {
-      return;
-    }
-
-    if (typeof window.turnstile === "undefined") {
-      if (this.turnstileRetries < 15) {
-        this.turnstileRetries++;
-        setTimeout(() => this.initTurnstile(), 250);
-        return;
-      } else {
-        console.warn("[AuthService] Cloudflare Turnstile no disponible tras reintentos (modo estático/offline).");
-        this.currentTurnstileToken = "client-turnstile-offline-token";
-        container.innerHTML = `
-          <div style="font-size: 0.78rem; color: var(--gold-secondary); display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 12px; background: rgba(212, 160, 23, 0.08); border-radius: 6px; border: 1px dashed rgba(212, 160, 23, 0.4); width: 100%;">
-            <i data-lucide="shield-check" style="width: 14px; height: 14px; color: var(--gold-primary);"></i>
-            <span>Verificación de seguridad en navegador activa</span>
-          </div>
-        `;
-        if (typeof lucide !== "undefined" && lucide.createIcons) lucide.createIcons();
-        this.validateFormInputs();
-        return;
-      }
-    }
-
-    // Si ya existe un widget y ya generó token, no destruirlo
-    if (this.turnstileWidgetId !== null && this.currentTurnstileToken) {
-      return;
-    }
-
-    try {
-      this.turnstileRetries = 0;
-      if (this.turnstileWidgetId !== null) {
-        window.turnstile.remove(this.turnstileWidgetId);
-        this.turnstileWidgetId = null;
-      }
-      container.innerHTML = "";
-      this.turnstileWidgetId = window.turnstile.render(container, {
-        sitekey: this.turnstileSiteKey,
-        theme: "dark",
-        callback: (token) => {
-          this.currentTurnstileToken = token;
-          // Limpiar mensaje de advertencia si el usuario intentó enviar antes de resolver el captcha
-          const errEl = document.getElementById("register-error-msg");
-          if (errEl && errEl.textContent && errEl.textContent.includes("captcha")) {
-            errEl.style.display = "none";
-            errEl.textContent = "";
-          }
-          this.validateFormInputs();
-        },
-        "expired-callback": () => {
-          this.currentTurnstileToken = null;
-          this.validateFormInputs();
-        },
-        "error-callback": () => {
-          console.warn("[AuthService] Turnstile error-callback invocado. Activando verificación de respaldo.");
-          this.currentTurnstileToken = "client-turnstile-fallback-token";
-          this.validateFormInputs();
-        }
-      });
-    } catch (e) {
-      console.warn("[AuthService] Error inicializando Turnstile:", e);
-      this.currentTurnstileToken = "client-turnstile-fallback-token";
-      this.validateFormInputs();
-    }
-  },
-
-  resetTurnstile() {
-    this.currentTurnstileToken = null;
-    if (typeof window !== "undefined" && window.turnstile && this.turnstileWidgetId !== null) {
-      try {
-        window.turnstile.reset(this.turnstileWidgetId);
-      } catch (e) {}
-    }
-  },
-
   // Alternar entre modo Registro y Login
   setAuthMode(mode) {
     this.authMode = mode === "login" ? "login" : "register";
+    this.hideVerifyCodeStep();
     if (typeof document === "undefined") return;
     const titleEl = document.getElementById("auth-form-title");
     const subEl = document.getElementById("auth-form-subtitle");
@@ -257,9 +198,7 @@ var AuthService = {
     const groupConfirm = document.getElementById("group-confirm-password");
     const hints = document.getElementById("password-policy-hints");
     const submitBtnText = document.getElementById("btn-submit-register-text");
-    const submitBtn = document.getElementById("btn-submit-register");
     const toggleLink = document.getElementById("link-toggle-login-register");
-    const captchaContainer = document.getElementById("unlock-captcha-container");
     const errEl = document.getElementById("register-error-msg");
 
     if (errEl) {
@@ -275,11 +214,6 @@ var AuthService = {
       if (hints) hints.style.display = "none";
       if (submitBtnText) submitBtnText.textContent = "Iniciar Sesión";
       if (toggleLink) toggleLink.textContent = "¿No tienes una cuenta? Regístrate aquí";
-
-      // En login, el captcha solo se exige tras el primer fallo
-      if (captchaContainer) {
-        captchaContainer.style.display = this.loginRequiresCaptcha ? "flex" : "none";
-      }
     } else {
       if (titleEl) titleEl.textContent = "Paso 1: Crea tu cuenta de postulante";
       if (subEl) subEl.textContent = "Crea tu cuenta para resguardar tu progreso en apuntes y casos prácticos en todos tus dispositivos. Accederás en Versión Demo para convalidar tu Pase.";
@@ -288,7 +222,6 @@ var AuthService = {
       if (hints) hints.style.display = "flex";
       if (submitBtnText) submitBtnText.textContent = "Crear Cuenta";
       if (toggleLink) toggleLink.textContent = "¿Ya tienes una cuenta? Inicia sesión";
-      if (captchaContainer) captchaContainer.style.display = "flex";
     }
 
     this.validateFormInputs();
@@ -354,19 +287,15 @@ var AuthService = {
     // Comprobar estado de habilitación del botón
     if (submitBtn) {
       if (this.authMode === "register") {
-        // En modo registro, el botón se habilita de forma reactiva cuando el usuario ingresa datos válidos:
-        // Correo sintácticamente correcto, contraseña que cumple la política de 4 reglas y confirmación coincidente.
         submitBtn.disabled = !(isEmailValid && isPolicyValid && isMatch);
       } else {
-        const token = this.getTurnstileToken();
-        const captchaOk = !this.loginRequiresCaptcha || Boolean(token);
-        submitBtn.disabled = !(isEmailValid && pwd.length >= 1 && captchaOk);
+        submitBtn.disabled = !(isEmailValid && pwd.length >= 1);
       }
     }
   },
 
   // Registrar nuevo usuario
-  async register({ email, password, passwordConfirm, captchaToken, name }) {
+  async register({ email, password, passwordConfirm, name }) {
     const cleanEmail = (email || "").trim().toLowerCase();
     const cleanName = (name || "").trim() || cleanEmail.split("@")[0];
 
@@ -381,9 +310,6 @@ var AuthService = {
     if (!policy.ok) {
       return { ok: false, error: policy.error };
     }
-    if (!captchaToken) {
-      return { ok: false, error: "Por favor completa la verificación de captcha." };
-    }
 
     // 1. Enviar al backend si está disponible
     try {
@@ -394,39 +320,25 @@ var AuthService = {
           email: cleanEmail,
           password: password,
           passwordConfirm: passwordConfirm,
-          captchaToken: captchaToken,
           name: cleanName
         })
       });
 
       const data = await res.json().catch(() => ({}));
       if (res.status === 201 && data.ok) {
-        this.currentUser = {
-          ...data.user,
-          isDemo: true
-        };
-        try {
-          localStorage.setItem("grado_auth_user", JSON.stringify(this.currentUser));
-        } catch (e) {}
-
-        this.notifyAuthStateChanged();
-        this.resetTurnstile();
-
-        if (typeof App !== "undefined" && App.updateUnlockModalState) {
-          App.updateUnlockModalState();
-        }
-
-        const safeName = (typeof SecurityShield !== "undefined" && SecurityShield.escapeHtml)
-          ? SecurityShield.escapeHtml(this.currentUser.name || this.currentUser.email)
-          : (this.currentUser.name || this.currentUser.email);
+        this.showVerifyCodeStep(cleanEmail);
 
         if (typeof App !== "undefined" && App.showToast) {
-          App.showToast(`¡Cuenta creada con éxito! Bienvenido, ${safeName} (Versión Demo)`, "success");
+          App.showToast("¡Cuenta creada! Ingresa el código de 6 dígitos enviado a tu correo.", "info");
         }
 
-        return { ok: true, user: this.currentUser };
+        return {
+          ok: true,
+          needsVerification: true,
+          email: cleanEmail,
+          testVerificationCode: data.testVerificationCode
+        };
       } else if (res.status !== 404) {
-        this.resetTurnstile();
         return { ok: false, error: data.error || "Error al crear la cuenta." };
       }
     } catch (e) {
@@ -440,46 +352,239 @@ var AuthService = {
     } catch (e) {}
 
     if (registeredUsers[cleanEmail]) {
-      this.resetTurnstile();
       return { ok: false, error: "El correo electrónico ya se encuentra registrado." };
     }
 
     const clientHash = await this.hashClientPassword(password);
-
-    this.currentUser = {
+    registeredUsers[cleanEmail] = {
       id: `user-${Date.now()}`,
       email: cleanEmail,
       name: cleanName,
+      passwordHash: clientHash,
       access_code: null,
+      is_verified: 0,
       isDemo: true
     };
-
-    registeredUsers[cleanEmail] = {
-      ...this.currentUser,
-      passwordHash: clientHash
-    };
-
     try {
       localStorage.setItem("grado_registered_users", JSON.stringify(registeredUsers));
-      localStorage.setItem("grado_auth_user", JSON.stringify(this.currentUser));
     } catch (e) {}
 
-    this.notifyAuthStateChanged();
-    this.resetTurnstile();
-
-    if (typeof App !== "undefined" && App.updateUnlockModalState) {
-      App.updateUnlockModalState();
-    }
+    this.showVerifyCodeStep(cleanEmail);
 
     if (typeof App !== "undefined" && App.showToast) {
-      App.showToast(`Cuenta creada correctamente en Versión Demo`, "success");
+      App.showToast("Modo estático: Ingresa cualquier código de 6 dígitos para activar tu cuenta.", "info");
     }
 
-    return { ok: true, user: this.currentUser };
+    return { ok: true, needsVerification: true, email: cleanEmail };
+  },
+
+  // Verificar código de 6 dígitos ingresado por el usuario
+  async verifyCode(code, targetEmail = null) {
+    const cleanCode = String(code || "").trim();
+    const email = (targetEmail || this.pendingVerificationEmail || "").trim().toLowerCase();
+
+    if (!email) {
+      return { ok: false, error: "No hay una cuenta pendiente de verificación." };
+    }
+    if (!cleanCode || cleanCode.length !== 6 || !/^\d{6}$/.test(cleanCode)) {
+      return { ok: false, error: "El código debe contener exactamente 6 dígitos numéricos." };
+    }
+
+    const errEl = typeof document !== "undefined" ? document.getElementById("verify-error-msg") : null;
+    const submitBtn = typeof document !== "undefined" ? document.getElementById("btn-submit-verify-code") : null;
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = "<span>Verificando...</span>";
+    }
+
+    // 1. Backend
+    try {
+      const res = await fetch("/api/auth/verify-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email, code: cleanCode })
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 200 && data.ok) {
+        this.currentUser = {
+          ...data.user,
+          isDemo: true
+        };
+        try {
+          localStorage.setItem("grado_auth_user", JSON.stringify(this.currentUser));
+        } catch (e) {}
+
+        this.notifyAuthStateChanged();
+        this.hideVerifyCodeStep();
+
+        if (typeof App !== "undefined" && App.updateUnlockModalState) {
+          App.updateUnlockModalState();
+        }
+
+        const safeName = (typeof SecurityShield !== "undefined" && SecurityShield.escapeHtml)
+          ? SecurityShield.escapeHtml(this.currentUser.name || this.currentUser.email)
+          : (this.currentUser.name || this.currentUser.email);
+
+        if (typeof App !== "undefined" && App.showToast) {
+          App.showToast(`¡Correo verificado con éxito! Bienvenido, ${safeName} (Versión Demo)`, "success");
+        }
+
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `<i data-lucide="check-circle-2"></i><span id="btn-submit-verify-code-text">Verificar y Continuar</span>`;
+          if (typeof lucide !== "undefined" && lucide.createIcons) lucide.createIcons();
+        }
+
+        return { ok: true, user: this.currentUser };
+      } else if (res.status !== 404) {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `<i data-lucide="check-circle-2"></i><span id="btn-submit-verify-code-text">Verificar y Continuar</span>`;
+          if (typeof lucide !== "undefined" && lucide.createIcons) lucide.createIcons();
+        }
+        if (errEl) {
+          errEl.textContent = data.error || "Código incorrecto o expirado.";
+          errEl.className = "auth-error-alert";
+          errEl.style.display = "block";
+          errEl.style.color = "";
+          errEl.style.borderColor = "";
+          errEl.style.background = "";
+        }
+        return { ok: false, error: data.error || "Código incorrecto o expirado." };
+      }
+    } catch (e) {
+      // Backend no disponible (modo estático)
+    }
+
+    // 2. Fallback modo estático / GitHub Pages
+    let registeredUsers = {};
+    try {
+      registeredUsers = JSON.parse(localStorage.getItem("grado_registered_users") || "{}");
+    } catch (e) {}
+
+    const existing = registeredUsers[email];
+    if (existing) {
+      existing.is_verified = 1;
+      this.currentUser = {
+        id: existing.id || `user-${Date.now()}`,
+        email: email,
+        name: existing.name || email.split("@")[0],
+        access_code: null,
+        isDemo: true
+      };
+      try {
+        localStorage.setItem("grado_registered_users", JSON.stringify(registeredUsers));
+        localStorage.setItem("grado_auth_user", JSON.stringify(this.currentUser));
+      } catch (e) {}
+
+      this.notifyAuthStateChanged();
+      this.hideVerifyCodeStep();
+
+      if (typeof App !== "undefined" && App.updateUnlockModalState) {
+        App.updateUnlockModalState();
+      }
+
+      if (typeof App !== "undefined" && App.showToast) {
+        App.showToast(`¡Correo verificado! Bienvenido (Versión Demo)`, "success");
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<i data-lucide="check-circle-2"></i><span id="btn-submit-verify-code-text">Verificar y Continuar</span>`;
+        if (typeof lucide !== "undefined" && lucide.createIcons) lucide.createIcons();
+      }
+
+      return { ok: true, user: this.currentUser };
+    }
+
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `<i data-lucide="check-circle-2"></i><span id="btn-submit-verify-code-text">Verificar y Continuar</span>`;
+      if (typeof lucide !== "undefined" && lucide.createIcons) lucide.createIcons();
+    }
+    return { ok: false, error: "Usuario no encontrado." };
+  },
+
+  // Reenviar código de verificación de 6 dígitos con throttling de 30s
+  async resendVerificationCode(targetEmail = null) {
+    const email = (targetEmail || this.pendingVerificationEmail || "").trim().toLowerCase();
+    if (!email) {
+      return { ok: false, error: "No hay una cuenta pendiente de verificación." };
+    }
+
+    const resendBtn = typeof document !== "undefined" ? document.getElementById("link-resend-code") : null;
+    const errEl = typeof document !== "undefined" ? document.getElementById("verify-error-msg") : null;
+
+    if (resendBtn) {
+      resendBtn.disabled = true;
+      resendBtn.textContent = "Reenviando código...";
+    }
+
+    let result = { ok: true };
+
+    try {
+      const res = await fetch("/api/auth/resend-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.ok) {
+        result = { ok: true, message: data.message, testVerificationCode: data.testVerificationCode };
+        if (errEl) {
+          errEl.textContent = "✓ Nuevo código enviado a tu correo (vence en 15 min).";
+          errEl.className = "auth-error-alert valid";
+          errEl.style.display = "block";
+          errEl.style.color = "var(--success-text, #22c55e)";
+          errEl.style.borderColor = "rgba(34, 197, 94, 0.4)";
+          errEl.style.background = "rgba(34, 197, 94, 0.1)";
+        }
+      } else {
+        result = { ok: false, error: data.error || "No se pudo reenviar el código." };
+        if (errEl) {
+          errEl.textContent = data.error || "No se pudo reenviar el código.";
+          errEl.className = "auth-error-alert";
+          errEl.style.display = "block";
+          errEl.style.color = "";
+          errEl.style.borderColor = "";
+          errEl.style.background = "";
+        }
+      }
+    } catch (e) {
+      // Modo estático
+      if (errEl) {
+        errEl.textContent = "✓ Nuevo código de prueba generado (modo estático).";
+        errEl.className = "auth-error-alert valid";
+        errEl.style.display = "block";
+      }
+    }
+
+    // Iniciar throttling visual de 30 segundos
+    if (resendBtn) {
+      if (this.resendCooldownTimer) clearInterval(this.resendCooldownTimer);
+      let secondsLeft = 30;
+      resendBtn.disabled = true;
+      resendBtn.textContent = `Reenviar código (${secondsLeft}s)`;
+      this.resendCooldownTimer = setInterval(() => {
+        secondsLeft--;
+        if (secondsLeft <= 0) {
+          clearInterval(this.resendCooldownTimer);
+          this.resendCooldownTimer = null;
+          resendBtn.disabled = false;
+          resendBtn.textContent = "¿No recibiste el código? Reenviar código";
+        } else {
+          resendBtn.textContent = `Reenviar código (${secondsLeft}s)`;
+        }
+      }, 1000);
+    }
+
+    return result;
   },
 
   // Iniciar sesión con correo y contraseña
-  async login({ email, password, captchaToken }) {
+  async login({ email, password }) {
     const cleanEmail = (email || "").trim().toLowerCase();
     if (!cleanEmail || !password) {
       return { ok: false, error: "Credenciales inválidas." };
@@ -492,8 +597,7 @@ var AuthService = {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: cleanEmail,
-          password: password,
-          captchaToken: captchaToken || ""
+          password: password
         })
       });
 
@@ -503,7 +607,6 @@ var AuthService = {
           ...data.user,
           isDemo: !data.user.access_code
         };
-        this.loginRequiresCaptcha = false;
 
         try {
           localStorage.setItem("grado_auth_user", JSON.stringify(this.currentUser));
@@ -514,7 +617,6 @@ var AuthService = {
         }
 
         this.notifyAuthStateChanged();
-        this.resetTurnstile();
 
         if (typeof App !== "undefined" && App.updateUnlockModalState) {
           App.updateUnlockModalState();
@@ -533,16 +635,12 @@ var AuthService = {
         }
 
         return { ok: true, user: this.currentUser };
+      } else if (res.status === 403 && data.unverified) {
+        // Cuenta no verificada: mostrar inmediatamente el paso de ingreso de código de 6 dígitos
+        this.showVerifyCodeStep(data.email || cleanEmail, data.error);
+        return { ok: false, unverified: true, error: data.error };
       } else if (res.status !== 404) {
-        if (data.requiresCaptcha) {
-          this.loginRequiresCaptcha = true;
-          if (typeof document !== "undefined") {
-            const captchaContainer = document.getElementById("unlock-captcha-container");
-            if (captchaContainer) captchaContainer.style.display = "flex";
-          }
-        }
-        this.resetTurnstile();
-        return { ok: false, error: data.error || "Credenciales inválidas.", requiresCaptcha: Boolean(data.requiresCaptcha) };
+        return { ok: false, error: data.error || "Credenciales inválidas." };
       }
     } catch (e) {
       // Backend no disponible (modo estático GitHub Pages)
@@ -562,13 +660,12 @@ var AuthService = {
     );
 
     if (!existing || !isPassValid) {
-      this.loginRequiresCaptcha = true;
-      if (typeof document !== "undefined") {
-        const captchaContainer = document.getElementById("unlock-captcha-container");
-        if (captchaContainer) captchaContainer.style.display = "flex";
-      }
-      this.resetTurnstile();
-      return { ok: false, error: "Credenciales inválidas.", requiresCaptcha: true };
+      return { ok: false, error: "Credenciales inválidas." };
+    }
+
+    if (existing.is_verified === 0) {
+      this.showVerifyCodeStep(cleanEmail, "Tu cuenta aún no ha sido verificada. Ingresa el código de 6 dígitos para activarla.");
+      return { ok: false, unverified: true, error: "Tu cuenta aún no ha sido verificada." };
     }
 
     if (existing.passwordMock) {
@@ -595,9 +692,7 @@ var AuthService = {
       LicenseService.activateCode(this.currentUser.access_code);
     }
 
-    this.loginRequiresCaptcha = false;
     this.notifyAuthStateChanged();
-    this.resetTurnstile();
 
     if (typeof App !== "undefined" && App.updateUnlockModalState) {
       App.updateUnlockModalState();
@@ -848,20 +943,10 @@ var AuthService = {
       const email = emailInput ? emailInput.value : "";
       const pwd = pwdInput ? pwdInput.value : "";
       const confirm = confirmInput ? confirmInput.value : "";
-      const captchaToken = this.getTurnstileToken();
 
       if (errEl) {
         errEl.style.display = "none";
         errEl.textContent = "";
-      }
-
-      // Si en registro aún no se obtiene token de captcha, advertir al usuario claramente
-      if (this.authMode === "register" && !captchaToken) {
-        if (errEl) {
-          errEl.textContent = "Por favor completa la verificación de seguridad (captcha) para continuar.";
-          errEl.style.display = "block";
-        }
-        return;
       }
 
       if (submitBtn) {
@@ -874,14 +959,12 @@ var AuthService = {
         res = await this.register({
           email,
           password: pwd,
-          passwordConfirm: confirm,
-          captchaToken: captchaToken
+          passwordConfirm: confirm
         });
       } else {
         res = await this.login({
           email,
-          password: pwd,
-          captchaToken: captchaToken
+          password: pwd
         });
       }
 
@@ -925,6 +1008,67 @@ var AuthService = {
     if (emailInput) emailInput.addEventListener("keydown", handleEnter);
     if (pwdInput) pwdInput.addEventListener("keydown", handleEnter);
     if (confirmInput) confirmInput.addEventListener("keydown", handleEnter);
+
+    // Listeners para verificación de código de 6 dígitos
+    const codeInput = document.getElementById("input-verification-code");
+    const submitVerifyBtn = document.getElementById("btn-submit-verify-code");
+    const resendLink = document.getElementById("link-resend-code");
+    const backToRegisterLink = document.getElementById("link-back-to-register");
+    const verifyErrEl = document.getElementById("verify-error-msg");
+
+    const doVerify = async () => {
+      if (!codeInput) return;
+      const code = codeInput.value.trim();
+      if (code.length !== 6) return;
+      await this.verifyCode(code);
+    };
+
+    if (codeInput) {
+      codeInput.addEventListener("input", () => {
+        // Filtrar sólo dígitos numéricos
+        codeInput.value = codeInput.value.replace(/\D/g, "").slice(0, 6);
+        if (verifyErrEl) {
+          verifyErrEl.style.display = "none";
+          verifyErrEl.textContent = "";
+        }
+        if (submitVerifyBtn) {
+          submitVerifyBtn.disabled = (codeInput.value.length !== 6);
+        }
+        if (codeInput.value.length === 6) {
+          doVerify();
+        }
+      });
+
+      codeInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          if (codeInput.value.length === 6) {
+            doVerify();
+          }
+        }
+      });
+    }
+
+    if (submitVerifyBtn) {
+      submitVerifyBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        doVerify();
+      });
+    }
+
+    if (resendLink) {
+      resendLink.addEventListener("click", async (e) => {
+        e.preventDefault();
+        await this.resendVerificationCode();
+      });
+    }
+
+    if (backToRegisterLink) {
+      backToRegisterLink.addEventListener("click", (e) => {
+        e.preventDefault();
+        this.hideVerifyCodeStep();
+      });
+    }
   }
 };
 

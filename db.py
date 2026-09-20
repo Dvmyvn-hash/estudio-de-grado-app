@@ -107,6 +107,10 @@ def init_db(db_path: Optional[Path] = None) -> None:
               access_code TEXT REFERENCES access_codes(code),
               failed_login_attempts INTEGER DEFAULT 0,
               locked_until INTEGER,               -- epoch ms; NULL si no está bloqueado
+              is_verified INTEGER DEFAULT 0,
+              verification_code TEXT,
+              verification_code_expires_at INTEGER, -- epoch ms
+              verification_attempts INTEGER DEFAULT 0,
               created_at INTEGER NOT NULL,
               last_login_at INTEGER
             );
@@ -125,6 +129,10 @@ def init_db(db_path: Optional[Path] = None) -> None:
               access_code TEXT REFERENCES access_codes(code),
               failed_login_attempts INTEGER DEFAULT 0,
               locked_until INTEGER,
+              is_verified INTEGER DEFAULT 0,
+              verification_code TEXT,
+              verification_code_expires_at INTEGER,
+              verification_attempts INTEGER DEFAULT 0,
               created_at INTEGER NOT NULL,
               last_login_at INTEGER
             );
@@ -133,11 +141,23 @@ def init_db(db_path: Optional[Path] = None) -> None:
             for r in cursor.fetchall():
                 dummy_hash, dummy_salt = hash_password("GradoDefaultPass2026!")
                 cursor.execute("""
-                INSERT OR IGNORE INTO users (id, email, password_hash, password_salt, name, access_code, failed_login_attempts, locked_until, created_at, last_login_at)
-                VALUES (?, ?, ?, ?, ?, ?, 0, NULL, ?, ?)
+                INSERT OR IGNORE INTO users (id, email, password_hash, password_salt, name, access_code, failed_login_attempts, locked_until, is_verified, verification_code, verification_code_expires_at, verification_attempts, created_at, last_login_at)
+                VALUES (?, ?, ?, ?, ?, ?, 0, NULL, 1, NULL, NULL, 0, ?, ?)
                 """, (r["id"], r["email"], dummy_hash, dummy_salt, r["name"], r["access_code"], r["created_at"], r["last_login_at"]))
             cursor.execute("DROP TABLE users_old")
             conn.execute("PRAGMA foreign_keys = ON;")
+
+        # Auto-migración incremental de campos de verificación por correo (v6.0)
+        cursor.execute("PRAGMA table_info(users)")
+        curr_columns = [row[1] for row in cursor.fetchall()]
+        if "is_verified" not in curr_columns:
+            cursor.execute("ALTER TABLE users ADD COLUMN is_verified INTEGER DEFAULT 0")
+        if "verification_code" not in curr_columns:
+            cursor.execute("ALTER TABLE users ADD COLUMN verification_code TEXT DEFAULT NULL")
+        if "verification_code_expires_at" not in curr_columns:
+            cursor.execute("ALTER TABLE users ADD COLUMN verification_code_expires_at INTEGER DEFAULT NULL")
+        if "verification_attempts" not in curr_columns:
+            cursor.execute("ALTER TABLE users ADD COLUMN verification_attempts INTEGER DEFAULT 0")
 
         cursor.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='user_progress'")
         up_row = cursor.fetchone()
@@ -315,6 +335,9 @@ def create_user(
     password: str,
     name: Optional[str] = None,
     access_code: Optional[str] = None,
+    is_verified: int = 0,
+    verification_code: Optional[str] = None,
+    verification_code_expires_at: Optional[int] = None,
     db_path: Optional[Path] = None
 ) -> Tuple[bool, str, Optional[Dict[str, Any]]]:
     """
@@ -366,17 +389,89 @@ def create_user(
 
         cursor.execute(
             """
-            INSERT INTO users (email, password_hash, password_salt, name, access_code, failed_login_attempts, locked_until, created_at, last_login_at)
-            VALUES (?, ?, ?, ?, ?, 0, NULL, ?, ?)
+            INSERT INTO users (
+                email, password_hash, password_salt, name, access_code,
+                failed_login_attempts, locked_until, is_verified,
+                verification_code, verification_code_expires_at, verification_attempts,
+                created_at, last_login_at
+            )
+            VALUES (?, ?, ?, ?, ?, 0, NULL, ?, ?, ?, 0, ?, ?)
             """,
-            (clean_email, pwd_hash, pwd_salt, clean_name, clean_code, now_ms, now_ms)
+            (clean_email, pwd_hash, pwd_salt, clean_name, clean_code, is_verified, verification_code, verification_code_expires_at, now_ms, now_ms)
         )
         user_id = cursor.lastrowid
         conn.commit()
 
-        cursor.execute("SELECT id, email, name, access_code, failed_login_attempts, locked_until, created_at, last_login_at FROM users WHERE id = ?", (user_id,))
+        cursor.execute("SELECT id, email, name, access_code, failed_login_attempts, locked_until, is_verified, verification_code, verification_code_expires_at, verification_attempts, created_at, last_login_at FROM users WHERE id = ?", (user_id,))
         row = cursor.fetchone()
         return True, "Usuario creado exitosamente.", dict(row) if row else None
+
+
+def update_verification_code(user_id: int, code: str, expires_at: int, db_path: Optional[Path] = None) -> bool:
+    """Actualiza el código de verificación de 6 dígitos, vencimiento y resetea intentos a 0."""
+    init_db(db_path)
+    with get_db_connection(db_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            UPDATE users
+            SET verification_code = ?,
+                verification_code_expires_at = ?,
+                verification_attempts = 0
+            WHERE id = ?
+            """,
+            (code, expires_at, user_id)
+        )
+        conn.commit()
+        return cursor.rowcount > 0
+
+
+def increment_verification_attempts(user_id: int, db_path: Optional[Path] = None) -> int:
+    """Incrementa los intentos de verificación fallidos y retorna el total."""
+    init_db(db_path)
+    with get_db_connection(db_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE users SET verification_attempts = COALESCE(verification_attempts, 0) + 1 WHERE id = ?",
+            (user_id,)
+        )
+        conn.commit()
+        cursor.execute("SELECT verification_attempts FROM users WHERE id = ?", (user_id,))
+        row = cursor.fetchone()
+        return row["verification_attempts"] if row else 1
+
+
+def invalidate_verification_code(user_id: int, db_path: Optional[Path] = None) -> bool:
+    """Invalida el código de verificación tras superar el límite de intentos."""
+    init_db(db_path)
+    with get_db_connection(db_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE users SET verification_code = NULL, verification_code_expires_at = NULL WHERE id = ?",
+            (user_id,)
+        )
+        conn.commit()
+        return cursor.rowcount > 0
+
+
+def mark_user_verified(user_id: int, db_path: Optional[Path] = None) -> bool:
+    """Marca al usuario como verificado y limpia los campos temporales de verificación."""
+    init_db(db_path)
+    with get_db_connection(db_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            UPDATE users
+            SET is_verified = 1,
+                verification_code = NULL,
+                verification_code_expires_at = NULL,
+                verification_attempts = 0
+            WHERE id = ?
+            """,
+            (user_id,)
+        )
+        conn.commit()
+        return cursor.rowcount > 0
 
 
 def create_user_with_code(
@@ -387,7 +482,7 @@ def create_user_with_code(
     code: str,
     db_path: Optional[Path] = None
 ) -> Tuple[bool, str, Optional[Dict[str, Any]]]:
-    """Crea o vincula usuario con código (usado en suite de pruebas / fallback)."""
+    """Crea o vincula usuario con código (usado en suite de pruebas / fallback con Google)."""
     clean_email = str(email or f"{google_sub}@example.com").strip().lower()
     clean_name = name or clean_email.split("@")[0]
     existing = get_user_by_email(clean_email, db_path)
@@ -400,6 +495,7 @@ def create_user_with_code(
         password="TestPassword2026!",
         name=clean_name,
         access_code=code,
+        is_verified=1,
         db_path=db_path
     )
 

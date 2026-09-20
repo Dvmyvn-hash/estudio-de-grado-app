@@ -1,5 +1,4 @@
 {
-  "turnstile_site_key": "0x4AAAAAAAE9e7tJ25CKz1YqH",
   "allowed_origins": [
     "http://localhost:8080",
     "http://127.0.0.1:8080",
@@ -7,5 +6,5 @@
     "http://127.0.0.1:8000",
     "https://dvmyvn-hash.github.io"
   ],
-  "comment": "Reemplaza turnstile_site_key con tu Site Key de Cloudflare Turnstile dashboard si deseas utilizar tus propias credenciales en produccion."
+  "comment": "Configuracion de origenes autorizados para GRADOMANIA (v6.0 - Verificacion Nativa por Correo SMTP)."
 }
