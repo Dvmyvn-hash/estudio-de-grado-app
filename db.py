@@ -117,6 +117,12 @@ def init_db(db_path: Optional[Path] = None) -> None:
             seeds
         )
 
+        # Verificar si la columna assigned_email existe en access_codes
+        cursor.execute("PRAGMA table_info(access_codes)")
+        ac_columns = [row[1] for row in cursor.fetchall()]
+        if "assigned_email" not in ac_columns:
+            cursor.execute("ALTER TABLE access_codes ADD COLUMN assigned_email TEXT")
+
         # Verificar si la tabla users existe y requiere migración
         cursor.execute("PRAGMA table_info(users)")
         columns = [row[1] for row in cursor.fetchall()]
@@ -230,21 +236,23 @@ def create_access_code(
     label: Optional[str] = None,
     max_uses: int = 1,
     expires_at: Optional[int] = None,
+    assigned_email: Optional[str] = None,
     db_path: Optional[Path] = None
 ) -> Dict[str, Any]:
-    """Crea un nuevo código de acceso de invitación."""
+    """Crea un nuevo código de acceso de invitación, con asignación opcional de email/Gmail."""
     init_db(db_path)
     clean_code = normalize_access_code(code)
+    clean_email = str(assigned_email).strip().lower() if assigned_email and str(assigned_email).strip() else None
     now_ms = int(time.time() * 1000)
 
     with get_db_connection(db_path) as conn:
         cursor = conn.cursor()
         cursor.execute(
             """
-            INSERT INTO access_codes (code, label, max_uses, times_used, active, expires_at, created_at)
-            VALUES (?, ?, ?, 0, 1, ?, ?)
+            INSERT INTO access_codes (code, label, max_uses, times_used, active, expires_at, created_at, assigned_email)
+            VALUES (?, ?, ?, 0, 1, ?, ?, ?)
             """,
-            (clean_code, label or "Beta-General", max_uses, expires_at, now_ms)
+            (clean_code, label or "Beta-General", max_uses, expires_at, now_ms, clean_email)
         )
         conn.commit()
 
@@ -255,7 +263,9 @@ def create_access_code(
         "times_used": 0,
         "active": 1,
         "expires_at": expires_at,
-        "created_at": now_ms
+        "created_at": now_ms,
+        "assigned_email": clean_email,
+        "associated_email": clean_email or ""
     }
 
 
@@ -271,12 +281,26 @@ def get_access_code(code: str, db_path: Optional[Path] = None) -> Optional[Dict[
 
 
 def list_access_codes(db_path: Optional[Path] = None) -> List[Dict[str, Any]]:
-    """Lista todos los códigos de acceso con detalle de usos."""
+    """Lista todos los códigos de acceso con detalle de usos y usuarios/Gmail vinculados."""
     init_db(db_path)
     with get_db_connection(db_path) as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM access_codes ORDER BY created_at DESC")
-        return [dict(row) for row in cursor.fetchall()]
+        cursor.execute("""
+            SELECT a.*,
+                   (SELECT GROUP_CONCAT(u.email, ', ') 
+                    FROM users u 
+                    WHERE u.access_code = a.code) AS linked_emails
+            FROM access_codes a
+            ORDER BY a.created_at DESC
+        """)
+        results = []
+        for row in cursor.fetchall():
+            item = dict(row)
+            item["linked_emails"] = item.get("linked_emails") or ""
+            item["assigned_email"] = item.get("assigned_email") or ""
+            item["associated_email"] = item["linked_emails"] or item["assigned_email"] or ""
+            results.append(item)
+        return results
 
 
 def revoke_access_code(code: str, db_path: Optional[Path] = None) -> bool:

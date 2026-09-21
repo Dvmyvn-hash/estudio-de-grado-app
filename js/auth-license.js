@@ -176,6 +176,7 @@ const LicenseService = {
     const scope = options.scope || "all"; // 'all', 'civil', 'procesal', 'constitucional'
     const days = options.days !== undefined ? options.days : 180; // 180 días (semestre de grado) o 0 (perpetua)
     const studentName = options.studentName || "Alumno";
+    const studentEmail = (options.studentEmail || options.email || "").trim().toLowerCase();
     const canManageNotes = !!options.canManageNotes;
 
     let code = "";
@@ -195,6 +196,8 @@ const LicenseService = {
       scope,
       days: parseInt(days),
       studentName,
+      assignedEmail: studentEmail,
+      linkedEmail: studentEmail || "",
       canManageNotes,
       role: canManageNotes ? "manager" : "student",
       createdAt: new Date().toISOString(),
@@ -219,6 +222,8 @@ const LicenseService = {
           days: parseInt(days),
           max_uses: 1,
           canManageNotes,
+          email: studentEmail,
+          assigned_email: studentEmail,
           pin: adminPin
         })
       });
@@ -265,7 +270,9 @@ const LicenseService = {
             max_uses: c.max_uses,
             revoked: c.active !== 1,
             expires_at: c.expires_at,
-            canManageNotes: (c.code || "").startsWith("GRADO-DOC")
+            canManageNotes: (c.code || "").startsWith("GRADO-DOC"),
+            linkedEmail: c.linked_emails || c.associated_email || c.assigned_email || "",
+            assignedEmail: c.assigned_email || ""
           }));
           this.saveIssuedCodes(serverCodes);
           return serverCodes;

@@ -1808,12 +1808,13 @@ const App = {
 
     btnGenerate?.addEventListener("click", async () => {
       const studentName = document.getElementById("admin-student-name")?.value.trim() || "Alumno";
+      const studentEmail = document.getElementById("admin-student-email")?.value.trim() || "";
       const customCode = document.getElementById("admin-custom-code")?.value.trim() || "";
       const scope = document.getElementById("admin-scope-select")?.value;
       const days = document.getElementById("admin-days-select")?.value;
       const canManageNotes = !!document.getElementById("admin-grant-notes-perm")?.checked;
 
-      const res = await LicenseService.generateCode({ studentName, scope, days, canManageNotes, customCode });
+      const res = await LicenseService.generateCode({ studentName, studentEmail, scope, days, canManageNotes, customCode });
       if (!res || !res.success) {
         this.showToast(res?.error || "Error al generar código de licencia", "error");
         return;
@@ -1822,6 +1823,8 @@ const App = {
       const roleMsg = canManageNotes ? " (con permiso de gestor de apuntes)" : "";
       this.showToast(`¡Código ${res.code} generado${roleMsg}! Cópialo para enviárselo a tu alumno.`, "success");
       document.getElementById("admin-student-name").value = "";
+      const emailInput = document.getElementById("admin-student-email");
+      if (emailInput) emailInput.value = "";
       const customInput = document.getElementById("admin-custom-code");
       if (customInput) customInput.value = "";
       const permCheck = document.getElementById("admin-grant-notes-perm");
@@ -1884,7 +1887,8 @@ const App = {
 
     const list = await LicenseService.fetchAdminCodes();
     tbody.innerHTML = list.map(c => {
-      const stStats = StorageService.calculateProgress(c.code, 'all');
+      const emailDisplay = c.linkedEmail || c.assignedEmail || '';
+      const isConvalidated = (c.uses > 0 && c.linkedEmail);
       return `
       <tr style="${c.revoked ? 'opacity: 0.5; text-decoration: line-through;' : ''}">
         <td><span class="code-pill">${escapeHTML(c.code)}</span></td>
@@ -1892,11 +1896,29 @@ const App = {
           ${escapeHTML(c.studentName || 'Sin asignar')}
           ${c.canManageNotes ? '<span class="badge-count" style="font-size: 0.65rem; margin-left: 4px; background: rgba(16, 185, 129, 0.2); color: #10b981;">Gestor Apuntes</span>' : ''}
         </td>
+        <td>
+          ${emailDisplay ? `
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <span style="display: inline-flex; align-items: center; gap: 5px; color: ${isConvalidated ? '#10b981' : 'var(--gold-primary)'}; font-size: 0.82rem; font-weight: 600;">
+                <i data-lucide="${isConvalidated ? 'check-circle' : 'mail'}" style="width: 13px; height: 13px; flex-shrink: 0;"></i>
+                <span>${escapeHTML(emailDisplay)}</span>
+              </span>
+              <span style="font-size: 0.70rem; color: ${isConvalidated ? '#10b981' : 'var(--text-muted)'}; font-weight: 500;">
+                ${isConvalidated ? '✓ Convalidado' : 'Pendiente de canje'}
+              </span>
+            </div>
+          ` : `
+            <span style="color: var(--text-muted); font-size: 0.78rem; font-style: italic;">
+              Sin vincular
+            </span>
+          `}
+        </td>
         <td><span class="badge-count" style="font-size: 0.65rem;">${c.scope}</span></td>
         <td>${c.days === 0 ? 'Perpetua' : `${c.days} días`}</td>
         <td>
-          <span style="font-weight: 700; color: var(--gold-primary);">${stStats.percent}%</span>
-          <span style="font-size: 0.72rem; color: var(--text-muted);">(${stStats.mastered}/${stStats.total})</span>
+          <span style="font-weight: 700; color: ${c.uses > 0 ? '#10b981' : 'var(--text-muted)'};">
+            ${c.uses}/${c.max_uses}
+          </span>
         </td>
         <td>
           <button class="btn-copy-code" data-copy-code="${c.code}" title="Copiar al portapapeles">

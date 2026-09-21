@@ -610,12 +610,16 @@
               <input type="text" id="admin-student-name" class="form-control" placeholder="Ej: Juan Pérez (Pago recibido)">
             </div>
             <div class="form-group">
-              <label for="admin-custom-code">Código Personalizado (Opcional):</label>
-              <input type="text" id="admin-custom-code" class="form-control" placeholder="Ej: TEST-GRADO-001 (o dejar vacío para autogenerar)" style="text-transform: uppercase;">
+              <label for="admin-student-email">Gmail / Correo del Alumno (Opcional):</label>
+              <input type="email" id="admin-student-email" class="form-control" placeholder="Ej: alumno@gmail.com (asignar directamente)">
             </div>
           </div>
 
           <div class="form-grid">
+            <div class="form-group">
+              <label for="admin-custom-code">Código Personalizado (Opcional):</label>
+              <input type="text" id="admin-custom-code" class="form-control" placeholder="Ej: TEST-GRADO-001 (o dejar vacío para autogenerar)" style="text-transform: uppercase;">
+            </div>
             <div class="form-group">
               <label for="admin-scope-select">Materias a Liberar:</label>
               <select id="admin-scope-select" class="form-control">
@@ -625,6 +629,9 @@
                 <option value="constitucional">Solo Derecho Constitucional</option>
               </select>
             </div>
+          </div>
+
+          <div class="form-grid">
             <div class="form-group">
               <label for="admin-days-select">Duración del Acceso:</label>
               <select id="admin-days-select" class="form-control">
@@ -660,10 +667,11 @@
                 <thead>
                   <tr>
                     <th>Código</th>
-                    <th>Alumno</th>
+                    <th>Alumno / Referencia</th>
+                    <th>Gmail Vinculado</th>
                     <th>Alcance</th>
                     <th>Vigencia</th>
-                    <th>% Progreso</th>
+                    <th>Usos</th>
                     <th>Acción</th>
                   </tr>
                 </thead>

@@ -1232,6 +1232,9 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                 item = dict(c)
                 item["current_uses"] = item.get("times_used", 0)
                 item["uses"] = item.get("times_used", 0)
+                item["linked_emails"] = item.get("linked_emails") or ""
+                item["assigned_email"] = item.get("assigned_email") or ""
+                item["associated_email"] = item.get("associated_email") or item.get("linked_emails") or item.get("assigned_email") or ""
                 codes.append(item)
             self.send_json_response({"ok": True, "codes": codes})
             return
@@ -1308,13 +1311,20 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                 except (ValueError, TypeError):
                     expires_at = None
 
+            raw_assigned_email = req_data.get("email") or req_data.get("assigned_email") or req_data.get("studentEmail")
+            clean_assigned_email = None
+            if raw_assigned_email and str(raw_assigned_email).strip():
+                candidate = str(raw_assigned_email).strip().lower()
+                if "@" in candidate:
+                    clean_assigned_email = candidate
+
             clean_code = db.normalize_access_code(code)
             if not clean_code or not re.match(r"^[A-Z0-9_\-]{4,36}$", clean_code):
                 self.send_json_response({"ok": False, "error": "Formato de código inválido (debe contener entre 4 y 36 caracteres alfanuméricos o guiones)."}, status_code=400)
                 return
 
             try:
-                res = db.create_access_code(clean_code, label=label, max_uses=max_uses, expires_at=expires_at)
+                res = db.create_access_code(clean_code, label=label, max_uses=max_uses, expires_at=expires_at, assigned_email=clean_assigned_email)
                 self.send_json_response({"ok": True, "code": clean_code, "item": res}, status_code=201)
             except sqlite3.IntegrityError:
                 self.send_json_response({"ok": False, "error": f"El código '{clean_code}' ya existe en el sistema."}, status_code=409)
