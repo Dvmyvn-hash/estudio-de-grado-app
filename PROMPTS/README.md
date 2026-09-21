@@ -15,7 +15,10 @@
 | # | Archivo | Descripción | Estado |
 | :-: | :--- | :--- | :--- |
 | 001 | `001_sync_apuntes_admin.md` | Subida de apuntes desde el Panel de Administrador con sincronización inmediata a la Sección de Apuntes e índice temático. | ✅ Implementado |
-| 002 | `002_mejorar_agente_casos_complejidad_pauta.md` | Mejora integral del agente de creación de casos: complejidad lógica e interdisciplinaria, cobertura completa del temario, rúbrica AIME 2026-20 al 100 %, soluciones modelo sin vaguedad, apego estricto a las fuentes implementadas y **nutrición dinámica desde los apuntes cargados** (`/api/sync-topics`, `linkedApuntes`, refresco ≤ 3.5 s). | 📝 Por ejecutar |
+| 002 | `002_mejorar_agente_casos_complejidad_pauta.md` | Mejora integral del agente de creación de casos: complejidad lógica e interdisciplinaria, cobertura completa del temario, rúbrica AIME 2026-20 al 100 %, soluciones modelo sin vaguedad, apego estricto a las fuentes implementadas y **nutrición dinámica desde los apuntes cargados** (`/api/sync-topics`, `linkedApuntes`, refresco ≤ 3.5 s). | ✅ Implementado (v7.3) |
+| 003 | `003_indice_unificado_sin_duplicados_solo_apuntes.md` | Índice de Apuntes unificado: elimina códigos duplicados (`1.1`, `1.3`…) vía `indexCode` canónico por disciplina (`N.N`) sin tocar `code`/`id`, orden continuo y completo acorde a las secciones reales de los apuntes, y **gatea el índice solo a la vista Apuntes** (oculto/cerrado en Casos y Grafo; `#btn-toggle-sidebar` deshabilitado fuera de Apuntes). | ✅ Implementado (v7.2) |
+| 004 | `004_registro_persistente_codigos_acceso_operativo.md` | Registro persistente y operativo de códigos de acceso usados: disco durable en Render, tabla de auditoría `access_code_usages`, restauración del Pase Activo al ingresar desde cualquier plataforma y cliente que prioriza la verdad del servidor sobre el `localStorage`. | ✅ Implementado (v7.4) |
+| 005 | `005_header_movil_iconos_eliminar_modo_claro.md` | Header móvil solo-íconos (eliminación de superposición entre logotipo y candado, chip de usuario compacto con solo avatar y logout) y eliminación definitiva del selector de Modo Claro (Dark Academy único e inmutable en `:root`). | ✅ Implementado (v7.5) |
 
 ## Reglas transversales para cualquier prompt (las heredan todos)
 

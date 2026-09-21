@@ -1,7 +1,7 @@
 # PROMPT 002 — Mejora Integral del Agente de Creación de Casos: Complejidad, Rúbrica AIME 2026-20, Precisión Sin Vaguedad, Apego Estricto a las Fuentes y Nutrición desde los Apuntes Cargados
 
 > **Versión:** v1.1 · **Fecha:** 2026-09-21 · **Autor:** puente (dpint)
-> **Estado:** 📝 Por ejecutar · **Depende de:** PROMPT 001 (subida de apuntes desde admin; el diseño de la Parte F es compatible con o sin él)
+> **Estado:** ✅ Implementado (v7.3) · **Depende de:** PROMPT 001 (subida de apuntes desde admin; el diseño de la Parte F es compatible con o sin él)
 >
 > **v1.1 (revisión):** incorpora la **Parte F** — el agente debe nutrirse también de los **apuntes cargados/dinámicos** (`/api/sync-topics` + `INITIAL_DATA.topics`): los nuevos apuntes subidos por el administrador pasan a ser fuente viva de casos, doctrina y cobertura temática, con guardrails anti-alucinación.
 

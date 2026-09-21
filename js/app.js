@@ -193,6 +193,16 @@ const App = {
     this.setupImportModal();
     this.setupKeyboardShortcuts();
 
+    // Sincronizar fuentes doctrinales y apuntes oficiales en el agente generador de casos
+    if (typeof CaseGeneratorAgent !== "undefined") {
+      if (typeof CaseGeneratorAgent.syncFuentesFromServer === "function") {
+        CaseGeneratorAgent.syncFuentesFromServer();
+      }
+      if (typeof CaseGeneratorAgent.syncApuntesFromServer === "function") {
+        CaseGeneratorAgent.syncApuntesFromServer();
+      }
+    }
+
     // Inicializar autenticación con Google y códigos de invitación
     if (typeof AuthService !== "undefined" && typeof AuthService.init === "function") {
       AuthService.init();
@@ -332,6 +342,16 @@ const App = {
           localData.topics = Array.from(existingMap.values());
           StorageService.saveData(localData);
 
+          // Invalidar y re-sincronizar apuntes en el agente generador de casos
+          if (typeof CaseGeneratorAgent !== "undefined") {
+            if (typeof CaseGeneratorAgent.invalidateApuntes === "function") {
+              CaseGeneratorAgent.invalidateApuntes();
+            }
+            if (typeof CaseGeneratorAgent.syncApuntesFromServer === "function") {
+              CaseGeneratorAgent.syncApuntesFromServer();
+            }
+          }
+
           this.renderSidebar();
           if (this.currentView === "topics") {
             this.renderTopicViewer();
@@ -371,23 +391,12 @@ const App = {
     }
   },
 
-  // 1. GESTIÓN DE TEMA (CLARO / OSCURO)
+  // 1. GESTIÓN DE TEMA (Dark Academy inmutable)
   setupTheme() {
-    const savedTheme = localStorage.getItem("theme_preference") || "dark";
-    document.documentElement.setAttribute("data-theme", savedTheme);
-
-    const btnTheme = document.getElementById("btn-toggle-theme");
-    if (btnTheme) {
-      btnTheme.addEventListener("click", () => {
-        const current = document.documentElement.getAttribute("data-theme");
-        const next = current === "dark" ? "light" : "dark";
-        document.documentElement.setAttribute("data-theme", next);
-        localStorage.setItem("theme_preference", next);
-        if (this.currentView === "graph") {
-          ConceptGraph.draw();
-        }
-      });
-    }
+    document.documentElement.setAttribute("data-theme", "dark");
+    try {
+      localStorage.removeItem("theme_preference");
+    } catch (e) {}
   },
 
   // 2. NAVEGACIÓN ENTRE VISTAS
@@ -420,12 +429,16 @@ const App = {
 
     if (btnSidebar && sidebar) {
       btnSidebar.addEventListener("click", () => {
+        // En vistas distintas a 'topics' la barra lateral está restringida
+        if (this.currentView !== "topics") return;
+
         const isCollapsed = sidebar.classList.contains("collapsed");
         if (isCollapsed) {
           openSidebarMobile();
         } else {
           closeSidebarMobile();
         }
+        this.sidebarHiddenByView = false;
         if (this.currentView === "graph") {
           setTimeout(() => {
             ConceptGraph.resizeCanvas();
@@ -436,10 +449,16 @@ const App = {
     }
 
     if (btnCloseSidebarMobile) {
-      btnCloseSidebarMobile.addEventListener("click", closeSidebarMobile);
+      btnCloseSidebarMobile.addEventListener("click", () => {
+        closeSidebarMobile();
+        this.sidebarHiddenByView = false;
+      });
     }
     if (sidebarBackdrop) {
-      sidebarBackdrop.addEventListener("click", closeSidebarMobile);
+      sidebarBackdrop.addEventListener("click", () => {
+        closeSidebarMobile();
+        this.sidebarHiddenByView = false;
+      });
     }
   },
 
@@ -458,6 +477,43 @@ const App = {
     const targetSection = document.getElementById(`view-${viewName}`);
     if (targetSection) {
       targetSection.classList.add("active");
+    }
+
+    // Gateo de Barra Lateral: el índice es exclusivo de la vista de Apuntes (topics)
+    const sidebar = document.getElementById("app-sidebar");
+    const btnSidebar = document.getElementById("btn-toggle-sidebar");
+    const sidebarBackdrop = document.getElementById("sidebar-backdrop");
+
+    if (viewName === "topics") {
+      // Restaurar índice si fue ocultado por gateo de vista
+      if (sidebar && this.sidebarHiddenByView) {
+        sidebar.classList.remove("collapsed");
+        this.sidebarHiddenByView = false;
+      }
+      if (sidebarBackdrop) {
+        sidebarBackdrop.classList.add("hidden");
+      }
+      if (btnSidebar) {
+        btnSidebar.classList.remove("hidden");
+        btnSidebar.removeAttribute("aria-hidden");
+        btnSidebar.disabled = false;
+        btnSidebar.style.display = "";
+      }
+    } else {
+      // Ocultar y restringir índice en vistas Casos y Grafo
+      if (sidebar && !sidebar.classList.contains("collapsed")) {
+        sidebar.classList.add("collapsed");
+        this.sidebarHiddenByView = true;
+      }
+      if (sidebarBackdrop) {
+        sidebarBackdrop.classList.add("hidden");
+      }
+      if (btnSidebar) {
+        btnSidebar.classList.add("hidden");
+        btnSidebar.setAttribute("aria-hidden", "true");
+        btnSidebar.disabled = true;
+        btnSidebar.style.display = "none";
+      }
     }
 
     this.renderCurrentView();
@@ -631,13 +687,15 @@ const App = {
       sortedChapters.forEach(([chapTitle, chapData]) => {
         const chapterTopics = chapData.topics;
         
-        // Ordenar cédulas estrictamente por código (1.1, 1.2, etc.)
+        // Ordenar cédulas prioritariamente por indexCode (1.1, 1.2, etc.) y fallback a code
         chapterTopics.sort((a, b) => {
           const parseCode = (c) => {
             const parts = (c || "").split(".").map(p => parseInt(p, 10) || 0);
-            return (parts[0] || 0) * 100 + (parts[1] || 0);
+            return (parts[0] || 0) * 1000 + (parts[1] || 0);
           };
-          return parseCode(a.code) - parseCode(b.code);
+          const codeA = a.indexCode || a.code;
+          const codeB = b.indexCode || b.code;
+          return parseCode(codeA) - parseCode(codeB);
         });
 
         const masteredInChap = chapterTopics.filter(t => StorageService.isTopicMasteredByUser(t.id)).length;
@@ -665,12 +723,19 @@ const App = {
                 const isMastered = StorageService.isTopicMasteredByUser(t.id);
                 // Quitar prefijo repetido
                 const cleanTitle = t.cleanTitle || (t.title.replace(/^Secci[oó]n\s*\d+\.\d+\s*[:–\-—]\s*/i, '').trim());
+                const displayCode = t.indexCode || t.code;
+                const safeDisplayCode = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(displayCode || '') : (displayCode || '');
+                const safeCleanTitle = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(cleanTitle || '') : (cleanTitle || '');
+                const tooltipText = t.indexCode 
+                  ? `Cédula ${t.indexCode} · Sección ${t.code || ''} (${t.sourceFile || ''})`
+                  : (t.title || '');
+                const safeTooltip = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(tooltipText) : tooltipText;
 
                 return `
-                <li class="topic-tree-item ${this.currentTopicId === t.id ? 'active' : ''} ${!isUnlocked ? 'locked' : ''}" data-topic-id="${t.id}" title="${t.title}">
+                <li class="topic-tree-item ${this.currentTopicId === t.id ? 'active' : ''} ${!isUnlocked ? 'locked' : ''}" data-topic-id="${t.id}" title="${safeTooltip}">
                   <div class="topic-item-left">
-                    <span class="cedula-code-badge">${t.code ? '§ ' + t.code : '·'}</span>
-                    <span class="topic-title-text">${cleanTitle}</span>
+                    <span class="cedula-code-badge">${displayCode ? '§ ' + safeDisplayCode : '·'}</span>
+                    <span class="topic-title-text">${safeCleanTitle}</span>
                   </div>
                   <div class="topic-item-right">
                     ${isAdmin ? `
@@ -808,9 +873,9 @@ const App = {
             <nav class="topic-breadcrumbs" aria-label="Ubicación en los apuntes">
               <span class="bc-discipline ${topic.subject}">${disciplineName}</span>
               <i data-lucide="chevron-right" class="bc-sep"></i>
-              <span class="bc-chapter">${topic.chapterTitle || topic.category}</span>
+              <span class="bc-chapter">${typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(topic.chapterTitle || topic.category || '') : (topic.chapterTitle || topic.category || '')}</span>
               <i data-lucide="chevron-right" class="bc-sep"></i>
-              <span class="bc-code">${topic.code ? 'Sección ' + topic.code : 'Apunte'}</span>
+              <span class="bc-code">${topic.indexCode ? `Cédula ${typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(topic.indexCode) : topic.indexCode} — Sección ${typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(topic.code || '') : (topic.code || '')} (${typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(topic.sourceFile || '') : (topic.sourceFile || '')})` : (topic.code ? 'Sección ' + (typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(topic.code) : topic.code) : 'Apunte')}</span>
             </nav>
 
             <div class="topic-meta-row">
@@ -819,7 +884,7 @@ const App = {
                   ${disciplineName}
                 </span>
                 <span class="topic-period-badge" title="Archivo de apuntes de origen">
-                  <i data-lucide="file-text" style="width: 12px; height: 12px; vertical-align: middle;"></i> ${topic.sourceFile || 'Apuntes'}
+                  <i data-lucide="file-text" style="width: 12px; height: 12px; vertical-align: middle;"></i> ${typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(topic.sourceFile || 'Apuntes') : (topic.sourceFile || 'Apuntes')}
                 </span>
               </div>
               

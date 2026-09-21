@@ -314,20 +314,45 @@ var CaseSolver = {
           </div>
 
           <!-- VINCULACIÓN CON APUNTES DEL TEMARIO Y CARPETA FUENTES -->
-          ${(activeCase.linkedTopics && activeCase.linkedTopics.length > 0) || activeCase.linkedFuentes ? `
+          ${(activeCase.linkedTopics && activeCase.linkedTopics.length > 0) || (activeCase.linkedApuntes && activeCase.linkedApuntes.length > 0) || activeCase.linkedFuentes ? `
             <div class="case-linked-sources-card">
               <div class="linked-sources-header">
                 <i data-lucide="book-open"></i>
                 <span>Cédulas del Temario & Fuentes Dogmáticas Vinculadas</span>
               </div>
               <div class="linked-topics-pills">
-                ${(activeCase.linkedTopics || []).map(t => `
-                  <button type="button" class="btn-linked-topic" data-goto-topic="${t.id}" title="Estudiar apunte oficial: ${t.title}">
+                ${(activeCase.linkedTopics || []).map(t => {
+                  const dispCode = t.indexCode || t.code || '';
+                  const safeCode = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(dispCode) : dispCode;
+                  const safeTitle = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(t.title || '') : (t.title || '');
+                  return `
+                  <button type="button" class="btn-linked-topic" data-goto-topic="${typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(t.id) : t.id}" title="Estudiar apunte oficial: ${safeTitle}">
                     <i data-lucide="external-link" style="width: 12px; height: 12px;"></i>
-                    <span>§ ${t.code || ''} ${t.title}</span>
+                    <span>§ ${safeCode} ${safeTitle}</span>
                   </button>
-                `).join('')}
+                `;}).join('')}
               </div>
+              ${activeCase.linkedApuntes && activeCase.linkedApuntes.length > 0 ? `
+                <div class="linked-apuntes-section" style="margin-top: 8px;">
+                  <div class="linked-sources-subheader" style="font-size: 0.8rem; color: var(--text-muted, #94a3b8); margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
+                    <i data-lucide="bookmark" style="width: 12px; height: 12px;"></i>
+                    <span>Apuntes de Grado Nutridos (${activeCase.linkedApuntes.length})</span>
+                  </div>
+                  <div class="linked-topics-pills">
+                    ${activeCase.linkedApuntes.map(ap => {
+                      const safeCode = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(ap.code || '') : (ap.code || '');
+                      const safeTitle = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(ap.title || '') : (ap.title || '');
+                      const safeFile = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(ap.sourceFile || '') : (ap.sourceFile || '');
+                      return `
+                        <button type="button" class="btn-linked-topic btn-linked-apunte" data-goto-topic="${typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(ap.id) : ap.id}" title="Apunte oficial: ${safeTitle} (${safeFile})">
+                          <i data-lucide="file-check" style="width: 12px; height: 12px;"></i>
+                          <span>§ ${safeCode} ${safeTitle} <small style="opacity: 0.75;">(${safeFile})</small></span>
+                        </button>
+                      `;
+                    }).join('')}
+                  </div>
+                </div>
+              ` : ''}
               ${activeCase.linkedFuentes ? `
                 <div class="linked-fuentes-row">
                   <i data-lucide="file-text" style="width: 13px; height: 13px;"></i>
@@ -742,6 +767,7 @@ var CaseSolver = {
               ${this.escapeText(question.explanation)}
             </div>
           </div>
+          ${this.renderQuestionPautaAndFatalError(question)}
         </div>
       `;
     }
@@ -773,6 +799,7 @@ var CaseSolver = {
               ${question.explanation}
             </div>
           </div>
+          ${this.renderQuestionPautaAndFatalError(question)}
         </div>
       `;
     }
@@ -876,9 +903,48 @@ var CaseSolver = {
             </div>
           </div>
 
+          ${this.renderQuestionPautaAndFatalError(question)}
+
         </div>
       </div>
     `;
+  },
+
+  /**
+   * Renderiza la Pauta de Corrección Oficial y el Error Fatal de Grado
+   */
+  renderQuestionPautaAndFatalError(question) {
+    if (!question) return '';
+    let html = '';
+    if (question.pauta) {
+      const safePauta = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(question.pauta) : question.pauta;
+      html += `
+        <div class="question-pauta-card" style="margin-top: 12px; padding: 12px 16px; background: rgba(59, 130, 246, 0.08); border-left: 4px solid #3b82f6; border-radius: 6px;">
+          <div style="font-size: 0.85rem; font-weight: 700; color: #60a5fa; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+            <i data-lucide="target" style="width: 15px; height: 15px;"></i>
+            <span>Pauta de Corrección Oficial (Criterio Examen de Grado)</span>
+          </div>
+          <div style="font-size: 0.88rem; line-height: 1.5; color: var(--text-primary, #e2e8f0);">
+            ${safePauta}
+          </div>
+        </div>
+      `;
+    }
+    if (question.errorFatalDeGrado) {
+      const safeFatal = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(question.errorFatalDeGrado) : question.errorFatalDeGrado;
+      html += `
+        <div class="question-fatal-error-card" style="margin-top: 10px; padding: 12px 16px; background: rgba(239, 68, 68, 0.10); border-left: 4px solid #ef4444; border-radius: 6px;">
+          <div style="font-size: 0.85rem; font-weight: 700; color: #f87171; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+            <i data-lucide="alert-triangle" style="width: 15px; height: 15px;"></i>
+            <span>Error Fatal de Grado (Causal Inmediata de Reprobación)</span>
+          </div>
+          <div style="font-size: 0.88rem; line-height: 1.5; color: var(--text-primary, #e2e8f0);">
+            ${safeFatal}
+          </div>
+        </div>
+      `;
+    }
+    return html;
   },
 
   renderRubricDimension(critKey, title, maxPts, guidingQuestion, currentVal, levels) {
@@ -1337,6 +1403,18 @@ var CaseSolver = {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         this.setQuestionIndex(0);
+      });
+    });
+
+    // Navegar a cédula o apunte oficial del temario
+    this.container.querySelectorAll('[data-goto-topic]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetBtn = e.target.closest('[data-goto-topic]');
+        const topicId = targetBtn ? targetBtn.dataset.gotoTopic : null;
+        if (topicId && typeof App !== 'undefined' && typeof App.openTopic === 'function') {
+          App.openTopic(topicId);
+        }
       });
     });
   },

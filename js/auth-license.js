@@ -63,21 +63,7 @@ const LicenseService = {
 
   // 1. Obtener la licencia actual del usuario en este navegador
   getCurrentLicense() {
-    try {
-      const stored = localStorage.getItem(this.STORAGE_LICENSE_KEY);
-      if (stored) {
-        const lic = JSON.parse(stored);
-        // Comprobar si ha expirado
-        if (lic.expiresAt && new Date(lic.expiresAt) < new Date()) {
-          lic.expired = true;
-          return lic;
-        }
-        return lic;
-      }
-    } catch (e) {
-      console.warn("Error leyendo licencia:", e);
-    }
-    // Comprobar si el usuario conectado con Google tiene cuenta convalidada
+    // Prioridad absoluta a la verdad del servidor (AuthService.currentUser)
     if (typeof AuthService !== "undefined" && AuthService.currentUser && AuthService.currentUser.access_code && !AuthService.currentUser.isDemo) {
       return {
         code: AuthService.currentUser.access_code,
@@ -92,12 +78,39 @@ const LicenseService = {
       };
     }
 
+    // Fallback cuando no hay sesión del servidor activa (modo offline / estático)
+    try {
+      const stored = localStorage.getItem(this.STORAGE_LICENSE_KEY);
+      if (stored) {
+        const lic = JSON.parse(stored);
+        // Comprobar si ha expirado
+        if (lic.expiresAt && new Date(lic.expiresAt) < new Date()) {
+          lic.expired = true;
+          return lic;
+        }
+        return lic;
+      }
+    } catch (e) {
+      console.warn("Error leyendo licencia:", e);
+    }
+
     return null; // Sin licencia = Modo Demo
   },
 
   // Comprobar si el usuario opera en Modo Demo (sin Pase Activo convalidado)
   isDemoMode() {
     if (this.isAdminMode()) return false;
+
+    // Prioridad absoluta a la sesión activa validada por el servidor
+    if (typeof AuthService !== "undefined" && AuthService.currentUser) {
+      if (AuthService.currentUser.access_code && !AuthService.currentUser.isDemo) {
+        return false;
+      }
+      if (AuthService.currentUser.isDemo) {
+        return true;
+      }
+    }
+
     const lic = this.getCurrentLicense();
     return !lic || Boolean(lic.expired);
   },

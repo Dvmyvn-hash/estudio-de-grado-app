@@ -70,7 +70,14 @@ def load_env_file():
 load_env_file()
 
 PORT = int(os.environ.get("PORT", 8080))
-DB_PATH = BASE_DIR / "estudio_grado.db"
+DB_PATH_ENV = os.environ.get("DB_PATH")
+DB_PATH = Path(DB_PATH_ENV).resolve() if DB_PATH_ENV else BASE_DIR / "estudio_grado.db"
+try:
+    if DB_PATH.parent and not DB_PATH.parent.exists():
+        DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+except Exception as e:
+    print(f"[Aviso] No se pudo crear directorio padre para DB_PATH: {e}")
+print(f"[DB] Archivo SQLite en {DB_PATH}")
 
 def get_or_create_auth_secret() -> str:
     """Obtiene el secreto HMAC desde variable de entorno o genera uno criptográfico de 256 bits."""
@@ -486,7 +493,7 @@ def get_all_synced_topics():
     Entrega todas las secciones reales de los apuntes desarrollados en vivo desde APUNTES y fuentes.
     """
     try:
-        from generate_clean_notes_data import extract_sections_from_file, build_files_config, update_data_js
+        from generate_clean_notes_data import extract_sections_from_file, build_files_config, update_data_js, assign_index_codes
         configs = build_files_config()
         all_sections = []
         for cfg in configs:
@@ -503,6 +510,9 @@ def get_all_synced_topics():
                         sec["connections"] = dogmatic_connections.get(sec["id"], [])
                 except Exception as ce:
                     print("Error vinculando conexiones dogmáticas:", ce)
+
+            # Asignar indexCodes canónicos únicos por disciplina
+            assign_index_codes(all_sections)
 
             try:
                 with open(ALL_TOPICS_PATH, "w", encoding="utf-8") as f:
@@ -1020,6 +1030,10 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
         if clean_path == "/api/auth/me":
             user = self.get_authenticated_user()
             if user:
+                if not user.get("access_code"):
+                    restored_code = db.restore_user_access_code(user["id"], user["email"], db_path=DB_PATH)
+                    if restored_code:
+                        user["access_code"] = restored_code
                 self.send_json_response({
                     "ok": True,
                     "user": {
@@ -1057,7 +1071,7 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
             if not verify_admin_pin(admin_pin):
                 self.send_json_response({"ok": False, "error": "Acceso de administrador no autorizado."}, status_code=401)
                 return
-            raw_codes = db.list_access_codes()
+            raw_codes = db.list_access_codes(db_path=DB_PATH)
             codes = []
             for c in raw_codes:
                 item = dict(c)
@@ -1066,6 +1080,7 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                 item["linked_emails"] = item.get("linked_emails") or ""
                 item["assigned_email"] = item.get("assigned_email") or ""
                 item["associated_email"] = item.get("associated_email") or item.get("linked_emails") or item.get("assigned_email") or ""
+                item["usages"] = item.get("usages", [])
                 codes.append(item)
             self.send_json_response({"ok": True, "codes": codes})
             return
@@ -1477,16 +1492,17 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
             token = create_session_token(str(user["id"]))
             cookie = make_session_cookie(token)
 
+            is_demo = not bool(user.get("access_code"))
             resp_payload = {
                 "ok": True,
                 "user": {
                     "id": user["id"],
                     "email": user["email"],
                     "name": user["name"] or user["email"].split("@")[0],
-                    "access_code": None,
-                    "isDemo": True
+                    "access_code": user.get("access_code"),
+                    "isDemo": is_demo
                 },
-                "message": "Cuenta creada exitosamente en Versión Demo."
+                "message": "Cuenta creada exitosamente con Pase Activo restaurado." if not is_demo else "Cuenta creada exitosamente en Versión Demo."
             }
 
             self.send_json_response(resp_payload, status_code=201, headers={"Set-Cookie": cookie})
@@ -1515,7 +1531,7 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
             email = req_data.get("email", "").strip().lower()
             password = req_data.get("password", "")
 
-            user = db.get_user_by_email(email)
+            user = db.get_user_by_email(email, db_path=DB_PATH)
 
             # Verificar si la cuenta está bloqueada temporalmente
             now_ms = int(time.time() * 1000)
@@ -1541,7 +1557,7 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
             is_valid = db.verify_password(password, user["password_hash"], user["password_salt"])
             if not is_valid:
                 LOGIN_BACKOFF_LIMITER.record_attempt(client_ip)
-                attempts, locked_until = db.record_login_failure(user["id"])
+                attempts, locked_until = db.record_login_failure(user["id"], db_path=DB_PATH)
                 if locked_until:
                     self.send_json_response({
                         "ok": False,
@@ -1555,10 +1571,14 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                 return
 
             LOGIN_BACKOFF_LIMITER.reset(client_ip)
-            db.record_login_success(user["id"])
+            db.record_login_success(user["id"], db_path=DB_PATH)
+            if not user.get("access_code"):
+                restored_code = db.restore_user_access_code(user["id"], user["email"], db_path=DB_PATH)
+                if restored_code:
+                    user["access_code"] = restored_code
             token = create_session_token(str(user["id"]))
             cookie = make_session_cookie(token)
-            progress = db.get_all_user_progress(user["id"])
+            progress = db.get_all_user_progress(user["id"], db_path=DB_PATH)
             self.send_json_response({
                 "ok": True,
                 "user": {
@@ -1630,7 +1650,7 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_json_response({"ok": False, "error": "No autenticado. Inicia sesión primero."}, status_code=401)
                 return
 
-            ok, reason, updated_user = db.link_user_code(user["id"], clean_code)
+            ok, reason, updated_user = db.link_user_code(user["id"], clean_code, db_path=DB_PATH)
             if not ok or not updated_user:
                 LINK_CODE_LIMITER.record_attempt(client_ip)
                 self.send_json_response({"ok": False, "error": reason}, status_code=400)

@@ -83,7 +83,12 @@
   --font-h4: clamp(0.9rem, 1.1vw, 1.02rem);
 }
 
-/* Tema Claro (Ivory & Antique Paper - Alto Contraste WCAG AA) */
+/* ==========================================================================
+   CÓDIGO MUERTO (Conservado únicamente como referencia histórica WCAG AA de v5.0):
+   El Modo Claro ha sido eliminado definitivamente de la plataforma en v7.2.
+   Dark Academy (Obsidian & Law Gold) es el único tema activo, permanente e inmutable.
+   ========================================================================== */
+/*
 [data-theme="light"] {
   color-scheme: light;
 
@@ -140,6 +145,7 @@
   --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.12);
 }
+*/
 
 /* Resets */
 *, *::before, *::after {
@@ -574,19 +580,7 @@ body {
   border-color: var(--border-subtle);
 }
 
-/* Toggle tema */
-[data-theme="dark"] .sun-icon {
-  display: block;
-}
-[data-theme="dark"] .moon-icon {
-  display: none;
-}
-[data-theme="light"] .sun-icon {
-  display: none;
-}
-[data-theme="light"] .moon-icon {
-  display: block;
-}
+/* Toggle tema eliminado en v7.2 (Dark Academy es el único tema activo e inmutable) */
 
 /* ==========================================================================
    CUERPO PRINCIPAL
@@ -845,47 +839,81 @@ body {
   }
 
   .header-brand {
-    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 0 0 auto;
     min-width: 0;
-    gap: 6px;
+  }
+
+  .header-brand .icon-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Logotipo móvil solo-ícono: ocultar textos de marca para prevenir superposición */
+  .brand-title,
+  .brand-subtitle,
+  .brand-text-block {
+    display: none !important;
   }
 
   .brand-badge {
-    gap: 6px;
-    min-width: 0;
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
   }
 
   .brand-icon-wrap {
-    width: 22px;
-    height: 22px;
+    width: 30px;
+    height: 30px;
   }
 
   .brand-icon-wrap i,
   .brand-icon-wrap svg {
-    width: 13px;
-    height: 13px;
-  }
-
-  .brand-title {
-    font-size: 0.72rem;
-    letter-spacing: 0.04em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .brand-subtitle {
-    display: none;
+    width: 16px;
+    height: 16px;
   }
 
   .header-actions {
+    display: flex;
+    align-items: center;
     gap: 6px;
+    margin-left: auto;
     flex-shrink: 0;
   }
 
   .header-actions .icon-btn {
     min-width: 44px;
     min-height: 44px;
+  }
+
+  /* Chip de usuario en móvil: ocultar texto y mostrar únicamente avatar y logout */
+  .user-profile-name {
+    display: none !important;
+  }
+
+  .user-profile-pill {
+    padding: 2px 4px 2px 6px;
+    gap: 4px;
+    min-height: 44px;
+    align-items: center;
+  }
+
+  .user-avatar-placeholder,
+  .user-avatar-img {
+    width: 26px;
+    height: 26px;
+  }
+
+  .btn-user-logout {
+    min-width: 36px;
+    min-height: 36px;
+    width: 36px;
+    height: 36px;
   }
 
   .search-bar {
@@ -966,9 +994,7 @@ body {
     gap: 6px;
   }
 
-  .brand-title {
-    font-size: 0.76rem;
-  }
+
 
   .nav-tab {
     font-size: 0.7rem;
@@ -1076,5 +1102,11 @@ body {
   background: var(--gold-primary);
   color: #0c0e14;
 }
+
+/* Utilidad Universal Ocultar */
+.hidden {
+  display: none !important;
+}
+
 
 

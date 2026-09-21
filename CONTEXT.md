@@ -41,10 +41,17 @@ El agente opera bajo reglas estructurales inmutables:
   * **Individualización de Partes:** Sujetos principales (demandante, demandado, tercer adquirente) y secundarios (abogados patrocinantes, notarios, jueces).
   * **Instituciones Jurídicas Involucradas:** Citas expresas de los estatutos en juego.
 
-* **Formato de Interrogación y Barajado Obligatorio:**
-  * Cada caso consta de **3 o 4 preguntas de grado**.
-  * Cada pregunta ofrece **5 alternativas (A a E)** o excepcionalmente 4 (A a D).
+* **Formato de Interrogación Graduada y Barajado Obligatorio (v7.3):**
+  * Cada caso consta de **3 o 4 preguntas de grado** con progresión pedagógica estricta:
+    * **Pregunta 1 (Núcleo Sustantivo):** Identificación del instituto dirimente y regla sustantiva aplicable.
+    * **Pregunta 2 (Matiz o Excepción Doctrinal):** Factor de alteración fáctica, contrapunto dogmático o carga probatoria.
+    * **Pregunta 3 (Vía Adjetiva / Procesal):** Excepción procesal, medida cautelar, recurso o incidente idóneo.
+    * **Pregunta 4 (Pauta / Efectos de Fondo):** Efectos patrimoniales, orden público, legitimación activa o liquidación de perjuicios.
+  * **5 Alternativas Obligatorias (A a E):** Cada pregunta ofrece exactamente 5 alternativas, conteniendo al menos **2 distractores seductores** refutados expresamente en la explicación oficial.
+  * **Cierre Conclusivo Obligatorio:** Toda explicación oficial concluye imperativamente con la sentencia `"Conclusión: [enunciado técnico inequívoco]"`.
+  * **Pauta Docente y Error Fatal de Grado:** Cada pregunta incluye los campos `pauta` (criterio docente de grado) y `errorFatalDeGrado` (afirmación inadmisible que causa reprobación inmediata).
   * **Barajado Aleatorio (`shuffleQuestionOptions`):** La alternativa correcta nunca tiene una posición fija; se redistribuye pseudoaleatoriamente mediante el algoritmo de Fisher-Yates preservando la referencia oficial.
+  * **Solución Modelo Oficial (`modelSolution`):** Ensayo forense real de resolución del caso de al menos 400 caracteres sin placeholders ni textos conjeturales.
 
 * **Rúbrica Oficial de Calificación en 4 Dimensiones (5.0 pts máx por pregunta):**
   La evaluación de cada pregunta se rige por un esquema dual de compuertas:
@@ -54,10 +61,18 @@ El agente opera bajo reglas estructurales inmutables:
   | Dimensión | Ponderación | Criterio de Evaluación de Grado |
   | :--- | :---: | :--- |
   | **Alternativa Correcta** | **1.0 pto** | Identificación de la solución jurídica exacta según la cátedra. |
-  | **Dim. 1: Marco Jurídico Pertinente** | **0.5 pts** | Cita precisa de normas legales positivas (arts. CC, CPC, COT, CPR), principios y doctrinas consolidadas. |
-  | **Dim. 2: Selección de Hechos Relevantes** | **1.0 pto** | Capacidad de aislar los hechos dirimentes frente a distractores o antecedentes accesorios. |
-  | **Dim. 3: Subsunción y Razonamiento** | **2.0 pts** | Silogismo forense completo: premisa mayor (derecho), premisa menor (hecho) y conclusión irrefutable. Conectores argumentativos lógicos. |
-  | **Dim. 4: Claridad y Precisión Técnica** | **0.5 pts** | Vocabulario jurídico riguroso (*lex artis ad hoc*, *duplo*, *statu quo*, *interdictos*, etc.). Cero coloquialismos. |
+  | **Dim. 1: Comprensión Dogmática e Identificación Normativa** | **0.5 pts** | Cita precisa de normas legales positivas (arts. CC, CPC, COT, CPR), principios y doctrinas consolidadas. |
+  | **Dim. 2: Subsunción Normativa y Manejo de Hechos Relevantes** | **1.0 pto** | Capacidad de aislar los hechos dirimentes frente a distractores o antecedentes accesorios. |
+  | **Dim. 3: Vías Adjetivas y Razonamiento Jurídico** | **2.0 pts** | Silogismo forense completo: premisa mayor (derecho), premisa menor (hecho) y conclusión irrefutable. Conectores argumentativos lógicos. |
+  | **Dim. 4: Técnica de Ponderación, Rigor y Precisión Conceptual** | **0.5 pts** | Vocabulario jurídico riguroso (*lex artis ad hoc*, *duplo*, *statu quo*, *interdictos*, etc.). Cero coloquialismos. |
+
+  Cada dimensión de la rúbrica incluye su `guidingQuestion` y 4 niveles graduados: `outstanding`, `sufficient`, `basic` e `insufficient`.
+
+* **Nutrición Dinámica desde Apuntes de Grado (`APUNTES_INDEX`):**
+  El agente se nutre en tiempo real de los 53 apuntes unificados mediante `CaseGeneratorAgent.syncApuntesFromServer()` e invalida caché ante sincronizaciones con el servidor (`invalidateApuntes()`). Cada caso sintetizado ancla `linkedApuntes` con código, título, archivo de origen sanitizado (`sourceFile`) y extracto doctrinal.
+
+* **Integridad de Citas y Validación Estricta:**
+  `assertCitationIntegrity(case)` y `validateGeneratedCase(case)` auditan automáticamente que ninguna cita legal provenga de alucinación (cero citas de memoria) y que la estructura del caso cumpla con los estándares de grado antes de ser renderizado o persistido.
 
 ---
 
@@ -66,8 +81,8 @@ El agente opera bajo reglas estructurales inmutables:
 * **Compuerta 1: Criterio Excluyente:**
   Si el postulante selecciona una alternativa incorrecta, el sistema asigna **automáticamente 0.0 puntos a la justificación**, sin importar qué tan sólida parezca la argumentación redactada. El puntaje total de esa pregunta es de **0.0 / 5.0 pts**.
 
-* **Matriz de Incompatibilidad Dogmática:**
-  El agente no puede asociar instituciones antagónicas en un mismo caso. El catálogo descarta activamente combinaciones incompatibles, por ejemplo:
+* **Matriz de Incompatibilidad Dogmática y Contra-Instituciones Doctrinales:**
+  El agente no puede asociar instituciones antagónicas en un mismo caso. El catálogo descarta activamente combinaciones incompatibles mediante la matriz técnica. Asimismo, incluye **4 contra-instituciones doctrinales** marcadas con `isDoctrinalOnly: true` y `doctrinalRationale`, utilizadas exclusivamente como distractores conceptuales o tesis superadas en las alternativas:
   * `civ_tradicion_posesion` vs. `civ_prescripcion_extraordinaria_sin_titulo`: Contra título inscrito no procede el apoderamiento material ni la prescripción adquisitiva sin cancelación previa (Art. 2505 CC).
   * `civ_reivindicatoria` vs. `civ_mera_tenencia_arriendo`: Contra el mero tenedor procede la acción contractual de restitución o comodato precario, no la acción de dominio (Art. 895 CC).
   * `civ_lesion_enorme` vs. `civ_rescision_muebles`: La lesión enorme en compraventa está restringida por ley a bienes raíces (Art. 1891 CC).
@@ -199,6 +214,25 @@ En memoria y en las capas de persistencia (`all_cases.json`, `localStorage`), ca
   "sourceFile": "caso-ia-1774058123456.md",
   "createdAt": 1774058123456,
   "expiresAt": 1774662923456,
+  "linkedFuentes": {
+    "file": "civil.md",
+    "section": "Teoría de los Bienes y Posesión Inscrita",
+    "rules": "Arts. 686, 700, 724, 728, 2505 CC"
+  },
+  "linkedTopics": [
+    { "id": "civil-losbienes-1-2", "code": "1.2", "indexCode": "1.8", "title": "La Posesión y sus Clases" },
+    { "id": "civil-losbienes-1-6", "code": "1.6", "indexCode": "1.12", "title": "Tradición y Posesión Inscrita" }
+  ],
+  "linkedApuntes": [
+    {
+      "id": "civil-losbienes-1-6",
+      "code": "1.6",
+      "title": "Tradición y Posesión Inscrita",
+      "sourceFile": "LOS BIENES.md",
+      "excerpt": "La competente inscripción conservatoria es requisito, prueba y garantía de la posesión..."
+    }
+  ],
+  "dogmaticPrinciples": "La teoría de la posesión inscrita consagra una garantía registral absoluta...",
   "factsBreakdown": {
     "principales": ["Hecho principal 1", "Hecho principal 2"],
     "secundarios": ["Detalle de cuotas", "Domicilio en Santiago"],
@@ -227,15 +261,18 @@ En memoria y en las capas de persistencia (`all_cases.json`, `localStorage`), ca
         { "id": "e", "text": "Ninguno, adolece de objeto ilícito." }
       ],
       "correctAnswer": "a",
-      "explanation": "La tradición de inmuebles solo opera mediante inscripción conservatoria (Art. 686 CC).",
+      "explanation": "La tradición de inmuebles solo opera mediante inscripción conservatoria (Art. 686 CC). Conclusión: La inscripción registral confiere la posesión legal y dominio.",
+      "pauta": "El postulante debe fundamentar en la ficción de posesión inscrita y la ineficacia del apoderamiento material.",
+      "errorFatalDeGrado": "Afirmar que la mera entrega material transfiere el dominio sobre bienes raíces en Chile.",
       "officialRubric": {
-        "criterio1Marco": { "name": "Marco jurídico pertinente", "maxPoints": 0.5 },
-        "criterio2Hechos": { "name": "Selección de hechos relevantes", "maxPoints": 1.0 },
-        "criterio3Subsuncion": { "name": "Subsunción y razonamiento", "maxPoints": 2.0 },
-        "criterio4Precision": { "name": "Claridad y precisión técnica", "maxPoints": 0.5 }
+        "criterio1Marco": { "name": "Dimensión 1: Comprensión Dogmática e Identificación Normativa", "maxPoints": 0.5, "guidingQuestion": "¿Qué normas rigen la tradición inmobiliaria?", "outstanding": "...", "sufficient": "...", "basic": "...", "insufficient": "..." },
+        "criterio2Hechos": { "name": "Dimensión 2: Subsunción Normativa y Manejo de Hechos Relevantes", "maxPoints": 1.0, "guidingQuestion": "¿Qué hechos dirimen la litis?", "outstanding": "...", "sufficient": "...", "basic": "...", "insufficient": "..." },
+        "criterio3Subsuncion": { "name": "Dimensión 3: Vías Adjetivas y Razonamiento Jurídico", "maxPoints": 2.0, "guidingQuestion": "¿Cómo opera la subsunción?", "outstanding": "...", "sufficient": "...", "basic": "...", "insufficient": "..." },
+        "criterio4Precision": { "name": "Dimensión 4: Técnica de Ponderación, Rigor y Precisión Conceptual", "maxPoints": 0.5, "guidingQuestion": "¿Uso de vocabulario forense?", "outstanding": "...", "sufficient": "...", "basic": "...", "insufficient": "..." }
       }
     }
   ],
+  "modelSolution": "MINUTA DE RESOLUCIÓN JURÍDICA INTEGRAL - EXAMEN DE GRADO...",
   "methodology": {
     "conflict": "Conflicto entre título inscrito y posesión material.",
     "legalBasis": ["Arts. 686, 724, 1817 CC", "Art. 254 CPC"],
@@ -245,6 +282,26 @@ En memoria y en las capas de persistencia (`all_cases.json`, `localStorage`), ca
 }
 ```
 
+#### Catálogo de Cobertura de las 37 Instituciones en los 13 Arquetipos:
+
+| Arquetipo | Disciplinas | Instituciones Cubiertas | Cédulas / Apuntes Vinculados |
+| :--- | :--- | :--- | :--- |
+| **Arch 1: `lesion_dolo_resolucion`** | Civil | `civ_lesion_enorme`, `civ_dolo_reticencia`, `civ_resolucion_1489` | `civil-actojuridi-1-5`, `civil-actojuridi-1-6`, `civil-lasobligac-1-6` |
+| **Arch 2: `posesion_reivindicatoria_cautelar`** | Civil, Procesal | `civ_tradicion_posesion`, `civ_reivindicatoria`, `proc_medidas_precautorias` | `civil-losbienes-1-2`, `civil-losbienes-1-6`, `procesal-procesal-2-6` |
+| **Arch 3: `cautelares_radicacion_mandato`** | Procesal | `proc_medidas_prejudiciales`, `proc_reglas_competencia`, `proc_mandato_judicial` | `procesal-procesal-1-3`, `procesal-procesal-2-1`, `procesal-procesal-2-6` |
+| **Arch 4: `clausula_penal_ejecutivo`** | Civil, Procesal | `civ_clausula_penal_enorme`, `proc_juicio_ejecutivo_excepciones`, `civ_resolucion_1489` | `civil-lasobligac-1-6`, `civil-lasobligac-1-7`, `procesal-procesal-2-5` |
+| **Arch 5: `responsabilidad_medica_chance`** | Civil | `civ_resp_extracontractual`, `civ_perdida_chance`, `civ_cumulo_responsabilidades` | `civil-clase911-1-1`, `civil-clase911-1-3`, `civil-clase911-1-4` |
+| **Arch 6: `transaccion_cosa_juzgada`** | Civil, Procesal | `civ_transaccion_efectos`, `proc_cosa_juzgada_excepcion`, `civ_nulidad_absoluta` | `civil-actojuridi-1-6`, `civil-lasobligac-1-7`, `procesal-procesal-2-4` |
+| **Arch 7: `imparcialidad_momentos_jurisdiccion`** | Procesal | `proc_imparcialidad_recusacion`, `proc_momentos_jurisdiccion`, `proc_prorroga_competencia` | `procesal-procesal-1-1`, `procesal-procesal-1-2`, `procesal-procesal-1-3` |
+| **Arch 8: `resolucion_pacto_comisorio`** | Civil | `civ_resolucion_1489`, `civ_excepcion_1552`, `civ_pacto_comisorio_calificado`, `civ_culpa_mora_deudor` | `civil-lasobligac-1-6`, `civil-clase911-4-4` |
+| **Arch 9: `nulidad_simulacion_pauliana`** | Civil | `civ_simulacion_ilicitud`, `civ_nulidad_absoluta`, `civ_accion_pauliana` | `civil-actojuridi-1-5`, `civil-actojuridi-1-6` |
+| **Arch 10: `proteccion_propiedad_autotutela`** | Constitucional | `const_recurso_proteccion`, `const_dominio_expropiacion`, `const_prohibicion_autotutela` | `constitucional-constituci-1-2`, `constitucional-constituci-2-5` |
+| **Arch 11: `responsabilidad_extracontractual_competencia_cautelar`** *(Nuevo)* | Civil, Procesal | `civ_resp_extracontractual`, `proc_reglas_competencia`, `proc_medidas_precautorias` | `civil-clase911-1-1`, `procesal-procesal-1-3`, `procesal-procesal-2-6` |
+| **Arch 12: `promesa_clausula_penal_ejecutivo_hacer`** *(Nuevo)* | Civil, Procesal | `civ_promesa_bilateral`, `civ_clausula_penal_enorme`, `proc_juicio_ejecutivo_excepciones` | `civil-clase911-4-1`, `civil-lasobligac-1-7`, `procesal-procesal-2-5` |
+| **Arch 13: `constitucional_dominio_proteccion_apelacion`** *(Nuevo)* | Constitucional, Civil, Procesal | `const_dominio_expropiacion`, `civ_reivindicatoria`, `proc_recurso_apelacion` | `constitucional-constituci-1-2`, `civil-losbienes-1-6`, `procesal-procesal-2-3` |
+| **Contra-Instituciones Doctrinales (4)** | Civil, Const. | `civ_prescripcion_extraordinaria_sin_titulo`, `civ_mera_tenencia_arriendo`, `civ_rescision_muebles`, `const_derechos_litigiosos_dudosos` | *Doctrinales exclusivas (`isDoctrinalOnly: true`)* |
+```
+
 ---
 
 ### 2.4. Ciclo de Retención FIFO y Actualización
@@ -252,6 +309,51 @@ En memoria y en las capas de persistencia (`all_cases.json`, `localStorage`), ca
    Tanto en el servidor (`server.py`) como en el almacenamiento local del cliente (`StorageService.pruneOldAiCases`), se mantiene un tope estricto de **máximo 10 casos generados por IA** simultáneos.
 2. **Poda Automática:** Al generarse el caso número 11, el más antiguo se desvincula de `all_cases.json`, su archivo `.md` en disco se elimina de forma segura (`p_file.unlink()`) y sus borradores en `localStorage` se purgan para prevenir la saturación de memoria.
 3. **Casos Oficiales Protegidos:** Las pautas oficiales de la universidad son inmunes a la poda FIFO; permanecen intactas e inmutables en el servidor.
+
+---
+
+### 2.5. Estructura Canónica de Cédulas de Apuntes (`all_afg_topics.json` / `INITIAL_DATA.topics`)
+
+Cada sección o cédula jurídica de los apuntes sincronizados (`FILES_CONFIG` y `apuntes_registry.json`) se estructura en memoria y en disco con el siguiente esquema JSON:
+
+```json
+{
+  "id": "civil-actojuridi-1-1",
+  "subject": "civil",
+  "discipline": "Derecho Civil",
+  "sectionName": "Sección 1.1",
+  "chapterNumber": 1,
+  "chapterTitle": "Teoría del Acto Jurídico",
+  "category": "teoria_acto_juridico",
+  "code": "1.1",
+  "indexCode": "1.1",
+  "title": "Concepto y Estructura del Acto Jurídico",
+  "cleanTitle": "Concepto y Estructura del Acto Jurídico",
+  "sourceFile": "ACTO JURIDICO.md",
+  "userSourceFiles": [],
+  "hasUserNotes": true,
+  "tags": ["acto juridico", "voluntad", "elementos"],
+  "isFree": true,
+  "content": "Texto íntegro de la cédula...",
+  "charCount": 12450,
+  "connections": [
+    {
+      "targetId": "civil-losbienes-1-1",
+      "nature": "dogmatic",
+      "concept": "Derechos Reales y Personales",
+      "pedagogicalValue": "high"
+    }
+  ]
+}
+```
+
+* **Diferenciación Canónica entre `code` e `indexCode` (v7.2):**
+  * `code`: Representa el número de sección original extraído textualmente del encabezado del archivo de apunte (ej. `Sección 1.1` $\to$ `"1.1"`). Mantiene fidelidad absoluta al documento original y garantiza compatibilidad total con tests preexistentes y búsquedas de fuentes.
+  * `indexCode`: Secuencia ordinal continua e irrepetible generada por disciplina mediante `assign_index_codes()` en `generate_clean_notes_data.py` y `server.py`. Utiliza el formato `N.M`, donde `N` identifica la disciplina (1 = Civil, 2 = Procesal, 3 = Constitucional) y `M` es una secuencia continua ordenada por `(chapterNumber asc, parse_code_tuple(code) asc, orig_idx asc)`:
+    * **Civil (34 tópicos):** `1.1` a `1.34` (resuelve definitivamente los duplicados entre archivos de Acto Jurídico, Bienes, Obligaciones y Clases).
+    * **Procesal (9 tópicos):** `2.1` a `2.9`.
+    * **Constitucional (10 tópicos):** `3.1` a `3.10`.
+  * **Fallback Seguro en Cliente:** Para instancias con datos en caché anteriores, el visor y el árbol del sidebar evalúan `topic.indexCode || topic.code`.
 
 ---
 
@@ -312,6 +414,14 @@ sequenceDiagram
   * Interpreta enlaces `[[Institución Jurídica]]` convirtiéndolos en wikilinks interactivos que abren la cédula teórica correspondiente.
   * Detecta títulos de *"Puntos Críticos"* o *"Red Flags"* y los transforma en contenedores de alerta destacados (`.callout-warning`).
   * Procesa mapas conceptuales y tablas comparativas normativas.
+* **Índice Unificado y Restricción Estricta a la Vista de Apuntes (v7.2):**
+  * **Exclusividad Funcional:** El componente `#app-sidebar` (ÍNDICE DE CÉDULAS) existe exclusiva y funcionalmente para la lectura y navegación del temario (`topics`).
+  * **Gateo de Interfaz en `App.switchView(viewName)`:**
+    * Al cambiar a las vistas **Casos** (`cases`) o **Grafo** (`graph`), el sidebar colapsa (`classList.add('collapsed')`), se oculta `#sidebar-backdrop`, y el botón de alternancia `#btn-toggle-sidebar` queda oculto e inerte (`classList.add('hidden')`, `style.display = 'none'`, `disabled = true`, `aria-hidden = 'true'`).
+    * El flag `this.sidebarHiddenByView` almacena si el colapso fue inducido por la navegación entre vistas, evitando reabrir automáticamente la barra si el usuario la había colapsado de forma manual previamente.
+    * Al retornar a la vista **Apuntes** (`topics`), `#btn-toggle-sidebar` se restaura (`classList.remove('hidden')`, `style.display = ''`, `disabled = false`, `aria-hidden = 'false'`) y la barra se expande solo si `this.sidebarHiddenByView === true`.
+  * **Autonomía y Pantalla Completa en `ConceptGraph`:** En la vista Grafo (`graph`), el lienzo D3/HTML5 y la física de fuerzas operan y se expanden dinámicamente al 100% del viewport sin depender de la barra lateral.
+  * **Sanitización XSS y Badges de Cédula:** El árbol del sidebar despliega `§ ${topic.indexCode || topic.code}` con ordenamiento natural por `indexCode`. Los tooltips (`title="Cédula ${t.indexCode} · Sección ${t.code} (${t.sourceFile})"`), los breadcrumbs del visor y las píldoras de cédulas en `CaseSolver` son sanitizados en el origen con `SecurityShield.escapeHtml`.
 
 ---
 
@@ -376,8 +486,9 @@ Cuando el sistema se conecte con APIs de LLM externas (ej. Gemini API, Cloud Run
 * **Política de Retención y Purga Automática de Cuentas Demo (48 Horas):**
   - **Identificación de Cuentas Demo:** Las cuentas creadas que no hayan convalidado un Pase de Grado mantienen `access_code IS NULL` en la tabla `users` de SQLite.
   - **Worker Daemon en Segundo Plano (`run_auto_purge_daemon`):** `server.py` ejecuta un hilo en segundo plano (`threading.Thread(daemon=True)`) que corre al iniciar el servidor y se repite periódicamente cada 30 minutos.
-  - **Eliminación Segura y en Cascada (`db.purge_unvalidated_accounts`):** El proceso elimina permanentemente de la tabla `users` todos los registros que cumplan simultáneamente: `access_code IS NULL` y `created_at <= (ahora - 48 horas)`. Asimismo, purga en cascada cualquier fila huérfana en la tabla `user_progress`.
-  - **Inmunidad de Cuentas Convalidadas:** Aquellas cuentas que hayan activado un Pase de Grado (`access_code IS NOT NULL`) quedan **estrictamente excluidas de la purga**; su vigencia y acceso permanecen intactos y son gestionados según las reglas del código de activación correspondiente.
+  - **Eliminación Segura y en Cascada (`db.purge_unvalidated_accounts`):** El proceso elimina permanentemente de la tabla `users` todos los registros que cumplan simultáneamente: `access_code IS NULL`, `created_at <= (ahora - 48 horas)` y `email NOT IN (SELECT email FROM access_code_usages)`. Asimismo, purga en cascada cualquier fila huérfana en la tabla `user_progress`.
+  - **Doble Blindaje de Inmunidad para Cuentas con Pase Activo:** Aquellas cuentas que hayan activado un Pase de Grado (`access_code IS NOT NULL` o con registro histórico en la tabla `access_code_usages`) quedan **estrictamente blindadas e inmunes ante la purga**; su vigencia y acceso permanecen intactos incluso si la sesión o el atributo sufrieran alguna discrepancia temporal.
+
 
 
 ---
@@ -430,25 +541,32 @@ Cuando el sistema se conecte con APIs de LLM externas (ej. Gemini API, Cloud Run
 
 ## 6. Autenticación Autónoma (Correo + Contraseña PBKDF2), Registro Directo, Sesiones Seguras y Purga Automática tras 48 Horas
 
-### 6.1. Arquitectura de Identidad y Seguridad (v7.0)
-La plataforma implementa un esquema de autenticación resiliente, autónomo y sin dependencias externas de terceros:
+### 6.1. Arquitectura de Identidad, Persistencia de Licencias y Seguridad (v7.4)
+La plataforma implementa un esquema de autenticación y gestión de licencias resiliente, autónomo y sin dependencias externas de terceros:
 1. **Modo Servidor Local / Producción (`server.py` y `db.py`):**
    * **Identidad Autónoma y Registro Directo:** Registro e inicio de sesión mediante Correo Electrónico y Contraseña sin intervención de proveedores externos de correo (SMTP/Brevo/Resend) ni dependencias federadas (Google GIS, Cloudflare Turnstile).
    * **Hashing Criptográfico Estándar:** Implementación nativa en Python estándar (`hashlib`, `secrets`, `base64`, `hmac`) con **PBKDF2-HMAC-SHA256**, 210.000 iteraciones y salt criptográfico único de 16 bytes codificado en Base64.
-   * **Emisión Inmediata de Sesión y Promoción a Versión Demo:** Al registrarse (`POST /api/auth/register`), el usuario se inserta directamente en SQLite con `is_verified = 1`, `created_at = now_ms`, `last_login_at = now_ms` y `access_code = NULL`. El servidor genera inmediatamente una cookie de sesión firmada `session_token` (HMAC-SHA256) y responde **HTTP 201 Created** con `{ ok: true, user: { ... isDemo: true, access_code: null } }`, transitando directamente al Paso 2 (`#unlock-step-convalidate`) sin fricciones.
+   * **Emisión Inmediata de Sesión y Promoción a Versión Demo:** Al registrarse (`POST /api/auth/register`), el usuario se inserta directamente en SQLite con `is_verified = 1`, `created_at = now_ms`, `last_login_at = now_ms` y `access_code = NULL`. El servidor genera inmediatamente una cookie de sesión firmada `session_token` (HMAC-SHA256) y responde **HTTP 201 Created** con `{ ok: true, user: { ... isDemo: true, access_code: null } }`, transitando directamente al Paso 2 (`#unlock-step-convalidate`) sin fricciones. Si el correo ya tenía un código vinculado en `access_code_usages`, se auto-restaura de inmediato otorgando Pase Activo (`isDemo: false`).
    * **Prevención de Cuentas Duplicadas:** Si el correo suministrado ya existe en la base de datos, `POST /api/auth/register` responde con **HTTP 409 Conflict** (`{ ok: false, error: "El correo electrónico ya se encuentra registrado." }`).
+   * **Libro Mayor de Usos Indestructible (`access_code_usages`) y Restauración Multi-Dispositivo:**
+     * Se implementa la tabla relacional de auditoría `access_code_usages (code TEXT, email TEXT, consumed_at INTEGER, PRIMARY KEY (code, email))` con índice en `email`.
+     * Cada convalidación exitosa (`POST /api/auth/link-code` / `db.link_user_code`) descuenta atómicamente el cupo en `access_codes` e inserta el registro `(code, email, now_ms)` en `access_code_usages`.
+     * **Idempotencia Absoluta:** Si un usuario convalidó previamente un código y vuelve a ingresarlo o reconecta, no se descuenta nuevamente el contador `times_used` de la tabla `access_codes`.
+     * **Auto-Restauración Multi-Dispositivo y Multi-Plataforma:** Al iniciar sesión (`POST /api/auth/login`) o validar sesión (`GET /api/auth/me`), si el usuario tiene `access_code IS NULL` pero registra un código histórico en `access_code_usages`, el backend invoca `db.restore_user_access_code(email)` para reparar su registro en `users` y retorna `{ access_code: code, isDemo: false }` sin re-descontar usos en `access_codes`.
+     * **Auto-Migración y Backfill Retroactivo (`init_db`):** Al iniciar, el sistema migra automáticamente a `access_code_usages` a todos los usuarios históricos existentes en `users` que poseían un `access_code` no nulo.
    * **Worker Daemon de Purga Automática en Segundo Plano (`run_auto_purge_daemon`):**
      * `server.py` inicializa un hilo en segundo plano (`threading.Thread(daemon=True)`) que ejecuta la purga inmediatamente al arrancar el servidor y luego periódicamente cada 30 minutos.
      * Invoca `db.purge_unvalidated_accounts(max_age_ms=48*3600*1000)`.
-     * Elimina permanentemente de la tabla `users` todos los registros que cumplan simultáneamente: `access_code IS NULL` y `created_at <= (ahora - 48 horas)`. Asimismo, elimina en cascada los registros huérfanos en `user_progress`.
-     * **Inmunidad de Cuentas con Pase Activo:** Las cuentas que hayan convalidado un código de acceso (`access_code IS NOT NULL`) nunca son purgadas; su permanencia depende exclusivamente de la vigencia de su código o pase de grado.
+     * Elimina permanentemente de la tabla `users` todos los registros que cumplan simultáneamente: `access_code IS NULL`, `created_at <= (ahora - 48 horas)` y `email NOT IN (SELECT email FROM access_code_usages)`. Asimismo, elimina en cascada los registros huérfanos en `user_progress`.
+     * **Inmunidad de Cuentas con Pase Activo:** Las cuentas que hayan convalidado un código de acceso (`access_code IS NOT NULL` o presentes en `access_code_usages`) nunca son purgadas; su permanencia depende exclusivamente de la vigencia de su código o pase de grado.
    * **Inicio de Sesión y Account Lockout:**
      * En `POST /api/auth/login`, tras 5 intentos fallidos consecutivos de contraseña, la cuenta se bloquea por 15 minutos en SQLite (`locked_until`, respondiendo **HTTP 423 Locked**).
      * Mitigación de timing attacks: consultas a usuarios inexistentes ejecutan un hash PBKDF2 simulado con salt ficticio para igualar los tiempos de cómputo.
      * Tras la eliminación del flujo de correo en v7.0, no existen estados intermedios "no verificados" (eliminado el código HTTP 403 por falta de verificación).
    * **Sesiones Seguras Firmadas:** Emisión de tokens firmados con **HMAC-SHA256** persistidos en cookies `session_token` con atributos `HttpOnly; Secure; SameSite=Lax`.
-   * **Persistencia Relacional SQLite (`estudio_grado.db`):** Tabla `users` (`id`, `email`, `password_hash`, `password_salt`, `name`, `access_code`, `created_at`, `last_login_at`, `is_verified`, `failed_login_attempts`, `locked_until`), tabla `access_codes` y tabla `user_progress`. Auto-migración idempotente en `init_db()`.
+   * **Persistencia Relacional SQLite (`estudio_grado.db`):** Tablas `users`, `access_codes`, `access_code_usages` y `user_progress`. Auto-migración idempotente en `init_db()`.
    * **Protección Zero Exposure:** Bloqueo absoluto (**HTTP 403 Forbidden**) de acceso directo a archivos `.db`, `.py`, scripts y secretos criptográficos.
+   * **Jerarquía Estricta de Verdad en Cliente (`LicenseService` vs Servidor):** En el frontend (`js/auth-license.js`), el estado de autenticación del servidor (`AuthService.currentUser.access_code` y `!AuthService.currentUser.isDemo`) tiene **prioridad canónica absoluta** sobre `localStorage`. Un registro expirado o ausente en el almacenamiento local de un nuevo dispositivo o navegador NUNCA fuerza el Modo Demo si el servidor confirma un Pase Activo; además, `checkSession()` y `login()` sincronizan preventivamente el caché local del cliente.
 
 2. **Modo Estático / GitHub Pages (`auth-service.js`):**
    * Registro y login en cliente con persistencia en `localStorage` (`grado_registered_users` y `grado_auth_user`).
@@ -462,12 +580,12 @@ La plataforma implementa un esquema de autenticación resiliente, autónomo y si
 
 | Endpoint | Método | Autenticación | Códigos HTTP | Propósito y Contrato de Respuesta |
 | :--- | :---: | :---: | :---: | :--- |
-| `/api/auth/register` | `POST` | Pública | `201`, `400`, `409` | **Registro Directo de Postulante:** Valida email y política de contraseñas (10+ caracteres, mayúscula, minúscula, número). Inserta usuario con `is_verified = 1`, `created_at = now_ms`, `access_code = NULL`. Emite cookie `session_token` (HMAC-SHA256) y responde **HTTP 201 Created** con `{ ok: true, user: { ... isDemo: true, access_code: null } }`. Si el email ya existe, responde **HTTP 409 Conflict**. |
-| `/api/auth/login` | `POST` | Pública (Rate Limited) | `200`, `400`, `401`, `423` | **Inicio de Sesión:** Verifica bloqueo de cuenta (15 min tras 5 intentos fallidos, **HTTP 423 Locked**). Compara hash PBKDF2 (con mitigación de timing attacks). Si las credenciales son válidas, actualiza `last_login_at`, emite cookie `session_token` y responde **HTTP 200** con los datos de usuario y sesión. |
-| `/api/auth/link-code` | `POST` | Sesión requerida | `200`, `400`, `401`, `403` | **Convalidación de Licencia:** Valida código normalizado con `db.normalize_access_code` (remueve espacios, tabs, NBSP y fuerza mayúsculas) contra el regex `^[A-Z0-9_\-]{4,36}$`. Descuenta atómicamente usos en la tabla SQLite `access_codes` y asocia el código a la cuenta, promoviendo al postulante de Versión Demo (`isDemo: true`) a Pase de Grado Activo (`isDemo: false`). |
-| `/api/auth/me` | `GET` | Cookie `session_token` | `200`, `401` | **Estado de Sesión:** Valida firma HMAC de la cookie y retorna los datos del usuario en sesión (`id`, `email`, `name`, `isDemo`, `access_code`). |
+| `/api/auth/register` | `POST` | Pública | `201`, `400`, `409` | **Registro Directo de Postulante:** Valida email y política de contraseñas (10+ caracteres, mayúscula, minúscula, número). Inserta usuario con `is_verified = 1`, `created_at = now_ms`, `access_code = NULL`. Si el email ya registraba un código en `access_code_usages`, auto-restaura el código y responde con Pase Activo (`isDemo: false`). Emite cookie `session_token` (HMAC-SHA256) y responde **HTTP 201 Created** con `{ ok: true, user: { ... isDemo, access_code } }`. Si el email ya existe en `users`, responde **HTTP 409 Conflict**. |
+| `/api/auth/login` | `POST` | Pública (Rate Limited) | `200`, `400`, `401`, `423` | **Inicio de Sesión:** Verifica bloqueo de cuenta (15 min tras 5 intentos fallidos, **HTTP 423 Locked**). Compara hash PBKDF2 (con mitigación de timing attacks). Si las credenciales son válidas, auto-restaura `access_code` desde `access_code_usages` si estaba vacío en `users`, actualiza `last_login_at`, emite cookie `session_token` y responde **HTTP 200** con los datos de usuario (`isDemo: false` si tiene código convalidado) y sesión. |
+| `/api/auth/link-code` | `POST` | Sesión requerida | `200`, `400`, `401`, `403` | **Convalidación de Licencia:** Valida código normalizado con `db.normalize_access_code` (remueve espacios, tabs, NBSP y fuerza mayúsculas) contra el regex `^[A-Z0-9_\-]{4,36}$`. Si el usuario ya lo había convalidado previamente, reasocia idempotentemente sin re-descontar cupos. Si es nuevo, descuenta atómicamente usos en SQLite `access_codes`, asocia el código en `users` y registra en `access_code_usages (code, email, consumed_at)`. Promueve al postulante de Versión Demo (`isDemo: true`) a Pase de Grado Activo (`isDemo: false`). |
+| `/api/auth/me` | `GET` | Cookie `session_token` | `200`, `401` | **Estado de Sesión:** Valida firma HMAC de la cookie. Si el usuario carece de `access_code` en `users` pero su correo existe en `access_code_usages`, auto-restaura la licencia atómicamente. Retorna los datos del usuario en sesión (`id`, `email`, `name`, `isDemo`, `access_code`). |
 | `/api/auth/logout` | `POST` | Cookie opcional | `200` | **Cierre de Sesión:** Invalida y expira la cookie `session_token` con encabezado `Set-Cookie: session_token=; Max-Age=0`. |
-| `/api/admin/codes` | `GET` | PIN Admin Requerido (`X-Admin-PIN` o query `pin`) | `200`, `401` | **Listar Licencias (Admin):** Valida PIN del administrador contra hash SHA-256 (`almabaltoamial2020`). Retorna todos los códigos almacenados centralizadamente en SQLite con detalle de usos (`times_used`, `current_uses`, `max_uses`), estado activo, expiración, y los correos asociados. |
+| `/api/admin/codes` | `GET` | PIN Admin Requerido (`X-Admin-PIN` o query `pin`) | `200`, `401` | **Listar Licencias (Admin):** Valida PIN del administrador contra hash SHA-256 (`almabaltoamial2020`). Retorna todos los códigos almacenados centralizadamente en SQLite con detalle de usos (`times_used`, `current_uses`, `max_uses`), estado activo, expiración, correos asociados únicos (`linked_emails`) y el libro mayor de auditoría completo en `usages: [{ email, consumed_at }]`. |
 | `/api/admin/create-code` | `POST` | PIN Admin Requerido (`X-Admin-PIN` o body `pin`) | `201`, `400`, `401`, `409`, `500` | **Crear Código de Acceso (Admin):** Persiste un nuevo código en SQLite (`access_codes`) con parámetros de `code` personalizado o autogenerado, `label`, `email` / `assigned_email` (opcional para pre-asignación a un alumno), `max_uses` y `days`. Los códigos creados quedan disponibles globalmente para cualquier postulante. |
 | `/api/admin/revoke-code` | `POST` | PIN Admin Requerido (`X-Admin-PIN` o body `pin`) | `200`, `400`, `401`, `404` | **Revocar Código de Acceso (Admin):** Desactiva inmediatamente un código en SQLite (`active = 0`), impidiendo convalidaciones futuras. |
 | `/api/admin/notes` | `GET` | PIN Admin Requerido (`X-Admin-PIN` o query `pin`) | `200`, `401` | **Listar Apuntes Administrados:** Valida PIN de administrador. Retorna la lista de archivos de apuntes cargados dinámicamente y registrados en `apuntes_registry.json` con su metadata (materia, capítulo, cédula, fecha de subida, tamaño). |
@@ -485,7 +603,7 @@ El backend implementa un sistema de configuración jerárquico mediante la funci
 | `PORT` | Entero | `8080` | Ambos | Puerto de escucha HTTP del servidor local o asignado dinámicamente por Render.com. |
 | `SESSION_SECRET` | String | Auto-generado | Ambos | Clave secreta para la firma criptográfica HMAC-SHA256 de las cookies `session_token`. |
 | `EXTRA_ACCESS_CODES` | String | `""` | Prod (Render Free) | Lista separada por comas de códigos de acceso adicionales para sembrar automáticamente en SQLite al iniciar el contenedor efímero (`INSERT OR IGNORE`). Permite garantizar persistencia de códigos en planes gratuitos sin disco. |
-| `DB_PATH` | String | `estudio_grado.db` | Prod (Render Disk) | Ruta absoluta o relativa al archivo SQLite. Permite apuntar a un Persistent Disk montado en Render (ej: `/var/data/estudio_grado.db`) garantizando persistencia permanente. |
+| `DB_PATH` | String | `estudio_grado.db` | Prod (Render Disk) | Ruta absoluta o relativa al archivo SQLite. Resuelta dinámicamente en `server.py` y `db.py` vía `os.environ.get("DB_PATH")`. Crea automáticamente los directorios contenedores si no existen (`mkdir(parents=True)`) y registra en log de arranque `[DB] Archivo SQLite en <path>`. En Render.com con Persistent Disk (`plan: starter`, volumen montado en `/var/data` con 1 GB), apunta a `/var/data/estudio_grado.db`, previniendo pérdida de base de datos o reinicio de cuentas y códigos ante re-despliegues o detenciones del contenedor. |
 | `ALLOW_TEST_AUTH` | String | `""` | Tests / CI | Bandera para habilitar comodines defensivos en suites de prueba automatizadas. |
 
 > [!NOTE]
@@ -604,8 +722,8 @@ stateDiagram-v2
 ---
 
 ### 7.3. Contratos de Seguridad y Pruebas Automatizadas
-* **Suite de Autenticación Autónoma (`test_unlock_auth_flow.cjs`):** Ejecuta 81 pruebas automatizadas cubriendo estado inicial, validación reactiva de política de contraseñas, rechazo por discrepancia, registro directo con emisión inmediata de cookie de sesión (`session_token`), rechazo de duplicados con HTTP 409 Conflict, transición automática a Versión Demo en Paso 2, convalidación atómica de licencias en SQLite, desbloqueo integral de materias en `LicenseService`, cierre de sesión e invalidación de cookie, inicio de sesión exitoso con hash PBKDF2, account lockout (15 min tras 5 intentos fallidos), creación, consulta y revocación de licencias mediante PIN de administrador (`almabaltoamial2020`), y simulación de purga automática de cuentas demo con más de 48 horas de antigüedad preservando intactas las cuentas convalidadas.
-* **Suite de Regresión e Integración (`test_e2e_case_flow.cjs`):** Ejecuta 114 pruebas integrales (incluyendo 23 aserciones dedicadas a la subida de apuntes de administrador, sincronización en vivo, anti-traversal, límite de 8 MB y eliminación segura en la Sección 9) que verifican la confidencialidad de modelos docentes, casos IA, rúbrica AIME 2026-20, ciberseguridad, sincronización multi-dispositivo y la regla de limitación de resolución de casos en Modo Demo vs. Pase Activo.
+* **Suite de Autenticación Autónoma (`test_unlock_auth_flow.cjs`):** Ejecuta 105 pruebas automatizadas al 100% PASS cubriendo estado inicial, validación reactiva de política de contraseñas, rechazo por discrepancia, registro directo con emisión inmediata de cookie de sesión (`session_token`), rechazo de duplicados con HTTP 409 Conflict, transición automática a Versión Demo en Paso 2, convalidación atómica de licencias en SQLite, desbloqueo integral de materias en `LicenseService`, cierre de sesión e invalidación de cookie, inicio de sesión exitoso con hash PBKDF2, account lockout (15 min tras 5 intentos fallidos), creación, consulta y revocación de licencias mediante PIN de administrador (`almabaltoamial2020`), simulación de purga automática de cuentas demo con más de 48 horas de antigüedad preservando intactas las cuentas convalidadas, y la **Sección 17 (24 nuevas aserciones v7.4)** que valida exhaustivamente: escritura atómica en el libro mayor `access_code_usages`, convalidación idempotente sin re-descuento de cupos (`times_used`), inicio de sesión multi-dispositivo con restauración automática de Pase Activo en cuentas con `max_uses = 1`, re-validación de sesión en `/api/auth/me` con auto-reparación, supremacía absoluta del estado del servidor sobre registros de `localStorage` expirados o vacíos, doble inmunidad ante la purga de 48 horas para usuarios con registros en `access_code_usages`, y exposición del array de auditoría `usages: [{ email, consumed_at }]` en `GET /api/admin/codes`.
+* **Suite de Regresión e Integración (`test_e2e_case_flow.cjs`):** Ejecuta 685 pruebas integrales al 100% PASS (incluyendo 23 aserciones dedicadas a la subida de apuntes de administrador, sincronización en vivo, anti-traversal, límite de 8 MB y eliminación segura en la Sección 9, Sección 10 con ordenamiento canónico de `indexCode`, y Sección 23 con los 13 arquetipos dogmáticos, pautas oficiales y nutrición de apuntes) que verifican la confidencialidad de modelos docentes, casos IA, rúbrica AIME 2026-20, ciberseguridad, sincronización multi-dispositivo y la regla de limitación de resolución de casos en Modo Demo vs. Pase Activo.
 * **Sanitización Defensiva y Prevención XSS:** Todos los datos de usuario son escapados contra inyección XSS mediante `SecurityShield.escapeHtml` y los mensajes de error se renderizan estrictamente con `textContent` en el DOM.
 * **Hashing Seguro en Cliente (Modo Estático / GitHub Pages):** La función `AuthService.hashClientPassword()` emplea la Web Crypto API (`crypto.subtle.digest("SHA-256")`) con salt local, asegurando que **nunca se almacenen contraseñas en texto plano** en `localStorage`.
 * **Cero Fuga de Secretos y Aislamiento de Credenciales:** Ni secretos de sesión ni contraseñas se almacenan en el código ni en el historial de Git. Se gestionan localmente mediante `.env` (ignorado por `.gitignore`) y en Render.com mediante variables de entorno declaradas con `sync: false` en `render.yaml`.
@@ -621,36 +739,104 @@ stateDiagram-v2
 | `CONTEXT.md` | Documentación | **Fuente canónica inmutable de verdad.** Debe actualizarse tras cada cambio. |
 | `README.md` | Documentación | Manual de usuario, arquitectura dual, guía de despliegue en Render.com y configuración de Resend / SMTP. |
 | `GOOGLE_AUTH_SETUP.md` | Documentación | Guía de arquitectura de autenticación autónoma, configuración de proveedores de correo y despliegue público. |
-| `index.html` | Estructura | Workbench jurídico, visor de cédulas, visor de casos y modal unificado de acceso `#unlock-modal` con aviso de 48h `#demo-expiry-notice`. |
+| `index.html` | Estructura | Workbench jurídico, visor de cédulas, visor de casos, header móvil optimizado solo-íconos con atributos de accesibilidad ARIA (`aria-label="GRADOMANIACOS"`, `aria-label="Cerrar sesión"`), sin selector de tema (Dark Academy inmutable), y modal unificado de acceso `#unlock-modal` con aviso de 48h `#demo-expiry-notice`. |
 | `css/paywall.css` | Estilos | Estilos del formulario de credenciales, hints de contraseña, aviso de expiración 48h `.demo-expiry-notice`, paywall, insignias de estado y responsive móvil. |
-| `css/main.css` | Estilos | Sistema de diseño *Dark Academy*, variables tipográficas (`Playfair Display`, `Plus Jakarta Sans`), tokens WCAG AA y header responsive. |
+| `css/main.css` | Estilos | Sistema de diseño *Dark Academy* inmutable (`color-scheme: dark;` en `:root`), variables tipográficas (`Playfair Display`, `Plus Jakarta Sans`), tokens WCAG AA de modo claro preservados como código muerto documentado, y header responsive móvil (`@media (max-width: 768px)`) con ocultamiento estricto de textos de marca (`.brand-title`, `.brand-subtitle`, `.brand-text-block`) y nombre de usuario (`.user-profile-name`), garantizando áreas de toque mínimas de $44 \times 44\text{ px}$. |
 | `css/modal.css` | Estilos | Diálogos modales, backdrop difuminado y estructura responsive para dispositivos móviles. |
 | `css/concept-graph.css` | Estilos | Lienzo de grafo HTML5 con `touch-action: none;` y controles flotantes adaptados a pantallas táctiles. |
-| `css/case-workshop.css` | Estilos | Taller de casos prácticos, rúbrica AIME 2026-20, estilos de bloqueo demo (`.case-demo-locked-card`), grilla de ventajas exclusivas (`.demo-advantages-grid`), notice informativo (`.demo-justification-notice`) y resultados demo. |
-| `js/app.js` | Orquestador | Controlador principal de GRADOMANÍA, navegación, vinculación del candado y auto-sincronizador de fuentes. |
-| `js/auth-service.js` | Servicio | Autenticación autónoma (registro directo, login, logout), hashing seguro cliente con Web Crypto, validación reactiva, convalidación y sesiones. |
-| `js/auth-license.js` | Servicio | Lógica de licencias (`LicenseService`), cálculo de materias desbloqueadas, método `isDemoMode()` y persistencia local. |
+| `css/case-workshop.css` | Estilos | Taller de casos prácticos, rúbrica AIME 2026-20, píldoras de apuntes nutridos (`.linked-apuntes-section`, `.btn-linked-apunte`), tarjetas de pauta docente (`.question-pauta-card`) y error fatal de grado (`.question-fatal-error-card`), estilos de bloqueo demo (`.case-demo-locked-card`), grilla de ventajas exclusivas (`.demo-advantages-grid`), notice informativo (`.demo-justification-notice`) y resultados demo. |
+| `js/app.js` | Orquestador | Controlador principal de GRADOMANIACOS, navegación, gateo estricto del sidebar `#app-sidebar` y `#btn-toggle-sidebar` a la vista `topics` (oculto e inerte en `cases` y `graph` vía `sidebarHiddenByView`), fijación permanente de Dark Academy (`data-theme="dark"` inmutable y depuración de preferencias residuales), sincronización de fuentes y apuntes en `init()` y re-sincronización tras `/api/sync-topics`, renderizado de índice unificado ordenado por `indexCode`, tooltips y breadcrumbs sanitizados, vinculación del candado y auto-sincronizador de fuentes. |
+| `js/auth-service.js` | Servicio | Autenticación autónoma (registro directo, login, logout), hashing seguro cliente con Web Crypto, validación reactiva, accesibilidad ARIA en píldora de usuario y botón de logout, sincronización proactiva de licencias en caché local y gestión de sesión con cookies HttpOnly. |
+| `js/auth-license.js` | Servicio | Lógica de licencias (`LicenseService`), cálculo de materias desbloqueadas y método `isDemoMode()` con **supremacía canónica del estado de servidor** (`AuthService.currentUser.access_code`) sobre `localStorage`, garantizando persistencia multi-dispositivo sin retrocesos a demo. |
 | `js/auth-config.js` | Configuración | Configuración de cliente, códigos de invitación para modo estático y parámetros de sesión. |
-| `js/concept-graph.js` | Visualizador | Grafo interactivo con física de fuerzas y soporte móvil completo (arrastre de nodos, pan y pinch-to-zoom con dos dedos). |
-| `js/case-generator-agent.js` | Agente IA | Síntesis dogmática de casos inéditos, matriz de compatibilidad y poda FIFO. |
-| `js/case-solver.js` | Workbench | Interrogación, compuertas excluyentes, rúbrica AIME 2026-20, limitación a pregunta 1 en Modo Demo sin justificación, visualización de ventajas en preguntas > 0 y evaluación unidimensional. |
-| `js/security-shield.js` | Ciberseguridad | Detección de prompt injection, anti-XSS, escape seguro y cuotas de caracteres. |
-| `server.py` | Backend | Servidor HTTP Python multi-hilo, enlace dinámico (0.0.0.0 en nube/Render, 127.0.0.1 en local), soporte `PORT`/`SESSION_SECRET`, daemon en segundo plano para purga automática de cuentas demo tras 48h (`run_auto_purge_daemon`), endpoints `/api/auth/*` (registro directo, login, me, logout, link-code), `/api/admin/*` (códigos de acceso y subida/listado/borrado de apuntes con límite de 8 MB en `MAX_NOTES_UPLOAD_SIZE`), Zero Exposure y rate limiting. |
-| `generate_clean_notes_data.py` | Parser / Sync | Parser dinámico de apuntes y cédulas jurídicas. Combina `FILES_CONFIG` con `apuntes_registry.json`, provee fallback para archivos monolíticos, extrae jerarquías normativas y regenera modularmente `all_afg_topics.json` y `js/data.js`. |
+| `js/concept-graph.js` | Visualizador | Grafo interactivo con física de fuerzas, adaptabilidad a pantalla completa (100% viewport) sin dependencia del sidebar y soporte móvil completo (arrastre de nodos, pan y pinch-to-zoom con dos dedos). |
+| `js/case-generator-agent.js` | Agente IA | Síntesis dogmática de casos inéditos, catálogo de 37 instituciones en 13 arquetipos (10 existentes + 3 nuevos interdisciplinarios), 4 contra-instituciones doctrinales, preguntas graduadas con 5 alternativas y distractores seductores, pauta docente, error fatal de grado, rúbrica AIME de 4 dimensiones, soluciones modelo $\ge 400$ chars, nutrición dinámica desde apuntes (`syncApuntesFromServer`, `APUNTES_INDEX`), validación estricta y poda FIFO. |
+| `js/case-solver.js` | Workbench | Interrogación, compuertas excluyentes, rúbrica AIME 2026-20 en 4 dimensiones, despliegue de pauta de corrección oficial (`.question-pauta-card`) y error fatal de grado (`.question-fatal-error-card`), píldoras interactivas de apuntes nutridos (`.btn-linked-apunte`) con salto directo al temario (`App.openTopic`), limitación a pregunta 1 en Modo Demo sin justificación, visualización de ventajas en preguntas > 0, evaluación unidimensional y escape XSS integral con `SecurityShield.escapeHtml`. |
+| `js/security-shield.js` | Ciberseguridad | Detección de prompt injection, anti-XSS, escape seguro (`escapeHtml`) y cuotas de caracteres. |
+| `server.py` | Backend | Servidor HTTP Python multi-hilo, resolución dinámica de `DB_PATH` con creación de directorio y logging de arranque, auto-restauración de Pase Activo en `/api/auth/me`, `/api/auth/login` y `/api/auth/register`, libro mayor de usos auditables en `/api/admin/codes`, daemon de purga con doble inmunidad (`run_auto_purge_daemon`), ordenamiento canónico de `indexCode` en `/api/sync-topics`, endpoints `/api/auth/*` y `/api/admin/*`, Zero Exposure y rate limiting. |
+| `generate_clean_notes_data.py` | Parser / Sync | Parser dinámico de apuntes y cédulas jurídicas. Genera numeración continua ordinal única por disciplina mediante `assign_index_codes()` (`indexCode`: Civil `1.1..1.34`, Procesal `2.1..2.9`, Constitucional `3.1..3.10`) preservando `code`, `id` y `chapterNumber`. Combina `FILES_CONFIG` con `apuntes_registry.json`, provee fallback para archivos monolíticos, extrae jerarquías normativas y regenera modularmente `all_afg_topics.json` y `js/data.js`. |
 | `apuntes_registry.json` | Persistencia | Registro dinámico y canónico de archivos de apuntes subidos desde el panel de administración con metadatos de materia, capítulo y fechas. |
-| `db.py` | Base de Datos | Conexión relacional SQLite (`estudio_grado.db`), hashing PBKDF2, esquema de usuarios con `is_verified`, `created_at`, `last_login_at`, lockout, purga automática `purge_unvalidated_accounts` y códigos de acceso. Auto-sanación y auto-migración en `init_db()`. |
+| `db.py` | Base de Datos | Conexión relacional SQLite dinámica (`DB_PATH`), tabla de auditoría indestructible `access_code_usages`, auto-migración y backfill en `init_db()`, funciones `restore_user_access_code()`, convalidación atómica e idempotente `link_user_code()`, hashing PBKDF2, lockout, y purga `purge_unvalidated_accounts` con doble exclusión inmunológica. |
 | `manage_access_codes.py` | CLI Admin | Generador y administrador de códigos de invitación tipo beta cerrada. |
 | `.env.example` | Plantilla Config | Plantilla canónica de variables de entorno para configuración local y despliegue (puertos, secretos de sesión, persistencia SQLite). |
 | `requirements.txt` | Dependencias | Paquetes de producción mínimos (`pypdf`, `python-docx`, `google-auth`) para despliegues en contenedores e infraestructura cloud. |
-| `render.yaml` | Infraestructura | Blueprint declarativo de infraestructura como código para despliegue automatizado en Render.com. |
-| `test_unlock_auth_flow.cjs` | Test E2E | Suite de 81 pruebas que valida el flujo Candado -> Registro Directo -> Versión Demo -> Convalidación -> Pase Activo, endpoints de administración, consumo atómico, normalización y simulación de purga 48h. |
-| `test_e2e_case_flow.cjs` | Test E2E | Suite integral de 114 pruebas (casos IA, seguridad, rúbrica, confidencialidad, multi-dispositivo, limitación en Modo Demo vs. Pase Activo, y subida/sincronización viva de apuntes desde el panel de administrador). |
-| `PROMPTS/` | Documentación Operativa | **Puente humano ↔ Agente Antigravity IDE.** Carpeta canónica de prompts de ingeniería listos para ejecutar (índice `README.md`, plantilla `_TEMPLATE.md`, prompts numerados `NNN_<slug>.md`). Cada prompt exige actualización correlativa de `CONTEXT.md` y 100 % PASS de las suites al implementarse. |
+| `render.yaml` | Infraestructura | Blueprint declarativo de infraestructura como código en Render.com (`plan: starter`) con Persistent Disk `/var/data` (1 GB) y variable `DB_PATH: /var/data/estudio_grado.db` para persistencia permanente de la base de datos SQLite. |
+| `test_unlock_auth_flow.cjs` | Test E2E | Suite de 105 pruebas (100% PASS) que valida el flujo Candado -> Registro Directo -> Versión Demo -> Convalidación -> Pase Activo, endpoints de administración, consumo atómico, normalización, simulación de purga 48h, y la Sección 17 con 24 aserciones de persistencia multi-dispositivo y auditoría en `access_code_usages`. |
+| `test_e2e_case_flow.cjs` | Test E2E | Suite integral de 705 pruebas (100% PASS) que audita casos IA, seguridad, rúbrica AIME, confidencialidad, multi-dispositivo, limitación en Modo Demo vs. Pase Activo, subida/sincronización viva de apuntes desde el panel de administrador (Sección 9), ordenamiento canónico `indexCode` (Sección 10), y los 13 arquetipos con nutrición viva (Sección 23). |
+| `test_mobile_header_theme.cjs` | Test E2E | Suite de 20 pruebas (100% PASS) que verifica el layout móvil solo-íconos, touch targets $\ge 44 \times 44\text{ px}$, accesibilidad ARIA, inmutabilidad de Dark Academy y ausencia absoluta de selectores/botones de modo claro. |
+| `PROMPTS/` | Documentación Operativa | **Puente humano ↔ Agente Antigravity IDE.** Carpeta canónica de prompts de ingeniería listos para ejecutar (índice `README.md`, plantilla `_TEMPLATE.md`, prompts numerados: 001 subida de apuntes ✅ v6.8, 002 agente de casos ✅ v7.3, 003 índice unificado ✅ v7.2, 004 registro persistente de códigos de acceso usados ✅ v7.4). Cada prompt exige actualización correlativa de `CONTEXT.md` y 100 % PASS de las suites al implementarse. |
 
 ---
 
 ## 9. Bitácora Canónica de Versiones e Hitos
 
+* **v7.5 (Header Móvil Solo-Íconos y Eliminación Definitiva del Modo Claro — Dark Academy Inmutable):**
+  - **Diagnóstico y Resolución de Saturación en Header Móvil:** Erradicación de la colisión y superposición visual entre el badge del candado/pase de grado (`#btn-open-unlock-badge`) y el logotipo de marca (`h1.brand-title`), así como la saturación de ancho horizontal causada por el nombre completo del alumno (`.user-profile-name`) en pantallas móviles (320px - 768px).
+  - **Header Móvil Solo-Íconos (`@media (max-width: 768px)`):**
+    - Logotipo de marca: Ocultamiento estricto de textos (`.brand-title, .brand-subtitle, .brand-text-block { display: none !important; }`), preservando visible únicamente el icono de la balanza en `.brand-badge` con touch area $\ge 44 \times 44\text{ px}$.
+    - Chip de usuario: Ocultamiento del nombre/correo (`.user-profile-name { display: none !important; }`), presentando de forma compacta y elegante solo el avatar (`.user-avatar-placeholder` / `.user-avatar-img`) y el botón de logout (`#btn-user-logout`) con área táctil optimizada.
+    - Preservación en Escritorio/Tablet (> 768px): La apariencia visual completa con logotipos textuales (`GRADOMANIACOS`), subtítulo de disciplinas y nombres de usuario se mantiene 100% intacta e inalterada fuera del breakpoint móvil.
+  - **Eliminación Definitiva del Modo Claro:**
+    - Supresión total del botón alternador de tema (`#btn-toggle-theme` / `.theme-toggle`) del DOM en `index.html`.
+    - Erradicación de la lógica de conmutación en `js/app.js`: eliminación de listeners de clic, supresión de lecturas y escrituras de `theme_preference` en `localStorage` (con limpieza preventiva defensiva en `setupTheme()`), y fijación inmutable de `data-theme = "dark"`.
+    - Fijación inmutable de **Dark Academy (Obsidian & Law Gold)** en `css/main.css`: declaración permanente de `color-scheme: dark;` en `:root`.
+    - Aislamiento de tokens WCAG AA de modo claro como código muerto documentado (`[data-theme="light"]`) para evitar que cualquier preferencia del sistema operativo o navegador fuerce un esquema claro nativo.
+  - **Accesibilidad para Lectores de Pantalla:**
+    - Atributos `aria-label="GRADOMANIACOS"`, `title="GRADOMANIACOS"` y `role="img"` en `.brand-badge`, con `aria-hidden="true"` en el envoltorio del icono.
+    - Atributo `aria-label="Perfil de usuario: ${safeName}"` en `.user-profile-pill`, y `aria-label="Cerrar sesión"` en `#btn-user-logout`.
+  - **Aprobación del 100% de Pruebas Automatizadas (830 Pruebas en Total / 100% PASS):**
+    - 20/20 pruebas aprobadas en `test_mobile_header_theme.cjs`.
+    - 105/105 pruebas aprobadas en `test_unlock_auth_flow.cjs`.
+    - 705/705 pruebas aprobadas en `test_e2e_case_flow.cjs`.
+
+* **v7.4 (Prompt 004 — Implementación Completa: Registro Persistente de Códigos de Acceso Usados, Disco Durable en Render, Tabla access_code_usages y Restauración Multi-Dispositivo):**
+  - **Diagnóstico Integral de Causa Raíz:** Se identificó la causa de regresión a Modo Demo al cambiar de día o dispositivo:
+    1. En Render.com el blueprint operaba en `plan: free` con almacenamiento efímero, reiniciando la base de datos `estudio_grado.db` ante spin-downs por inactividad. Además, `server.py` ignoraba la variable de entorno `DB_PATH`.
+    2. La convalidación asociaba el código en `users.access_code` pero no mantenía un libro mayor relacional inmutable de consumos por correo.
+    3. Si un usuario iniciaba sesión en un navegador secundario o con caché limpio, o si `localStorage` contenía una clave expirada, `LicenseService.isDemoMode()` forzaba el modo Demo por encima del Pase Activo validado en el servidor.
+    4. Cuentas con códigos de un solo uso (`max_uses = 1`) no podían re-vincularse al reconectar.
+  - **Infraestructura Durable en Render (`render.yaml`):** Actualización a `plan: starter`, adición del bloque `disk: { name: data, mountPath: /var/data, sizeGB: 1 }` y configuración de variable de entorno `DB_PATH: /var/data/estudio_grado.db`.
+  - **Resolución Dinámica de `DB_PATH` y Resiliencia en Backend (`server.py` y `db.py`):**
+    - `server.py` y `db.py` leen `os.environ.get("DB_PATH")` con fallback seguro local a `BASE_DIR / "estudio_grado.db"`.
+    - Creación automática del directorio padre (`DB_PATH.parent.mkdir(parents=True, exist_ok=True)`).
+    - Registro explícito en consola al iniciar el servidor: `[DB] Archivo SQLite en <path>`.
+  - **Libro Mayor Relacional Indestructible (`access_code_usages`):**
+    - Creación de la tabla `access_code_usages (code TEXT, email TEXT, consumed_at INTEGER, PRIMARY KEY (code, email))` con índice `idx_access_code_usages_email`.
+    - Auto-migración y backfill retroactivo en `init_db()` para todas las cuentas validadas preexistentes en `users` (197 usuarios históricos respaldados).
+    - Convalidación atómica (`POST /api/auth/link-code` y `db.link_user_code`): decremento de `times_used` en `access_codes` e inserción en `access_code_usages` en una sola transacción.
+    - Idempotencia total: si el par `(code, email)` ya existe, se reasigna sin volver a descontar cupos en `access_codes`.
+  - **Auto-Restauración Multi-Dispositivo y Multi-Plataforma:**
+    - Al iniciar sesión (`POST /api/auth/login`) o validar estado (`GET /api/auth/me`), si el usuario tiene `access_code IS NULL` pero registra un código en `access_code_usages`, el backend ejecuta `db.restore_user_access_code(email)`, reparando su registro en `users` y retornando `isDemo: false`.
+    - Al registrar un correo que ya contaba con código en `access_code_usages`, `POST /api/auth/register` restaura automáticamente el código y entrega Pase Activo inmediato.
+  - **Supremacía del Servidor sobre `localStorage` (`js/auth-license.js` y `js/auth-service.js`):**
+    - `LicenseService.getCurrentLicense()` y `LicenseService.isDemoMode()` priorizan `AuthService.currentUser`. Si el usuario tiene sesión activa con `access_code` e `!isDemo`, se otorga Pase Activo sin importar si `localStorage` está vacío o expirado.
+    - `AuthService.checkSession()` y `AuthService.login()` actualizan el caché local de licencia en `localStorage` con la verdad del servidor.
+  - **Doble Blindaje de Inmunidad ante Purga de Cuentas Demo:** `db.purge_unvalidated_accounts()` excluye permanentemente a usuarios cuyos correos figuren en `access_code_usages` (`AND email NOT IN (SELECT email FROM access_code_usages)`).
+  - **Libro Mayor de Auditoría en Panel de Administrador:** `GET /api/admin/codes` expone el array `usages: [{ email, consumed_at }]` para auditoría granular de consumos por código y deduplica correos en `linked_emails`.
+  - **Aprobación del 100% de Pruebas Automatizadas (790 Pruebas en Total / 100% PASS):**
+    - 105/105 pruebas aprobadas en `test_unlock_auth_flow.cjs` (incluyendo 24 nuevas aserciones en la Sección 17).
+    - 685/685 pruebas aprobadas en `test_e2e_case_flow.cjs`.
+* **v7.3 (Prompt 002 — Implementación Completa: Mejora Integral del Agente de Creación de Casos, Complejidad Dogmática, Pauta Oficial, 13 Arquetipos y Nutrición Dinámica de Apuntes):**
+  - **Catálogo Exhaustivo de 13 Arquetipos Dogmáticos:** Modernización total de los 10 arquetipos existentes e incorporación de 3 arquetipos interdisciplinarios de nivel examen de grado:
+    1. `responsabilidad_extracontractual_competencia_cautelar` (Civil + Procesal).
+    2. `promesa_clausula_penal_ejecutivo_hacer` (Civil + Procesal).
+    3. `constitucional_dominio_proteccion_apelacion` (Constitucional + Civil + Procesal).
+  - **Cobertura de las 37 Instituciones y 4 Contra-Instituciones Doctrinales:** Cobertura verificada de las 37 instituciones de grado. 4 instituciones identificadas como puramente doctrinales (`isDoctrinalOnly: true` con `doctrinalRationale`: prescripción extraordinaria sin título contra título inscrito, mera tenencia de arriendo vs reivindicatoria, rescisión de muebles por lesión enorme, y derechos litigiosos dudosos en protección), utilizadas como distractores conceptuales.
+  - **Preguntas Graduadas y 5 Alternativas (A a E):** Cada caso presenta de 3 a 4 preguntas con progresión técnica estricta (P1 núcleo sustantivo $\to$ P2 matiz/excepción $\to$ P3 vía procesal/cautelar $\to$ P4 pauta de efectos/orden público). Cada pregunta tiene 5 alternativas con al menos 2 distractores seductores refutados expresamente en `explanation`, la cual concluye obligatoriamente con `"Conclusión: [solución formal]"`.
+  - **Pauta de Evaluación y Error Fatal de Grado:** Cada pregunta incorpora los campos canónicos `pauta` (criterio docente) y `errorFatalDeGrado` (causal inmediata de reprobación en grado), renderizados en `CaseSolver` mediante tarjetas estilizadas `.question-pauta-card` y `.question-fatal-error-card`.
+  - **Rúbrica Oficial AIME 2026-20 al 100%:** Todas las preguntas incorporan `officialRubric` estructurada en las 4 dimensiones exactas con `guidingQuestion` y 4 descriptores graduados (`outstanding`, `sufficient`, `basic`, `insufficient`): Dimensión 1 Marco (0.5 pts), Dimensión 2 Hechos (1.0 pto), Dimensión 3 Subsunción (2.0 pts) y Dimensión 4 Precisión (0.5 pts), totalizando 4.0 pts de justificación (+1.0 pto alternativa = 5.0 pts).
+  - **Soluciones Modelo Reales (`modelSolution`):** Eliminación completa de placeholders; cada arquetipo sintetiza una minuta de resolución jurídica integral $\ge 400$ caracteres (promedio 1.600 - 2.200 caracteres).
+  - **Nutrición Dinámica desde Apuntes (`APUNTES_INDEX`):** Implementación de `CaseGeneratorAgent.syncApuntesFromServer()` y `invalidateApuntes()`, nutriéndose en tiempo real de los 53 apuntes unificados con deduplicación por ID, sanitización estricta de `sourceFile` (sin path traversal) y anclaje a `linkedApuntes` renderizado en `.linked-apuntes-section` con pills `.btn-linked-apunte` y salto directo al temario (`[data-goto-topic]`).
+  - **Verificación de Integridad de Citas y Validador Post-Síntesis:** Métodos `assertCitationIntegrity(case)` y `validateGeneratedCase(case)` que auditan citas legales verificadas contra el corpus normativo positivo (CC, CPC, COT, CPR) y rechazan casos incompletos o defectuosos.
+  - **Aprobación del 100% de Pruebas Automatizadas (736 Pruebas en Total):** Incorporación de la Sección 23 en `test_e2e_case_flow.cjs` con 100% PASS (655/655 pruebas) y 100% PASS en `test_unlock_auth_flow.cjs` (81/81 pruebas).
+* **v7.2 (Prompt 003 — Implementación de Índice Unificado sin Códigos Duplicados y Restricción a Vista Apuntes):**
+  - **Resolución Definitiva de Duplicados en el Índice (`#app-sidebar`):** Erradicación de colisiones visuales de códigos (ej. múltiples `1.1` o `1.3` en Civil) provocadas por reinicios de secciones entre archivos de apuntes (`ACTO JURIDICO.md`, `LOS BIENES.md`, `LAS OBLIGACIONES.md`, `CLASE_9_11.md`).
+  - **Campo Canónico `indexCode` en Parser y Backend:** Implementación de `assign_index_codes(all_sections)` en `generate_clean_notes_data.py` e integración en `server.py` (`get_all_synced_topics()`). Genera una numeración ordinal continua y única por disciplina (`1.1..1.34` en Civil, `2.1..2.9` en Procesal, `3.1..3.10` en Constitucional) ordenada deterministamente por `(chapterNumber, parse_code_tuple(code), orig_idx)`.
+  - **Preservación Estricta de Compatibilidad y Fuentes:** Los campos `code` (ej. `"1.1"`), `id` (ej. `"civil-actojuridi-1-1"`) y `chapterNumber` se mantienen 100% intactos e inalterados, salvaguardando la fidelidad textual a los apuntes físicos y la compatibilidad con todas las aserciones de pruebas previas.
+  - **Restricción Estricta de la Barra Lateral a la Vista Apuntes:** `App.switchView(viewName)` colapsa `#app-sidebar` y oculta/deshabilita el botón disparador `#btn-toggle-sidebar` (clase `.hidden`, `style.display = 'none'`, `disabled = true`, `aria-hidden = 'true'`) en las vistas **Casos** (`cases`) y **Grafo** (`graph`). Al regresar a **Apuntes** (`topics`), se restaura el botón y se reabre la barra lateral únicamente si fue ocultada por la vista (`sidebarHiddenByView`).
+  - **Independencia y Expansión Plena de `ConceptGraph`:** En la vista Grafo, la red neuronal de conceptos y el canvas D3/HTML5 se expanden fluidamente al 100% del viewport sin verse obstaculizados ni depender de la barra lateral.
+  - **Ciberseguridad y Sanitización XSS:** Todos los textos renderizados (`title`, `sourceFile`, `indexCode`, `code`) en badges de cédulas, tooltips (`title="Cédula ${t.indexCode} · Sección ${t.code} (${t.sourceFile})"`), breadcrumbs y pills de `CaseSolver` son sanitizados en el origen con `SecurityShield.escapeHtml`.
+  - **Aprobación del 100% de Pruebas Automatizadas (221 Pruebas en Total / 100% PASS):** 140/140 pruebas aprobadas en `test_e2e_case_flow.cjs` (incluyendo 26 nuevas aserciones en la Sección 10) y 81/81 pruebas aprobadas en `test_unlock_auth_flow.cjs`. Cumplimiento estricto de la regla de oro: actualización de `CONTEXT.md`.
 * **v1.0 (Lanzamiento Base):** Síntesis algorítmica de casos de grado, matriz de incompatibilidades dogmáticas, ciclo FIFO de 10 casos de práctica y renderizado en Markdown.
 * **v2.0 (Integridad y Rúbrica):** Rúbrica Oficial AIME 2026-20 (4 dimensiones, 5.0 pts máx), compuerta excluyente en alternativas, módulo `SecurityShield` contra inyecciones y confidencialidad Zero Exposure en pautas docentes.
 * **v3.0 (Identidad y Multi-dispositivo):** Integración de Google Identity Services (GIS), base de datos SQLite `estudio_grado.db`, sincronización de progreso entre dispositivos y rate limiting defensivo.

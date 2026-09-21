@@ -334,6 +334,56 @@ const INITIAL_DATA = {{
     except Exception as e:
         print("Error actualizando js/data.js:", e)
 
+def parse_code_tuple(code_str):
+    """Convierte un código como '1.2' o '1.10' a tupla de enteros (1, 2) para ordenamiento natural."""
+    parts = (code_str or "").split(".")
+    res = []
+    for p in parts:
+        digits = re.findall(r"\d+", p)
+        res.append(int(digits[0]) if digits else 0)
+    return tuple(res)
+
+def assign_index_codes(all_sections):
+    """
+    Asigna un indexCode canónico único y secuencial ('N.M') por disciplina a todas las secciones.
+    N = 1 (Civil), 2 (Procesal), 3 (Constitucional).
+    Ordena determinísticamente por (chapterNumber asc, parse_code_tuple(code) asc, original_index asc).
+    Muta all_sections in-place y la retorna.
+    """
+    discipline_prefixes = {
+        "civil": 1,
+        "procesal": 2,
+        "constitucional": 3
+    }
+
+    for idx, sec in enumerate(all_sections):
+        sec["_orig_idx"] = idx
+
+    disciplines = ["civil", "procesal", "constitucional"]
+    for sec in all_sections:
+        s = sec.get("subject", "civil")
+        if s not in disciplines:
+            disciplines.append(s)
+
+    for d_idx, subj in enumerate(disciplines, start=1):
+        prefix = discipline_prefixes.get(subj, d_idx)
+        subj_sections = [sec for sec in all_sections if sec.get("subject", "civil") == subj]
+
+        def sort_key(s):
+            chap = s.get("chapterNumber") or 1
+            c_tuple = parse_code_tuple(s.get("code", ""))
+            return (chap, c_tuple, s.get("_orig_idx", 0))
+
+        subj_sections.sort(key=sort_key)
+
+        for seq, sec in enumerate(subj_sections, start=1):
+            sec["indexCode"] = f"{prefix}.{seq}"
+
+    for sec in all_sections:
+        sec.pop("_orig_idx", None)
+
+    return all_sections
+
 def main():
     configs = build_files_config()
     all_sections = []
@@ -355,6 +405,9 @@ def main():
 
     for sec in all_sections:
         sec["connections"] = dogmatic_connections.get(sec["id"], [])
+
+    # Asignar indexCodes canónicos únicos y ordenados por disciplina
+    assign_index_codes(all_sections)
 
     # Guardar en all_afg_topics.json
     with open(ALL_TOPICS_PATH, "w", encoding="utf-8") as f:

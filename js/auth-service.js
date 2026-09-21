@@ -99,6 +99,27 @@ var AuthService = {
             ...data.user,
             isDemo: !data.user.access_code
           };
+          try {
+            localStorage.setItem("grado_auth_user", JSON.stringify(this.currentUser));
+          } catch (e) {}
+
+          if (this.currentUser.access_code && !this.currentUser.isDemo && typeof LicenseService !== "undefined") {
+            try {
+              const userLic = {
+                code: this.currentUser.access_code,
+                scope: "all",
+                studentName: this.currentUser.name || "Estudiante de Grado",
+                email: this.currentUser.email,
+                canManageNotes: false,
+                role: "student",
+                activatedAt: new Date().toISOString(),
+                expiresAt: null,
+                days: 180
+              };
+              localStorage.setItem(LicenseService.STORAGE_LICENSE_KEY, JSON.stringify(userLic));
+            } catch (e) {}
+          }
+
           this.notifyAuthStateChanged();
           if (typeof StorageService !== "undefined" && StorageService.syncPullProgress) {
             StorageService.syncPullProgress();
@@ -371,7 +392,21 @@ var AuthService = {
           localStorage.setItem("grado_auth_user", JSON.stringify(this.currentUser));
         } catch (e) {}
 
-        if (this.currentUser.access_code && typeof LicenseService !== "undefined") {
+        if (this.currentUser.access_code && !this.currentUser.isDemo && typeof LicenseService !== "undefined") {
+          try {
+            const userLic = {
+              code: this.currentUser.access_code,
+              scope: "all",
+              studentName: this.currentUser.name || "Estudiante de Grado",
+              email: this.currentUser.email,
+              canManageNotes: false,
+              role: "student",
+              activatedAt: new Date().toISOString(),
+              expiresAt: null,
+              days: 180
+            };
+            localStorage.setItem(LicenseService.STORAGE_LICENSE_KEY, JSON.stringify(userLic));
+          } catch (e) {}
           LicenseService.activateCode(this.currentUser.access_code);
         }
 
@@ -630,8 +665,8 @@ var AuthService = {
       const safeEmail = escape(this.currentUser.email);
 
       container.innerHTML = `
-        <div class="user-profile-pill" title="Conectado como: ${safeEmail}">
-          <div class="user-avatar-placeholder"><i data-lucide="user"></i></div>
+        <div class="user-profile-pill" title="Conectado como: ${safeEmail}" aria-label="Perfil de usuario: ${safeName}">
+          <div class="user-avatar-placeholder" aria-hidden="true"><i data-lucide="user"></i></div>
           <span class="user-profile-name">${safeName}</span>
           <button id="btn-user-logout" class="icon-btn btn-user-logout" title="Cerrar sesión" aria-label="Cerrar sesión">
             <i data-lucide="log-out"></i>
@@ -645,7 +680,7 @@ var AuthService = {
       }
     } else {
       container.innerHTML = `
-        <button id="btn-trigger-auth-modal" class="btn btn-outline btn-sm auth-login-btn" title="Iniciar sesión o registrarse">
+        <button id="btn-trigger-auth-modal" class="btn btn-outline btn-sm auth-login-btn" title="Iniciar sesión o registrarse" aria-label="Acceder o registrarse">
           <i data-lucide="user-check"></i>
           <span>Acceder</span>
         </button>

@@ -15,13 +15,19 @@ from pathlib import Path
 from typing import Optional, Dict, Any, List, Tuple
 
 BASE_DIR = Path(__file__).resolve().parent
-DB_PATH_ENV = os.environ.get("DB_PATH")
-DEFAULT_DB_PATH = Path(DB_PATH_ENV).resolve() if DB_PATH_ENV else BASE_DIR / "estudio_grado.db"
+
+def get_default_db_path() -> Path:
+    env_path = os.environ.get("DB_PATH")
+    if env_path:
+        return Path(env_path).resolve()
+    return BASE_DIR / "estudio_grado.db"
+
+DEFAULT_DB_PATH = get_default_db_path()
 
 
 def get_db_connection(db_path: Optional[Path] = None) -> sqlite3.Connection:
     """Crea y retorna una conexión con integridad referencial activa, WAL mode y row_factory."""
-    path = db_path or DEFAULT_DB_PATH
+    path = db_path or get_default_db_path()
     if path.parent and not path.parent.exists():
         path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(str(path), timeout=15.0)
@@ -79,6 +85,14 @@ def init_db(db_path: Optional[Path] = None) -> None:
           expires_at INTEGER,         -- epoch ms, NULL = sin expiración
           created_at INTEGER NOT NULL
         );
+
+        CREATE TABLE IF NOT EXISTS access_code_usages (
+          code TEXT NOT NULL,
+          email TEXT NOT NULL,
+          consumed_at INTEGER NOT NULL,
+          PRIMARY KEY (code, email)
+        );
+        CREATE INDEX IF NOT EXISTS idx_access_code_usages_email ON access_code_usages(email);
         """)
 
         # Semilla de códigos de invitación estándar (idempotente con INSERT OR IGNORE)
@@ -219,6 +233,17 @@ def init_db(db_path: Optional[Path] = None) -> None:
           PRIMARY KEY (user_id, case_id)
         );
         """)
+        # Backfill idempotente de usuarios con código convalidado hacia access_code_usages
+        cursor.execute("PRAGMA table_info(users)")
+        u_cols = [row[1] for row in cursor.fetchall()]
+        if "access_code" in u_cols and "email" in u_cols:
+            cursor.execute("""
+            INSERT OR IGNORE INTO access_code_usages (code, email, consumed_at)
+            SELECT access_code, LOWER(TRIM(email)), COALESCE(created_at, ?)
+            FROM users
+            WHERE access_code IS NOT NULL AND access_code != ''
+            """, (now_seed_ms,))
+
         conn.commit()
 
 
@@ -295,10 +320,30 @@ def list_access_codes(db_path: Optional[Path] = None) -> List[Dict[str, Any]]:
             FROM access_codes a
             ORDER BY a.created_at DESC
         """)
+        raw_rows = cursor.fetchall()
+
+        cursor.execute("SELECT code, email, consumed_at FROM access_code_usages ORDER BY consumed_at ASC")
+        usages_by_code: Dict[str, List[Dict[str, Any]]] = {}
+        for u in cursor.fetchall():
+            c_code = u["code"]
+            if c_code not in usages_by_code:
+                usages_by_code[c_code] = []
+            usages_by_code[c_code].append({
+                "email": u["email"],
+                "consumed_at": u["consumed_at"]
+            })
+
         results = []
-        for row in cursor.fetchall():
+        for row in raw_rows:
             item = dict(row)
-            item["linked_emails"] = item.get("linked_emails") or ""
+            code_usages = usages_by_code.get(item["code"], [])
+            item["usages"] = code_usages
+
+            usage_emails = [u["email"] for u in code_usages]
+            user_emails = [e.strip() for e in (item.get("linked_emails") or "").split(",") if e.strip()]
+            combined_emails = list(dict.fromkeys(user_emails + usage_emails))
+
+            item["linked_emails"] = ", ".join(combined_emails)
             item["assigned_email"] = item.get("assigned_email") or ""
             item["associated_email"] = item["linked_emails"] or item["assigned_email"] or ""
             results.append(item)
@@ -420,30 +465,49 @@ def create_user(
             return False, "El correo electrónico ya se encuentra registrado.", None
 
         clean_code = normalize_access_code(access_code) if access_code else None
+        if not clean_code:
+            cursor.execute("SELECT code FROM access_code_usages WHERE email = ? ORDER BY consumed_at DESC LIMIT 1", (clean_email,))
+            usage_row = cursor.fetchone()
+            if usage_row:
+                clean_code = usage_row["code"]
+        else:
+            cursor.execute("SELECT consumed_at FROM access_code_usages WHERE code = ? AND email = ?", (clean_code, clean_email))
+            existing_usage = cursor.fetchone()
+            if not existing_usage:
+                cursor.execute(
+                    """
+                    UPDATE access_codes
+                    SET times_used = times_used + 1
+                    WHERE code = ?
+                      AND active = 1
+                      AND times_used < max_uses
+                      AND (expires_at IS NULL OR expires_at > ?)
+                    """,
+                    (clean_code, now_ms)
+                )
+                if cursor.rowcount == 0:
+                    cursor.execute("SELECT active, max_uses, times_used, expires_at FROM access_codes WHERE code = ?", (clean_code,))
+                    row = cursor.fetchone()
+                    if not row:
+                        return False, "El código de acceso no existe.", None
+                    if row["active"] != 1:
+                        return False, "El código de acceso ha sido revocado o desactivado.", None
+                    if row["times_used"] >= row["max_uses"]:
+                        return False, f"El código ha alcanzado el límite máximo de usos ({row['times_used']}/{row['max_uses']}).", None
+                    if row["expires_at"] is not None and now_ms > row["expires_at"]:
+                        return False, "El código de acceso ha expirado.", None
+                    return False, "El código de acceso no es válido o ya fue utilizado.", None
+
+                cursor.execute(
+                    "INSERT OR IGNORE INTO access_code_usages (code, email, consumed_at) VALUES (?, ?, ?)",
+                    (clean_code, clean_email, now_ms)
+                )
+
         if clean_code:
             cursor.execute(
-                """
-                UPDATE access_codes
-                SET times_used = times_used + 1
-                WHERE code = ?
-                  AND active = 1
-                  AND times_used < max_uses
-                  AND (expires_at IS NULL OR expires_at > ?)
-                """,
-                (clean_code, now_ms)
+                "INSERT OR IGNORE INTO access_code_usages (code, email, consumed_at) VALUES (?, ?, ?)",
+                (clean_code, clean_email, now_ms)
             )
-            if cursor.rowcount == 0:
-                cursor.execute("SELECT active, max_uses, times_used, expires_at FROM access_codes WHERE code = ?", (clean_code,))
-                row = cursor.fetchone()
-                if not row:
-                    return False, "El código de acceso no existe.", None
-                if row["active"] != 1:
-                    return False, "El código de acceso ha sido revocado o desactivado.", None
-                if row["times_used"] >= row["max_uses"]:
-                    return False, f"El código ha alcanzado el límite máximo de usos ({row['times_used']}/{row['max_uses']}).", None
-                if row["expires_at"] is not None and now_ms > row["expires_at"]:
-                    return False, "El código de acceso ha expirado.", None
-                return False, "El código de acceso no es válido o ya fue utilizado.", None
 
         cursor.execute(
             """
@@ -469,6 +533,7 @@ def purge_unvalidated_accounts(max_age_ms: int = 48 * 3600 * 1000, db_path: Opti
     """
     Elimina automáticamente las cuentas de usuarios en Versión Demo que no hayan sido convalidadas
     con un código de acceso dentro del plazo establecido (por defecto 48 horas desde su creación).
+    Cuentas que registren un código en access_code_usages son inmunes a la purga.
     También purga las filas asociadas en user_progress para no dejar huérfanos.
     Retorna el número de cuentas eliminadas.
     """
@@ -484,6 +549,7 @@ def purge_unvalidated_accounts(max_age_ms: int = 48 * 3600 * 1000, db_path: Opti
             WHERE access_code IS NULL
               AND created_at IS NOT NULL
               AND created_at < ?
+              AND email NOT IN (SELECT email FROM access_code_usages)
             """,
             (threshold_ms,)
         )
@@ -503,6 +569,51 @@ def purge_unvalidated_accounts(max_age_ms: int = 48 * 3600 * 1000, db_path: Opti
         purged_count = len(expired_ids)
         print(f"[Purge] Se eliminaron {purged_count} cuentas no convalidadas con más de 48h de antigüedad.")
         return purged_count
+
+
+def get_user_code_usage(email: str, db_path: Optional[Path] = None) -> Optional[Dict[str, Any]]:
+    """Obtiene el último registro contable de uso de código para un correo."""
+    init_db(db_path)
+    clean_email = str(email or "").strip().lower()
+    if not clean_email:
+        return None
+    with get_db_connection(db_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT code, email, consumed_at FROM access_code_usages WHERE email = ? ORDER BY consumed_at DESC LIMIT 1",
+            (clean_email,)
+        )
+        row = cursor.fetchone()
+        return dict(row) if row else None
+
+
+def restore_user_access_code(user_id: int, email: str, db_path: Optional[Path] = None) -> Optional[str]:
+    """
+    Restaura automáticamente el código de acceso de un usuario si existe un registro
+    en access_code_usages para su email y la cuenta actualmente tiene access_code = NULL.
+    Es atómico, idempotente y no re-descuenta times_used.
+    Retorna el código restaurado o None si no corresponde.
+    """
+    init_db(db_path)
+    clean_email = str(email or "").strip().lower()
+    if not clean_email:
+        return None
+    with get_db_connection(db_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT code FROM access_code_usages WHERE email = ? ORDER BY consumed_at DESC LIMIT 1",
+            (clean_email,)
+        )
+        row = cursor.fetchone()
+        if not row:
+            return None
+        code = row["code"]
+        cursor.execute(
+            "UPDATE users SET access_code = ? WHERE id = ? AND access_code IS NULL",
+            (code, user_id)
+        )
+        conn.commit()
+        return code
 
 
 def update_verification_code(user_id: int, code: str, expires_at: int, db_path: Optional[Path] = None) -> bool:
@@ -639,8 +750,10 @@ def record_login_success(user_id: int, db_path: Optional[Path] = None) -> None:
 def link_user_code(user_id: int, code: str, db_path: Optional[Path] = None) -> Tuple[bool, str, Optional[Dict[str, Any]]]:
     """
     Convalida y vincula un código de acceso a la cuenta de usuario de forma atómica:
-    1. Descuenta atómicamente en access_codes (previene Race Conditions).
-    2. Actualiza users.access_code.
+    1. Si el usuario ya convalidó este código previamente (en access_code_usages),
+       se reasigna de forma idempotente sin re-descontar times_used ni rebotar por cupos.
+    2. Si es primer uso, descuenta atómicamente en access_codes y registra en access_code_usages.
+    3. Actualiza users.access_code.
     """
     init_db(db_path)
     clean_code = normalize_access_code(code)
@@ -657,6 +770,23 @@ def link_user_code(user_id: int, code: str, db_path: Optional[Path] = None) -> T
         user = cursor.fetchone()
         if not user:
             return False, "Usuario no encontrado.", None
+
+        user_email = str(user["email"]).strip().lower()
+
+        # Verificar si este usuario ya consumió legítimamente este código
+        cursor.execute(
+            "SELECT consumed_at FROM access_code_usages WHERE code = ? AND email = ?",
+            (clean_code, user_email)
+        )
+        existing_usage = cursor.fetchone()
+
+        if existing_usage:
+            # Re-asignación idempotente (sin re-descontar cupos)
+            cursor.execute("UPDATE users SET access_code = ? WHERE id = ?", (clean_code, user_id))
+            conn.commit()
+            cursor.execute("SELECT id, email, name, access_code, failed_login_attempts, locked_until, created_at, last_login_at FROM users WHERE id = ?", (user_id,))
+            updated_row = cursor.fetchone()
+            return True, "Código convalidado exitosamente.", dict(updated_row) if updated_row else None
 
         cursor.execute(
             """
@@ -681,6 +811,11 @@ def link_user_code(user_id: int, code: str, db_path: Optional[Path] = None) -> T
             if row["expires_at"] is not None and now_ms > row["expires_at"]:
                 return False, "El código de acceso ha expirado.", None
             return False, "El código de acceso no es válido o ya fue utilizado.", None
+
+        cursor.execute(
+            "INSERT OR IGNORE INTO access_code_usages (code, email, consumed_at) VALUES (?, ?, ?)",
+            (clean_code, user_email, now_ms)
+        )
 
         cursor.execute("UPDATE users SET access_code = ? WHERE id = ?", (clean_code, user_id))
         conn.commit()

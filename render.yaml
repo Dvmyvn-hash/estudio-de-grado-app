@@ -3,7 +3,11 @@ services:
     name: gradomania-app
     env: python
     region: oregon
-    plan: free
+    plan: starter
+    disk:
+      name: data
+      mountPath: /var/data
+      sizeGB: 1
     buildCommand: pip install -r requirements.txt
     startCommand: python server.py
     envVars:
@@ -32,5 +36,5 @@ services:
       - key: EXTRA_ACCESS_CODES
         sync: false
       - key: DB_PATH
-        sync: false
+        value: /var/data/estudio_grado.db
 
