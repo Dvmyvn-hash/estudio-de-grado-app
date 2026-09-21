@@ -13,6 +13,12 @@ services:
         value: 8080
       - key: SESSION_SECRET
         generateValue: true
+      - key: EMAIL_PROVIDER
+        value: resend
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
       - key: SMTP_HOST
         sync: false
       - key: SMTP_PORT
@@ -20,8 +26,6 @@ services:
       - key: SMTP_USER
         sync: false
       - key: SMTP_PASS
-        sync: false
-      - key: EMAIL_FROM
         sync: false
       - key: ALLOW_TEST_AUTH
         value: "0"

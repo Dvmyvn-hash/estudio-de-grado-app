@@ -23,35 +23,46 @@ El sistema cuenta con una arquitectura de **Autenticación Autónoma con Correo 
 
 ---
 
-## 📧 2. Configuración de Envío de Correos (SMTP con Gmail o Proveedor)
+## 📧 2. Configuración de Envío de Correos (Resend HTTPS API / SMTP)
 
-El sistema utiliza la biblioteca estándar de Python (`smtplib` con STARTTLS en puerto 587) sin dependencias externas. Para enviar correos de verificación reales en producción o desarrollo local:
+El sistema soporta una arquitectura dual de transporte sin dependencias externas (utiliza `urllib.request` y `smtplib` de la biblioteca estándar de Python):
 
-1. **Uso de Archivo Local `.env` (Ignorado en Git):**
-   Copia el archivo `.env.example` como `.env` en la raíz del proyecto y completa los campos:
+### Opción A: Producción en Render.com (Resend HTTPS API — Recomendado)
+> [!IMPORTANT]
+> Render bloquea puertos SMTP salientes (25, 465, 587) en planes gratuitos. Resend opera vía HTTPS en puerto 443, garantizando 100% de entrega en Render.
+
+1. **Variables en Render Dashboard:**
    ```env
+   EMAIL_PROVIDER=resend
+   RESEND_API_KEY=re_tu_api_key_de_resend
+   EMAIL_FROM=GRADOMANÍA <onboarding@resend.dev>
+   ```
+2. **Obtención de API Key en Resend:**
+   - Regístrate gratis en [resend.com](https://resend.com) (3.000 correos/mes gratis).
+   - Ve a **API Keys** -> **Create API Key**.
+   - Con el dominio `onboarding@resend.dev` puedes enviar al correo con el que te registraste en Resend. Para enviar a cualquier usuario, agrega y verifica tu dominio en Resend.
+
+### Opción B: Entorno Local con Gmail SMTP (Opcional)
+1. **Archivo Local `.env` (Ignorado en Git):**
+   ```env
+   EMAIL_PROVIDER=smtp
    SMTP_HOST=smtp.gmail.com
    SMTP_PORT=587
    SMTP_USER=gradomaniacos@gmail.com
    SMTP_PASS=tu_app_password_de_16_caracteres
    EMAIL_FROM=GRADOMANÍA <gradomaniacos@gmail.com>
    ```
+2. **Obtención de Contraseña de Aplicación de Google:**
+   - [Cuenta de Google](https://myaccount.google.com/) -> **Seguridad** -> **Verificación en 2 pasos** -> **Contraseñas de aplicaciones**.
 
-2. **Obtención de Contraseña de Aplicación de Google (App Password):**
-   - Accede a tu [Cuenta de Google](https://myaccount.google.com/) -> **Seguridad**.
-   - Activa la **Verificación en 2 pasos**.
-   - Ve a **Contraseñas de aplicaciones** (`https://myaccount.google.com/apppasswords`).
-   - Genera una nueva clave seleccionando app *"Correo"*, nombrando *"GRADOMANÍA"*.
-   - Pega los 16 caracteres en `SMTP_PASS` dentro de tu `.env` o en las Environment Variables de Render.
-
-3. **Verificación Manual de Envío (Script Aislado):**
-   Puedes verificar el despacho real de correos sin pasar por el formulario web ejecutando:
-   ```powershell
-   python scripts/test_smtp_manual.py tu_correo_personal@ejemplo.com
-   ```
+### Diagnóstico Aislado de Transporte:
+Puedes probar el envío manual de correos en local o en la terminal de Render ejecutando:
+```powershell
+python scripts/test_email_manual.py tu_correo@ejemplo.com
+```
 
 > [!NOTE]
-> **Modo Desarrollo (Sin SMTP):** Si no defines `SMTP_HOST` en `.env` ni en el entorno, `server.py` activará el modo dev (`[SMTP Dev]`), registrando el código numérico directamente en la consola sin fallar ni requerir conexión a internet.
+> **Modo Desarrollo (Sin Envío):** Si no defines ni `RESEND_API_KEY` ni `SMTP_HOST`, `server.py` activará el modo dev (`[Email Dev]`), imprimiendo el código de 6 dígitos en consola sin fallar.
 
 ---
 

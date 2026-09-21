@@ -41,25 +41,30 @@ Sube este repositorio a tu cuenta de GitHub (público o privado).
 
 ### Paso 3: Variables de Entorno (Environment Variables)
 En la sección **"Environment"** de Render Dashboard añade:
+
+> [!IMPORTANT]
+> **Transporte de Correo en Render Free (Resend HTTPS API):**
+> Los Web Services gratuitos de Render bloquean el tráfico SMTP saliente (puertos 25, 465 y 587). Para el envío garantizado de códigos de verificación por correo, **GRADOMANÍA** utiliza la API HTTPS de [Resend](https://resend.com) (puerto 443 estándar).
+
 | Clave (Key) | Valor (Value) | Descripción |
 | :--- | :--- | :--- |
 | `PYTHON_VERSION` | `3.11.8` | Versión recomendada de Python |
 | `SESSION_SECRET` | *(Haz clic en "Generate")* | Secreto criptográfico de 32+ caracteres para firmar cookies de sesión |
-| `SMTP_HOST` | `smtp.gmail.com` | Servidor SMTP (ej: Gmail o tu proveedor) |
-| `SMTP_PORT` | `587` | Puerto SMTP con cifrado STARTTLS (recomendado 587) |
-| `SMTP_USER` | `tu_cuenta@gmail.com` | Correo electrónico de la cuenta remitente |
-| `SMTP_PASS` | `tu_app_password_de_16_caracteres` | Contraseña de Aplicación de Google (ver instrucciones abajo) |
-| `EMAIL_FROM` | `GRADOMANÍA <tu_cuenta@gmail.com>` | Nombre visible y dirección del remitente |
+| `EMAIL_PROVIDER` | `resend` | Proveedor de correo en producción (`resend` o `smtp`) |
+| `RESEND_API_KEY` | `re_123456789...` | API Key creada en [resend.com/api-keys](https://resend.com/api-keys) |
+| `EMAIL_FROM` | `GRADOMANÍA <onboarding@resend.dev>` | Remitente inicial de pruebas (o tu dominio verificado) |
 | `PORT` | `8080` | Render lo configura automáticamente |
 
 > [!TIP]
-> **Cómo generar la Contraseña de Aplicación (App Password) en Gmail:**
-> 1. Ve a tu [Cuenta de Google](https://myaccount.google.com/) -> pestaña **Seguridad**.
-> 2. Asegúrate de tener activada la **Verificación en 2 pasos**.
-> 3. En la barra de búsqueda de la cuenta, escribe **"Contraseñas de aplicaciones"** (o accede a `https://myaccount.google.com/apppasswords`).
-> 4. Crea una nueva contraseña indicando la app (ej: *"GRADOMANÍA"*).
-> 5. Copia la clave de 16 caracteres generada y pégala en `SMTP_PASS` (en tu archivo local `.env` o en las variables de Render).
-> 6. *Nota de seguridad:* Nunca comitees credenciales a Git; `render.yaml` declara las claves con `sync: false` para que las configures privadamente.
+> **Configuración en 1 minuto con Resend:**
+> 1. Regístrate gratis en [resend.com](https://resend.com) (incluye 3.000 correos/mes sin costo).
+> 2. En el panel de Resend, entra a **API Keys** y crea una clave (ej: *"gradomania-prod"*).
+> 3. Copia la clave generada (`re_...`) y colócala en `RESEND_API_KEY` en Render.
+> 4. Deja `EMAIL_FROM=GRADOMANÍA <onboarding@resend.dev>`. *(Nota: con el dominio `onboarding@resend.dev`, Resend solo permite enviar al correo asociado a tu cuenta de Resend. Cuando verifiques tu propio dominio en Resend, podrás enviar a cualquier destinatario libremente).*
+
+> [!NOTE]
+> **Para desarrollo local con Gmail SMTP (opcional):**
+> En tu entorno local puedes seguir usando Gmail SMTP configurando en tu `.env` local `EMAIL_PROVIDER=smtp`, `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=587`, `SMTP_USER=tu_correo@gmail.com` y `SMTP_PASS=tu_app_password`. Para diagnosticar cualquier transporte ejecuta: `python scripts/test_email_manual.py tu_correo@gmail.com`.
 
 ### Paso 4: Desplegar y listo
 Haz clic en **"Create Web Service"**. En un par de minutos, Render completará el build y te entregará una URL pública segura HTTPS (ej: `https://gradomania.onrender.com`).

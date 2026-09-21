@@ -12,6 +12,7 @@ import time
 import re
 import urllib.parse
 import urllib.request
+import urllib.error
 import hmac
 import hashlib
 import base64
@@ -611,32 +612,134 @@ AUTH_LIMITER = SecurityRateLimiter(max_entries=5000)
 LOGIN_BACKOFF_LIMITER = SecurityRateLimiter(max_entries=5000)
 GOOGLE_AUTH_LIMITER = SecurityRateLimiter(max_entries=5000)
 
-def get_smtp_config() -> Tuple[str, int, str, str, str]:
-    """Obtiene la configuración SMTP actual desde variables de entorno."""
-    host = os.environ.get("SMTP_HOST", "").strip()
+def mask_email(email: str) -> str:
+    """Enmascara correo para logs de auditoría seguros (ej. david@gmail.com -> d***@gmail.com)."""
+    if not email or "@" not in email:
+        return "***"
+    local, domain = email.split("@", 1)
+    if len(local) <= 1:
+        return f"{local}***@{domain}"
+    elif len(local) == 2:
+        return f"{local[0]}***@{domain}"
+    else:
+        return f"{local[0]}***@{domain}"
+
+
+def get_email_config() -> Dict[str, Any]:
+    """Obtiene la configuración de correo actual desde variables de entorno."""
+    raw_provider = os.environ.get("EMAIL_PROVIDER", "").strip().lower()
+    resend_key = os.environ.get("RESEND_API_KEY", "").strip()
+    smtp_host = os.environ.get("SMTP_HOST", "").strip()
     try:
-        port = int(os.environ.get("SMTP_PORT", "587"))
+        smtp_port = int(os.environ.get("SMTP_PORT", "587"))
     except ValueError:
-        port = 587
-    user = os.environ.get("SMTP_USER", "").strip()
-    password = os.environ.get("SMTP_PASS", "").strip()
-    from_addr = os.environ.get("EMAIL_FROM", "").strip() or user or "no-reply@gradomania.cl"
-    return host, port, user, password, from_addr
+        smtp_port = 587
+    smtp_user = os.environ.get("SMTP_USER", "").strip()
+    smtp_pass = os.environ.get("SMTP_PASS", "").strip()
+    email_from = os.environ.get("EMAIL_FROM", "").strip()
+
+    # Determinación jerárquica del proveedor activo
+    if raw_provider == "resend":
+        provider = "resend"
+    elif raw_provider == "smtp":
+        provider = "smtp"
+    elif resend_key:
+        provider = "resend"
+    elif smtp_host:
+        provider = "smtp"
+    else:
+        provider = ""
+
+    return {
+        "provider": provider,
+        "resend_key": resend_key,
+        "smtp_host": smtp_host,
+        "smtp_port": smtp_port,
+        "smtp_user": smtp_user,
+        "smtp_pass": smtp_pass,
+        "email_from": email_from
+    }
 
 
-def send_verification_email(to_email: str, code: str) -> Tuple[bool, str]:
+def get_smtp_config() -> Tuple[str, int, str, str, str]:
+    """Compatibilidad con código existente: obtiene configuración SMTP."""
+    cfg = get_email_config()
+    from_addr = cfg["email_from"] or cfg["smtp_user"] or "no-reply@gradomania.cl"
+    return cfg["smtp_host"], cfg["smtp_port"], cfg["smtp_user"], cfg["smtp_pass"], from_addr
+
+
+def _send_via_resend(to_email: str, code: str, api_key: str, from_addr: str) -> Tuple[bool, str]:
     """
-    Envía código de verificación de 6 dígitos mediante SMTP (soporte Gmail STARTTLS / puerto 587).
-    Si SMTP_HOST no está configurado (entorno local de desarrollo o pruebas),
-    registra el código en consola y simula envío exitoso.
-    Retorna (éxito: bool, mensaje_error: str).
+    Envía código de verificación de 6 dígitos mediante la API REST HTTPS oficial de Resend.
+    Compatible con Web Services gratuitos de Render.com (puerto 443 sin bloqueos SMTP).
     """
-    host, port, user, password, from_addr = get_smtp_config()
+    if not api_key:
+        print("[Email Error] Provider=resend status=missing_api_key")
+        return False, "Configuración incompleta del servicio de correo."
 
-    if not host:
-        print(f"[SMTP Dev] Código de verificación para {to_email}: {code} (Vence en 15 minutos)")
-        return True, ""
+    sender = from_addr or "GRADOMANÍA <onboarding@resend.dev>"
+    subject = f"Tu código de verificación de GRADOMANÍA es: {code}"
+    body_text = (
+        f"Hola,\n\n"
+        f"Tu código de verificación de GRADOMANÍA es: {code}\n\n"
+        f"Este código vence en 15 minutos. Ingrésalo en la plataforma para activar tu cuenta.\n\n"
+        f"Si no solicitaste este código, puedes desestimar este mensaje con total seguridad.\n"
+    )
+    body_html = (
+        f"<div style='font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif; "
+        f"max-width: 520px; margin: 0 auto; padding: 28px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #ffffff;'>"
+        f"<h2 style='color: #1e293b; margin: 0 0 16px 0; font-size: 20px; letter-spacing: -0.5px;'>GRADOMANÍA</h2>"
+        f"<p style='color: #475569; font-size: 15px; line-height: 1.5;'>Tu código de verificación de seguridad es:</p>"
+        f"<div style='background-color: #f8fafc; border: 1px dashed #cbd5e1; padding: 18px; border-radius: 6px; text-align: center; margin: 20px 0;'>"
+        f"<span style='font-size: 32px; font-weight: 700; letter-spacing: 8px; color: #0f172a; font-family: monospace;'>{code}</span>"
+        f"</div>"
+        f"<p style='color: #64748b; font-size: 13px; line-height: 1.4;'>Este código vence en <strong>15 minutos</strong>. Ingrésalo en la plataforma para activar tu cuenta.</p>"
+        f"<hr style='border: none; border-top: 1px solid #e2e8f0; margin: 24px 0 16px 0;'>"
+        f"<p style='color: #94a3b8; font-size: 12px; margin: 0;'>Si no solicitaste este código, puedes ignorar este correo con total seguridad.</p>"
+        f"</div>"
+    )
 
+    payload = {
+        "from": sender,
+        "to": [to_email],
+        "subject": subject,
+        "text": body_text,
+        "html": body_html
+    }
+
+    try:
+        req = urllib.request.Request(
+            "https://api.resend.com/emails",
+            data=json.dumps(payload).encode("utf-8"),
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+                "User-Agent": "Gradomania-App/1.0"
+            },
+            method="POST"
+        )
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            status = resp.status
+            if 200 <= status < 300:
+                print(f"[Email] Provider=resend Verification email sent successfully to {mask_email(to_email)}")
+                return True, ""
+            else:
+                print(f"[Email Error] Provider=resend status={status}")
+                return False, f"Resend API error status={status}"
+    except urllib.error.HTTPError as e:
+        print(f"[Email Error] Provider=resend status={e.code}")
+        return False, f"Resend API error (status {e.code})"
+    except urllib.error.URLError as e:
+        print(f"[Email Error] Provider=resend status=network_error error={type(e.reason).__name__}")
+        return False, "Error de red al conectar con el servicio de correo."
+    except Exception as e:
+        print(f"[Email Error] Provider=resend status=unexpected error={type(e).__name__}")
+        return False, "Error inesperado al despachar el correo."
+
+
+def _send_via_smtp(to_email: str, code: str, host: str, port: int, user: str, password: str, from_addr: str) -> Tuple[bool, str]:
+    """Envía código de verificación vía SMTP (soporte Gmail STARTTLS / puerto 587 o SSL / puerto 465)."""
+    sender = from_addr or user or "no-reply@gradomania.cl"
     subject = f"Tu código de verificación de GRADOMANÍA es: {code}"
     body = (
         f"Hola,\n\n"
@@ -648,7 +751,7 @@ def send_verification_email(to_email: str, code: str) -> Tuple[bool, str]:
     try:
         msg = MIMEText(body, "plain", "utf-8")
         msg["Subject"] = subject
-        msg["From"] = from_addr
+        msg["From"] = sender
         msg["To"] = to_email
 
         if port == 465:
@@ -665,20 +768,52 @@ def send_verification_email(to_email: str, code: str) -> Tuple[bool, str]:
                     server.login(user, password)
                 server.send_message(msg)
 
-        print(f"[SMTP Producción] Correo de verificación despachado exitosamente a {to_email}")
+        print(f"[Email] Provider=smtp Verification email sent successfully to {mask_email(to_email)}")
         return True, ""
 
     except smtplib.SMTPAuthenticationError as e:
-        print(f"[Aviso SMTP] Fallo de autenticación en {host} con usuario '{user}': "
-              f"Verifique si 2FA está activo y se está utilizando una Contraseña de Aplicación (App Password) de 16 letras de Google. "
-              f"Detalle: {e.smtp_code} {e.smtp_error}")
+        print(f"[Email Error] Provider=smtp status=auth_error code={e.smtp_code}")
         return False, "Error de autenticación con el servidor de correo."
     except (smtplib.SMTPException, OSError) as e:
-        print(f"[Aviso SMTP] Error de conexión o transporte SMTP al enviar a {to_email}: {type(e).__name__} - {e}")
+        print(f"[Email Error] Provider=smtp status=transport_error error={type(e).__name__}")
         return False, "No se pudo conectar con el servidor de correo."
     except Exception as e:
-        print(f"[Aviso SMTP] Error inesperado en envío SMTP a {to_email}: {type(e).__name__} - {e}")
+        print(f"[Email Error] Provider=smtp status=unexpected error={type(e).__name__}")
         return False, "Error inesperado al despachar el correo."
+
+
+def send_verification_email(to_email: str, code: str) -> Tuple[bool, str]:
+    """
+    Envía código de verificación de 6 dígitos mediante el proveedor activo:
+    - HTTPS Resend API (para producción en Render.com / sin bloqueos de puerto)
+    - SMTP (para desarrollo local con Gmail)
+    - Dev Fallback si no hay proveedor configurado (imprime en consola)
+    Retorna (éxito: bool, mensaje_error: str).
+    """
+    cfg = get_email_config()
+    provider = cfg["provider"]
+
+    if provider == "resend":
+        return _send_via_resend(
+            to_email=to_email,
+            code=code,
+            api_key=cfg["resend_key"],
+            from_addr=cfg["email_from"]
+        )
+    elif provider == "smtp":
+        return _send_via_smtp(
+            to_email=to_email,
+            code=code,
+            host=cfg["smtp_host"],
+            port=cfg["smtp_port"],
+            user=cfg["smtp_user"],
+            password=cfg["smtp_pass"],
+            from_addr=cfg["email_from"]
+        )
+    else:
+        # Modo desarrollo / fallback local
+        print(f"[SMTP Dev] Código de verificación para {to_email}: {code} (Vence en 15 minutos)")
+        return True, ""
 
 
 def validate_password_policy(password: str) -> Tuple[bool, str]:

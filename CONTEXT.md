@@ -352,6 +352,24 @@ Cuando el sistema se conecte con APIs de LLM externas (ej. Gemini API, Cloud Run
 
 ---
 
+### 4.4. Manejo de Errores en Proveedores de Correo y Blindaje Fail-Safe (HTTP 503)
+* **Bloqueo de Puertos SMTP en Render Free:** Las plataformas de nube modernas como Render.com bloquean por defecto el tráfico saliente por los puertos SMTP estándar (25, 465 y 587) en planes gratuitos para mitigar spam.
+* **Capa de Transporte HTTPS Resend API:** La aplicación sortea esta restricción direccionando las comunicaciones en producción a la API REST HTTPS de **Resend** (`https://api.resend.com/emails`) a través del puerto 443 (abierto y sin restricciones en Render).
+* **Contrato Fail-Safe Unificado:** Si el despacho del correo falla (por clave `RESEND_API_KEY` ausente o no autorizada, rechazo de dominio remitente `HTTPError`, indisponibilidad de red `URLError` o credenciales SMTP inválidas), la función `send_verification_email` captura la excepción sin filtrar información sensible y los endpoints `POST /api/auth/register` y `POST /api/auth/resend-code` responden inmediatamente con **HTTP 503 Service Unavailable**:
+  ```json
+  {
+    "ok": false,
+    "error": "No pudimos enviar el correo de verificación. Por favor intenta nuevamente en unos minutos."
+  }
+  ```
+* **Logs Sanitizados de Auditoría:** En todo momento se mantiene estricta confidencialidad. Los registros de consola reportan:
+  `[Email] Provider=resend Verification email sent successfully to d***@gmail.com`
+  o ante fallos:
+  `[Email Error] Provider=resend status=XXX`
+  **Nunca** se imprime en consola o en red la API key, la contraseña SMTP, la contraseña del postulante o el código de verificación de 6 dígitos.
+
+---
+
 ## 5. Stack Tecnológico y Convenciones
 
 ### 5.1. Resumen Tecnológico
@@ -398,16 +416,20 @@ Cuando el sistema se conecte con APIs de LLM externas (ej. Gemini API, Cloud Run
 
 ---
 
-## 6. Autenticación Autónoma (Correo + Contraseña PBKDF2), Verificación de Correo con Código de 6 Dígitos (SMTP) y Sincronización Multi-Dispositivo
+## 6. Autenticación Autónoma (Correo + Contraseña PBKDF2), Verificación de Correo con Código de 6 Dígitos (Resend HTTPS API / SMTP) y Sincronización Multi-Dispositivo
 
 ### 6.1. Arquitectura de Identidad y Seguridad
-La plataforma implementa un esquema de autenticación resiliente, autónomo y sin dependencias externas:
+La plataforma implementa un esquema de autenticación resiliente, autónomo y sin dependencias externas de terceros en el frontend:
 1. **Modo Servidor Local / Producción (`server.py` y `db.py`):**
-   * **Identidad Autónoma:** Registro e inicio de sesión mediante Correo Electrónico y Contraseña, eliminando dependencias externas de Google Identity Services (GIS) y de Cloudflare Turnstile.
+   * **Identidad Autónoma:** Registro e inicio de sesión mediante Correo Electrónico y Contraseña, eliminando dependencias de Google Identity Services (GIS) y de Cloudflare Turnstile.
    * **Hashing Criptográfico Estándar:** Implementación nativa en Python estándar (`hashlib`, `secrets`, `base64`, `hmac`) con **PBKDF2-HMAC-SHA256**, 210.000 iteraciones y salt criptográfico único de 16 bytes codificado en Base64.
    * **Verificación Nativa por Correo Electrónico:** Flujo de validación mediante código numérico criptográficamente seguro de 6 dígitos (`secrets.choice`), con caducidad estricta de 15 minutos (`verification_code_expires_at` en epoch ms) y límite defensivo de 5 intentos fallidos (`verification_attempts`).
-   * **Transporte de Correo mediante SMTP Estándar (Gmail STARTTLS 587):** Módulo `smtplib` y `email.mime.text.MIMEText` sin librerías externas. Soporte para cuentas Gmail dedicadas (`gradomaniacos@gmail.com`) mediante **Contraseña de Aplicación de 16 caracteres** (`SMTP_PASS`) sobre STARTTLS (`server.starttls()`) en el puerto 587. Carga nativa y transparente de variables desde archivo `.env` en `server.py` (`load_env_file()`). Si no se define `SMTP_HOST`, el servidor entra en modo de desarrollo y registra el código directamente en la consola (`[SMTP Dev] Código de verificación para user@...: XXXXXX`).
-   * **Blindaje de Envío y Respuestas HTTP 503:** Si el transporte SMTP falla por credenciales inválidas (`SMTPAuthenticationError`) o problemas de red (`SMTPException`, `OSError`), el servidor registra un log claro y accionable sin filtrar la contraseña, y los endpoints `POST /api/auth/register` y `POST /api/auth/resend-code` responden explícitamente con **HTTP 503 Service Unavailable** (`{"ok": False, "error": "No pudimos enviar el correo de verificación..."}`), evitando falsos positivos y garantizando que el usuario no espere un código que no fue despachado.
+   * **Capa de Transporte Dual de Correo (Resend HTTPS / SMTP Local):**
+     * **Producción en la Nube (Render Free / Puerto 443):** Utiliza la API REST oficial de **Resend** (`https://api.resend.com/emails`) mediante `urllib.request` sobre HTTPS, evitando por diseño el bloqueo de puertos salientes (25, 465, 587) impuesto en los Web Services gratuitos de Render.com.
+     * **Desarrollo Local (Gmail SMTP / STARTTLS 587 o SSL 465):** Mantiene soporte completo de `smtplib` y `email.mime.text.MIMEText` sin librerías externas para pruebas en entornos locales mediante Contraseña de Aplicación de Google (`gradomaniacos@gmail.com`).
+     * **Selección Jerárquica del Proveedor Activo (`get_email_config`):** 1) `EMAIL_PROVIDER=resend` fuerza Resend; 2) `EMAIL_PROVIDER=smtp` fuerza SMTP; 3) si existe `RESEND_API_KEY`, activa Resend; 4) si existe `SMTP_HOST`, activa SMTP; 5) si ninguno está definido, entra en modo de desarrollo (`[SMTP Dev]`) imprimiendo el código en consola sin fallar.
+   * **Blindaje de Envío y Respuestas HTTP 503:** Si el despacho del correo falla (por clave `RESEND_API_KEY` errónea, rechazo de dominio, credenciales SMTP inválidas o caída de red), el servidor captura el error, emite un log seguro sin filtrar secretos y los endpoints `POST /api/auth/register` y `POST /api/auth/resend-code` responden explícitamente con **HTTP 503 Service Unavailable** (`{"ok": False, "error": "No pudimos enviar el correo de verificación..."}`), garantizando que el usuario no quede en limbo esperando un código no despachado.
+   * **Logs Sanitizados de Auditoría y Cero Fuga de Secretos:** Los logs de servidor enmascaran la casilla destinataria (`d***@gmail.com`) y **nunca** imprimen `RESEND_API_KEY`, `SMTP_PASS`, contraseñas de usuarios ni el código de verificación en modo producción.
    * **Reenvío Seguro con Throttling:** Endpoint `POST /api/auth/resend-code` con rate limiting (10 req/min), generación de nuevo código, reset de intentos a 0 y respuesta genérica uniforme para prevenir la enumeración de usuarios.
    * **Defensa Proactiva en Login:** Si una cuenta no ha completado la verificación de correo (`is_verified = 0`), el endpoint `POST /api/auth/login` responde **HTTP 403 Forbidden** con `{ ok: false, unverified: true, email: ... }` sin crear sesión, guiando al postulante a la subvista de ingreso de código.
    * **Bloqueo Temporal de Cuenta (*Account Lockout*):** Tras 5 intentos fallidos consecutivos de contraseña en login, la cuenta queda bloqueada temporalmente por 15 minutos en base de datos (`locked_until` en SQLite, respondiendo **HTTP 423 Locked**).
@@ -415,7 +437,7 @@ La plataforma implementa un esquema de autenticación resiliente, autónomo y si
    * **Sesiones Seguras Firmadas:** Emisión de tokens firmados con **HMAC-SHA256** persistidos en cookies `session_token` con atributos `HttpOnly; Secure; SameSite=Lax`.
    * **Persistencia Relacional SQLite:** Base de datos `estudio_grado.db` con tablas `users` (con `email`, `password_hash`, `password_salt`, `name`, `access_code`, `is_verified`, `verification_code`, `verification_code_expires_at`, `verification_attempts`, `failed_login_attempts`, `locked_until`), `access_codes` y `user_progress`. Auto-migración idempotente en `init_db()`.
    * **Protección Zero Exposure:** Bloqueo absoluto (**HTTP 403 Forbidden**) de acceso directo a archivos `.db`, `.py`, scripts y secretos criptográficos.
-   * **Compatibilidad de Pruebas E2E:** Soporte condicional controlado por variable de entorno `ALLOW_TEST_AUTH=1` para emitir `testVerificationCode` en respuestas de registro y reenvío, permitiendo pruebas automatizadas deterministas sin servicios de correo externos.
+   * **Compatibilidad de Pruebas E2E:** Soporte condicional controlado por variable de entorno `ALLOW_TEST_AUTH=1` para emitir `testVerificationCode` en respuestas de registro y reenvío, permitiendo pruebas automatizadas deterministas sin servicios de correo externos. En producción (`ALLOW_TEST_AUTH=0`), este campo queda estrictamente omitido.
 
 2. **Modo Estático / GitHub Pages (`auth-service.js`):**
    * Registro y login en cliente con persistencia en `localStorage` (`grado_registered_users` y `grado_auth_user`).
@@ -429,9 +451,9 @@ La plataforma implementa un esquema de autenticación resiliente, autónomo y si
 
 | Endpoint | Método | Autenticación | Códigos HTTP | Propósito y Contrato de Respuesta |
 | :--- | :---: | :---: | :---: | :--- |
-| `/api/auth/register` | `POST` | Pública | `201`, `400`, `409`, `503` | **Registro de Postulante:** Valida email y política de contraseñas (10+ caracteres, mayúscula, minúscula, número). Genera código numérico aleatorio de 6 dígitos con expiración de 15 minutos e inserta usuario con `is_verified = 0`. Despacha el correo mediante `send_verification_email`. Si `SMTP_HOST` está configurado y el envío falla, aborta y retorna **HTTP 503 Service Unavailable**. En éxito responde **HTTP 201** con `{ ok: true, requiresVerification: true, email: ... }`. |
+| `/api/auth/register` | `POST` | Pública | `201`, `400`, `409`, `503` | **Registro de Postulante:** Valida email y política de contraseñas (10+ caracteres, mayúscula, minúscula, número). Genera código numérico aleatorio de 6 dígitos con expiración de 15 minutos e inserta usuario con `is_verified = 0`. Despacha el correo mediante `send_verification_email` (Resend HTTPS o SMTP). Si el proveedor activo falla, aborta y retorna **HTTP 503 Service Unavailable**. En éxito responde **HTTP 201** con `{ ok: true, requiresVerification: true, email: ... }`. En producción omite el código; con `ALLOW_TEST_AUTH=1` incluye `testVerificationCode`. |
 | `/api/auth/verify-code` | `POST` | Pública | `200`, `400`, `404` | **Validación de Código de 6 Dígitos:** Valida el código enviado. Si es incorrecto, incrementa `verification_attempts`; al 5to intento fallido, borra el código y responde **HTTP 400**. Si es válido y no ha expirado, actualiza `is_verified = 1`, resetea intentos, emite cookie `session_token` (HMAC-SHA256) y responde **HTTP 200** con `{ ok: true, user: { ... isDemo: true } }`, promoviendo al usuario directamente a Versión Demo. |
-| `/api/auth/resend-code` | `POST` | Pública (Rate Limited) | `200`, `429`, `503` | **Reenvío Seguro de Código:** Rate limiting defensivo (10 req/min). Si el usuario existe y `is_verified = 0`, genera un nuevo código de 6 dígitos independiente, renueva expiración a 15 min y resetea intentos a 0. Despacha vía SMTP; si `SMTP_HOST` está configurado y falla el envío, retorna **HTTP 503**. Retorna **HTTP 200** con mensaje uniforme anti-enumeración. |
+| `/api/auth/resend-code` | `POST` | Pública (Rate Limited) | `200`, `429`, `503` | **Reenvío Seguro de Código:** Rate limiting defensivo (10 req/min). Si el usuario existe y `is_verified = 0`, genera un nuevo código de 6 dígitos independiente, renueva expiración a 15 min y resetea intentos a 0. Despacha vía proveedor de correo activo (Resend o SMTP); si el proveedor falla, retorna **HTTP 503**. Retorna **HTTP 200** con mensaje uniforme anti-enumeración. |
 | `/api/auth/login` | `POST` | Pública (Rate Limited) | `200`, `400`, `401`, `403`, `423` | **Inicio de Sesión:** Verifica bloqueo de cuenta (15 min tras 5 intentos fallidos, **HTTP 423 Locked**). Compara hash PBKDF2 (con mitigación de timing attacks). Si la cuenta no está verificada (`is_verified = 0`), responde **HTTP 403 Forbidden** con `{ ok: false, unverified: true, email: ... }` sin emitir sesión. Si las credenciales son válidas, emite cookie `session_token` y responde **HTTP 200**. |
 | `/api/auth/link-code` | `POST` | Sesión requerida | `200`, `400`, `401`, `403` | **Convalidación de Licencia:** Valida código con regex canónico `^[A-Z0-9_\-]{4,36}$`. Descuenta atómicamente usos en SQLite y asocia el código a la cuenta, promoviendo al postulante de Versión Demo (`isDemo: true`) a Pase de Grado Activo (`isDemo: false`). |
 | `/api/auth/me` | `GET` | Cookie `session_token` | `200`, `401` | **Estado de Sesión:** Valida firma HMAC de la cookie y retorna los datos del usuario en sesión (`id`, `email`, `name`, `isDemo`, `access_code`). |
@@ -439,20 +461,21 @@ La plataforma implementa un esquema de autenticación resiliente, autónomo y si
 
 ---
 
-### 6.3. Variables de Entorno y Configuración SMTP
+### 6.3. Variables de Entorno y Configuración de Correo (Resend HTTPS / SMTP)
 
-El backend implementa un sistema de configuración jerárquico mediante la función nativa `load_env_file()` en `server.py`, la cual parsea el archivo local `.env` sin sobreescribir variables ya inyectadas por el sistema operativo o la plataforma de despliegue (Render.com).
+El backend implementa un sistema de configuración jerárquico mediante la función nativa `load_env_file()` en `server.py`, la cual parsea el archivo local `.env` sin sobreescribir variables ya inyectadas por el sistema operativo o el entorno de producción (Render.com).
 
-| Variable de Entorno | Tipo | Valor Predeterminado | Obligatoria | Rol y Comportamiento Arquitectónico |
+| Variable de Entorno | Tipo | Valor Predeterminado | Entorno | Rol y Comportamiento Arquitectónico |
 | :--- | :---: | :---: | :---: | :--- |
-| `SMTP_HOST` | String | `""` (Vacío) | Sí (en Producción) | Servidor SMTP saliente. Para Gmail oficial: `smtp.gmail.com`. Si no se define, activa el modo `[SMTP Dev]` que imprime el código en consola sin fallar. |
-| `SMTP_PORT` | Entero | `587` | No | Puerto de conexión. `587` activa STARTTLS con negociación bidireccional `ehlo()` -> `starttls()` -> `ehlo()`. Puerto `465` conmuta automáticamente a SSL directo (`smtplib.SMTP_SSL`). |
-| `SMTP_USER` | String | `""` (Vacío) | Sí (en Producción) | Usuario autenticador del servicio de correo. Cuenta oficial: `gradomaniacos@gmail.com`. |
-| `SMTP_PASS` | String | `""` (Vacío) | Sí (en Producción) | Contraseña de Aplicación de 16 letras de Google generada con 2FA activo. **Estrictamente protegida por `.gitignore`.** |
-| `EMAIL_FROM` | String | `SMTP_USER` o `no-reply@...` | No | Dirección o cabecera remitente visible para el destinatario. |
-| `PORT` | Entero | `8080` | No | Puerto de escucha HTTP del servidor local o asignado dinámicamente por Render.com. |
-| `SESSION_SECRET` | String | Auto-generado dinámico | No | Clave secreta para la firma criptográfica HMAC-SHA256 de las cookies de sesión. |
-| `ALLOW_TEST_AUTH` | String | `""` | No | Si es `"1"`, habilita el campo `testVerificationCode` en respuestas de registro y reenvío para permitir suites automatizadas E2E. |
+| `EMAIL_PROVIDER` | String | Auto-detectado (`resend` o `smtp`) | Prod / Local | Define el proveedor activo. `resend` activa la API REST HTTPS oficial. `smtp` activa el transporte tradicional por socket. |
+| `RESEND_API_KEY` | String | `""` (Vacío) | **Obligatoria en Render** | Clave secreta de la API de Resend (`re_...`). Opera sobre HTTPS en puerto 443 sin bloqueos en Render Free. **Nunca comitear.** |
+| `EMAIL_FROM` | String | `onboarding@resend.dev` | Prod / Local | Dirección o cabecera remitente visible para el destinatario (ej: `GRADOMANÍA <onboarding@resend.dev>` o tu dominio verificado). |
+| `SMTP_HOST` | String | `""` (Vacío) | Local | Servidor SMTP saliente para desarrollo local (ej: `smtp.gmail.com`). |
+| `SMTP_PORT` | Entero | `587` | Local | Puerto SMTP local. `587` activa STARTTLS; `465` activa SSL directo (`smtplib.SMTP_SSL`). |
+| `SMTP_USER` | String | `""` (Vacío) | Local | Cuenta emisora para SMTP local (ej: `gradomaniacos@gmail.com`). |
+| `SMTP_PASS` | String | `""` (Vacío) | Local | Contraseña de Aplicación de Google (16 letras) para desarrollo local. |
+| `PORT` | Entero | `8080` | Ambos | Puerto de escucha HTTP del servidor local o asignado dinámicamente por Render.com. |
+| `ALLOW_TEST_AUTH` | String | `""` | Tests / CI | Si es `"1"`, habilita el campo `testVerificationCode` en respuestas JSON para permitir suites automatizadas E2E. En Render se fija en `"0"`. |
 
 ---
 
@@ -551,14 +574,14 @@ stateDiagram-v2
 ---
 
 ### 7.3. Contratos de Seguridad y Pruebas Automatizadas
-* **Suite de Autenticación Autónoma (`test_unlock_auth_flow.cjs`):** Ejecuta 63 pruebas cubriendo estado inicial, validación de política de contraseñas, rechazo por discrepancia, registro con emisión de código de verificación, prevención de duplicados, login fallido de cuenta no verificada (HTTP 403), verificación con código erróneo, invalidación tras 5 intentos fallidos, reenvío de nuevo código con reseteo de intentos, verificación exitosa con código válido, autenticación directa en Versión Demo, convalidación con código de activación, desbloqueo integral de materias en `LicenseService`, cierre de sesión, login exitoso con credenciales correctas tras verificación, y pruebas de regresión reactivas para el botón `#btn-submit-register` y la subvista `#unlock-step-verify-code`.
+* **Suite de Autenticación Autónoma (`test_unlock_auth_flow.cjs`):** Ejecuta 74 pruebas cubriendo estado inicial, validación de política de contraseñas, rechazo por discrepancia, registro con emisión de código de verificación, prevención de duplicados, login fallido de cuenta no verificada (HTTP 403), verificación con código erróneo, invalidación tras 5 intentos fallidos, reenvío de nuevo código con reseteo de intentos, verificación exitosa con código válido, autenticación directa en Versión Demo, convalidación con código de activación, desbloqueo integral de materias en `LicenseService`, cierre de sesión, login exitoso con credenciales correctas tras verificación, pruebas de regresión reactivas para el botón `#btn-submit-register` y la subvista `#unlock-step-verify-code`, pruebas de blindaje HTTP 503 ante caída del proveedor de correo y verificación de confidencialidad en producción (`ALLOW_TEST_AUTH=0`).
 * **Suite de Regresión e Integración (`test_e2e_case_flow.cjs`):** Ejecuta 65 pruebas integrales que verifican la confidencialidad de modelos docentes, casos IA, rúbrica AIME 2026-20, ciberseguridad y sincronización multi-dispositivo sin regresiones.
 * **Sanitización Defensiva y Prevención XSS:** Todos los datos de usuario son escapados contra inyección XSS mediante `SecurityShield.escapeHtml` y los mensajes de error se renderizan estrictamente con `textContent` en el DOM.
 * **Hashing Seguro en Cliente (Modo Estático / GitHub Pages):** La función `AuthService.hashClientPassword()` emplea la Web Crypto API (`crypto.subtle.digest("SHA-256")`) con salt local, asegurando que **nunca se almacenen contraseñas en texto plano** en `localStorage`.
-* **Resiliencia y Modo Desarrollo SMTP:** Si `SMTP_HOST` no está configurado en el servidor, `server.py` no falla ni interrumpe la ejecución; imprime el código de verificación en consola con la etiqueta `[SMTP Dev]` permitiendo pruebas locales transparentes y suites automatizadas deterministas.
-* **Contrato Fail-Safe de Transporte SMTP (HTTP 503):** Si `SMTP_HOST` está definido y la entrega del correo electrónico falla (autenticación errónea, bloqueo de Google o timeout de red), los endpoints `/api/auth/register` y `/api/auth/resend-code` interceptan la excepción e inmediatamente retornan **HTTP 503 Service Unavailable** con un mensaje sanitizado (`{"ok": false, "error": "No pudimos enviar el correo de verificación. Por favor intenta nuevamente en unos minutos."}`). Esto previene que el postulante quede varado esperando un código no emitido y garantiza la coherencia del estado del sistema.
-* **Diagnóstico Interactivo CLI (`scripts/test_smtp_manual.py`):** Script independiente para verificar de forma segura y directa la conectividad SMTP de Gmail (STARTTLS 587 / SSL 465) antes de registrar usuarios reales, proporcionando diagnósticos asistidos paso a paso ante errores de autenticación 2FA.
-* **Cero Fuga de Secretos y Aislamiento de Credenciales:** La contraseña de aplicación `SMTP_PASS` nunca se almacena en el código ni en el historial de Git. Se gestiona localmente mediante `.env` (estrictamente filtrado por `.gitignore`) y en Render.com mediante variables de entorno declaradas con `sync: false` en `render.yaml`.
+* **Resiliencia y Modo Desarrollo:** Si no se define un proveedor de correo en el servidor, `server.py` no interrumpe la ejecución; imprime el código de verificación en consola con la etiqueta `[SMTP Dev]` permitiendo pruebas locales transparentes y suites automatizadas deterministas.
+* **Contrato Fail-Safe de Transporte de Correo (HTTP 503):** Si se configura un proveedor (`resend` o `smtp`) y la entrega del correo falla (rechazo de API key, error de dominio remitente, bloqueo de red o credenciales inválidas), los endpoints `/api/auth/register` y `/api/auth/resend-code` interceptan la excepción y retornan **HTTP 503 Service Unavailable** con `{ "ok": false, "error": "No pudimos enviar el correo de verificación. Por favor intenta nuevamente en unos minutos." }`, evitando registros inconsistentes o cuentas abandonadas esperando un correo no despachado.
+* **Diagnóstico Interactivo CLI (`scripts/test_email_manual.py` y `scripts/test_smtp_manual.py`):** Herramientas independientes para verificar de forma segura y directa la conectividad con Resend (HTTPS 443) o Gmail (SMTP 587/465) antes de registrar usuarios reales, proporcionando diagnósticos asistidos paso a paso.
+* **Cero Fuga de Secretos y Aislamiento de Credenciales:** Ni `RESEND_API_KEY` ni `SMTP_PASS` se almacenan en el código ni en el historial de Git. Se gestionan localmente mediante `.env` (ignorado por `.gitignore`) y en Render.com mediante variables de entorno declaradas con `sync: false` en `render.yaml`.
 * **Accesibilidad Visual WCAG AA y Contraste Real:** Tokens semánticos tipográficos y de estado (`--gold-primary: #92400e;`, `--danger-text: #b91c1c;`, `--warning-text: #92400e;`, `--success-text: #047857;`, `--info-text: #0284c7;`) que garantizan relaciones de contraste superiores a 4.5:1 (texto normal) y 7:1 (encabezados/estados) contra fondos claros, eliminando colores amarillos pálidos o rojos claros inaccesibles.
 * **Experiencia y Accesibilidad Táctil Móvil:** Dimensiones mínimas de touch targets $\ge 44 \times 44\text{ px}$ en botones de navegación, badges de estado e interactores de formulario; entradas de texto a 16px para evitar auto-zoom indeseado en iOS Safari; y propiedad `touch-action: none;` con gestos multitáctiles (pan y pinch-to-zoom de 2 dedos) en el visor de instituciones interconectadas (`ConceptGraph`).
 
@@ -569,8 +592,8 @@ stateDiagram-v2
 | Archivo / Ruta | Tipo | Responsabilidad Arquitectónica |
 | :--- | :--- | :--- |
 | `CONTEXT.md` | Documentación | **Fuente canónica inmutable de verdad.** Debe actualizarse tras cada cambio. |
-| `README.md` | Documentación | Manual de usuario, arquitectura dual, guía paso a paso para Render.com y administración CLI con variables SMTP. |
-| `GOOGLE_AUTH_SETUP.md` | Documentación | Guía de arquitectura de autenticación autónoma, configuración de SMTP y despliegue público. |
+| `README.md` | Documentación | Manual de usuario, arquitectura dual, guía de despliegue en Render.com y configuración de Resend / SMTP. |
+| `GOOGLE_AUTH_SETUP.md` | Documentación | Guía de arquitectura de autenticación autónoma, configuración de proveedores de correo y despliegue público. |
 | `index.html` | Estructura | Workbench jurídico, visor de cédulas, visor de casos y modal unificado de acceso `#unlock-modal` con subvista de verificación `#unlock-step-verify-code`. |
 | `css/paywall.css` | Estilos | Estilos del formulario de credenciales, hints de contraseña, subvista de código 6 dígitos, paywall, insignias de estado y responsive móvil. |
 | `css/main.css` | Estilos | Sistema de diseño *Dark Academy*, variables tipográficas (`Playfair Display`, `Plus Jakarta Sans`), tokens WCAG AA y header responsive. |
@@ -585,14 +608,15 @@ stateDiagram-v2
 | `js/case-generator-agent.js` | Agente IA | Síntesis dogmática de casos inéditos, matriz de compatibilidad y poda FIFO. |
 | `js/case-solver.js` | Workbench | Interrogación, compuertas excluyentes, rúbrica AIME 2026-20 y evaluación de justificaciones. |
 | `js/security-shield.js` | Ciberseguridad | Detección de prompt injection, anti-XSS, escape seguro y cuotas de caracteres. |
-| `server.py` | Backend | Servidor HTTP Python multi-hilo, enlace dinámico (0.0.0.0 en nube/Render, 127.0.0.1 en local), soporte `PORT`/`SESSION_SECRET`, correo SMTP nativo con `smtplib`, endpoints `/api/auth/register`, `/api/auth/verify-code`, `/api/auth/resend-code`, `/api/auth/login`, Zero Exposure y rate limiting. |
+| `server.py` | Backend | Servidor HTTP Python multi-hilo, enlace dinámico (0.0.0.0 en nube/Render, 127.0.0.1 en local), soporte `PORT`/`SESSION_SECRET`, transporte de correo dual nativo (Resend REST API HTTPS vía `urllib.request` / SMTP con `smtplib`), endpoints `/api/auth/*`, Zero Exposure y rate limiting. |
 | `db.py` | Base de Datos | Conexión relacional SQLite (`estudio_grado.db`), hashing PBKDF2, esquema de usuarios con `is_verified`, `verification_code`, `verification_code_expires_at`, `verification_attempts`, lockout y códigos de acceso. Auto-sanación y auto-migración en `init_db()`. |
 | `manage_access_codes.py` | CLI Admin | Generador y administrador de códigos de invitación tipo beta cerrada. |
-| `scripts/test_smtp_manual.py` | CLI Diagnóstico | Herramienta CLI para pruebas directas y diagnóstico interactivo del transporte SMTP de Gmail (STARTTLS 587 / SSL 465) con detección de errores de autenticación y guía de contraseñas de aplicación. |
-| `.env.example` | Plantilla Config | Plantilla canónica de variables de entorno para configuración local y despliegue (SMTP Gmail, puertos, secretos de sesión). |
+| `scripts/test_email_manual.py` | CLI Diagnóstico | Herramienta CLI unificada para diagnóstico y prueba directa de despacho de correo mediante Resend API HTTPS (puerto 443) o SMTP. |
+| `scripts/test_smtp_manual.py` | CLI Diagnóstico | Herramienta CLI especializada para pruebas directas y diagnóstico del transporte SMTP local de Gmail (STARTTLS 587 / SSL 465). |
+| `.env.example` | Plantilla Config | Plantilla canónica de variables de entorno para configuración local y despliegue (Resend API, SMTP Gmail, puertos, secretos de sesión). |
 | `requirements.txt` | Dependencias | Paquetes de producción mínimos (`pypdf`, `python-docx`, `google-auth`) para despliegues en contenedores e infraestructura cloud. |
-| `render.yaml` | Infraestructura | Blueprint declarativo de infraestructura como código para despliegue automatizado en Render.com con variables SMTP. |
-| `test_unlock_auth_flow.cjs` | Test E2E | Suite de 63 pruebas que valida el flujo Candado -> Correo/Contraseña -> Verificación 6 Dígitos -> Demo -> Convalidación -> Pase Activo y regresión reactiva. |
+| `render.yaml` | Infraestructura | Blueprint declarativo de infraestructura como código para despliegue automatizado en Render.com con Resend HTTPS API. |
+| `test_unlock_auth_flow.cjs` | Test E2E | Suite ampliada de 74 pruebas que valida el flujo Candado -> Correo/Contraseña -> Verificación 6 Dígitos -> Demo -> Convalidación -> Pase Activo, blindaje fail-safe HTTP 503 y cero exposición en producción. |
 | `test_e2e_case_flow.cjs` | Test E2E | Suite integral de 65 pruebas (casos IA, seguridad, rúbrica, confidencialidad y multi-dispositivo). |
 
 ---
@@ -625,5 +649,13 @@ stateDiagram-v2
   - **Herramienta CLI de Verificación (`scripts/test_smtp_manual.py`):** Script interactivo para validación rápida y diagnóstico del servidor SMTP antes o durante el despliegue, con instrucciones paso a paso para resolución de fallos de autenticación 2FA.
   - **Plantilla de Entorno (`.env.example`) y Documentación:** Actualización exhaustiva en `README.md` y `GOOGLE_AUTH_SETUP.md` con tablas de variables de entorno y pasos detallados para generar Contraseñas de Aplicación en Google.
   - **Verificación Automatizada Completa:** 63/63 pruebas aprobadas en `test_unlock_auth_flow.cjs` y 65/65 pruebas aprobadas en `test_e2e_case_flow.cjs`. Actualización completa y canónica de `CONTEXT.md`.
+* **v6.2 (Migración de Transporte a Resend HTTPS API para Render Free, Blindaje Fail-Safe y Diagnóstico Dual):**
+  - **Causa Raíz de Producción Resuelta:** Identificación y resolución definitiva del bloqueo de puertos SMTP salientes (25, 465, 587) impuesto por Render.com en sus Web Services gratuitos.
+  - **Capa de Transporte HTTPS Resend API:** Implementación nativa de llamadas REST sobre HTTPS (`https://api.resend.com/emails`) en el puerto 443 utilizando exclusivamente la librería estándar de Python (`urllib.request`, `json`), sin agregar dependencias externas a `requirements.txt`.
+  - **Arquitectura Dual y Selección Jerárquica:** Mantiene intacto el soporte de SMTP tradicional para desarrollo local conmutando automáticamente mediante `get_email_config()` (`EMAIL_PROVIDER=resend` / `EMAIL_PROVIDER=smtp` / auto-detección por claves presentes / fallback dev local).
+  - **Auditoría Segura con Enmascaramiento y Cero Fuga:** Logs limpios con enmascaramiento estricto (`d***@gmail.com`). Nunca se imprimen API keys, contraseñas ni códigos de verificación en producción.
+  - **Blindaje Fail-Safe con HTTP 503:** Si el proveedor falla por cualquier motivo (red, credenciales, rechazo de dominio), `POST /api/auth/register` y `POST /api/auth/resend-code` devuelven **HTTP 503** con mensaje amigable sanitizado.
+  - **Script de Diagnóstico CLI Unificado (`scripts/test_email_manual.py`):** Herramienta interactiva para probar tanto Resend HTTPS API como SMTP Gmail directamente desde terminal.
+  - **Ampliación de Pruebas Automatizadas a 74 Pruebas (100% PASS):** Verificación exhaustiva de emisión de códigos, contratos HTTP 201/200, contratos fail-safe HTTP 503 en registro y reenvío, y garantía estricta de que ninguna respuesta en producción (`ALLOW_TEST_AUTH=0`) exponga el código de verificación. 100% de aprobación en `test_unlock_auth_flow.cjs` (74/74) y `test_e2e_case_flow.cjs` (65/65). Actualización obligatoria y canónica de `CONTEXT.md`.
 
 
