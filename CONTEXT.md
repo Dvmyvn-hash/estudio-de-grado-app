@@ -597,6 +597,7 @@ stateDiagram-v2
 | `.btn-link-convalidate` | Enlace Interactivo | Enlace inline dentro del notice demo para abrir el modal de convalidación. |
 | `.demo-eval-result-card` | Tarjeta de Resultado | Muestra el resultado de evaluación en Modo Demo (1.0 / 1.0 pt o 0.0 / 1.0 pt) con fundamentación oficial y upsell. |
 | `.demo-eval-upsell-box` | Banner de Upsell | Destaca las ventajas de la justificación argumentativa y convoca a activar el Pase de Grado. |
+| `#unlock-modal .btn-whatsapp-buy` | Enlace Externo | Redirige a la cuenta oficial de Instagram de GRADOMANIACOS para solicitar el Pase de Grado con `target="_blank"` y `rel="noopener noreferrer"`. |
 
 ---
 
@@ -690,6 +691,12 @@ stateDiagram-v2
   - **Exposición de Ventajas Exclusivas en Preguntas Avanzadas (P2 en adelante):** Al seleccionar las preguntas posteriores en Modo Demo, el sistema no expone las alternativas ni el formulario, sino la tarjeta premium `.case-demo-locked-card` con la grilla `.demo-advantages-grid` exhibiendo las 4 ventajas del Pase Activo: Resolución Integral de todas las preguntas, Rúbrica Oficial AIME 2026-20 (hasta 5.0 pts), Generador Inédito de Casos con IA Ilimitado y Soluciones Dogmáticas Modelo; con llamadas de acción directa para abrir el modal de convalidación (`.btn-trigger-convalidate`) o volver a la Pregunta 1 (`.btn-back-to-q1`).
   - **Preservación Íntegra de la Experiencia con Pase Activo:** Para postulantes con código de acceso convalidado (`LicenseService.isDemoMode() === false`), todas las preguntas del caso permanecen 100% desbloqueadas, con redacción de justificación activa y calificación multidimensional oficial (Marco Jurídico, Hechos Relevantes, Subsunción y Precisión Técnica) hasta 5.0 puntos por pregunta.
   - **Aprobación de Suites Automatizadas al 100% (192 Pruebas en Total):** 101/101 pruebas exitosas en `test_unlock_auth_flow.cjs` y 91/91 pruebas exitosas en `test_e2e_case_flow.cjs` (incluyendo 26 nuevas aserciones en el Test 8 dedicadas al flujo Demo vs. Pase Activo). Actualización canónica y obligatoria de `CONTEXT.md`.
+* **v6.5 (Redirección a Instagram en Modal de Activación):**
+  - **Reemplazo de Canal de Compra/Solicitud:** Reemplazo del enlace en el pie del modal unificado `#unlock-modal`, apuntando a la cuenta oficial de Instagram (`https://www.instagram.com/gradomaniacos?stkn=MXNtMDF1OHBhMmRhcA%3D%3D&utm_source=qr`).
+  - **Seguridad y Navegación:** Integración de los atributos `target="_blank"` y `rel="noopener noreferrer"`.
+  - **Interfaz de Usuario:** Actualización del icono a `data-lucide="instagram"` y del texto a "Solicitar mi Pase por Instagram".
+  - **Aprobación del 100% de Pruebas:** Preservación de 101/101 pruebas exitosas en `test_unlock_auth_flow.cjs` y 91/91 en `test_e2e_case_flow.cjs`.
+
 
 
 
