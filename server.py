@@ -19,6 +19,7 @@ import base64
 import random
 import secrets
 import smtplib
+import sqlite3
 from email.mime.text import MIMEText
 from pathlib import Path
 from typing import Optional, Tuple, Dict, Any
@@ -677,18 +678,18 @@ def _send_via_resend(to_email: str, code: str, api_key: str, from_addr: str) -> 
         print("[Email Error] Provider=resend status=missing_api_key")
         return False, "Configuración incompleta del servicio de correo."
 
-    sender = from_addr or "GRADOMANÍA <onboarding@resend.dev>"
-    subject = f"Tu código de verificación de GRADOMANÍA es: {code}"
+    sender = from_addr or "GRADOMANIACOS <onboarding@resend.dev>"
+    subject = f"Tu código de verificación de GRADOMANIACOS es: {code}"
     body_text = (
         f"Hola,\n\n"
-        f"Tu código de verificación de GRADOMANÍA es: {code}\n\n"
+        f"Tu código de verificación de GRADOMANIACOS es: {code}\n\n"
         f"Este código vence en 15 minutos. Ingrésalo en la plataforma para activar tu cuenta.\n\n"
         f"Si no solicitaste este código, puedes desestimar este mensaje con total seguridad.\n"
     )
     body_html = (
         f"<div style='font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif; "
         f"max-width: 520px; margin: 0 auto; padding: 28px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #ffffff;'>"
-        f"<h2 style='color: #1e293b; margin: 0 0 16px 0; font-size: 20px; letter-spacing: -0.5px;'>GRADOMANÍA</h2>"
+        f"<h2 style='color: #1e293b; margin: 0 0 16px 0; font-size: 20px; letter-spacing: -0.5px;'>GRADOMANIACOS</h2>"
         f"<p style='color: #475569; font-size: 15px; line-height: 1.5;'>Tu código de verificación de seguridad es:</p>"
         f"<div style='background-color: #f8fafc; border: 1px dashed #cbd5e1; padding: 18px; border-radius: 6px; text-align: center; margin: 20px 0;'>"
         f"<span style='font-size: 32px; font-weight: 700; letter-spacing: 8px; color: #0f172a; font-family: monospace;'>{code}</span>"
@@ -714,7 +715,7 @@ def _send_via_resend(to_email: str, code: str, api_key: str, from_addr: str) -> 
             headers={
                 "Authorization": f"Bearer {api_key}",
                 "Content-Type": "application/json",
-                "User-Agent": "Gradomania-App/1.0"
+                "User-Agent": "Gradomaniacos-App/1.0"
             },
             method="POST"
         )
@@ -739,11 +740,11 @@ def _send_via_resend(to_email: str, code: str, api_key: str, from_addr: str) -> 
 
 def _send_via_smtp(to_email: str, code: str, host: str, port: int, user: str, password: str, from_addr: str) -> Tuple[bool, str]:
     """Envía código de verificación vía SMTP (soporte Gmail STARTTLS / puerto 587 o SSL / puerto 465)."""
-    sender = from_addr or user or "no-reply@gradomania.cl"
-    subject = f"Tu código de verificación de GRADOMANÍA es: {code}"
+    sender = from_addr or user or "no-reply@gradomaniacos.cl"
+    subject = f"Tu código de verificación de GRADOMANIACOS es: {code}"
     body = (
         f"Hola,\n\n"
-        f"Tu código de verificación de GRADOMANÍA es: {code}\n\n"
+        f"Tu código de verificación de GRADOMANIACOS es: {code}\n\n"
         f"Este código vence en 15 minutos. Ingrésalo en la plataforma para activar tu cuenta.\n\n"
         f"Si no solicitaste este código, puedes desestimar este mensaje con total seguridad.\n"
     )
@@ -833,6 +834,24 @@ def validate_password_policy(password: str) -> Tuple[bool, str]:
     if not re.search(r"[0-9]", password):
         return False, "La contraseña debe contener al menos un número."
     return True, ""
+
+
+# Hash criptográfico SHA-256 de la clave de administración
+ADMIN_PIN_HASH = "75cfc5343b1e254fc0e4f909e980e14cda4d24dc223718749855ba3ec28457d8"
+
+def verify_admin_pin(entered_pin: Any) -> bool:
+    """Verifica en tiempo constante el PIN de administración usando SHA-256."""
+    if not entered_pin or not isinstance(entered_pin, str):
+        return False
+    pin_clean = entered_pin.strip()
+    calc_hash = hashlib.sha256(pin_clean.encode("utf-8")).hexdigest()
+    env_pin = os.environ.get("ADMIN_PIN")
+    if env_pin:
+        env_hash = hashlib.sha256(env_pin.strip().encode("utf-8")).hexdigest()
+        if hmac.compare_digest(calc_hash, env_hash):
+            return True
+    return hmac.compare_digest(calc_hash, ADMIN_PIN_HASH)
+
 
 def create_session_token(sub: str) -> str:
     """Crea un token de sesión firmado con HMAC-SHA256 y expiración a 30 días."""
@@ -1197,6 +1216,27 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json_response({"ok": True, "progress": progress})
             return
 
+        # API 8: Listar Códigos de Acceso (Admin)
+        if clean_path == "/api/admin/codes":
+            admin_pin = self.headers.get("X-Admin-PIN", "").strip()
+            if not admin_pin and "?" in self.path:
+                query_str = self.path.split("?", 1)[1]
+                params = urllib.parse.parse_qs(query_str)
+                admin_pin = params.get("pin", [""])[0].strip()
+            if not verify_admin_pin(admin_pin):
+                self.send_json_response({"ok": False, "error": "Acceso de administrador no autorizado."}, status_code=401)
+                return
+            raw_codes = db.list_access_codes()
+            codes = []
+            for c in raw_codes:
+                item = dict(c)
+                item["current_uses"] = item.get("times_used", 0)
+                item["uses"] = item.get("times_used", 0)
+                codes.append(item)
+            self.send_json_response({"ok": True, "codes": codes})
+            return
+
+
         # Servir archivos estáticos normales
         super().do_GET()
 
@@ -1235,6 +1275,74 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header("Content-Type", "application/json")
             self.end_headers()
             self.wfile.write(json.dumps({"ok": False, "error": f"Carga útil excede el límite máximo de seguridad ({MAX_PAYLOAD_SIZE // 1024} KB)"}).encode("utf-8"))
+            return
+
+        # API Admin: Crear Código de Acceso
+        if clean_path == "/api/admin/create-code":
+            body = self.rfile.read(content_length).decode("utf-8", errors="replace")
+            try:
+                req_data = json.loads(body)
+            except Exception:
+                self.send_json_response({"ok": False, "error": "Cuerpo JSON inválido"}, status_code=400)
+                return
+
+            admin_pin = req_data.get("pin") or self.headers.get("X-Admin-PIN", "")
+            if not verify_admin_pin(admin_pin):
+                self.send_json_response({"ok": False, "error": "Acceso de administrador no autorizado. Clave incorrecta."}, status_code=401)
+                return
+
+            code = req_data.get("code", "")
+            label = req_data.get("label") or req_data.get("studentName") or "Grado-2026-Sept"
+            try:
+                max_uses = max(1, int(req_data.get("max_uses") or req_data.get("maxUses") or 1))
+            except (ValueError, TypeError):
+                max_uses = 1
+
+            days = req_data.get("days")
+            expires_at = None
+            if days is not None and str(days).strip():
+                try:
+                    d_int = int(days)
+                    if d_int > 0:
+                        expires_at = int((time.time() + (d_int * 86400)) * 1000)
+                except (ValueError, TypeError):
+                    expires_at = None
+
+            clean_code = db.normalize_access_code(code)
+            if not clean_code or not re.match(r"^[A-Z0-9_\-]{4,36}$", clean_code):
+                self.send_json_response({"ok": False, "error": "Formato de código inválido (debe contener entre 4 y 36 caracteres alfanuméricos o guiones)."}, status_code=400)
+                return
+
+            try:
+                res = db.create_access_code(clean_code, label=label, max_uses=max_uses, expires_at=expires_at)
+                self.send_json_response({"ok": True, "code": clean_code, "item": res}, status_code=201)
+            except sqlite3.IntegrityError:
+                self.send_json_response({"ok": False, "error": f"El código '{clean_code}' ya existe en el sistema."}, status_code=409)
+            except Exception as e:
+                self.send_json_response({"ok": False, "error": f"Error al crear código: {str(e)}"}, status_code=500)
+            return
+
+        # API Admin: Revocar Código de Acceso
+        if clean_path == "/api/admin/revoke-code":
+            body = self.rfile.read(content_length).decode("utf-8", errors="replace")
+            try:
+                req_data = json.loads(body)
+            except Exception:
+                self.send_json_response({"ok": False, "error": "Cuerpo JSON inválido"}, status_code=400)
+                return
+
+            admin_pin = req_data.get("pin") or self.headers.get("X-Admin-PIN", "")
+            if not verify_admin_pin(admin_pin):
+                self.send_json_response({"ok": False, "error": "Acceso de administrador no autorizado."}, status_code=401)
+                return
+
+            code = req_data.get("code", "")
+            clean_code = db.normalize_access_code(code)
+            ok = db.revoke_access_code(clean_code)
+            if ok:
+                self.send_json_response({"ok": True, "message": f"Código '{clean_code}' revocado exitosamente."})
+            else:
+                self.send_json_response({"ok": False, "error": f"No se encontró el código '{clean_code}' o ya estaba inactivo."}, status_code=404)
             return
 
         # API: Registro de Usuario (Correo + Contraseña + Verificación por Código de 6 Dígitos)
@@ -1561,7 +1669,7 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_json_response({"ok": False, "error": "Cuerpo JSON inválido"}, status_code=400)
                 return
 
-            code = req_data.get("code", "").strip()
+            clean_code = db.normalize_access_code(req_data.get("code", ""))
 
             # Identificar usuario: por cookie de sesión o por idToken (modo test)
             user = self.get_authenticated_user()
@@ -1574,7 +1682,7 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                         email=token_info["email"],
                         name=token_info["name"],
                         picture_url=token_info["picture"],
-                        code=code
+                        code=clean_code
                     )
                     if not ok or not user:
                         LINK_CODE_LIMITER.record_attempt(client_ip)
@@ -1599,7 +1707,7 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_json_response({"ok": False, "error": "No autenticado. Inicia sesión primero."}, status_code=401)
                 return
 
-            ok, reason, updated_user = db.link_user_code(user["id"], code)
+            ok, reason, updated_user = db.link_user_code(user["id"], clean_code)
             if not ok or not updated_user:
                 LINK_CODE_LIMITER.record_attempt(client_ip)
                 self.send_json_response({"ok": False, "error": reason}, status_code=400)
@@ -1944,7 +2052,7 @@ if __name__ == "__main__":
     with socketserver.ThreadingTCPServer((bind_address, PORT), AutoSyncHTTPHandler) as httpd:
         mode_str = "Nube / Red Pública (0.0.0.0)" if bind_address == "0.0.0.0" else "Localhost seguro (127.0.0.1)"
         print(f"==================================================")
-        print(f" Servidor GRADOMANÍA con Auto-Sincronizador")
+        print(f" Servidor GRADOMANIACOS con Auto-Sincronizador")
         print(f" Modo: {mode_str}")
         print(f" Puerto: {PORT}")
         print(f" URL: http://{'localhost' if bind_address == '127.0.0.1' else '0.0.0.0'}:{PORT}")

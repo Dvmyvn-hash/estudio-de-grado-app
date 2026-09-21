@@ -185,7 +185,7 @@ const App = {
   },
 
   init() {
-    console.log("Inicializando GRADOMANÍA...");
+    console.log("Inicializando GRADOMANIACOS...");
     this.setupTheme();
     this.setupNavigation();
     this.setupSidebar();
@@ -1442,7 +1442,7 @@ const App = {
           this.closeImportModal();
           this.init();
         } else {
-          alert("El archivo JSON seleccionado no tiene un formato válido de GRADOMANÍA.");
+          alert("El archivo JSON seleccionado no tiene un formato válido de GRADOMANIACOS.");
         }
       };
       reader.readAsText(file);
@@ -1806,17 +1806,24 @@ const App = {
       this.openImportModal("paste");
     });
 
-    btnGenerate?.addEventListener("click", () => {
+    btnGenerate?.addEventListener("click", async () => {
       const studentName = document.getElementById("admin-student-name")?.value.trim() || "Alumno";
+      const customCode = document.getElementById("admin-custom-code")?.value.trim() || "";
       const scope = document.getElementById("admin-scope-select")?.value;
       const days = document.getElementById("admin-days-select")?.value;
       const canManageNotes = !!document.getElementById("admin-grant-notes-perm")?.checked;
 
-      const newLic = LicenseService.generateCode({ studentName, scope, days, canManageNotes });
-      this.renderAdminCodesTable();
+      const res = await LicenseService.generateCode({ studentName, scope, days, canManageNotes, customCode });
+      if (!res || !res.success) {
+        this.showToast(res?.error || "Error al generar código de licencia", "error");
+        return;
+      }
+      await this.renderAdminCodesTable();
       const roleMsg = canManageNotes ? " (con permiso de gestor de apuntes)" : "";
-      this.showToast(`¡Código ${newLic.code} generado${roleMsg}! Cópialo para enviárselo a tu alumno.`, "success");
+      this.showToast(`¡Código ${res.code} generado${roleMsg}! Cópialo para enviárselo a tu alumno.`, "success");
       document.getElementById("admin-student-name").value = "";
+      const customInput = document.getElementById("admin-custom-code");
+      if (customInput) customInput.value = "";
       const permCheck = document.getElementById("admin-grant-notes-perm");
       if (permCheck) permCheck.checked = false;
     });
@@ -1871,11 +1878,11 @@ const App = {
     }
   },
 
-  renderAdminCodesTable() {
+  async renderAdminCodesTable() {
     const tbody = document.getElementById("admin-codes-tbody");
     if (!tbody) return;
 
-    const list = LicenseService.getAllIssuedCodes();
+    const list = await LicenseService.fetchAdminCodes();
     tbody.innerHTML = list.map(c => {
       const stStats = StorageService.calculateProgress(c.code, 'all');
       return `
@@ -1918,11 +1925,11 @@ const App = {
 
     // Eventos de revocación
     tbody.querySelectorAll('[data-revoke-code]').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async () => {
         const code = btn.dataset.revokeCode;
         if (confirm(`¿Estás seguro de revocar la licencia ${code}?`)) {
-          LicenseService.revokeCode(code);
-          this.renderAdminCodesTable();
+          await LicenseService.revokeCode(code);
+          await this.renderAdminCodesTable();
           this.showToast(`Licencia ${code} revocada`, "info");
         }
       });

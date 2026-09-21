@@ -6,19 +6,19 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0c0e14">
-  <title>GRADOMANÍA — Plataforma Inteligente para el Examen de Grado en Derecho</title>
-  <meta name="description" content="GRADOMANÍA: Plataforma interactiva de alta exigencia para la preparación del Examen de Grado en Derecho. Temario interconectado, cédulas dogmáticas y taller de casos prácticos con IA.">
+  <title>GRADOMANIACOS — Plataforma Inteligente para el Examen de Grado en Derecho</title>
+  <meta name="description" content="GRADOMANIACOS: Plataforma interactiva de alta exigencia para la preparación del Examen de Grado en Derecho. Temario interconectado, cédulas dogmáticas y taller de casos prácticos con IA.">
 
   <!-- Favicon Jurídico Minimalista -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d4af37' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z'/%3E%3Cpath d='m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z'/%3E%3Cpath d='M7 21h10'/%3E%3Cpath d='M12 3v18'/%3E%3Cpath d='M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2'/%3E%3C/svg%3E">
 
   <!-- Open Graph / Redes Sociales -->
-  <meta property="og:title" content="GRADOMANÍA — Preparación para el Examen de Grado en Derecho">
+  <meta property="og:title" content="GRADOMANIACOS — Preparación para el Examen de Grado en Derecho">
   <meta property="og:description" content="Plataforma de alta exigencia para el Examen de Grado. Temario interconectado, visualizador de cédulas y taller de casos prácticos con IA y rúbrica AIME 2026-20.">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="GRADOMANÍA">
+  <meta property="og:site_name" content="GRADOMANIACOS">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="GRADOMANÍA — Examen de Grado de Derecho">
+  <meta name="twitter:title" content="GRADOMANIACOS — Examen de Grado de Derecho">
   <meta name="twitter:description" content="Plataforma interactiva para preparar el Examen de Grado de Derecho: Civil, Procesal y Constitucional.">
   
   <!-- Tipografía jurídica elegante tipo diploma (Playfair Display) + lectura funcional (Plus Jakarta Sans) -->
@@ -52,7 +52,7 @@
             <i data-lucide="scale" class="brand-icon"></i>
           </div>
           <div class="brand-text-block">
-            <h1 class="brand-title">GRADOMANÍA</h1>
+            <h1 class="brand-title">GRADOMANIACOS</h1>
             <span class="brand-subtitle">Civil · Procesal · Constitucional</span>
           </div>
         </div>
@@ -212,7 +212,7 @@
           <i data-lucide="file-text" class="modal-header-icon"></i>
           <div>
             <h2 class="modal-title">Gestor de Apuntes y NotebookLM</h2>
-            <p class="modal-subtitle">Importa tus resúmenes de "GRADOMANÍA" en formato Markdown o texto</p>
+            <p class="modal-subtitle">Importa tus resúmenes de "GRADOMANIACOS" en formato Markdown o texto</p>
           </div>
         </div>
         <button class="icon-btn btn-close-modal" id="btn-close-import-modal" aria-label="Cerrar modal">
@@ -610,6 +610,13 @@
               <input type="text" id="admin-student-name" class="form-control" placeholder="Ej: Juan Pérez (Pago recibido)">
             </div>
             <div class="form-group">
+              <label for="admin-custom-code">Código Personalizado (Opcional):</label>
+              <input type="text" id="admin-custom-code" class="form-control" placeholder="Ej: TEST-GRADO-001 (o dejar vacío para autogenerar)" style="text-transform: uppercase;">
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
               <label for="admin-scope-select">Materias a Liberar:</label>
               <select id="admin-scope-select" class="form-control">
                 <option value="all">Pase Completo (Civil + Procesal + Constitucional)</option>
@@ -618,9 +625,6 @@
                 <option value="constitucional">Solo Derecho Constitucional</option>
               </select>
             </div>
-          </div>
-
-          <div class="form-grid">
             <div class="form-group">
               <label for="admin-days-select">Duración del Acceso:</label>
               <select id="admin-days-select" class="form-control">
@@ -630,12 +634,12 @@
                 <option value="0">Pase Perpetuo (Sin límite de tiempo)</option>
               </select>
             </div>
-            <div class="form-group" style="justify-content: flex-end;">
-              <button id="btn-generate-code" class="btn btn-primary" style="height: 42px;">
-                <i data-lucide="plus-circle"></i>
-                <span>Generar Código de Licencia</span>
-              </button>
-            </div>
+          </div>
+          <div style="display: flex; justify-content: flex-end; margin-top: 8px; margin-bottom: 12px;">
+            <button id="btn-generate-code" class="btn btn-primary" style="height: 42px;">
+              <i data-lucide="plus-circle"></i>
+              <span>Generar Código de Licencia</span>
+            </button>
           </div>
 
           <!-- Permiso opcional para rol de gestión de apuntes -->

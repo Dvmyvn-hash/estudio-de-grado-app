@@ -10,6 +10,7 @@ const LicenseService = {
   STORAGE_ALL_CODES_KEY: "estudio_grado_issued_licenses",
 
   STORAGE_ADMIN_KEY: "estudio_grado_admin_session",
+  STORAGE_ADMIN_PIN_KEY: "estudio_grado_admin_pin",
 
   // Verificación criptográfica segura de la clave de administración
   async verifyAdminPin(enteredPin) {
@@ -20,12 +21,20 @@ const LicenseService = {
         const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-        return hashHex === this.ADMIN_PIN_HASH;
+        const isValid = hashHex === this.ADMIN_PIN_HASH;
+        if (isValid) {
+          sessionStorage.setItem(this.STORAGE_ADMIN_PIN_KEY, enteredPin.trim());
+        }
+        return isValid;
       }
     } catch (e) {
       console.warn("Crypto API no disponible para verificación de PIN:", e);
     }
     return false;
+  },
+
+  getAdminPin() {
+    return sessionStorage.getItem(this.STORAGE_ADMIN_PIN_KEY) || "";
   },
 
   // Modo Administrador
@@ -38,6 +47,7 @@ const LicenseService = {
       sessionStorage.setItem(this.STORAGE_ADMIN_KEY, "true");
     } else {
       sessionStorage.removeItem(this.STORAGE_ADMIN_KEY);
+      sessionStorage.removeItem(this.STORAGE_ADMIN_PIN_KEY);
     }
   },
 
@@ -155,18 +165,23 @@ const LicenseService = {
   },
 
   // 4. Panel de Admin: Generar nuevo código de licencia
-  generateCode(options = {}) {
+  async generateCode(options = {}) {
     const scope = options.scope || "all"; // 'all', 'civil', 'procesal', 'constitucional'
-    const days = options.days || 180; // 180 días (semestre de grado) o 0 (perpetua)
+    const days = options.days !== undefined ? options.days : 180; // 180 días (semestre de grado) o 0 (perpetua)
     const studentName = options.studentName || "Alumno";
     const canManageNotes = !!options.canManageNotes;
 
-    const prefix = canManageNotes
-      ? "GRADO-DOC"
-      : (scope === "all" ? "GRADO-FULL" : `GRADO-${scope.toUpperCase()}`);
-    const randomHex = Math.random().toString(36).substring(2, 6).toUpperCase();
-    const randomNum = Math.floor(1000 + Math.random() * 9000);
-    const code = `${prefix}-${randomHex}-${randomNum}`;
+    let code = "";
+    if (options.customCode && options.customCode.trim()) {
+      code = options.customCode.trim().toUpperCase().replace(/[\s\u200b\u00a0]+/g, "");
+    } else {
+      const prefix = canManageNotes
+        ? "GRADO-DOC"
+        : (scope === "all" ? "GRADO-FULL" : `GRADO-${scope.toUpperCase()}`);
+      const randomHex = Math.random().toString(36).substring(2, 6).toUpperCase();
+      const randomNum = Math.floor(1000 + Math.random() * 9000);
+      code = `${prefix}-${randomHex}-${randomNum}`;
+    }
 
     const newLicense = {
       code,
@@ -177,17 +192,84 @@ const LicenseService = {
       role: canManageNotes ? "manager" : "student",
       createdAt: new Date().toISOString(),
       uses: 0,
+      max_uses: 1,
       revoked: false
     };
 
+    // Si hay backend disponible, persistir atómicamente en SQLite
+    try {
+      const adminPin = this.getAdminPin();
+      const res = await fetch("/api/admin/create-code", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Admin-PIN": adminPin
+        },
+        body: JSON.stringify({
+          code,
+          label: studentName,
+          scope,
+          days: parseInt(days),
+          max_uses: 1,
+          canManageNotes,
+          pin: adminPin
+        })
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 409) {
+        return { success: false, error: data.error || `El código ${code} ya existe en el sistema.` };
+      }
+      if (!res.ok && res.status !== 404) {
+        return { success: false, error: data.error || "No se pudo registrar el código en el servidor." };
+      }
+    } catch (e) {
+      console.warn("Servidor no disponible para guardar código, guardando localmente:", e);
+    }
+
     const list = this.getAllIssuedCodes();
-    list.unshift(newLicense);
+    const existingIdx = list.findIndex(c => c.code === code);
+    if (existingIdx >= 0) {
+      list[existingIdx] = newLicense;
+    } else {
+      list.unshift(newLicense);
+    }
     this.saveIssuedCodes(list);
 
-    return newLicense;
+    return { success: true, license: newLicense, code: newLicense.code };
   },
 
-  // 5. Obtener todos los códigos emitidos
+  // 5. Obtener todos los códigos emitidos (sincronizado con el servidor SQLite si está disponible)
+  async fetchAdminCodes() {
+    const adminPin = this.getAdminPin();
+    if (adminPin) {
+      try {
+        const res = await fetch("/api/admin/codes", {
+          headers: { "X-Admin-PIN": adminPin }
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.ok && Array.isArray(data.codes)) {
+          const serverCodes = data.codes.map(c => ({
+            code: c.code,
+            studentName: c.label || "Sin asignar",
+            scope: "all",
+            days: c.expires_at ? Math.max(1, Math.round((c.expires_at - c.created_at) / 86400000)) : 0,
+            uses: c.times_used,
+            max_uses: c.max_uses,
+            revoked: c.active !== 1,
+            expires_at: c.expires_at,
+            canManageNotes: (c.code || "").startsWith("GRADO-DOC")
+          }));
+          this.saveIssuedCodes(serverCodes);
+          return serverCodes;
+        }
+      } catch (e) {
+        console.warn("Error sincronizando códigos del servidor:", e);
+      }
+    }
+    return this.getAllIssuedCodes();
+  },
+
   getAllIssuedCodes() {
     try {
       const stored = localStorage.getItem(this.STORAGE_ALL_CODES_KEY);
@@ -244,7 +326,22 @@ const LicenseService = {
     }
   },
 
-  revokeCode(code) {
+  async revokeCode(code) {
+    const adminPin = this.getAdminPin();
+    if (adminPin) {
+      try {
+        await fetch("/api/admin/revoke-code", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Admin-PIN": adminPin
+          },
+          body: JSON.stringify({ code, pin: adminPin })
+        });
+      } catch (e) {
+        console.warn("Error revocando código en servidor:", e);
+      }
+    }
     const list = this.getAllIssuedCodes();
     const item = list.find(c => c.code === code);
     if (item) {

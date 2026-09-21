@@ -1,5 +1,5 @@
 # ⚖️ CONTEXT.md — Guía de Contexto y Arquitectura de la Aplicación
-### GRADOMANÍA — Plataforma Inteligente para el Examen de Grado en Derecho (`estudio-de-grado-app`)
+### GRADOMANIACOS — Plataforma Inteligente para el Examen de Grado en Derecho (`estudio-de-grado-app`)
 **Derecho Civil · Derecho Procesal Orgánico y Funcional · Derecho Constitucional**
 
 ## 0. Regla Inmutable: Actualización Obligatoria de CONTEXT.md
@@ -447,7 +447,7 @@ La plataforma implementa un esquema de autenticación resiliente, autónomo y si
 
 ---
 
-### 6.2. Especificación Técnica de Endpoints de Autenticación y Verificación (`server.py`)
+### 6.2. Especificación Técnica de Endpoints de Autenticación, Verificación y Administración (`server.py`)
 
 | Endpoint | Método | Autenticación | Códigos HTTP | Propósito y Contrato de Respuesta |
 | :--- | :---: | :---: | :---: | :--- |
@@ -455,13 +455,16 @@ La plataforma implementa un esquema de autenticación resiliente, autónomo y si
 | `/api/auth/verify-code` | `POST` | Pública | `200`, `400`, `404` | **Validación de Código de 6 Dígitos:** Valida el código enviado. Si es incorrecto, incrementa `verification_attempts`; al 5to intento fallido, borra el código y responde **HTTP 400**. Si es válido y no ha expirado, actualiza `is_verified = 1`, resetea intentos, emite cookie `session_token` (HMAC-SHA256) y responde **HTTP 200** con `{ ok: true, user: { ... isDemo: true } }`, promoviendo al usuario directamente a Versión Demo. |
 | `/api/auth/resend-code` | `POST` | Pública (Rate Limited) | `200`, `429`, `503` | **Reenvío Seguro de Código:** Rate limiting defensivo (10 req/min). Si el usuario existe y `is_verified = 0`, genera un nuevo código de 6 dígitos independiente, renueva expiración a 15 min y resetea intentos a 0. Despacha vía proveedor de correo activo (Resend o SMTP); si el proveedor falla, retorna **HTTP 503**. Retorna **HTTP 200** con mensaje uniforme anti-enumeración. |
 | `/api/auth/login` | `POST` | Pública (Rate Limited) | `200`, `400`, `401`, `403`, `423` | **Inicio de Sesión:** Verifica bloqueo de cuenta (15 min tras 5 intentos fallidos, **HTTP 423 Locked**). Compara hash PBKDF2 (con mitigación de timing attacks). Si la cuenta no está verificada (`is_verified = 0`), responde **HTTP 403 Forbidden** con `{ ok: false, unverified: true, email: ... }` sin emitir sesión. Si las credenciales son válidas, emite cookie `session_token` y responde **HTTP 200**. |
-| `/api/auth/link-code` | `POST` | Sesión requerida | `200`, `400`, `401`, `403` | **Convalidación de Licencia:** Valida código con regex canónico `^[A-Z0-9_\-]{4,36}$`. Descuenta atómicamente usos en SQLite y asocia el código a la cuenta, promoviendo al postulante de Versión Demo (`isDemo: true`) a Pase de Grado Activo (`isDemo: false`). |
+| `/api/auth/link-code` | `POST` | Sesión requerida | `200`, `400`, `401`, `403` | **Convalidación de Licencia:** Valida código normalizado con `db.normalize_access_code` (remueve espacios, tabs, NBSP y aplica mayúsculas) contra el regex `^[A-Z0-9_\-]{4,36}$`. Descuenta atómicamente usos en la tabla SQLite `access_codes` y asocia el código a la cuenta, promoviendo al postulante de Versión Demo (`isDemo: true`) a Pase de Grado Activo (`isDemo: false`). |
 | `/api/auth/me` | `GET` | Cookie `session_token` | `200`, `401` | **Estado de Sesión:** Valida firma HMAC de la cookie y retorna los datos del usuario en sesión (`id`, `email`, `name`, `isDemo`, `access_code`). |
 | `/api/auth/logout` | `POST` | Cookie opcional | `200` | **Cierre de Sesión:** Invalida y expira la cookie `session_token` con encabezado `Set-Cookie: session_token=; Max-Age=0`. |
+| `/api/admin/codes` | `GET` | PIN Admin Requerido (`X-Admin-PIN` o query `pin`) | `200`, `401` | **Listar Licencias (Admin):** Valida PIN del administrador contra hash SHA-256 (`almabaltoamial2020`). Retorna todos los códigos almacenados centralizadamente en SQLite (`times_used`, `current_uses`, `max_uses`, `active`, `expires_at`, `created_at`). |
+| `/api/admin/create-code` | `POST` | PIN Admin Requerido (`X-Admin-PIN` o body `pin`) | `201`, `400`, `401`, `409`, `500` | **Crear Código de Acceso (Admin):** Persiste un nuevo código en SQLite (`access_codes`) con parámetros de `code` personalizado o autogenerado, `label`, `max_uses` y `days`. Los códigos creados aquí quedan disponibles globalmente para cualquier postulante desde cualquier dispositivo o ventana de incógnito. |
+| `/api/admin/revoke-code` | `POST` | PIN Admin Requerido (`X-Admin-PIN` o body `pin`) | `200`, `400`, `401`, `404` | **Revocar Código de Acceso (Admin):** Desactiva inmediatamente un código en SQLite (`active = 0`), impidiendo convalidaciones futuras. |
 
 ---
 
-### 6.3. Variables de Entorno y Configuración de Correo (Resend HTTPS / SMTP)
+### 6.3. Variables de Entorno, Configuración de Correo y Persistencia
 
 El backend implementa un sistema de configuración jerárquico mediante la función nativa `load_env_file()` en `server.py`, la cual parsea el archivo local `.env` sin sobreescribir variables ya inyectadas por el sistema operativo o el entorno de producción (Render.com).
 
@@ -469,13 +472,16 @@ El backend implementa un sistema de configuración jerárquico mediante la funci
 | :--- | :---: | :---: | :---: | :--- |
 | `EMAIL_PROVIDER` | String | Auto-detectado (`resend` o `smtp`) | Prod / Local | Define el proveedor activo. `resend` activa la API REST HTTPS oficial. `smtp` activa el transporte tradicional por socket. |
 | `RESEND_API_KEY` | String | `""` (Vacío) | **Obligatoria en Render** | Clave secreta de la API de Resend (`re_...`). Opera sobre HTTPS en puerto 443 sin bloqueos en Render Free. **Nunca comitear.** |
-| `EMAIL_FROM` | String | `onboarding@resend.dev` | Prod / Local | Dirección o cabecera remitente visible para el destinatario (ej: `GRADOMANÍA <onboarding@resend.dev>` o tu dominio verificado). |
+| `EMAIL_FROM` | String | `GRADOMANIACOS <onboarding@resend.dev>` | Prod / Local | Dirección o cabecera remitente visible para el destinatario (ej: `GRADOMANIACOS <onboarding@resend.dev>` o tu dominio verificado). |
 | `SMTP_HOST` | String | `""` (Vacío) | Local | Servidor SMTP saliente para desarrollo local (ej: `smtp.gmail.com`). |
 | `SMTP_PORT` | Entero | `587` | Local | Puerto SMTP local. `587` activa STARTTLS; `465` activa SSL directo (`smtplib.SMTP_SSL`). |
 | `SMTP_USER` | String | `""` (Vacío) | Local | Cuenta emisora para SMTP local (ej: `gradomaniacos@gmail.com`). |
 | `SMTP_PASS` | String | `""` (Vacío) | Local | Contraseña de Aplicación de Google (16 letras) para desarrollo local. |
 | `PORT` | Entero | `8080` | Ambos | Puerto de escucha HTTP del servidor local o asignado dinámicamente por Render.com. |
 | `ALLOW_TEST_AUTH` | String | `""` | Tests / CI | Si es `"1"`, habilita el campo `testVerificationCode` en respuestas JSON para permitir suites automatizadas E2E. En Render se fija en `"0"`. |
+| `EXTRA_ACCESS_CODES` | String | `""` | Prod (Render Free) | Lista separada por comas de códigos de acceso adicionales para sembrar automáticamente en SQLite al iniciar el contenedor efímero (`INSERT OR IGNORE`). Permite garantizar persistencia de códigos en planes gratuitos sin disco. |
+| `DB_PATH` | String | `estudio_grado.db` | Prod (Render Disk) | Ruta absoluta o relativa al archivo SQLite. Permite apuntar a un Persistent Disk montado en Render (ej: `/var/data/estudio_grado.db`) garantizando persistencia permanente. |
+
 
 ---
 
@@ -649,13 +655,13 @@ stateDiagram-v2
   - **Herramienta CLI de Verificación (`scripts/test_smtp_manual.py`):** Script interactivo para validación rápida y diagnóstico del servidor SMTP antes o durante el despliegue, con instrucciones paso a paso para resolución de fallos de autenticación 2FA.
   - **Plantilla de Entorno (`.env.example`) y Documentación:** Actualización exhaustiva en `README.md` y `GOOGLE_AUTH_SETUP.md` con tablas de variables de entorno y pasos detallados para generar Contraseñas de Aplicación en Google.
   - **Verificación Automatizada Completa:** 63/63 pruebas aprobadas en `test_unlock_auth_flow.cjs` y 65/65 pruebas aprobadas en `test_e2e_case_flow.cjs`. Actualización completa y canónica de `CONTEXT.md`.
-* **v6.2 (Migración de Transporte a Resend HTTPS API para Render Free, Blindaje Fail-Safe y Diagnóstico Dual):**
-  - **Causa Raíz de Producción Resuelta:** Identificación y resolución definitiva del bloqueo de puertos SMTP salientes (25, 465, 587) impuesto por Render.com en sus Web Services gratuitos.
-  - **Capa de Transporte HTTPS Resend API:** Implementación nativa de llamadas REST sobre HTTPS (`https://api.resend.com/emails`) en el puerto 443 utilizando exclusivamente la librería estándar de Python (`urllib.request`, `json`), sin agregar dependencias externas a `requirements.txt`.
-  - **Arquitectura Dual y Selección Jerárquica:** Mantiene intacto el soporte de SMTP tradicional para desarrollo local conmutando automáticamente mediante `get_email_config()` (`EMAIL_PROVIDER=resend` / `EMAIL_PROVIDER=smtp` / auto-detección por claves presentes / fallback dev local).
-  - **Auditoría Segura con Enmascaramiento y Cero Fuga:** Logs limpios con enmascaramiento estricto (`d***@gmail.com`). Nunca se imprimen API keys, contraseñas ni códigos de verificación en producción.
-  - **Blindaje Fail-Safe con HTTP 503:** Si el proveedor falla por cualquier motivo (red, credenciales, rechazo de dominio), `POST /api/auth/register` y `POST /api/auth/resend-code` devuelven **HTTP 503** con mensaje amigable sanitizado.
-  - **Script de Diagnóstico CLI Unificado (`scripts/test_email_manual.py`):** Herramienta interactiva para probar tanto Resend HTTPS API como SMTP Gmail directamente desde terminal.
-  - **Ampliación de Pruebas Automatizadas a 74 Pruebas (100% PASS):** Verificación exhaustiva de emisión de códigos, contratos HTTP 201/200, contratos fail-safe HTTP 503 en registro y reenvío, y garantía estricta de que ninguna respuesta en producción (`ALLOW_TEST_AUTH=0`) exponga el código de verificación. 100% de aprobación en `test_unlock_auth_flow.cjs` (74/74) y `test_e2e_case_flow.cjs` (65/65). Actualización obligatoria y canónica de `CONTEXT.md`.
+* **v6.3 (Solución Integral de Códigos de Activación en Servidor, Persistencia Multi-Entorno y Rebranding Visual a GRADOMANIACOS):**
+  - **Diagnóstico y Resolución de Causa Raíz de Códigos:** Identificación de la desconexión total entre el panel de administración (`js/auth-license.js`), que guardaba las licencias exclusivamente en el `localStorage` del navegador del admin, y el backend (`server.py`), que consultaba la tabla `access_codes` de SQLite. Al acceder un postulante desde incógnito u otro dispositivo, su `localStorage` estaba vacío y la consulta al servidor devolvía 400 ("Código de invitación inválido o agotado").
+  - **Endpoints de Administración Protegidos por PIN Hasheado:** Creación de `POST /api/admin/create-code`, `POST /api/admin/revoke-code` y `GET /api/admin/codes` en `server.py`, asegurados mediante comparación SHA-256 del PIN maestro (`almabaltoamial2020`). Los códigos creados por el admin ahora se insertan directamente en SQLite y quedan disponibles inmediatamente para cualquier postulante global.
+  - **Persistencia en Render Free y Render Disk:** Soporte para la variable `EXTRA_ACCESS_CODES` en `db.py` (sembrado automático mediante `INSERT OR IGNORE` al iniciar el contenedor efímero) y para `DB_PATH` (soporte de Persistent Disk montado en `/var/data/estudio_grado.db`), previniendo pérdida de licencias ante reinicios de contenedores en Render.
+  - **Normalización Canónica de Códigos (`normalize_access_code`):** Sanitización robusta en backend (`db.py`) y frontend (`js/auth-license.js`) que elimina espacios en blanco normales, espacios no separables (`\u00a0`), caracteres de ancho cero (`\u200b`) y fuerza mayúsculas antes de consultas e inserciones SQL, tolerando pegado imperfecto desde WhatsApp o correos.
+  - **Rebranding Visual Estricto a GRADOMANIACOS:** Actualización visual integral de la marca a **`GRADOMANIACOS`** en `<title>`, metadatos Open Graph, Twitter Cards, `h1.brand-title`, modales, alertas y correos electrónicos, preservando con estricta rigurosidad los nombres técnicos internos (`CaseGeneratorAgent`, `AuthService`, `LicenseService`, base de datos `estudio_grado.db`, etc.).
+  - **Verificación Automatizada Exhaustiva (166 Pruebas / 100% PASS):** Incorporación de la sección 21 en `test_unlock_auth_flow.cjs` para validar el ciclo completo: admin crea código con PIN -> persistencia en SQLite -> consulta y validación -> postulante en incógnito se registra, verifica correo y convalida -> consumo atómico impide segundo uso -> normalización de espacios -> revocación -> validación de marca. 101/101 pruebas exitosas en `test_unlock_auth_flow.cjs` y 65/65 pruebas exitosas en `test_e2e_case_flow.cjs`. Actualización canónica de `CONTEXT.md`.
+
 
 

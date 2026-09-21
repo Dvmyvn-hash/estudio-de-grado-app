@@ -6,6 +6,7 @@ Persistencia transaccional para:
 - Progreso multi-dispositivo por caso práctico (user_progress)
 """
 
+import os
 import sqlite3
 import time
 import json
@@ -14,12 +15,15 @@ from pathlib import Path
 from typing import Optional, Dict, Any, List, Tuple
 
 BASE_DIR = Path(__file__).resolve().parent
-DEFAULT_DB_PATH = BASE_DIR / "estudio_grado.db"
+DB_PATH_ENV = os.environ.get("DB_PATH")
+DEFAULT_DB_PATH = Path(DB_PATH_ENV).resolve() if DB_PATH_ENV else BASE_DIR / "estudio_grado.db"
 
 
 def get_db_connection(db_path: Optional[Path] = None) -> sqlite3.Connection:
     """Crea y retorna una conexión con integridad referencial activa, WAL mode y row_factory."""
     path = db_path or DEFAULT_DB_PATH
+    if path.parent and not path.parent.exists():
+        path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(str(path), timeout=15.0)
     conn.execute("PRAGMA foreign_keys = ON;")
     conn.execute("PRAGMA journal_mode = WAL;")
@@ -79,17 +83,38 @@ def init_db(db_path: Optional[Path] = None) -> None:
 
         # Semilla de códigos de invitación estándar (idempotente con INSERT OR IGNORE)
         now_seed_ms = int(time.time() * 1000)
+        seeds = [
+            ("GRADO-BETA-2026", "Beta Cerrada 2026", 10000, now_seed_ms),
+            ("CIVIL-PROCESAL-2026", "Cohorte Civil y Procesal", 5000, now_seed_ms),
+            ("GRADO-VIP-2026", "Acceso VIP Institucional", 1000, now_seed_ms),
+            ("GRADO-DOCENTE-2026", "Cuerpo Docente", 1000, now_seed_ms),
+        ]
+
+        extra_env = os.environ.get("EXTRA_ACCESS_CODES", "").strip()
+        if extra_env:
+            for item in extra_env.split(","):
+                item = item.strip()
+                if not item:
+                    continue
+                if ":" in item:
+                    code_part, uses_part = item.split(":", 1)
+                    code_clean = re.sub(r"[\s\u200b\u00a0]+", "", code_part).upper()
+                    try:
+                        max_u = max(1, int(uses_part.strip()))
+                    except ValueError:
+                        max_u = 1000
+                else:
+                    code_clean = re.sub(r"[\s\u200b\u00a0]+", "", item).upper()
+                    max_u = 1000
+                if re.match(r"^[A-Z0-9_\-]{4,36}$", code_clean):
+                    seeds.append((code_clean, "Semilla Entorno", max_u, now_seed_ms))
+
         cursor.executemany(
             """
             INSERT OR IGNORE INTO access_codes (code, label, max_uses, times_used, active, expires_at, created_at)
             VALUES (?, ?, ?, 0, 1, NULL, ?)
             """,
-            [
-                ("GRADO-BETA-2026", "Beta Cerrada 2026", 10000, now_seed_ms),
-                ("CIVIL-PROCESAL-2026", "Cohorte Civil y Procesal", 5000, now_seed_ms),
-                ("GRADO-VIP-2026", "Acceso VIP Institucional", 1000, now_seed_ms),
-                ("GRADO-DOCENTE-2026", "Cuerpo Docente", 1000, now_seed_ms),
-            ]
+            seeds
         )
 
         # Verificar si la tabla users existe y requiere migración
@@ -193,6 +218,13 @@ def init_db(db_path: Optional[Path] = None) -> None:
 # GESTIÓN DE CÓDIGOS DE ACCESO
 # ==========================================
 
+def normalize_access_code(code: Any) -> str:
+    """Sanitiza y normaliza códigos de acceso eliminando espacios, NBSP, zero-width y aplicando mayúsculas."""
+    if not code:
+        return ""
+    return re.sub(r"[\s\u200b\u00a0]+", "", str(code)).upper()
+
+
 def create_access_code(
     code: str,
     label: Optional[str] = None,
@@ -202,7 +234,7 @@ def create_access_code(
 ) -> Dict[str, Any]:
     """Crea un nuevo código de acceso de invitación."""
     init_db(db_path)
-    clean_code = code.strip().upper()
+    clean_code = normalize_access_code(code)
     now_ms = int(time.time() * 1000)
 
     with get_db_connection(db_path) as conn:
@@ -230,7 +262,7 @@ def create_access_code(
 def get_access_code(code: str, db_path: Optional[Path] = None) -> Optional[Dict[str, Any]]:
     """Obtiene información de un código de acceso."""
     init_db(db_path)
-    clean_code = code.strip().upper()
+    clean_code = normalize_access_code(code)
     with get_db_connection(db_path) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM access_codes WHERE code = ?", (clean_code,))
@@ -250,7 +282,7 @@ def list_access_codes(db_path: Optional[Path] = None) -> List[Dict[str, Any]]:
 def revoke_access_code(code: str, db_path: Optional[Path] = None) -> bool:
     """Revoca (desactiva) un código de acceso."""
     init_db(db_path)
-    clean_code = code.strip().upper()
+    clean_code = normalize_access_code(code)
     with get_db_connection(db_path) as conn:
         cursor = conn.cursor()
         cursor.execute("UPDATE access_codes SET active = 0 WHERE code = ?", (clean_code,))
@@ -266,10 +298,10 @@ def validate_access_code(code: str, db_path: Optional[Path] = None) -> Tuple[boo
     - Usos disponibles (times_used < max_uses)
     - No expirado (expires_at)
     """
-    if not code or not isinstance(code, str):
+    clean_code = normalize_access_code(code)
+    if not clean_code:
         return False, "Código de acceso no proporcionado.", None
 
-    clean_code = code.strip().upper()
     if not re.match(r"^[A-Z0-9_\-]{4,36}$", clean_code):
         return False, "El código de acceso no es válido (formato incorrecto).", None
 
@@ -360,9 +392,8 @@ def create_user(
         if cursor.fetchone():
             return False, "El correo electrónico ya se encuentra registrado.", None
 
-        clean_code = None
-        if access_code and isinstance(access_code, str) and access_code.strip():
-            clean_code = access_code.strip().upper()
+        clean_code = normalize_access_code(access_code) if access_code else None
+        if clean_code:
             cursor.execute(
                 """
                 UPDATE access_codes
@@ -545,10 +576,10 @@ def link_user_code(user_id: int, code: str, db_path: Optional[Path] = None) -> T
     2. Actualiza users.access_code.
     """
     init_db(db_path)
-    if not code or not isinstance(code, str):
+    clean_code = normalize_access_code(code)
+    if not clean_code:
         return False, "Código de acceso no proporcionado.", None
 
-    clean_code = code.strip().upper()
     if not re.match(r"^[A-Z0-9_\-]{4,36}$", clean_code):
         return False, "El código de acceso no es válido (formato incorrecto).", None
 

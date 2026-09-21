@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Script de Verificación Manual de Envío SMTP (Gmail / Producción)
-GRADOMANÍA — Estudio de Grado Hub
+GRADOMANIACOS — Estudio de Grado Hub
 
 Uso:
     python scripts/test_smtp_manual.py [destinatario@ejemplo.com]
@@ -58,7 +58,7 @@ def main():
         print("   SMTP_PORT=587")
         print("   SMTP_USER=tu_cuenta@gmail.com")
         print("   SMTP_PASS=tu_app_password_de_16_letras")
-        print("   EMAIL_FROM=GRADOMANÍA <tu_cuenta@gmail.com>\n")
+        print("   EMAIL_FROM=GRADOMANIACOS <tu_cuenta@gmail.com>\n")
         sys.exit(1)
 
     if not SMTP_USER or not SMTP_PASS:
@@ -82,10 +82,10 @@ def main():
         sys.exit(1)
 
     code = "".join(secrets.choice("0123456789") for _ in range(6))
-    subject = f"Prueba SMTP GRADOMANÍA — Código: {code}"
+    subject = f"Prueba SMTP GRADOMANIACOS — Código: {code}"
     body = (
         f"Hola,\n\n"
-        f"Este es un correo de verificación de prueba enviado desde GRADOMANÍA.\n\n"
+        f"Este es un correo de verificación de prueba enviado desde GRADOMANIACOS.\n\n"
         f"Tu código de prueba es: {code}\n\n"
         f"Si recibes este mensaje, la configuración SMTP con Gmail está funcionando correctamente.\n"
     )

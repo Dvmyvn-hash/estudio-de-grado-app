@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Script de Verificación Manual de Envío de Correo (Resend HTTPS / Gmail SMTP)
-GRADOMANÍA — Estudio de Grado Hub (v6.2)
+GRADOMANIACOS — Estudio de Grado Hub (v6.3)
 
 Uso:
     python scripts/test_email_manual.py [destinatario@ejemplo.com]
@@ -62,11 +62,11 @@ def test_resend(dest_email: str, code: str):
         print("   Por favor crea tu cuenta gratuita en https://resend.com y agrega:")
         print("   EMAIL_PROVIDER=resend")
         print("   RESEND_API_KEY=re_xxxxxxxxxxxx")
-        print("   EMAIL_FROM=GRADOMANÍA <onboarding@resend.dev>\n")
+        print("   EMAIL_FROM=GRADOMANIACOS <onboarding@resend.dev>\n")
         sys.exit(1)
 
-    sender = EMAIL_FROM or "GRADOMANÍA <onboarding@resend.dev>"
-    subject = f"Prueba Resend GRADOMANÍA — Código: {code}"
+    sender = EMAIL_FROM or "GRADOMANIACOS <onboarding@resend.dev>"
+    subject = f"Prueba Resend GRADOMANIACOS — Código: {code}"
     body_text = (
         f"Hola,\n\n"
         f"Este es un correo de verificación de prueba enviado vía Resend HTTPS API.\n\n"
@@ -75,7 +75,7 @@ def test_resend(dest_email: str, code: str):
     )
     body_html = (
         f"<div style='font-family: sans-serif; max-width: 520px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 8px;'>"
-        f"<h2 style='color: #1e293b;'>GRADOMANÍA</h2>"
+        f"<h2 style='color: #1e293b;'>GRADOMANIACOS</h2>"
         f"<p style='color: #475569;'>Prueba de Despacho de Correo (Resend HTTPS API)</p>"
         f"<div style='background-color: #f1f5f9; padding: 16px; border-radius: 6px; text-align: center; margin: 20px 0;'>"
         f"<span style='font-size: 30px; font-weight: bold; letter-spacing: 6px; color: #0f172a;'>{code}</span>"
@@ -143,11 +143,12 @@ def test_smtp(dest_email: str, code: str):
         sys.exit(1)
 
     sender = EMAIL_FROM or SMTP_USER
-    subject = f"Prueba SMTP GRADOMANÍA — Código: {code}"
+    subject = f"Prueba SMTP GRADOMANIACOS — Código: {code}"
     body = (
         f"Hola,\n\n"
         f"Este es un correo de verificación de prueba enviado vía SMTP.\n\n"
-        f"Tu código de prueba es: {code}\n"
+        f"Tu código de prueba es: {code}\n\n"
+        f"Si recibes este mensaje, la configuración SMTP con Gmail está funcionando correctamente.\n"
     )
     msg = MIMEText(body, "plain", "utf-8")
     msg["Subject"] = subject
@@ -177,7 +178,7 @@ def test_smtp(dest_email: str, code: str):
 
 def main():
     print("==================================================")
-    print(" VERIFICACIÓN MANUAL DE CORREO — GRADOMANÍA (v6.2)")
+    print(" VERIFICACIÓN MANUAL DE CORREO — GRADOMANIACOS (v6.3)")
     print("==================================================\n")
 
     # Determinar proveedor
