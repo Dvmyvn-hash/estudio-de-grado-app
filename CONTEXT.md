@@ -363,26 +363,19 @@ Cuando el sistema se conecte con APIs de LLM externas (ej. Gemini API, Cloud Run
 
 ---
 
-### 4.4. Manejo de Errores en Proveedores de Correo, Brevo HTTPS y Blindaje Fail-Safe (HTTP 503)
-* **Bloqueo de Puertos SMTP en Render Free:** Las plataformas de nube modernas como Render.com bloquean por defecto el tráfico saliente por los puertos SMTP estándar (25, 465 y 587) en planes gratuitos para mitigar spam.
-* **Capa de Transporte HTTPS Multi-Proveedor (Brevo y Resend):**
-  - **Brevo (Sendinblue) API REST HTTPS (`https://api.brevo.com/v3/smtp/email`):** Solución recomendada para producción en Render. Funciona 100% sobre HTTPS (puerto 443) y permite enviar correos transaccionales a cualquier destinatario (`@gmail.com`, `@hotmail.com`, etc.) validando únicamente el correo remitente (`gradomaniacos@gmail.com`) mediante el enlace de verificación gratuito de Brevo (*Sender Verification*), sin requerir la compra de un dominio web ni la configuración de registros DNS complejos.
-  - **Resend API REST HTTPS (`https://api.resend.com/emails`):** Soporte activo sobre puerto 443. Si no se cuenta con un dominio verificado en `resend.com/domains`, Resend restringe los envíos con `onboarding@resend.dev` exclusivamente al correo del titular de la cuenta de Resend (retornando HTTP 403 ante correos de terceros). El servidor captura el error e imprime un diagnóstico explícito en consola alertando de la restricción.
-  - **Multi-Provider Fallback Automático:** Si están configuradas ambas claves (`BREVO_API_KEY` y `RESEND_API_KEY`) y el proveedor principal falla por restricciones o cuotas, el servidor intenta automáticamente el proveedor de respaldo antes de rechazar la solicitud.
-* **Resiliencia en SQLite para Cuentas No Verificadas (`db.py`):** Si un usuario intentó registrarse y su código de verificación previo expiró tras 15 minutos, `create_user` permite actualizar las credenciales y emitir un nuevo código en lugar de bloquear el registro con error de duplicado.
-* **Contrato Fail-Safe Unificado:** Si el despacho del correo falla (por claves ausentes, rechazo de dominio remitente `HTTPError`, indisponibilidad de red `URLError` o credenciales SMTP inválidas), la función `send_verification_email` captura la excepción sin filtrar información sensible y los endpoints `POST /api/auth/register` y `POST /api/auth/resend-code` responden inmediatamente con **HTTP 503 Service Unavailable**:
-  ```json
-  {
-    "ok": false,
-    "error": "No pudimos enviar el correo de verificación. Por favor intenta nuevamente en unos minutos."
-  }
-  ```
-* **Logs Sanitizados y Diagnóstico Detallado:** Los registros de consola reportan:
-  `[Email] Provider=brevo Verification email sent successfully to d***@gmail.com`
-  o ante fallos:
-  `[Email Error] Provider=resend status=403 [DOMINIO RESTRINGIDO]: ...`
-  `[Auth Register Error] No se pudo despachar correo a d***@gmail.com: ...`
-  **Nunca** se imprime en consola o en red la API key, la contraseña SMTP, la contraseña del postulante o el código de verificación de 6 dígitos.
+### 4.4. Desacoplamiento de Servicios de Correo, Registro Directo y Purga Automática de Cuentas Demo tras 48 Horas (v7.0)
+* **Eliminación Total de Dependencias de Correo Externas:** A partir de la versión v7.0, se eliminan por completo todas las dependencias y transportes de correo saliente (SMTP, Brevo API REST HTTPS y Resend API REST HTTPS), junto con el flujo de validación mediante código de 6 dígitos. Esto erradica de raíz los fallos de registro por puertos SMTP bloqueados en Render Free, restricciones de dominio remitente o agotamiento de cuotas (HTTP 503 Service Unavailable).
+* **Registro Directo e Inmediato (Zero Friction):**
+  - El postulante se registra exclusivamente con Correo Electrónico, Contraseña (10+ caracteres, mayúscula, minúscula y número) y Confirmación de Contraseña.
+  - La contraseña se hashea de forma determinista y segura en `db.py` mediante **PBKDF2-HMAC-SHA256** (210.000 iteraciones, salt criptográfico único de 16 bytes codificado en Base64).
+  - Al completar el registro, `server.py` emite de inmediato una cookie de sesión firmada `session_token` (HMAC-SHA256), guarda al usuario con `is_verified = 1`, `created_at = now_ms`, `isDemo: true` y responde **HTTP 201 Created**, transitando directamente al Paso 2 (`#unlock-step-convalidate`) sin fricciones ni esperas de códigos.
+  - Si el correo ya se encuentra registrado, `server.py` responde **HTTP 409 Conflict** con mensaje claro e informativo.
+* **Política de Retención y Purga Automática de Cuentas Demo (48 Horas):**
+  - **Identificación de Cuentas Demo:** Las cuentas creadas que no hayan convalidado un Pase de Grado mantienen `access_code IS NULL` en la tabla `users` de SQLite.
+  - **Worker Daemon en Segundo Plano (`run_auto_purge_daemon`):** `server.py` ejecuta un hilo en segundo plano (`threading.Thread(daemon=True)`) que corre al iniciar el servidor y se repite periódicamente cada 30 minutos.
+  - **Eliminación Segura y en Cascada (`db.purge_unvalidated_accounts`):** El proceso elimina permanentemente de la tabla `users` todos los registros que cumplan simultáneamente: `access_code IS NULL` y `created_at <= (ahora - 48 horas)`. Asimismo, purga en cascada cualquier fila huérfana en la tabla `user_progress`.
+  - **Inmunidad de Cuentas Convalidadas:** Aquellas cuentas que hayan activado un Pase de Grado (`access_code IS NOT NULL`) quedan **estrictamente excluidas de la purga**; su vigencia y acceso permanecen intactos y son gestionados según las reglas del código de activación correspondiente.
+
 
 ---
 
@@ -432,75 +425,65 @@ Cuando el sistema se conecte con APIs de LLM externas (ej. Gemini API, Cloud Run
 
 ---
 
-## 6. Autenticación Autónoma (Correo + Contraseña PBKDF2), Verificación de Correo con Código de 6 Dígitos (Resend HTTPS API / SMTP) y Sincronización Multi-Dispositivo
+## 6. Autenticación Autónoma (Correo + Contraseña PBKDF2), Registro Directo, Sesiones Seguras y Purga Automática tras 48 Horas
 
-### 6.1. Arquitectura de Identidad y Seguridad
-La plataforma implementa un esquema de autenticación resiliente, autónomo y sin dependencias externas de terceros en el frontend:
+### 6.1. Arquitectura de Identidad y Seguridad (v7.0)
+La plataforma implementa un esquema de autenticación resiliente, autónomo y sin dependencias externas de terceros:
 1. **Modo Servidor Local / Producción (`server.py` y `db.py`):**
-   * **Identidad Autónoma:** Registro e inicio de sesión mediante Correo Electrónico y Contraseña, eliminando dependencias de Google Identity Services (GIS) y de Cloudflare Turnstile.
+   * **Identidad Autónoma y Registro Directo:** Registro e inicio de sesión mediante Correo Electrónico y Contraseña sin intervención de proveedores externos de correo (SMTP/Brevo/Resend) ni dependencias federadas (Google GIS, Cloudflare Turnstile).
    * **Hashing Criptográfico Estándar:** Implementación nativa en Python estándar (`hashlib`, `secrets`, `base64`, `hmac`) con **PBKDF2-HMAC-SHA256**, 210.000 iteraciones y salt criptográfico único de 16 bytes codificado en Base64.
-   * **Verificación Nativa por Correo Electrónico:** Flujo de validación mediante código numérico criptográficamente seguro de 6 dígitos (`secrets.choice`), con caducidad estricta de 15 minutos (`verification_code_expires_at` en epoch ms) y límite defensivo de 5 intentos fallidos (`verification_attempts`).
-   * **Capa de Transporte Multi-Proveedor de Correo (Brevo HTTPS / Resend HTTPS / SMTP Local):**
-      * **Producción en la Nube con Brevo (Recomendado sin Dominio propio / Puerto 443):** Utiliza la API REST oficial de **Brevo (Sendinblue)** (`https://api.brevo.com/v3/smtp/email`) sobre HTTPS nativo en Python (`urllib.request`). Permite despachar códigos de verificación a cualquier casilla de correo del mundo (`@gmail.com`, `@hotmail.com`, casillas universitarias, etc.) validando únicamente el correo remitente (`gradomaniacos@gmail.com`) con enlace de confirmación gratuito (*Sender Verification*), sin requerir comprar dominio ni configurar registros DNS.
-      * **Producción en la Nube con Resend (Con Dominio Propio / Puerto 443):** Utiliza la API REST oficial de **Resend** (`https://api.resend.com/emails`) mediante HTTPS puerto 443. Si no se cuenta con dominio propio verificado en `resend.com/domains`, Resend restringe los envíos con `onboarding@resend.dev` exclusivamente al correo del titular de la cuenta de Resend (emitiendo HTTP 403 ante correos de terceros). El servidor captura esta condición e imprime diagnóstico en consola de Render.
-      * **Multi-Provider Fallback Automático:** Si están configuradas ambas claves (`BREVO_API_KEY` y `RESEND_API_KEY`), ante un fallo del proveedor principal (por cuotas o restricciones de dominio), el servidor conmuta e intenta automáticamente el proveedor de respaldo antes de fallar.
-      * **Desarrollo Local (Gmail SMTP / STARTTLS 587 o SSL 465):** Mantiene soporte completo de `smtplib` y `email.mime.text.MIMEText` sin librerías externas para pruebas locales mediante Contraseña de Aplicación de Google (`gradomaniacos@gmail.com`).
-      * **Selección Jerárquica del Proveedor Activo (`get_email_config`):** 1) `EMAIL_PROVIDER=brevo` fuerza Brevo; 2) `EMAIL_PROVIDER=resend` fuerza Resend; 3) `EMAIL_PROVIDER=smtp` fuerza SMTP; 4) si existe `BREVO_API_KEY`, activa Brevo; 5) si existe `RESEND_API_KEY`, activa Resend; 6) si existe `SMTP_HOST`, activa SMTP; 7) si ninguno está definido, entra en modo de desarrollo (`[SMTP Dev]`) imprimiendo el código en consola sin fallar.
-   * **Blindaje de Envío y Respuestas HTTP 503:** Si el despacho del correo falla (por claves ausentes o erróneas, rechazo de dominio, credenciales SMTP inválidas o caída de red), el servidor captura el error, emite un log seguro sin filtrar secretos y los endpoints `POST /api/auth/register` y `POST /api/auth/resend-code` responden explícitamente con **HTTP 503 Service Unavailable** (`{"ok": False, "error": "No pudimos enviar el correo de verificación..."}`), garantizando que el usuario no quede en limbo esperando un código no despachado.
-   * **Resiliencia en Base de Datos para Cuentas No Verificadas:** Si un postulante intenta registrarse nuevamente tras un fallo de correo o abandono de sesión, y el código previo ya expiró (>15 minutos), `db.create_user()` actualiza sus credenciales y emite un nuevo código en lugar de bloquear el proceso con mensaje de duplicado. Si el código aún está vigente, rechaza como duplicado pendiente de verificación.
-   * **Logs Sanitizados de Auditoría y Cero Fuga de Secretos:** Los logs de servidor enmascaran la casilla destinataria (`d***@gmail.com`) y **nunca** imprimen `BREVO_API_KEY`, `RESEND_API_KEY`, `SMTP_PASS`, contraseñas de usuarios ni el código de verificación en modo producción.
-   * **Reenvío Seguro con Throttling:** Endpoint `POST /api/auth/resend-code` con rate limiting (10 req/min), generación de nuevo código, reset de intentos a 0 y respuesta genérica uniforme para prevenir la enumeración de usuarios.
-   * **Defensa Proactiva en Login:** Si una cuenta no ha completado la verificación de correo (`is_verified = 0`), el endpoint `POST /api/auth/login` responde **HTTP 403 Forbidden** con `{ ok: false, unverified: true, email: ... }` sin crear sesión, guiando al postulante a la subvista de ingreso de código.
-   * **Bloqueo Temporal de Cuenta (*Account Lockout*):** Tras 5 intentos fallidos consecutivos de contraseña en login, la cuenta queda bloqueada temporalmente por 15 minutos en base de datos (`locked_until` en SQLite, respondiendo **HTTP 423 Locked**).
-   * **Mitigación de Ataques de Temporización (*Timing Attacks*):** En caso de consultar un usuario inexistente en login, el servidor ejecuta una verificación simulada de PBKDF2 con salt ficticio para igualar el tiempo de respuesta.
+   * **Emisión Inmediata de Sesión y Promoción a Versión Demo:** Al registrarse (`POST /api/auth/register`), el usuario se inserta directamente en SQLite con `is_verified = 1`, `created_at = now_ms`, `last_login_at = now_ms` y `access_code = NULL`. El servidor genera inmediatamente una cookie de sesión firmada `session_token` (HMAC-SHA256) y responde **HTTP 201 Created** con `{ ok: true, user: { ... isDemo: true, access_code: null } }`, transitando directamente al Paso 2 (`#unlock-step-convalidate`) sin fricciones.
+   * **Prevención de Cuentas Duplicadas:** Si el correo suministrado ya existe en la base de datos, `POST /api/auth/register` responde con **HTTP 409 Conflict** (`{ ok: false, error: "El correo electrónico ya se encuentra registrado." }`).
+   * **Worker Daemon de Purga Automática en Segundo Plano (`run_auto_purge_daemon`):**
+     * `server.py` inicializa un hilo en segundo plano (`threading.Thread(daemon=True)`) que ejecuta la purga inmediatamente al arrancar el servidor y luego periódicamente cada 30 minutos.
+     * Invoca `db.purge_unvalidated_accounts(max_age_ms=48*3600*1000)`.
+     * Elimina permanentemente de la tabla `users` todos los registros que cumplan simultáneamente: `access_code IS NULL` y `created_at <= (ahora - 48 horas)`. Asimismo, elimina en cascada los registros huérfanos en `user_progress`.
+     * **Inmunidad de Cuentas con Pase Activo:** Las cuentas que hayan convalidado un código de acceso (`access_code IS NOT NULL`) nunca son purgadas; su permanencia depende exclusivamente de la vigencia de su código o pase de grado.
+   * **Inicio de Sesión y Account Lockout:**
+     * En `POST /api/auth/login`, tras 5 intentos fallidos consecutivos de contraseña, la cuenta se bloquea por 15 minutos en SQLite (`locked_until`, respondiendo **HTTP 423 Locked**).
+     * Mitigación de timing attacks: consultas a usuarios inexistentes ejecutan un hash PBKDF2 simulado con salt ficticio para igualar los tiempos de cómputo.
+     * Tras la eliminación del flujo de correo en v7.0, no existen estados intermedios "no verificados" (eliminado el código HTTP 403 por falta de verificación).
    * **Sesiones Seguras Firmadas:** Emisión de tokens firmados con **HMAC-SHA256** persistidos en cookies `session_token` con atributos `HttpOnly; Secure; SameSite=Lax`.
-   * **Persistencia Relacional SQLite:** Base de datos `estudio_grado.db` con tablas `users` (con `email`, `password_hash`, `password_salt`, `name`, `access_code`, `is_verified`, `verification_code`, `verification_code_expires_at`, `verification_attempts`, `failed_login_attempts`, `locked_until`), `access_codes` y `user_progress`. Auto-migración idempotente en `init_db()`.
+   * **Persistencia Relacional SQLite (`estudio_grado.db`):** Tabla `users` (`id`, `email`, `password_hash`, `password_salt`, `name`, `access_code`, `created_at`, `last_login_at`, `is_verified`, `failed_login_attempts`, `locked_until`), tabla `access_codes` y tabla `user_progress`. Auto-migración idempotente en `init_db()`.
    * **Protección Zero Exposure:** Bloqueo absoluto (**HTTP 403 Forbidden**) de acceso directo a archivos `.db`, `.py`, scripts y secretos criptográficos.
-   * **Compatibilidad de Pruebas E2E:** Soporte condicional controlado por variable de entorno `ALLOW_TEST_AUTH=1` para emitir `testVerificationCode` en respuestas de registro y reenvío, permitiendo pruebas automatizadas deterministas sin servicios de correo externos. En producción (`ALLOW_TEST_AUTH=0`), este campo queda estrictamente omitido.
 
 2. **Modo Estático / GitHub Pages (`auth-service.js`):**
    * Registro y login en cliente con persistencia en `localStorage` (`grado_registered_users` y `grado_auth_user`).
-   * Validación en cliente de política de contraseñas y coincidencia de confirmación.
-   * Flujo de verificación de 6 dígitos simulado en navegador para pruebas offline y despliegues estáticos.
+   * Hashing seguro en cliente mediante Web Crypto API (`crypto.subtle.digest("SHA-256")`) con salt local, garantizando cero contraseñas en texto plano.
+   * Registro directo en navegador que asigna de inmediato `isDemo: true` y transita al Paso 2 de convalidación.
    * Validación de códigos de invitación preconfigurados en `js/auth-config.js` (`AUTH_CONFIG`).
 
 ---
 
-### 6.2. Especificación Técnica de Endpoints de Autenticación, Verificación y Administración (`server.py`)
+### 6.2. Especificación Técnica de Endpoints de Autenticación y Administración (`server.py`)
 
 | Endpoint | Método | Autenticación | Códigos HTTP | Propósito y Contrato de Respuesta |
 | :--- | :---: | :---: | :---: | :--- |
-| `/api/auth/register` | `POST` | Pública | `201`, `400`, `409`, `503` | **Registro de Postulante:** Valida email y política de contraseñas (10+ caracteres, mayúscula, minúscula, número). Genera código numérico aleatorio de 6 dígitos con expiración de 15 minutos e inserta usuario con `is_verified = 0`. Despacha el correo mediante `send_verification_email` (Resend HTTPS o SMTP). Si el proveedor activo falla, aborta y retorna **HTTP 503 Service Unavailable**. En éxito responde **HTTP 201** con `{ ok: true, requiresVerification: true, email: ... }`. En producción omite el código; con `ALLOW_TEST_AUTH=1` incluye `testVerificationCode`. |
-| `/api/auth/verify-code` | `POST` | Pública | `200`, `400`, `404` | **Validación de Código de 6 Dígitos:** Valida el código enviado. Si es incorrecto, incrementa `verification_attempts`; al 5to intento fallido, borra el código y responde **HTTP 400**. Si es válido y no ha expirado, actualiza `is_verified = 1`, resetea intentos, emite cookie `session_token` (HMAC-SHA256) y responde **HTTP 200** con `{ ok: true, user: { ... isDemo: true } }`, promoviendo al usuario directamente a Versión Demo. |
-| `/api/auth/resend-code` | `POST` | Pública (Rate Limited) | `200`, `429`, `503` | **Reenvío Seguro de Código:** Rate limiting defensivo (10 req/min). Si el usuario existe y `is_verified = 0`, genera un nuevo código de 6 dígitos independiente, renueva expiración a 15 min y resetea intentos a 0. Despacha vía proveedor de correo activo (Resend o SMTP); si el proveedor falla, retorna **HTTP 503**. Retorna **HTTP 200** con mensaje uniforme anti-enumeración. |
-| `/api/auth/login` | `POST` | Pública (Rate Limited) | `200`, `400`, `401`, `403`, `423` | **Inicio de Sesión:** Verifica bloqueo de cuenta (15 min tras 5 intentos fallidos, **HTTP 423 Locked**). Compara hash PBKDF2 (con mitigación de timing attacks). Si la cuenta no está verificada (`is_verified = 0`), responde **HTTP 403 Forbidden** con `{ ok: false, unverified: true, email: ... }` sin emitir sesión. Si las credenciales son válidas, emite cookie `session_token` y responde **HTTP 200**. |
-| `/api/auth/link-code` | `POST` | Sesión requerida | `200`, `400`, `401`, `403` | **Convalidación de Licencia:** Valida código normalizado con `db.normalize_access_code` (remueve espacios, tabs, NBSP y aplica mayúsculas) contra el regex `^[A-Z0-9_\-]{4,36}$`. Descuenta atómicamente usos en la tabla SQLite `access_codes` y asocia el código a la cuenta, promoviendo al postulante de Versión Demo (`isDemo: true`) a Pase de Grado Activo (`isDemo: false`). |
+| `/api/auth/register` | `POST` | Pública | `201`, `400`, `409` | **Registro Directo de Postulante:** Valida email y política de contraseñas (10+ caracteres, mayúscula, minúscula, número). Inserta usuario con `is_verified = 1`, `created_at = now_ms`, `access_code = NULL`. Emite cookie `session_token` (HMAC-SHA256) y responde **HTTP 201 Created** con `{ ok: true, user: { ... isDemo: true, access_code: null } }`. Si el email ya existe, responde **HTTP 409 Conflict**. |
+| `/api/auth/login` | `POST` | Pública (Rate Limited) | `200`, `400`, `401`, `423` | **Inicio de Sesión:** Verifica bloqueo de cuenta (15 min tras 5 intentos fallidos, **HTTP 423 Locked**). Compara hash PBKDF2 (con mitigación de timing attacks). Si las credenciales son válidas, actualiza `last_login_at`, emite cookie `session_token` y responde **HTTP 200** con los datos de usuario y sesión. |
+| `/api/auth/link-code` | `POST` | Sesión requerida | `200`, `400`, `401`, `403` | **Convalidación de Licencia:** Valida código normalizado con `db.normalize_access_code` (remueve espacios, tabs, NBSP y fuerza mayúsculas) contra el regex `^[A-Z0-9_\-]{4,36}$`. Descuenta atómicamente usos en la tabla SQLite `access_codes` y asocia el código a la cuenta, promoviendo al postulante de Versión Demo (`isDemo: true`) a Pase de Grado Activo (`isDemo: false`). |
 | `/api/auth/me` | `GET` | Cookie `session_token` | `200`, `401` | **Estado de Sesión:** Valida firma HMAC de la cookie y retorna los datos del usuario en sesión (`id`, `email`, `name`, `isDemo`, `access_code`). |
 | `/api/auth/logout` | `POST` | Cookie opcional | `200` | **Cierre de Sesión:** Invalida y expira la cookie `session_token` con encabezado `Set-Cookie: session_token=; Max-Age=0`. |
-| `/api/admin/codes` | `GET` | PIN Admin Requerido (`X-Admin-PIN` o query `pin`) | `200`, `401` | **Listar Licencias (Admin):** Valida PIN del administrador contra hash SHA-256 (`almabaltoamial2020`). Retorna todos los códigos almacenados centralizadamente en SQLite con detalle de usos (`times_used`, `current_uses`, `max_uses`), estado activo, expiración, y los correos de Gmail asociados (`assigned_email`, `linked_emails`, `associated_email`). |
-| `/api/admin/create-code` | `POST` | PIN Admin Requerido (`X-Admin-PIN` o body `pin`) | `201`, `400`, `401`, `409`, `500` | **Crear Código de Acceso (Admin):** Persiste un nuevo código en SQLite (`access_codes`) con parámetros de `code` personalizado o autogenerado, `label`, `email` / `assigned_email` (opcional para pre-asignación a un alumno), `max_uses` y `days`. Los códigos creados aquí quedan disponibles globalmente para cualquier postulante desde cualquier dispositivo o ventana de incógnito. |
+| `/api/admin/codes` | `GET` | PIN Admin Requerido (`X-Admin-PIN` o query `pin`) | `200`, `401` | **Listar Licencias (Admin):** Valida PIN del administrador contra hash SHA-256 (`almabaltoamial2020`). Retorna todos los códigos almacenados centralizadamente en SQLite con detalle de usos (`times_used`, `current_uses`, `max_uses`), estado activo, expiración, y los correos asociados. |
+| `/api/admin/create-code` | `POST` | PIN Admin Requerido (`X-Admin-PIN` o body `pin`) | `201`, `400`, `401`, `409`, `500` | **Crear Código de Acceso (Admin):** Persiste un nuevo código en SQLite (`access_codes`) con parámetros de `code` personalizado o autogenerado, `label`, `email` / `assigned_email` (opcional para pre-asignación a un alumno), `max_uses` y `days`. Los códigos creados quedan disponibles globalmente para cualquier postulante. |
 | `/api/admin/revoke-code` | `POST` | PIN Admin Requerido (`X-Admin-PIN` o body `pin`) | `200`, `400`, `401`, `404` | **Revocar Código de Acceso (Admin):** Desactiva inmediatamente un código en SQLite (`active = 0`), impidiendo convalidaciones futuras. |
 
 ---
 
-### 6.3. Variables de Entorno, Configuración de Correo y Persistencia
+### 6.3. Variables de Entorno y Persistencia
 
-El backend implementa un sistema de configuración jerárquico mediante la función nativa `load_env_file()` en `server.py`, la cual parsea el archivo local `.env` sin sobreescribir variables ya inyectadas por el sistema operativo o el entorno de producción (Render.com).
+El backend implementa un sistema de configuración jerárquico mediante la función nativa `load_env_file()` en `server.py`, la cual parsea el archivo local `.env` sin sobreescribir variables ya inyectadas por el entorno de producción (Render.com).
 
 | Variable de Entorno | Tipo | Valor Predeterminado | Entorno | Rol y Comportamiento Arquitectónico |
 | :--- | :---: | :---: | :---: | :--- |
-| `EMAIL_PROVIDER` | String | Auto-detectado (`brevo`, `resend` o `smtp`) | Prod / Local | Define el proveedor activo: `brevo` activa la API REST HTTPS oficial de Brevo (recomendada); `resend` activa Resend API HTTPS; `smtp` activa socket local. |
-| `BREVO_API_KEY` | String | `""` (Vacío) | **Recomendada en Render** | Clave secreta API de Brevo / Sendinblue (`xkeysib-...`). Opera sobre HTTPS (puerto 443) y permite enviar correos transaccionales a cualquier persona sin requerir dominio web propio ni registros DNS. |
-| `RESEND_API_KEY` | String | `""` (Vacío) | Prod | Clave secreta de la API de Resend (`re_...`). Opera sobre HTTPS en puerto 443 sin bloqueos en Render. Requiere dominio verificado en `resend.com/domains` para enviar a terceros. |
-| `EMAIL_FROM` | String | `GRADOMANIACOS <gradomaniacos@gmail.com>` | Prod / Local | Dirección o cabecera remitente visible para el alumno (ej: `GRADOMANIACOS <gradomaniacos@gmail.com>` en Brevo, o `GRADOMANIACOS <onboarding@resend.dev>` en Resend). |
-| `SMTP_HOST` | String | `""` (Vacío) | Local | Servidor SMTP saliente para desarrollo local (ej: `smtp.gmail.com`). |
-| `SMTP_PORT` | Entero | `587` | Local | Puerto SMTP local. `587` activa STARTTLS; `465` activa SSL directo (`smtplib.SMTP_SSL`). |
-| `SMTP_USER` | String | `""` (Vacío) | Local | Cuenta emisora para SMTP local (ej: `gradomaniacos@gmail.com`). |
-| `SMTP_PASS` | String | `""` (Vacío) | Local | Contraseña de Aplicación de Google (16 letras) para desarrollo local. |
 | `PORT` | Entero | `8080` | Ambos | Puerto de escucha HTTP del servidor local o asignado dinámicamente por Render.com. |
-| `ALLOW_TEST_AUTH` | String | `""` | Tests / CI | Si es `"1"`, habilita el campo `testVerificationCode` en respuestas JSON para permitir suites automatizadas E2E. En Render se fija en `"0"`. |
+| `SESSION_SECRET` | String | Auto-generado | Ambos | Clave secreta para la firma criptográfica HMAC-SHA256 de las cookies `session_token`. |
 | `EXTRA_ACCESS_CODES` | String | `""` | Prod (Render Free) | Lista separada por comas de códigos de acceso adicionales para sembrar automáticamente en SQLite al iniciar el contenedor efímero (`INSERT OR IGNORE`). Permite garantizar persistencia de códigos en planes gratuitos sin disco. |
 | `DB_PATH` | String | `estudio_grado.db` | Prod (Render Disk) | Ruta absoluta o relativa al archivo SQLite. Permite apuntar a un Persistent Disk montado en Render (ej: `/var/data/estudio_grado.db`) garantizando persistencia permanente. |
+| `ALLOW_TEST_AUTH` | String | `""` | Tests / CI | Bandera para habilitar comodines defensivos en suites de prueba automatizadas. |
+
+> [!NOTE]
+> **Desincorporación en v7.0:** Las variables de correo saliente (`EMAIL_PROVIDER`, `BREVO_API_KEY`, `RESEND_API_KEY`, `EMAIL_FROM`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`) han sido desincorporadas de la arquitectura activa tras la eliminación total de los flujos de correo.
 
 
 ---
@@ -510,7 +493,8 @@ El backend implementa un sistema de configuración jerárquico mediante la funci
 ### 7.1. Dinámica del Flujo de Acceso
 El botón de estado de licencia (icono de candado `#btn-open-unlock-badge` en la cabecera superior y tarjetas de paywall) opera como la puerta de entrada unificada para la activación del Pase de Grado:
 
-1. **Paso 1: Identificación y Verificación de Correo (Sub-estado de Código 6 Dígitos):**
+
+1. **Paso 1: Identificación y Registro Directo (Aviso de 48h en Versión Demo):**
    * Al presionar el candado, si el usuario **no cuenta con una sesión activa**, se despliega el modal `#unlock-modal` en la vista `#unlock-step-login`.
    * Se presenta el formulario de credenciales (`#form-auth-register`) con campos de correo (`#input-register-email`), contraseña (`#input-register-password`) y confirmación (`#input-confirm-password`).
    * Validación en vivo de la política de contraseñas mediante `#password-policy-hints`:
@@ -520,18 +504,14 @@ El botón de estado de licencia (icono de candado `#btn-open-unlock-badge` en la
      * Al menos un número (`#rule-num`).
    * Indicador dinámico de coincidencia de contraseñas (`#password-match-hint`).
    * Enlace interactivo `#link-toggle-login-register` para conmutar ágilmente entre modo Registro y modo Iniciar Sesión.
-   * **Subvista de Verificación (`#unlock-step-verify-code`):** Al registrar una cuenta nueva o intentar iniciar sesión en una cuenta pendiente de verificación, el formulario `#form-auth-register` se oculta y se despliega la subvista de verificación:
-     * Muestra el correo destinatario en `#verify-email-display`.
-     * Campo `#input-verification-code` con máscara numérica, longitud de 6 caracteres y filtrado automático de caracteres no numéricos.
-     * Botón `#btn-submit-verify-code` habilitado únicamente al alcanzar exactamente 6 dígitos.
-     * Enlace de reenvío `#link-resend-code` con cuenta regresiva visual de 30 segundos (*throttling* defensivo).
-     * Enlace `#link-back-to-register` para retornar en cualquier momento al formulario de credenciales.
-   * Al verificar exitosamente el código de 6 dígitos, el usuario queda **autenticado de inmediato con cookie de sesión activa** y transita directamente al Paso 2 (`#unlock-step-convalidate`) en **Versión Demo**, sin requerir un inicio de sesión intermedio.
+   * **Aviso de Expiración en Versión Demo (`#demo-expiry-notice`):** Visible en modo Registro con icono de reloj y bordes dorados, informando: *"Versión Demo por 48 horas. Tu cuenta y avances temporales caducarán automáticamente salvo que convalides un Pase de Grado."*
+   * **Registro Directo sin Fricción:** Al pulsar *"Crear Cuenta"* (`#btn-submit-register`), se ejecuta `POST /api/auth/register`. El backend valida los datos, crea el usuario con `is_verified = 1`, `created_at = now_ms`, emite la cookie de sesión `session_token` (HMAC-SHA256) y responde **HTTP 201 Created**.
+   * El cliente actualiza `currentUser = { ...data.user, isDemo: true }` y transita de forma inmediata y automática al **Paso 2 (`#unlock-step-convalidate`)**, sin requerir verificación por correo ni pantallas intermedias.
 
 2. **Inicio Predeterminado en Versión Demo:**
-   * Tras la verificación del código o login de cuenta verificada, el postulante accede **con la sesión iniciada en Versión Demo por defecto** (`isDemo = true`, `access_code = null`).
+   * Tras el registro directo o inicio de sesión de una cuenta sin código, el postulante accede **con la sesión iniciada en Versión Demo por defecto** (`isDemo = true`, `access_code = null`).
    * La cabecera muestra el nombre o correo del alumno (`#auth-user-container`), mientras el candado permanece en estado demo rojo.
-   * El postulante puede explorar de inmediato las cédulas y casos liberados para prueba.
+   * El postulante puede explorar de inmediato las cédulas y el taller de casos (con la limitación de la Pregunta 1).
 
 3. **Paso 2: Convalidación de la Cuenta con Código de Activación:**
    * Con la sesión iniciada en Versión Demo, el modal `#unlock-modal` transita fluidamente a `#unlock-step-convalidate`.
@@ -544,7 +524,8 @@ El botón de estado de licencia (icono de candado `#btn-open-unlock-badge` en la
      * En cliente: Sincroniza `LicenseService.activateCode(code)` y actualiza el objeto `currentUser.isDemo = false`.
    * Si la convalidación es exitosa:
      * El candado se transforma instantáneamente en la corona dorada de Pase Activo (`#badge-license-active`).
-     * Se desbloquean inmediatamente las materias protegidas (Civil, Procesal y Constitucional).
+     * Se desbloquean inmediatamente las materias protegidas (Civil, Procesal y Constitucional) y todas las preguntas en el taller de casos.
+     * La cuenta queda permanentemente inmunizada ante la purga automática de 48h.
      * Se emite una notificación toast celebratoria: *"¡Cuenta convalidada con éxito! Pase de Grado activado."*
 
 ### 7.2. Máquina de Estados y Mapeo del DOM (`#unlock-modal`)
@@ -553,15 +534,11 @@ El botón de estado de licencia (icono de candado `#btn-open-unlock-badge` en la
 stateDiagram-v2
     [*] --> SinSesion: Clic en Candado (#btn-open-unlock-badge)
     SinSesion --> Paso1_Credenciales: Renderiza #unlock-step-login (#form-auth-register)
-    Paso1_Credenciales --> Paso1_Credenciales: Error validación credenciales / contraseñas
-    Paso1_Credenciales --> Paso1_VerificacionCodigo: Registro exitoso (201) o Login no verificado (403)
-    Paso1_VerificacionCodigo --> Paso1_Credenciales: Clic en Volver (#link-back-to-register)
-    Paso1_VerificacionCodigo --> Paso1_VerificacionCodigo: Código erróneo / Reenviar código (#link-resend-code)
-    Paso1_VerificacionCodigo --> Paso2_Demo: Código de 6 dígitos verificado (Sesión creada, isDemo: true)
-    Paso1_Credenciales --> Paso2_Demo: Login exitoso de cuenta ya verificada (isDemo: true)
+    Paso1_Credenciales --> Paso1_Credenciales: Error validación / Email duplicado (409)
+    Paso1_Credenciales --> Paso2_Demo: Registro exitoso (201) o Login exitoso (200) -> (Sesión creada, isDemo: true)
     Paso2_Demo --> Convalidando: Ingreso de Código (#input-license-code) + Clic #btn-submit-license
     Convalidando --> Paso2_Demo: Código inválido o expirado (Toast error)
-    Convalidando --> PaseActivo: Código válido vinculado a la cuenta (isDemo: false)
+    Convalidando --> PaseActivo: Código válido vinculado a la cuenta (isDemo: false, inmunidad 48h)
     PaseActivo --> [*]: Candado -> Corona (#badge-license-active)
 ```
 
@@ -570,7 +547,7 @@ stateDiagram-v2
 | :--- | :--- | :--- |
 | `#unlock-modal` | Contenedor Modal | Diálogo principal de activación con backdrop difuminado. |
 | `.unlock-step-indicator` | Barra de Progreso | Muestra los estados visuales `1. Identificación` y `2. Convalidación`. |
-| `#unlock-step-login` | Vista de Paso 1 | Contenedor principal de identificación y verificación. |
+| `#unlock-step-login` | Vista de Paso 1 | Contenedor principal de identificación y registro directo. |
 | `#auth-form-title` | Encabezado | Título dinámico ("Paso 1: Crea tu cuenta..." o "Paso 1: Inicia sesión..."). |
 | `#form-auth-register` | Formulario | Formulario con prevención de submit por defecto y validación reactiva. |
 | `#input-register-email` | Input Email | Entrada para correo electrónico del postulante. |
@@ -578,16 +555,10 @@ stateDiagram-v2
 | `#input-confirm-password` | Input Password | Entrada de confirmación de contraseña (modo Registro). |
 | `#password-policy-hints` | Contenedor Hints | Indicadores visuales de cumplimiento de reglas (`#rule-len`, `#rule-upper`, `#rule-lower`, `#rule-num`). |
 | `#password-match-hint` | Hint Coincidencia | Feedback en tiempo real sobre coincidencia entre contraseña y confirmación. |
+| `#demo-expiry-notice` | Contenedor Notice | Aviso visible en modo Registro informando la vigencia de 48 horas de la Versión Demo y la purga automática de cuentas no convalidadas. |
 | `#btn-submit-register` | Botón Submit | Botón dinámico ("Crear Cuenta" o "Iniciar Sesión") con icono reactivo. |
 | `#link-toggle-login-register` | Enlace Toggle | Conmutador interactivo entre modo Registro y modo Login. |
-| `#register-error-msg` | Alerta de Error | Banner de alerta para desplegar errores de autenticación sanitizados. |
-| `#unlock-step-verify-code` | Subvista Paso 1 | Subvista para el ingreso y validación del código numérico de 6 dígitos. |
-| `#verify-email-display` | Texto | Despliega la dirección de correo a la que fue enviado el código. |
-| `#input-verification-code` | Input Código | Entrada numérica de 6 dígitos con máscara y auto-validación. |
-| `#btn-submit-verify-code` | Botón Submit | Botón "Verificar y Continuar" que envía el código al servidor. |
-| `#link-resend-code` | Botón Acción | Botón de reenvío de código con temporizador de enfriamiento de 30 segundos. |
-| `#link-back-to-register` | Enlace Toggle | Retorna al formulario de registro/login si el postulante desea corregir su correo. |
-| `#verify-error-msg` | Alerta de Error | Banner de retroalimentación para códigos inválidos, expirados o confirmación de reenvío. |
+| `#register-error-msg` | Alerta de Error | Banner de alerta para desplegar errores de autenticación sanitizados (ej. correo duplicado 409). |
 | `#unlock-step-convalidate` | Vista de Paso 2 | Desplegada cuando existe sesión activa en Versión Demo (`currentUser.isDemo = true`). |
 | `#unlock-user-card` | Tarjeta de Identidad | Despliega la cuenta de usuario vinculada. |
 | `#unlock-user-name` | Texto | Nombre y apellidos o identificador del postulante (`name`). |
@@ -611,14 +582,11 @@ stateDiagram-v2
 ---
 
 ### 7.3. Contratos de Seguridad y Pruebas Automatizadas
-* **Suite de Autenticación Autónoma (`test_unlock_auth_flow.cjs`):** Ejecuta 101 pruebas cubriendo estado inicial, validación de política de contraseñas, rechazo por discrepancia, registro con emisión de código de verificación, prevención de duplicados, login fallido de cuenta no verificada (HTTP 403), verificación con código erróneo, invalidación tras 5 intentos fallidos, reenvío de nuevo código con reseteo de intentos, verificación exitosa con código válido, autenticación directa en Versión Demo, convalidación con código de activación, desbloqueo integral de materias en `LicenseService`, cierre de sesión, login exitoso con credenciales correctas tras verificación, pruebas de regresión reactivas para el botón `#btn-submit-register` y la subvista `#unlock-step-verify-code`, pruebas de blindaje HTTP 503 ante caída del proveedor de correo, verificación de confidencialidad en producción (`ALLOW_TEST_AUTH=0`), creación y revocación de códigos por PIN de administrador, persistencia en SQLite, consumo atómico y normalización canónica de espacios.
-* **Suite de Regresión e Integración (`test_e2e_case_flow.cjs`):** Ejecuta 91 pruebas integrales que verifican la confidencialidad de modelos docentes, casos IA, rúbrica AIME 2026-20, ciberseguridad, sincronización multi-dispositivo y la **regla de limitación de resolución de casos en Modo Demo vs. Pase Activo (v6.4)**.
+* **Suite de Autenticación Autónoma (`test_unlock_auth_flow.cjs`):** Ejecuta 81 pruebas automatizadas cubriendo estado inicial, validación reactiva de política de contraseñas, rechazo por discrepancia, registro directo con emisión inmediata de cookie de sesión (`session_token`), rechazo de duplicados con HTTP 409 Conflict, transición automática a Versión Demo en Paso 2, convalidación atómica de licencias en SQLite, desbloqueo integral de materias en `LicenseService`, cierre de sesión e invalidación de cookie, inicio de sesión exitoso con hash PBKDF2, account lockout (15 min tras 5 intentos fallidos), creación, consulta y revocación de licencias mediante PIN de administrador (`almabaltoamial2020`), y simulación de purga automática de cuentas demo con más de 48 horas de antigüedad preservando intactas las cuentas convalidadas.
+* **Suite de Regresión e Integración (`test_e2e_case_flow.cjs`):** Ejecuta 91 pruebas integrales que verifican la confidencialidad de modelos docentes, casos IA, rúbrica AIME 2026-20, ciberseguridad, sincronización multi-dispositivo y la regla de limitación de resolución de casos en Modo Demo vs. Pase Activo.
 * **Sanitización Defensiva y Prevención XSS:** Todos los datos de usuario son escapados contra inyección XSS mediante `SecurityShield.escapeHtml` y los mensajes de error se renderizan estrictamente con `textContent` en el DOM.
 * **Hashing Seguro en Cliente (Modo Estático / GitHub Pages):** La función `AuthService.hashClientPassword()` emplea la Web Crypto API (`crypto.subtle.digest("SHA-256")`) con salt local, asegurando que **nunca se almacenen contraseñas en texto plano** en `localStorage`.
-* **Resiliencia y Modo Desarrollo:** Si no se define un proveedor de correo en el servidor, `server.py` no interrumpe la ejecución; imprime el código de verificación en consola con la etiqueta `[SMTP Dev]` permitiendo pruebas locales transparentes y suites automatizadas deterministas.
-* **Contrato Fail-Safe de Transporte de Correo (HTTP 503):** Si se configura un proveedor (`resend` o `smtp`) y la entrega del correo falla (rechazo de API key, error de dominio remitente, bloqueo de red o credenciales inválidas), los endpoints `/api/auth/register` y `/api/auth/resend-code` interceptan la excepción y retornan **HTTP 503 Service Unavailable** con `{ "ok": false, "error": "No pudimos enviar el correo de verificación. Por favor intenta nuevamente en unos minutos." }`, evitando registros inconsistentes o cuentas abandonadas esperando un correo no despachado.
-* **Diagnóstico Interactivo CLI (`scripts/test_email_manual.py` y `scripts/test_smtp_manual.py`):** Herramientas independientes para verificar de forma segura y directa la conectividad con Resend (HTTPS 443) o Gmail (SMTP 587/465) antes de registrar usuarios reales, proporcionando diagnósticos asistidos paso a paso.
-* **Cero Fuga de Secretos y Aislamiento de Credenciales:** Ni `RESEND_API_KEY` ni `SMTP_PASS` se almacenan en el código ni en el historial de Git. Se gestionan localmente mediante `.env` (ignorado por `.gitignore`) y en Render.com mediante variables de entorno declaradas con `sync: false` en `render.yaml`.
+* **Cero Fuga de Secretos y Aislamiento de Credenciales:** Ni secretos de sesión ni contraseñas se almacenan en el código ni en el historial de Git. Se gestionan localmente mediante `.env` (ignorado por `.gitignore`) y en Render.com mediante variables de entorno declaradas con `sync: false` en `render.yaml`.
 * **Accesibilidad Visual WCAG AA y Contraste Real:** Tokens semánticos tipográficos y de estado (`--gold-primary: #92400e;`, `--danger-text: #b91c1c;`, `--warning-text: #92400e;`, `--success-text: #047857;`, `--info-text: #0284c7;`) que garantizan relaciones de contraste superiores a 4.5:1 (texto normal) y 7:1 (encabezados/estados) contra fondos claros, eliminando colores amarillos pálidos o rojos claros inaccesibles.
 * **Experiencia y Accesibilidad Táctil Móvil:** Dimensiones mínimas de touch targets $\ge 44 \times 44\text{ px}$ en botones de navegación, badges de estado e interactores de formulario; entradas de texto a 16px para evitar auto-zoom indeseado en iOS Safari; y propiedad `touch-action: none;` con gestos multitáctiles (pan y pinch-to-zoom de 2 dedos) en el visor de instituciones interconectadas (`ConceptGraph`).
 
@@ -631,29 +599,28 @@ stateDiagram-v2
 | `CONTEXT.md` | Documentación | **Fuente canónica inmutable de verdad.** Debe actualizarse tras cada cambio. |
 | `README.md` | Documentación | Manual de usuario, arquitectura dual, guía de despliegue en Render.com y configuración de Resend / SMTP. |
 | `GOOGLE_AUTH_SETUP.md` | Documentación | Guía de arquitectura de autenticación autónoma, configuración de proveedores de correo y despliegue público. |
-| `index.html` | Estructura | Workbench jurídico, visor de cédulas, visor de casos y modal unificado de acceso `#unlock-modal` con subvista de verificación `#unlock-step-verify-code`. |
-| `css/paywall.css` | Estilos | Estilos del formulario de credenciales, hints de contraseña, subvista de código 6 dígitos, paywall, insignias de estado y responsive móvil. |
+| `index.html` | Estructura | Workbench jurídico, visor de cédulas, visor de casos y modal unificado de acceso `#unlock-modal` con aviso de 48h `#demo-expiry-notice`. |
+| `css/paywall.css` | Estilos | Estilos del formulario de credenciales, hints de contraseña, aviso de expiración 48h `.demo-expiry-notice`, paywall, insignias de estado y responsive móvil. |
 | `css/main.css` | Estilos | Sistema de diseño *Dark Academy*, variables tipográficas (`Playfair Display`, `Plus Jakarta Sans`), tokens WCAG AA y header responsive. |
 | `css/modal.css` | Estilos | Diálogos modales, backdrop difuminado y estructura responsive para dispositivos móviles. |
 | `css/concept-graph.css` | Estilos | Lienzo de grafo HTML5 con `touch-action: none;` y controles flotantes adaptados a pantallas táctiles. |
 | `css/case-workshop.css` | Estilos | Taller de casos prácticos, rúbrica AIME 2026-20, estilos de bloqueo demo (`.case-demo-locked-card`), grilla de ventajas exclusivas (`.demo-advantages-grid`), notice informativo (`.demo-justification-notice`) y resultados demo. |
 | `js/app.js` | Orquestador | Controlador principal de GRADOMANÍA, navegación, vinculación del candado y auto-sincronizador de fuentes. |
-| `js/auth-service.js` | Servicio | Autenticación autónoma (registro, verificación de código de 6 dígitos, reenvío con throttling, login, logout), hashing seguro cliente con Web Crypto, validación reactiva y sesiones. |
+| `js/auth-service.js` | Servicio | Autenticación autónoma (registro directo, login, logout), hashing seguro cliente con Web Crypto, validación reactiva, convalidación y sesiones. |
 | `js/auth-license.js` | Servicio | Lógica de licencias (`LicenseService`), cálculo de materias desbloqueadas, método `isDemoMode()` y persistencia local. |
 | `js/auth-config.js` | Configuración | Configuración de cliente, códigos de invitación para modo estático y parámetros de sesión. |
 | `js/concept-graph.js` | Visualizador | Grafo interactivo con física de fuerzas y soporte móvil completo (arrastre de nodos, pan y pinch-to-zoom con dos dedos). |
 | `js/case-generator-agent.js` | Agente IA | Síntesis dogmática de casos inéditos, matriz de compatibilidad y poda FIFO. |
 | `js/case-solver.js` | Workbench | Interrogación, compuertas excluyentes, rúbrica AIME 2026-20, limitación a pregunta 1 en Modo Demo sin justificación, visualización de ventajas en preguntas > 0 y evaluación unidimensional. |
 | `js/security-shield.js` | Ciberseguridad | Detección de prompt injection, anti-XSS, escape seguro y cuotas de caracteres. |
-| `server.py` | Backend | Servidor HTTP Python multi-hilo, enlace dinámico (0.0.0.0 en nube/Render, 127.0.0.1 en local), soporte `PORT`/`SESSION_SECRET`, transporte de correo multi-proveedor nativo (Brevo REST API HTTPS, Resend REST API HTTPS vía `urllib.request` y SMTP con `smtplib`), multi-provider fallback, endpoints `/api/auth/*` y `/api/admin/*`, Zero Exposure y rate limiting. |
-| `db.py` | Base de Datos | Conexión relacional SQLite (`estudio_grado.db`), hashing PBKDF2, esquema de usuarios con `is_verified`, `verification_code`, `verification_code_expires_at`, `verification_attempts`, lockout y códigos de acceso. Auto-sanación y auto-migración en `init_db()`. |
+| `server.py` | Backend | Servidor HTTP Python multi-hilo, enlace dinámico (0.0.0.0 en nube/Render, 127.0.0.1 en local), soporte `PORT`/`SESSION_SECRET`, daemon en segundo plano para purga automática de cuentas demo tras 48h (`run_auto_purge_daemon`), endpoints `/api/auth/*` (registro directo, login, me, logout, link-code) y `/api/admin/*`, Zero Exposure y rate limiting. |
+| `db.py` | Base de Datos | Conexión relacional SQLite (`estudio_grado.db`), hashing PBKDF2, esquema de usuarios con `is_verified`, `created_at`, `last_login_at`, lockout, purga automática `purge_unvalidated_accounts` y códigos de acceso. Auto-sanación y auto-migración en `init_db()`. |
 | `manage_access_codes.py` | CLI Admin | Generador y administrador de códigos de invitación tipo beta cerrada. |
-| `scripts/test_email_manual.py` | CLI Diagnóstico | Herramienta CLI unificada para diagnóstico y prueba directa de despacho de correo mediante Brevo HTTPS, Resend HTTPS o SMTP con detección de restricciones de dominio. |
-| `scripts/test_smtp_manual.py` | CLI Diagnóstico | Herramienta CLI especializada para pruebas directas y diagnóstico del transporte SMTP local de Gmail (STARTTLS 587 / SSL 465). |
-| `.env.example` | Plantilla Config | Plantilla canónica de variables de entorno para configuración local y despliegue (Resend API, SMTP Gmail, puertos, secretos de sesión). |
+| `.env.example` | Plantilla Config | Plantilla canónica de variables de entorno para configuración local y despliegue (puertos, secretos de sesión, persistencia SQLite). |
 | `requirements.txt` | Dependencias | Paquetes de producción mínimos (`pypdf`, `python-docx`, `google-auth`) para despliegues en contenedores e infraestructura cloud. |
-| `render.yaml` | Infraestructura | Blueprint declarativo de infraestructura como código para despliegue automatizado en Render.com con Resend HTTPS API. |
-| `test_unlock_auth_flow.cjs` | Test E2E | Suite ampliada de 101 pruebas que valida el flujo Candado -> Correo/Contraseña -> Verificación 6 Dígitos -> Demo -> Convalidación -> Pase Activo, endpoints de administración, consumo atómico, normalización y marca. |
+| `render.yaml` | Infraestructura | Blueprint declarativo de infraestructura como código para despliegue automatizado en Render.com. |
+| `test_unlock_auth_flow.cjs` | Test E2E | Suite de 81 pruebas que valida el flujo Candado -> Registro Directo -> Versión Demo -> Convalidación -> Pase Activo, endpoints de administración, consumo atómico, normalización y simulación de purga 48h. |
+| `PROMPTS/` | Documentación Operativa | **Puente humano ↔ Agente Antigravity IDE.** Carpeta canónica de prompts de ingeniería listos para ejecutar (índice `README.md`, plantilla `_TEMPLATE.md`, prompts numerados `NNN_<slug>.md`). Cada prompt exige actualización correlativa de `CONTEXT.md` y 100 % PASS de las suites al implementarse. |
 | `test_e2e_case_flow.cjs` | Test E2E | Suite integral de 91 pruebas (casos IA, seguridad, rúbrica, confidencialidad, multi-dispositivo y limitación en Modo Demo vs. Pase Activo). |
 
 ---
@@ -715,6 +682,16 @@ stateDiagram-v2
   - **Resiliencia en SQLite para Cuentas No Verificadas (`db.py`):** Modificación de `create_user` para que cuando un usuario no verificado con código expirado (>15 min) reintente el registro, se actualicen sus credenciales y se emita un nuevo código en lugar de bloquear el proceso con mensaje de duplicado.
   - **Herramienta CLI de Verificación Multi-Proveedor (`scripts/test_email_manual.py`):** Actualización completa con soporte para probar Brevo, Resend y SMTP por línea de comandos con diagnóstico y recomendaciones de configuración.
   - **Aprobación del 100% de Pruebas Automatizadas (194 Pruebas):** 103/103 pruebas exitosas en `test_unlock_auth_flow.cjs` y 91/91 en `test_e2e_case_flow.cjs`. Actualización canónica de `CONTEXT.md`.
+* **v7.0 (Reversión a Registro Directo sin Verificación de Correo y Purga Automática de Cuentas Demo tras 48 Horas):**
+  - **Desacoplamiento Absoluto de Servicios de Correo:** Eliminación completa de dependencias y código de transporte SMTP, Brevo HTTPS y Resend HTTPS en `server.py`. Supresión definitiva de los endpoints `/api/auth/verify-code` y `/api/auth/resend-code`, erradicando los errores de entrega o bloqueos en producción (HTTP 503).
+  - **Flujo de Registro Directo sin Fricción:** Creación de cuenta inmediata mediante Correo + Contraseña hasheada con **PBKDF2-HMAC-SHA256** (210.000 iteraciones, 16 bytes salt Base64) y confirmación de contraseña. El endpoint `POST /api/auth/register` emite la cookie de sesión firmada `session_token` (HMAC-SHA256), inserta al usuario con `is_verified = 1`, `created_at = now_ms`, `last_login_at = now_ms`, responde **HTTP 201 Created** con `{ ok: true, user: { ... isDemo: true, access_code: null } }` y transita de inmediato al Paso 2 (`#unlock-step-convalidate`) en Versión Demo.
+  - **Manejo Estricto de Duplicados:** Si el correo ya existe, `POST /api/auth/register` responde de inmediato con **HTTP 409 Conflict** (`{ ok: false, error: "El correo electrónico ya se encuentra registrado." }`).
+  - **UI/UX Limpia y Aviso de Expiración en Demo:** Eliminación del contenedor `#unlock-step-verify-code` e incorporación del componente visual `#demo-expiry-notice` en el formulario de registro (`index.html`, `css/paywall.css`), advirtiendo al postulante que la Versión Demo tiene una vigencia de 48 horas antes de su purga automática salvo que convalide un Pase de Grado.
+  - **Worker Daemon de Purga Automática en Segundo Plano (`run_auto_purge_daemon`):** `server.py` inicializa un hilo daemon (`threading.Thread(daemon=True)`) que ejecuta la purga de cuentas al iniciar el servidor y de forma recurrente cada 30 minutos, invocando `db.purge_unvalidated_accounts(max_age_ms=48*3600*1000)`.
+  - **Política de Purga Segura:** Se eliminan permanentemente de SQLite los usuarios de la tabla `users` que mantengan `access_code IS NULL` y cuya antigüedad (`created_at`) supere las 48 horas, limpiando en cascada las filas huérfanas en `user_progress`. Las cuentas con Pase de Grado convalidado (`access_code IS NOT NULL`) quedan **estrictamente excluidas e inmunizadas** ante la purga.
+  - **Depuración de Archivos Huérfanos:** Eliminación de los scripts obsoletos `scripts/test_email_manual.py` y `scripts/test_smtp_manual.py`.
+  - **Aprobación del 100% de Pruebas Automatizadas (172 Pruebas en Total):** 81/81 pruebas aprobadas en `test_unlock_auth_flow.cjs` y 91/91 pruebas aprobadas en `test_e2e_case_flow.cjs`. Cumplimiento estricto de la regla de oro: actualización exhaustiva y canónica de `CONTEXT.md` (SSOT).
+
 
 
 

@@ -178,11 +178,13 @@ def init_db(db_path: Optional[Path] = None) -> None:
             cursor.execute("DROP TABLE users_old")
             conn.execute("PRAGMA foreign_keys = ON;")
 
-        # Auto-migración incremental de campos de verificación por correo (v6.0)
+        # Auto-migración incremental de columnas en users
         cursor.execute("PRAGMA table_info(users)")
         curr_columns = [row[1] for row in cursor.fetchall()]
+        if "created_at" not in curr_columns:
+            cursor.execute("ALTER TABLE users ADD COLUMN created_at INTEGER DEFAULT 0")
         if "is_verified" not in curr_columns:
-            cursor.execute("ALTER TABLE users ADD COLUMN is_verified INTEGER DEFAULT 0")
+            cursor.execute("ALTER TABLE users ADD COLUMN is_verified INTEGER DEFAULT 1")
         if "verification_code" not in curr_columns:
             cursor.execute("ALTER TABLE users ADD COLUMN verification_code TEXT DEFAULT NULL")
         if "verification_code_expires_at" not in curr_columns:
@@ -391,13 +393,14 @@ def create_user(
     password: str,
     name: Optional[str] = None,
     access_code: Optional[str] = None,
-    is_verified: int = 0,
+    is_verified: int = 1,
     verification_code: Optional[str] = None,
     verification_code_expires_at: Optional[int] = None,
     db_path: Optional[Path] = None
 ) -> Tuple[bool, str, Optional[Dict[str, Any]]]:
     """
-    Crea un nuevo usuario con correo, contraseña (hasheada PBKDF2) y opcionalmente código de acceso.
+    Crea un nuevo usuario con correo y contraseña (hasheada PBKDF2).
+    En v7.0 la activación es directa en Versión Demo (sin verificación por correo).
     Retorna (ok, mensaje, user_dict).
     """
     init_db(db_path)
@@ -412,39 +415,9 @@ def create_user(
 
     with get_db_connection(db_path) as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT id, is_verified, access_code, verification_code_expires_at FROM users WHERE LOWER(email) = ?", (clean_email,))
-        existing_user = cursor.fetchone()
-        if existing_user:
-            if existing_user["is_verified"] == 1:
-                return False, "El correo electrónico ya se encuentra registrado.", None
-
-            # Si el usuario no está verificado pero su código sigue vigente: rechazar duplicado
-            expires_at = existing_user["verification_code_expires_at"] or 0
-            if now_ms <= expires_at:
-                return False, "El correo electrónico ya se encuentra registrado y pendiente de verificación.", None
-
-            # Si el código previo ya expiró, permitir re-registro seguro con nuevo código y contraseña
-            clean_code = normalize_access_code(access_code) if access_code else None
-            cursor.execute(
-                """
-                UPDATE users
-                SET password_hash = ?,
-                    password_salt = ?,
-                    name = COALESCE(?, name),
-                    access_code = COALESCE(?, access_code),
-                    verification_code = ?,
-                    verification_code_expires_at = ?,
-                    verification_attempts = 0,
-                    failed_login_attempts = 0,
-                    locked_until = NULL
-                WHERE id = ?
-                """,
-                (pwd_hash, pwd_salt, clean_name, clean_code, verification_code, verification_code_expires_at, existing_user["id"])
-            )
-            conn.commit()
-            cursor.execute("SELECT id, email, name, access_code, failed_login_attempts, locked_until, is_verified, verification_code, verification_code_expires_at, verification_attempts, created_at, last_login_at FROM users WHERE id = ?", (existing_user["id"],))
-            row = cursor.fetchone()
-            return True, "Código de verificación actualizado para la cuenta.", dict(row) if row else None
+        cursor.execute("SELECT id FROM users WHERE LOWER(email) = ?", (clean_email,))
+        if cursor.fetchone():
+            return False, "El correo electrónico ya se encuentra registrado.", None
 
         clean_code = normalize_access_code(access_code) if access_code else None
         if clean_code:
@@ -490,6 +463,46 @@ def create_user(
         cursor.execute("SELECT id, email, name, access_code, failed_login_attempts, locked_until, is_verified, verification_code, verification_code_expires_at, verification_attempts, created_at, last_login_at FROM users WHERE id = ?", (user_id,))
         row = cursor.fetchone()
         return True, "Usuario creado exitosamente.", dict(row) if row else None
+
+
+def purge_unvalidated_accounts(max_age_ms: int = 48 * 3600 * 1000, db_path: Optional[Path] = None) -> int:
+    """
+    Elimina automáticamente las cuentas de usuarios en Versión Demo que no hayan sido convalidadas
+    con un código de acceso dentro del plazo establecido (por defecto 48 horas desde su creación).
+    También purga las filas asociadas en user_progress para no dejar huérfanos.
+    Retorna el número de cuentas eliminadas.
+    """
+    init_db(db_path)
+    now_ms = int(time.time() * 1000)
+    threshold_ms = now_ms - max_age_ms
+
+    with get_db_connection(db_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT id, email FROM users
+            WHERE access_code IS NULL
+              AND created_at IS NOT NULL
+              AND created_at < ?
+            """,
+            (threshold_ms,)
+        )
+        expired_users = cursor.fetchall()
+        if not expired_users:
+            return 0
+
+        expired_ids = [u["id"] for u in expired_users]
+        placeholders = ",".join("?" for _ in expired_ids)
+
+        # Eliminar progreso asociado
+        cursor.execute(f"DELETE FROM user_progress WHERE user_id IN ({placeholders})", expired_ids)
+        # Eliminar usuarios
+        cursor.execute(f"DELETE FROM users WHERE id IN ({placeholders})", expired_ids)
+        conn.commit()
+
+        purged_count = len(expired_ids)
+        print(f"[Purge] Se eliminaron {purged_count} cuentas no convalidadas con más de 48h de antigüedad.")
+        return purged_count
 
 
 def update_verification_code(user_id: int, code: str, expires_at: int, db_path: Optional[Path] = None) -> bool:

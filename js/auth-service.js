@@ -11,8 +11,6 @@
 var AuthService = {
   currentUser: null,
   authMode: "register", // "register" | "login"
-  pendingVerificationEmail: null,
-  resendCooldownTimer: null,
   isInitialized: false,
   listeners: [],
 
@@ -84,66 +82,9 @@ var AuthService = {
   getTurnstileToken() { return null; },
   resetTurnstile() {},
 
-  // Mostrar subvista de ingreso de código de 6 dígitos dentro del Paso 1
-  showVerifyCodeStep(email, errorMsg = "") {
-    this.pendingVerificationEmail = email;
-    if (typeof document === "undefined") return;
-
-    const form = document.getElementById("form-auth-register");
-    const verifyView = document.getElementById("unlock-step-verify-code");
-    const emailDisplay = document.getElementById("verify-email-display");
-    const codeInput = document.getElementById("input-verification-code");
-    const errEl = document.getElementById("verify-error-msg");
-    const submitBtn = document.getElementById("btn-submit-verify-code");
-
-    if (form) form.style.display = "none";
-    if (verifyView) {
-      verifyView.classList.remove("hidden");
-      verifyView.style.display = "block";
-    }
-    if (emailDisplay) emailDisplay.textContent = email;
-    if (codeInput) {
-      codeInput.value = "";
-      setTimeout(() => codeInput.focus(), 150);
-    }
-    if (submitBtn) submitBtn.disabled = true;
-
-    if (errEl) {
-      if (errorMsg) {
-        errEl.textContent = errorMsg;
-        errEl.className = "auth-error-alert";
-        errEl.style.display = "block";
-        errEl.style.color = "";
-        errEl.style.borderColor = "";
-        errEl.style.background = "";
-      } else {
-        errEl.textContent = "";
-        errEl.style.display = "none";
-      }
-    }
-
-    if (typeof lucide !== "undefined" && lucide.createIcons) {
-      lucide.createIcons();
-    }
-  },
-
-  // Ocultar subvista de verificación y restaurar formulario de registro / login
-  hideVerifyCodeStep() {
-    if (typeof document === "undefined") return;
-    const form = document.getElementById("form-auth-register");
-    const verifyView = document.getElementById("unlock-step-verify-code");
-    const errEl = document.getElementById("verify-error-msg");
-
-    if (form) form.style.display = "block";
-    if (verifyView) {
-      verifyView.classList.add("hidden");
-      verifyView.style.display = "none";
-    }
-    if (errEl) {
-      errEl.textContent = "";
-      errEl.style.display = "none";
-    }
-  },
+  // Métodos no-op para compatibilidad defensiva
+  showVerifyCodeStep() {},
+  hideVerifyCodeStep() {},
 
   // Verificar sesión con cookie HttpOnly en /api/auth/me o fallback en localStorage
   async checkSession() {
@@ -190,13 +131,13 @@ var AuthService = {
   // Alternar entre modo Registro y Login
   setAuthMode(mode) {
     this.authMode = mode === "login" ? "login" : "register";
-    this.hideVerifyCodeStep();
     if (typeof document === "undefined") return;
     const titleEl = document.getElementById("auth-form-title");
     const subEl = document.getElementById("auth-form-subtitle");
     const step1IndEl = document.getElementById("step1-indicator-text");
     const groupConfirm = document.getElementById("group-confirm-password");
     const hints = document.getElementById("password-policy-hints");
+    const expiryNotice = document.getElementById("demo-expiry-notice");
     const submitBtnText = document.getElementById("btn-submit-register-text");
     const toggleLink = document.getElementById("link-toggle-login-register");
     const errEl = document.getElementById("register-error-msg");
@@ -212,6 +153,7 @@ var AuthService = {
       if (step1IndEl) step1IndEl.textContent = "Iniciar Sesión";
       if (groupConfirm) groupConfirm.style.display = "none";
       if (hints) hints.style.display = "none";
+      if (expiryNotice) expiryNotice.style.display = "none";
       if (submitBtnText) submitBtnText.textContent = "Iniciar Sesión";
       if (toggleLink) toggleLink.textContent = "¿No tienes una cuenta? Regístrate aquí";
     } else {
@@ -220,6 +162,7 @@ var AuthService = {
       if (step1IndEl) step1IndEl.textContent = "Identificación";
       if (groupConfirm) groupConfirm.style.display = "block";
       if (hints) hints.style.display = "flex";
+      if (expiryNotice) expiryNotice.style.display = "flex";
       if (submitBtnText) submitBtnText.textContent = "Crear Cuenta";
       if (toggleLink) toggleLink.textContent = "¿Ya tienes una cuenta? Inicia sesión";
     }
@@ -294,7 +237,7 @@ var AuthService = {
     }
   },
 
-  // Registrar nuevo usuario
+  // Registrar nuevo usuario (Directo a Versión Demo 48h)
   async register({ email, password, passwordConfirm, name }) {
     const cleanEmail = (email || "").trim().toLowerCase();
     const cleanName = (name || "").trim() || cleanEmail.split("@")[0];
@@ -326,17 +269,31 @@ var AuthService = {
 
       const data = await res.json().catch(() => ({}));
       if (res.status === 201 && data.ok) {
-        this.showVerifyCodeStep(cleanEmail);
+        this.currentUser = {
+          ...data.user,
+          isDemo: true
+        };
+        try {
+          localStorage.setItem("grado_auth_user", JSON.stringify(this.currentUser));
+        } catch (e) {}
+
+        this.notifyAuthStateChanged();
+
+        if (typeof App !== "undefined" && App.updateUnlockModalState) {
+          App.updateUnlockModalState();
+        }
+
+        const safeName = (typeof SecurityShield !== "undefined" && SecurityShield.escapeHtml)
+          ? SecurityShield.escapeHtml(this.currentUser.name || this.currentUser.email)
+          : (this.currentUser.name || this.currentUser.email);
 
         if (typeof App !== "undefined" && App.showToast) {
-          App.showToast("¡Cuenta creada! Ingresa el código de 6 dígitos enviado a tu correo.", "info");
+          App.showToast(`¡Cuenta creada! Bienvenido, ${safeName} (Versión Demo - 48h)`, "success");
         }
 
         return {
           ok: true,
-          needsVerification: true,
-          email: cleanEmail,
-          testVerificationCode: data.testVerificationCode
+          user: this.currentUser
         };
       } else if (res.status !== 404) {
         return { ok: false, error: data.error || "Error al crear la cuenta." };
@@ -356,231 +313,33 @@ var AuthService = {
     }
 
     const clientHash = await this.hashClientPassword(password);
-    registeredUsers[cleanEmail] = {
+    this.currentUser = {
       id: `user-${Date.now()}`,
       email: cleanEmail,
       name: cleanName,
       passwordHash: clientHash,
       access_code: null,
-      is_verified: 0,
+      is_verified: 1,
+      created_at: Date.now(),
       isDemo: true
     };
+    registeredUsers[cleanEmail] = this.currentUser;
     try {
       localStorage.setItem("grado_registered_users", JSON.stringify(registeredUsers));
+      localStorage.setItem("grado_auth_user", JSON.stringify(this.currentUser));
     } catch (e) {}
 
-    this.showVerifyCodeStep(cleanEmail);
+    this.notifyAuthStateChanged();
+
+    if (typeof App !== "undefined" && App.updateUnlockModalState) {
+      App.updateUnlockModalState();
+    }
 
     if (typeof App !== "undefined" && App.showToast) {
-      App.showToast("Modo estático: Ingresa cualquier código de 6 dígitos para activar tu cuenta.", "info");
+      App.showToast("¡Cuenta creada! Acceso Demo activo por 48 horas.", "success");
     }
 
-    return { ok: true, needsVerification: true, email: cleanEmail };
-  },
-
-  // Verificar código de 6 dígitos ingresado por el usuario
-  async verifyCode(code, targetEmail = null) {
-    const cleanCode = String(code || "").trim();
-    const email = (targetEmail || this.pendingVerificationEmail || "").trim().toLowerCase();
-
-    if (!email) {
-      return { ok: false, error: "No hay una cuenta pendiente de verificación." };
-    }
-    if (!cleanCode || cleanCode.length !== 6 || !/^\d{6}$/.test(cleanCode)) {
-      return { ok: false, error: "El código debe contener exactamente 6 dígitos numéricos." };
-    }
-
-    const errEl = typeof document !== "undefined" ? document.getElementById("verify-error-msg") : null;
-    const submitBtn = typeof document !== "undefined" ? document.getElementById("btn-submit-verify-code") : null;
-
-    if (submitBtn) {
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = "<span>Verificando...</span>";
-    }
-
-    // 1. Backend
-    try {
-      const res = await fetch("/api/auth/verify-code", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email, code: cleanCode })
-      });
-
-      const data = await res.json().catch(() => ({}));
-      if (res.status === 200 && data.ok) {
-        this.currentUser = {
-          ...data.user,
-          isDemo: true
-        };
-        try {
-          localStorage.setItem("grado_auth_user", JSON.stringify(this.currentUser));
-        } catch (e) {}
-
-        this.notifyAuthStateChanged();
-        this.hideVerifyCodeStep();
-
-        if (typeof App !== "undefined" && App.updateUnlockModalState) {
-          App.updateUnlockModalState();
-        }
-
-        const safeName = (typeof SecurityShield !== "undefined" && SecurityShield.escapeHtml)
-          ? SecurityShield.escapeHtml(this.currentUser.name || this.currentUser.email)
-          : (this.currentUser.name || this.currentUser.email);
-
-        if (typeof App !== "undefined" && App.showToast) {
-          App.showToast(`¡Correo verificado con éxito! Bienvenido, ${safeName} (Versión Demo)`, "success");
-        }
-
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = `<i data-lucide="check-circle-2"></i><span id="btn-submit-verify-code-text">Verificar y Continuar</span>`;
-          if (typeof lucide !== "undefined" && lucide.createIcons) lucide.createIcons();
-        }
-
-        return { ok: true, user: this.currentUser };
-      } else if (res.status !== 404) {
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = `<i data-lucide="check-circle-2"></i><span id="btn-submit-verify-code-text">Verificar y Continuar</span>`;
-          if (typeof lucide !== "undefined" && lucide.createIcons) lucide.createIcons();
-        }
-        if (errEl) {
-          errEl.textContent = data.error || "Código incorrecto o expirado.";
-          errEl.className = "auth-error-alert";
-          errEl.style.display = "block";
-          errEl.style.color = "";
-          errEl.style.borderColor = "";
-          errEl.style.background = "";
-        }
-        return { ok: false, error: data.error || "Código incorrecto o expirado." };
-      }
-    } catch (e) {
-      // Backend no disponible (modo estático)
-    }
-
-    // 2. Fallback modo estático / GitHub Pages
-    let registeredUsers = {};
-    try {
-      registeredUsers = JSON.parse(localStorage.getItem("grado_registered_users") || "{}");
-    } catch (e) {}
-
-    const existing = registeredUsers[email];
-    if (existing) {
-      existing.is_verified = 1;
-      this.currentUser = {
-        id: existing.id || `user-${Date.now()}`,
-        email: email,
-        name: existing.name || email.split("@")[0],
-        access_code: null,
-        isDemo: true
-      };
-      try {
-        localStorage.setItem("grado_registered_users", JSON.stringify(registeredUsers));
-        localStorage.setItem("grado_auth_user", JSON.stringify(this.currentUser));
-      } catch (e) {}
-
-      this.notifyAuthStateChanged();
-      this.hideVerifyCodeStep();
-
-      if (typeof App !== "undefined" && App.updateUnlockModalState) {
-        App.updateUnlockModalState();
-      }
-
-      if (typeof App !== "undefined" && App.showToast) {
-        App.showToast(`¡Correo verificado! Bienvenido (Versión Demo)`, "success");
-      }
-
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = `<i data-lucide="check-circle-2"></i><span id="btn-submit-verify-code-text">Verificar y Continuar</span>`;
-        if (typeof lucide !== "undefined" && lucide.createIcons) lucide.createIcons();
-      }
-
-      return { ok: true, user: this.currentUser };
-    }
-
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = `<i data-lucide="check-circle-2"></i><span id="btn-submit-verify-code-text">Verificar y Continuar</span>`;
-      if (typeof lucide !== "undefined" && lucide.createIcons) lucide.createIcons();
-    }
-    return { ok: false, error: "Usuario no encontrado." };
-  },
-
-  // Reenviar código de verificación de 6 dígitos con throttling de 30s
-  async resendVerificationCode(targetEmail = null) {
-    const email = (targetEmail || this.pendingVerificationEmail || "").trim().toLowerCase();
-    if (!email) {
-      return { ok: false, error: "No hay una cuenta pendiente de verificación." };
-    }
-
-    const resendBtn = typeof document !== "undefined" ? document.getElementById("link-resend-code") : null;
-    const errEl = typeof document !== "undefined" ? document.getElementById("verify-error-msg") : null;
-
-    if (resendBtn) {
-      resendBtn.disabled = true;
-      resendBtn.textContent = "Reenviando código...";
-    }
-
-    let result = { ok: true };
-
-    try {
-      const res = await fetch("/api/auth/resend-code", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email })
-      });
-      const data = await res.json().catch(() => ({}));
-      if (res.ok && data.ok) {
-        result = { ok: true, message: data.message, testVerificationCode: data.testVerificationCode };
-        if (errEl) {
-          errEl.textContent = "✓ Nuevo código enviado a tu correo (vence en 15 min).";
-          errEl.className = "auth-error-alert valid";
-          errEl.style.display = "block";
-          errEl.style.color = "var(--success-text, #22c55e)";
-          errEl.style.borderColor = "rgba(34, 197, 94, 0.4)";
-          errEl.style.background = "rgba(34, 197, 94, 0.1)";
-        }
-      } else {
-        result = { ok: false, error: data.error || "No se pudo reenviar el código." };
-        if (errEl) {
-          errEl.textContent = data.error || "No se pudo reenviar el código.";
-          errEl.className = "auth-error-alert";
-          errEl.style.display = "block";
-          errEl.style.color = "";
-          errEl.style.borderColor = "";
-          errEl.style.background = "";
-        }
-      }
-    } catch (e) {
-      // Modo estático
-      if (errEl) {
-        errEl.textContent = "✓ Nuevo código de prueba generado (modo estático).";
-        errEl.className = "auth-error-alert valid";
-        errEl.style.display = "block";
-      }
-    }
-
-    // Iniciar throttling visual de 30 segundos
-    if (resendBtn) {
-      if (this.resendCooldownTimer) clearInterval(this.resendCooldownTimer);
-      let secondsLeft = 30;
-      resendBtn.disabled = true;
-      resendBtn.textContent = `Reenviar código (${secondsLeft}s)`;
-      this.resendCooldownTimer = setInterval(() => {
-        secondsLeft--;
-        if (secondsLeft <= 0) {
-          clearInterval(this.resendCooldownTimer);
-          this.resendCooldownTimer = null;
-          resendBtn.disabled = false;
-          resendBtn.textContent = "¿No recibiste el código? Reenviar código";
-        } else {
-          resendBtn.textContent = `Reenviar código (${secondsLeft}s)`;
-        }
-      }, 1000);
-    }
-
-    return result;
+    return { ok: true, user: this.currentUser };
   },
 
   // Iniciar sesión con correo y contraseña
@@ -635,10 +394,6 @@ var AuthService = {
         }
 
         return { ok: true, user: this.currentUser };
-      } else if (res.status === 403 && data.unverified) {
-        // Cuenta no verificada: mostrar inmediatamente el paso de ingreso de código de 6 dígitos
-        this.showVerifyCodeStep(data.email || cleanEmail, data.error);
-        return { ok: false, unverified: true, error: data.error };
       } else if (res.status !== 404) {
         return { ok: false, error: data.error || "Credenciales inválidas." };
       }
@@ -661,11 +416,6 @@ var AuthService = {
 
     if (!existing || !isPassValid) {
       return { ok: false, error: "Credenciales inválidas." };
-    }
-
-    if (existing.is_verified === 0) {
-      this.showVerifyCodeStep(cleanEmail, "Tu cuenta aún no ha sido verificada. Ingresa el código de 6 dígitos para activarla.");
-      return { ok: false, unverified: true, error: "Tu cuenta aún no ha sido verificada." };
     }
 
     if (existing.passwordMock) {
@@ -1008,67 +758,6 @@ var AuthService = {
     if (emailInput) emailInput.addEventListener("keydown", handleEnter);
     if (pwdInput) pwdInput.addEventListener("keydown", handleEnter);
     if (confirmInput) confirmInput.addEventListener("keydown", handleEnter);
-
-    // Listeners para verificación de código de 6 dígitos
-    const codeInput = document.getElementById("input-verification-code");
-    const submitVerifyBtn = document.getElementById("btn-submit-verify-code");
-    const resendLink = document.getElementById("link-resend-code");
-    const backToRegisterLink = document.getElementById("link-back-to-register");
-    const verifyErrEl = document.getElementById("verify-error-msg");
-
-    const doVerify = async () => {
-      if (!codeInput) return;
-      const code = codeInput.value.trim();
-      if (code.length !== 6) return;
-      await this.verifyCode(code);
-    };
-
-    if (codeInput) {
-      codeInput.addEventListener("input", () => {
-        // Filtrar sólo dígitos numéricos
-        codeInput.value = codeInput.value.replace(/\D/g, "").slice(0, 6);
-        if (verifyErrEl) {
-          verifyErrEl.style.display = "none";
-          verifyErrEl.textContent = "";
-        }
-        if (submitVerifyBtn) {
-          submitVerifyBtn.disabled = (codeInput.value.length !== 6);
-        }
-        if (codeInput.value.length === 6) {
-          doVerify();
-        }
-      });
-
-      codeInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          if (codeInput.value.length === 6) {
-            doVerify();
-          }
-        }
-      });
-    }
-
-    if (submitVerifyBtn) {
-      submitVerifyBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        doVerify();
-      });
-    }
-
-    if (resendLink) {
-      resendLink.addEventListener("click", async (e) => {
-        e.preventDefault();
-        await this.resendVerificationCode();
-      });
-    }
-
-    if (backToRegisterLink) {
-      backToRegisterLink.addEventListener("click", (e) => {
-        e.preventDefault();
-        this.hideVerifyCodeStep();
-      });
-    }
   }
 };
 

@@ -18,9 +18,8 @@ import hashlib
 import base64
 import random
 import secrets
-import smtplib
 import sqlite3
-from email.mime.text import MIMEText
+import threading
 from pathlib import Path
 from typing import Optional, Tuple, Dict, Any
 
@@ -626,337 +625,7 @@ def mask_email(email: str) -> str:
         return f"{local[0]}***@{domain}"
 
 
-def parse_sender_info(raw_sender: str, default_name: str = "GRADOMANIACOS", default_email: str = "gradomaniacos@gmail.com") -> Tuple[str, str]:
-    """Extrae (name, email) de strings como 'GRADOMANIACOS <correo@ejemplo.com>' o 'correo@ejemplo.com'."""
-    if not raw_sender or not raw_sender.strip():
-        return default_name, default_email
-    clean = raw_sender.strip()
-    match = re.match(r"^([^<]+)<([^>]+)>$", clean)
-    if match:
-        name = match.group(1).strip().strip('"\'')
-        email = match.group(2).strip()
-        return name or default_name, email or default_email
-    if "@" in clean:
-        return default_name, clean
-    return default_name, default_email
 
-
-def get_email_config() -> Dict[str, Any]:
-    """Obtiene la configuración de correo actual desde variables de entorno."""
-    raw_provider = os.environ.get("EMAIL_PROVIDER", "").strip().lower()
-    brevo_key = os.environ.get("BREVO_API_KEY", "").strip() or os.environ.get("SENDINBLUE_API_KEY", "").strip()
-    resend_key = os.environ.get("RESEND_API_KEY", "").strip()
-    smtp_host = os.environ.get("SMTP_HOST", "").strip()
-    try:
-        smtp_port = int(os.environ.get("SMTP_PORT", "587"))
-    except ValueError:
-        smtp_port = 587
-    smtp_user = os.environ.get("SMTP_USER", "").strip()
-    smtp_pass = os.environ.get("SMTP_PASS", "").strip()
-    email_from = os.environ.get("EMAIL_FROM", "").strip()
-
-    # Determinación jerárquica del proveedor activo
-    if raw_provider in ("brevo", "sendinblue"):
-        provider = "brevo"
-    elif raw_provider == "resend":
-        provider = "resend"
-    elif raw_provider == "smtp":
-        provider = "smtp"
-    elif brevo_key:
-        provider = "brevo"
-    elif resend_key:
-        provider = "resend"
-    elif smtp_host:
-        provider = "smtp"
-    else:
-        provider = ""
-
-    return {
-        "provider": provider,
-        "brevo_key": brevo_key,
-        "resend_key": resend_key,
-        "smtp_host": smtp_host,
-        "smtp_port": smtp_port,
-        "smtp_user": smtp_user,
-        "smtp_pass": smtp_pass,
-        "email_from": email_from
-    }
-
-
-def get_smtp_config() -> Tuple[str, int, str, str, str]:
-    """Compatibilidad con código existente: obtiene configuración SMTP."""
-    cfg = get_email_config()
-    from_addr = cfg["email_from"] or cfg["smtp_user"] or "no-reply@gradomania.cl"
-    return cfg["smtp_host"], cfg["smtp_port"], cfg["smtp_user"], cfg["smtp_pass"], from_addr
-
-
-def _send_via_brevo(to_email: str, code: str, api_key: str, from_addr: str) -> Tuple[bool, str]:
-    """
-    Envía código de verificación de 6 dígitos mediante la API REST HTTPS oficial de Brevo (Sendinblue).
-    Funciona 100% por HTTPS (puerto 443 estándar) y permite enviar a CUALQUIER destinatario
-    validando únicamente el correo remitente ('Sender Verification' gratuito sin exigir dominio DNS).
-    """
-    if not api_key:
-        print("[Email Error] Provider=brevo status=missing_api_key")
-        return False, "Configuración incompleta de Brevo API Key."
-
-    sender_name, sender_email = parse_sender_info(from_addr, default_name="GRADOMANIACOS", default_email="gradomaniacos@gmail.com")
-    subject = f"Tu código de verificación de GRADOMANIACOS es: {code}"
-    body_text = (
-        f"Hola,\n\n"
-        f"Tu código de verificación de GRADOMANIACOS es: {code}\n\n"
-        f"Este código vence en 15 minutos. Ingrésalo en la plataforma para activar tu cuenta.\n\n"
-        f"Si no solicitaste este código, puedes desestimar este mensaje con total seguridad.\n"
-    )
-    body_html = (
-        f"<div style='font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif; "
-        f"max-width: 520px; margin: 0 auto; padding: 28px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #ffffff;'>"
-        f"<h2 style='color: #1e293b; margin: 0 0 16px 0; font-size: 20px; letter-spacing: -0.5px;'>GRADOMANIACOS</h2>"
-        f"<p style='color: #475569; font-size: 15px; line-height: 1.5;'>Tu código de verificación de seguridad es:</p>"
-        f"<div style='background-color: #f8fafc; border: 1px dashed #cbd5e1; padding: 18px; border-radius: 6px; text-align: center; margin: 20px 0;'>"
-        f"<span style='font-size: 32px; font-weight: 700; letter-spacing: 8px; color: #0f172a; font-family: monospace;'>{code}</span>"
-        f"</div>"
-        f"<p style='color: #64748b; font-size: 13px; line-height: 1.4;'>Este código vence en <strong>15 minutos</strong>. Ingrésalo en la plataforma para activar tu cuenta.</p>"
-        f"<hr style='border: none; border-top: 1px solid #e2e8f0; margin: 24px 0 16px 0;'>"
-        f"<p style='color: #94a3b8; font-size: 12px; margin: 0;'>Si no solicitaste este código, puedes ignorar este correo con total seguridad.</p>"
-        f"</div>"
-    )
-
-    payload = {
-        "sender": {"name": sender_name, "email": sender_email},
-        "to": [{"email": to_email}],
-        "subject": subject,
-        "textContent": body_text,
-        "htmlContent": body_html
-    }
-
-    try:
-        req = urllib.request.Request(
-            "https://api.brevo.com/v3/smtp/email",
-            data=json.dumps(payload).encode("utf-8"),
-            headers={
-                "accept": "application/json",
-                "api-key": api_key,
-                "content-type": "application/json",
-                "User-Agent": "Gradomaniacos-App/1.0"
-            },
-            method="POST"
-        )
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            status = resp.status
-            if 200 <= status < 300:
-                print(f"[Email] Provider=brevo Verification email sent successfully to {mask_email(to_email)}")
-                return True, ""
-            else:
-                print(f"[Email Error] Provider=brevo status={status}")
-                return False, f"Brevo API error status={status}"
-    except urllib.error.HTTPError as e:
-        err_body = e.read().decode("utf-8", errors="replace")
-        try:
-            err_json = json.loads(err_body)
-            err_msg = err_json.get("message") or err_body
-        except Exception:
-            err_msg = err_body
-        print(f"[Email Error] Provider=brevo status={e.code} detail={err_msg}")
-        return False, f"Brevo API error (status {e.code}): {err_msg}"
-    except urllib.error.URLError as e:
-        print(f"[Email Error] Provider=brevo status=network_error error={type(e.reason).__name__}")
-        return False, "Error de red al conectar con Brevo API."
-    except Exception as e:
-        print(f"[Email Error] Provider=brevo status=unexpected error={type(e).__name__}")
-        return False, "Error inesperado al despachar el correo."
-
-
-def _send_via_resend(to_email: str, code: str, api_key: str, from_addr: str) -> Tuple[bool, str]:
-    """
-    Envía código de verificación de 6 dígitos mediante la API REST HTTPS oficial de Resend.
-    Compatible con Web Services de Render.com (puerto 443 sin bloqueos SMTP).
-    """
-    if not api_key:
-        print("[Email Error] Provider=resend status=missing_api_key")
-        return False, "Configuración incompleta del servicio de correo (Resend API Key ausente)."
-
-    clean_from = (from_addr or "").strip()
-    sender = clean_from if clean_from else "GRADOMANIACOS <onboarding@resend.dev>"
-
-    subject = f"Tu código de verificación de GRADOMANIACOS es: {code}"
-    body_text = (
-        f"Hola,\n\n"
-        f"Tu código de verificación de GRADOMANIACOS es: {code}\n\n"
-        f"Este código vence en 15 minutos. Ingrésalo en la plataforma para activar tu cuenta.\n\n"
-        f"Si no solicitaste este código, puedes desestimar este mensaje con total seguridad.\n"
-    )
-    body_html = (
-        f"<div style='font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif; "
-        f"max-width: 520px; margin: 0 auto; padding: 28px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #ffffff;'>"
-        f"<h2 style='color: #1e293b; margin: 0 0 16px 0; font-size: 20px; letter-spacing: -0.5px;'>GRADOMANIACOS</h2>"
-        f"<p style='color: #475569; font-size: 15px; line-height: 1.5;'>Tu código de verificación de seguridad es:</p>"
-        f"<div style='background-color: #f8fafc; border: 1px dashed #cbd5e1; padding: 18px; border-radius: 6px; text-align: center; margin: 20px 0;'>"
-        f"<span style='font-size: 32px; font-weight: 700; letter-spacing: 8px; color: #0f172a; font-family: monospace;'>{code}</span>"
-        f"</div>"
-        f"<p style='color: #64748b; font-size: 13px; line-height: 1.4;'>Este código vence en <strong>15 minutos</strong>. Ingrésalo en la plataforma para activar tu cuenta.</p>"
-        f"<hr style='border: none; border-top: 1px solid #e2e8f0; margin: 24px 0 16px 0;'>"
-        f"<p style='color: #94a3b8; font-size: 12px; margin: 0;'>Si no solicitaste este código, puedes ignorar este correo con total seguridad.</p>"
-        f"</div>"
-    )
-
-    payload = {
-        "from": sender,
-        "to": [to_email],
-        "subject": subject,
-        "text": body_text,
-        "html": body_html
-    }
-
-    try:
-        req = urllib.request.Request(
-            "https://api.resend.com/emails",
-            data=json.dumps(payload).encode("utf-8"),
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json",
-                "User-Agent": "Gradomaniacos-App/1.0"
-            },
-            method="POST"
-        )
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            status = resp.status
-            if 200 <= status < 300:
-                print(f"[Email] Provider=resend Verification email sent successfully to {mask_email(to_email)}")
-                return True, ""
-            else:
-                print(f"[Email Error] Provider=resend status={status}")
-                return False, f"Resend API error status={status}"
-    except urllib.error.HTTPError as e:
-        err_body = e.read().decode("utf-8", errors="replace")
-        try:
-            err_json = json.loads(err_body)
-            err_msg = err_json.get("message") or err_json.get("error") or err_body
-        except Exception:
-            err_msg = err_body
-
-        if e.code == 403 and ("testing" in err_msg.lower() or "only send" in err_msg.lower()):
-            print(f"[Email Error] Provider=resend status=403 [DOMINIO RESTRINGIDO]: Resend sólo permite enviar al correo del titular de la cuenta de Resend mientras no verifiques un dominio en resend.com/domains. Usa Brevo (BREVO_API_KEY) para enviar sin dominio. Detalle: {err_msg}")
-        elif "domain" in err_msg.lower() or "not verified" in err_msg.lower():
-            print(f"[Email Error] Provider=resend status={e.code} [DOMINIO NO VERIFICADO]: El remitente '{sender}' requiere verificación DNS en resend.com/domains o usar Brevo. Detalle: {err_msg}")
-        else:
-            print(f"[Email Error] Provider=resend status={e.code} detail={err_msg}")
-
-        return False, f"Resend API error (status {e.code}): {err_msg}"
-    except urllib.error.URLError as e:
-        print(f"[Email Error] Provider=resend status=network_error error={type(e.reason).__name__}")
-        return False, "Error de red al conectar con el servicio de correo."
-    except Exception as e:
-        print(f"[Email Error] Provider=resend status=unexpected error={type(e).__name__}")
-        return False, "Error inesperado al despachar el correo."
-
-
-def _send_via_smtp(to_email: str, code: str, host: str, port: int, user: str, password: str, from_addr: str) -> Tuple[bool, str]:
-    """Envía código de verificación vía SMTP (soporte Gmail STARTTLS / puerto 587 o SSL / puerto 465)."""
-    sender = from_addr or user or "no-reply@gradomaniacos.cl"
-    subject = f"Tu código de verificación de GRADOMANIACOS es: {code}"
-    body = (
-        f"Hola,\n\n"
-        f"Tu código de verificación de GRADOMANIACOS es: {code}\n\n"
-        f"Este código vence en 15 minutos. Ingrésalo en la plataforma para activar tu cuenta.\n\n"
-        f"Si no solicitaste este código, puedes desestimar este mensaje con total seguridad.\n"
-    )
-
-    try:
-        msg = MIMEText(body, "plain", "utf-8")
-        msg["Subject"] = subject
-        msg["From"] = sender
-        msg["To"] = to_email
-
-        if port == 465:
-            with smtplib.SMTP_SSL(host, port, timeout=15) as server:
-                if user and password:
-                    server.login(user, password)
-                server.send_message(msg)
-        else:
-            with smtplib.SMTP(host, port, timeout=15) as server:
-                server.ehlo()
-                server.starttls()
-                server.ehlo()
-                if user and password:
-                    server.login(user, password)
-                server.send_message(msg)
-
-        print(f"[Email] Provider=smtp Verification email sent successfully to {mask_email(to_email)}")
-        return True, ""
-
-    except smtplib.SMTPAuthenticationError as e:
-        print(f"[Email Error] Provider=smtp status=auth_error code={e.smtp_code}")
-        return False, "Error de autenticación con el servidor de correo."
-    except (smtplib.SMTPException, OSError) as e:
-        print(f"[Email Error] Provider=smtp status=transport_error error={type(e).__name__}")
-        return False, "No se pudo conectar con el servidor de correo."
-    except Exception as e:
-        print(f"[Email Error] Provider=smtp status=unexpected error={type(e).__name__}")
-        return False, "Error inesperado al despachar el correo."
-
-
-def send_verification_email(to_email: str, code: str) -> Tuple[bool, str]:
-    """
-    Envía código de verificación de 6 dígitos mediante el proveedor activo:
-    - Brevo API REST HTTPS (recomendado: sin restricciones de dominio DNS, 300/día gratis)
-    - Resend API REST HTTPS (para producción con dominio propio verificado)
-    - SMTP (para desarrollo local con Gmail)
-    - Multi-provider Fallback automático si hay más de una clave disponible
-    - Dev Fallback si no hay proveedor configurado (imprime en consola)
-    Retorna (éxito: bool, mensaje_error: str).
-    """
-    cfg = get_email_config()
-    provider = cfg["provider"]
-
-    if provider == "brevo":
-        sent, err = _send_via_brevo(
-            to_email=to_email,
-            code=code,
-            api_key=cfg["brevo_key"],
-            from_addr=cfg["email_from"]
-        )
-        if sent:
-            return True, ""
-        # Multi-provider fallback hacia Resend si está disponible
-        if cfg["resend_key"]:
-            print("[Email Fallback] Brevo no pudo despachar, intentando con Resend...")
-            res_sent, res_err = _send_via_resend(to_email, code, cfg["resend_key"], cfg["email_from"])
-            if res_sent:
-                return True, ""
-        return False, err
-
-    elif provider == "resend":
-        sent, err = _send_via_resend(
-            to_email=to_email,
-            code=code,
-            api_key=cfg["resend_key"],
-            from_addr=cfg["email_from"]
-        )
-        if sent:
-            return True, ""
-        # Multi-provider fallback hacia Brevo si está disponible
-        if cfg["brevo_key"]:
-            print("[Email Fallback] Resend no pudo despachar, intentando con Brevo...")
-            brv_sent, brv_err = _send_via_brevo(to_email, code, cfg["brevo_key"], cfg["email_from"])
-            if brv_sent:
-                return True, ""
-        return False, err
-
-    elif provider == "smtp":
-        return _send_via_smtp(
-            to_email=to_email,
-            code=code,
-            host=cfg["smtp_host"],
-            port=cfg["smtp_port"],
-            user=cfg["smtp_user"],
-            password=cfg["smtp_pass"],
-            from_addr=cfg["email_from"]
-        )
-    else:
-        # Modo desarrollo / fallback local
-        print(f"[SMTP Dev] Código de verificación para {to_email}: {code} (Vence en 15 minutos)")
-        return True, ""
 
 
 def validate_password_policy(password: str) -> Tuple[bool, str]:
@@ -1497,7 +1166,7 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_json_response({"ok": False, "error": f"No se encontró el código '{clean_code}' o ya estaba inactivo."}, status_code=404)
             return
 
-        # API: Registro de Usuario (Correo + Contraseña + Verificación por Código de 6 Dígitos)
+        # API: Registro Directo de Usuario (Correo + Contraseña PBKDF2 -> Versión Demo Directa)
         if clean_path == "/api/auth/register":
             client_ip = self.client_address[0]
             is_test = os.environ.get("ALLOW_TEST_AUTH") == "1"
@@ -1535,185 +1204,40 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_json_response({"ok": False, "error": pwd_err}, status_code=400)
                 return
 
-            # Generar código de 6 dígitos numérico con secrets.choice (no random)
-            digits = "0123456789"
-            verification_code = "".join(secrets.choice(digits) for _ in range(6))
-            now_ms = int(time.time() * 1000)
-            verification_expires_at = now_ms + (15 * 60 * 1000)  # 15 minutos
-
             ok, reason, user = db.create_user(
                 email=email,
                 password=password,
                 name=name,
-                is_verified=0,
-                verification_code=verification_code,
-                verification_code_expires_at=verification_expires_at
+                is_verified=1,
+                db_path=DB_PATH
             )
             if not ok or not user:
-                self.send_json_response({"ok": False, "error": reason}, status_code=400)
+                if "ya se encuentra registrado" in (reason or "").lower():
+                    self.send_json_response({"ok": False, "error": "El correo electrónico ya se encuentra registrado. Inicia sesión o recupera tu contraseña."}, status_code=409)
+                else:
+                    self.send_json_response({"ok": False, "error": reason}, status_code=400)
                 return
 
-            # Enviar correo mediante el proveedor activo (Brevo HTTPS / Resend HTTPS / SMTP)
-            email_sent, email_err = send_verification_email(email, verification_code)
-            if not email_sent:
-                print(f"[Auth Register Error] No se pudo despachar correo a {mask_email(email)}: {email_err}")
-                self.send_json_response({
-                    "ok": False,
-                    "error": "No pudimos enviar el correo de verificación. Por favor intenta nuevamente en unos minutos."
-                }, status_code=503)
-                return
-
-            resp_payload = {
-                "ok": True,
-                "needsVerification": True,
-                "email": user["email"],
-                "message": "Tu cuenta ha sido creada. Por favor ingresa el código de 6 dígitos enviado a tu correo."
-            }
-            if is_test:
-                resp_payload["testVerificationCode"] = verification_code
-
-            self.send_json_response(resp_payload, status_code=201)
-            return
-
-        # API: Verificar Código de 6 Dígitos
-        if clean_path == "/api/auth/verify-code":
-            client_ip = self.client_address[0]
-            is_test = os.environ.get("ALLOW_TEST_AUTH") == "1"
-            if not is_test:
-                allowed, retry_sec = AUTH_LIMITER.check_fixed_limit(client_ip, max_requests=30, window_seconds=60.0)
-                if not allowed:
-                    self.send_json_response({
-                        "ok": False,
-                        "error": f"Demasiados intentos. Por favor espera {int(retry_sec) + 1} segundos."
-                    }, status_code=429)
-                    return
-
-            body = self.rfile.read(content_length).decode("utf-8", errors="replace")
-            try:
-                req_data = json.loads(body)
-            except Exception:
-                self.send_json_response({"ok": False, "error": "Cuerpo JSON inválido"}, status_code=400)
-                return
-
-            email = req_data.get("email", "").strip().lower()
-            code = str(req_data.get("code", "")).strip()
-
-            if not email or not code:
-                self.send_json_response({"ok": False, "error": "Correo y código de verificación son requeridos."}, status_code=400)
-                return
-
-            user = db.get_user_by_email(email)
-            if not user:
-                self.send_json_response({"ok": False, "error": "Código de verificación inválido o usuario no encontrado."}, status_code=400)
-                return
-
-            if user.get("is_verified") == 1:
-                self.send_json_response({"ok": False, "error": "La cuenta ya ha sido verificada. Inicia sesión directamente."}, status_code=400)
-                return
-
-            attempts = user.get("verification_attempts") or 0
-            if attempts >= 5 or not user.get("verification_code"):
-                db.invalidate_verification_code(user["id"])
-                self.send_json_response({
-                    "ok": False,
-                    "error": "Has alcanzado el límite máximo de intentos (5). Solicita un nuevo código de verificación."
-                }, status_code=400)
-                return
-
-            now_ms = int(time.time() * 1000)
-            expires_at = user.get("verification_code_expires_at")
-            if not expires_at or now_ms > expires_at:
-                self.send_json_response({
-                    "ok": False,
-                    "error": "El código de verificación ha expirado (vence en 15 minutos). Por favor solicita uno nuevo."
-                }, status_code=410)
-                return
-
-            if code != str(user.get("verification_code", "")).strip():
-                new_attempts = db.increment_verification_attempts(user["id"])
-                if new_attempts >= 5:
-                    db.invalidate_verification_code(user["id"])
-                    self.send_json_response({
-                        "ok": False,
-                        "error": "Has alcanzado el límite de 5 intentos fallidos. El código ha sido invalidado; solicita uno nuevo."
-                    }, status_code=400)
-                    return
-                self.send_json_response({
-                    "ok": False,
-                    "error": f"Código de verificación incorrecto. Intento {new_attempts} de 5."
-                }, status_code=400)
-                return
-
-            # Código correcto: marcar verificado y crear sesión activa en Versión Demo
-            db.mark_user_verified(user["id"])
+            # Emisión inmediata de sesión autenticada en Versión Demo (Paso 1 completado)
             token = create_session_token(str(user["id"]))
             cookie = make_session_cookie(token)
-            self.send_json_response({
+
+            resp_payload = {
                 "ok": True,
                 "user": {
                     "id": user["id"],
                     "email": user["email"],
                     "name": user["name"] or user["email"].split("@")[0],
-                    "access_code": user.get("access_code"),
-                    "isDemo": not bool(user.get("access_code"))
+                    "access_code": None,
+                    "isDemo": True
                 },
-                "message": "Correo verificado exitosamente."
-            }, status_code=200, headers={"Set-Cookie": cookie})
-            return
-
-        # API: Reenviar Código de Verificación de 6 Dígitos
-        if clean_path == "/api/auth/resend-code":
-            client_ip = self.client_address[0]
-            is_test = os.environ.get("ALLOW_TEST_AUTH") == "1"
-            if not is_test:
-                allowed, retry_sec = AUTH_LIMITER.check_fixed_limit(client_ip, max_requests=10, window_seconds=60.0)
-                if not allowed:
-                    self.send_json_response({
-                        "ok": False,
-                        "error": f"Demasiadas solicitudes de reenvío. Espera {int(retry_sec) + 1} segundos."
-                    }, status_code=429)
-                    return
-
-            body = self.rfile.read(content_length).decode("utf-8", errors="replace")
-            try:
-                req_data = json.loads(body)
-            except Exception:
-                self.send_json_response({"ok": False, "error": "Cuerpo JSON inválido"}, status_code=400)
-                return
-
-            email = req_data.get("email", "").strip().lower()
-            if not email or not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
-                self.send_json_response({"ok": False, "error": "Correo electrónico inválido."}, status_code=400)
-                return
-
-            user = db.get_user_by_email(email)
-            new_code = None
-            if user and not user.get("is_verified"):
-                digits = "0123456789"
-                new_code = "".join(secrets.choice(digits) for _ in range(6))
-                now_ms = int(time.time() * 1000)
-                new_expires_at = now_ms + (15 * 60 * 1000)
-                db.update_verification_code(user["id"], new_code, new_expires_at)
-                email_sent, email_err = send_verification_email(email, new_code)
-                if not email_sent:
-                    print(f"[Auth Resend Error] No se pudo despachar correo a {mask_email(email)}: {email_err}")
-                    self.send_json_response({
-                        "ok": False,
-                        "error": "No pudimos enviar el correo de verificación. Por favor intenta nuevamente en unos minutos."
-                    }, status_code=503)
-                    return
-
-            resp_payload = {
-                "ok": True,
-                "message": "Si el correo corresponde a una cuenta pendiente de verificación, recibirás un nuevo código en unos momentos."
+                "message": "Cuenta creada exitosamente en Versión Demo."
             }
-            if is_test and new_code:
-                resp_payload["testVerificationCode"] = new_code
 
-            self.send_json_response(resp_payload, status_code=200)
+            self.send_json_response(resp_payload, status_code=201, headers={"Set-Cookie": cookie})
             return
 
-        # API: Inicio de Sesión (Correo + Contraseña con Lockout de 15 min y Verificación de Cuenta)
+        # API: Inicio de Sesión (Correo + Contraseña con Lockout de 15 min tras 5 intentos fallidos)
         if clean_path == "/api/auth/login":
             client_ip = self.client_address[0]
             is_test = os.environ.get("ALLOW_TEST_AUTH") == "1"
@@ -1773,16 +1297,6 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                     "ok": False,
                     "error": "Credenciales inválidas."
                 }, status_code=401)
-                return
-
-            # Verificar si la cuenta está verificada por correo
-            if not user.get("is_verified"):
-                self.send_json_response({
-                    "ok": False,
-                    "unverified": True,
-                    "email": user["email"],
-                    "error": "Tu cuenta aún no ha sido verificada. Ingresa el código de 6 dígitos enviado a tu correo para activarla."
-                }, status_code=403)
                 return
 
             LOGIN_BACKOFF_LIMITER.reset(client_ip)
@@ -2188,6 +1702,21 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
 
         self.send_error(404, "Endpoint no encontrado")
 
+def run_auto_purge_daemon():
+    """Hilo daemon en segundo plano que purga periódicamente cuentas Demo no convalidadas (>48h)."""
+    try:
+        db.purge_unvalidated_accounts(db_path=DB_PATH)
+    except Exception as e:
+        print(f"[Purge Daemon Error Inicial]: {e}")
+
+    while True:
+        time.sleep(1800)  # Cada 30 minutos
+        try:
+            db.purge_unvalidated_accounts(db_path=DB_PATH)
+        except Exception as e:
+            print(f"[Purge Daemon Error]: {e}")
+
+
 if __name__ == "__main__":
     import sys
     # Seguridad: Enlazar a 127.0.0.1 en desarrollo local.
@@ -2201,6 +1730,10 @@ if __name__ == "__main__":
     )
     if is_cloud_or_lan:
         bind_address = "0.0.0.0"
+
+    # Iniciar hilo daemon de purga automática de cuentas no convalidadas (>48h)
+    purge_thread = threading.Thread(target=run_auto_purge_daemon, daemon=True, name="PurgeDaemon")
+    purge_thread.start()
 
     socketserver.ThreadingTCPServer.allow_reuse_address = True
     with socketserver.ThreadingTCPServer((bind_address, PORT), AutoSyncHTTPHandler) as httpd:
