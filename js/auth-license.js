@@ -95,6 +95,13 @@ const LicenseService = {
     return null; // Sin licencia = Modo Demo
   },
 
+  // Comprobar si el usuario opera en Modo Demo (sin Pase Activo convalidado)
+  isDemoMode() {
+    if (this.isAdminMode()) return false;
+    const lic = this.getCurrentLicense();
+    return !lic || Boolean(lic.expired);
+  },
+
   // 2. Verificar si un tema o caso específico está desbloqueado
   isContentUnlocked(item, type = "topic") {
     // Si es Administrador, tiene acceso total irrestricto a todas las cédulas

@@ -205,7 +205,7 @@ var CaseSolver = {
       </div>
     `;
 
-    if (window.lucide) {
+    if (typeof window !== "undefined" && window.lucide) {
       window.lucide.createIcons();
     }
 
@@ -272,6 +272,9 @@ var CaseSolver = {
    * Renderiza el taller de acuerdo estricto al Protocolo 2026-20 (Parte I: Preguntas con alternativas y justificación)
    */
   renderProtocolo2026Workspace(activeCase, draft, mobileHeaderHtml) {
+    const isDemo = (typeof LicenseService !== 'undefined' && typeof LicenseService.isDemoMode === 'function') 
+      ? LicenseService.isDemoMode() 
+      : false;
     const questions = activeCase.questions || [];
     const qIndex = Math.min(Math.max(0, this.currentQuestionIndex), questions.length - 1);
     const currentQ = questions[qIndex];
@@ -423,9 +426,21 @@ var CaseSolver = {
             const qEval = evaluations[q.id];
             let statusIcon = "";
             let statusClass = "";
+            const isLockedByDemo = isDemo && idx > 0;
 
-            if (qEval && qEval.isEvaluated) {
-              if (qEval.isCorrect) {
+            if (isLockedByDemo) {
+              statusClass = "locked-demo";
+              statusIcon = "🔒 Pase Activo";
+            } else if (qEval && qEval.isEvaluated) {
+              if (qEval.isDemoEvaluation) {
+                if (qEval.isCorrect) {
+                  statusClass = "completed";
+                  statusIcon = "✓ 1.0/1.0";
+                } else {
+                  statusClass = "incorrect-badge";
+                  statusIcon = "✕ 0.0/1.0";
+                }
+              } else if (qEval.isCorrect) {
                 statusClass = "completed";
                 statusIcon = `✓ ${qEval.totalScore.toFixed(1)}/5.0`;
               } else {
@@ -437,8 +452,8 @@ var CaseSolver = {
             }
 
             return `
-              <button class="question-nav-btn ${idx === qIndex ? 'active' : ''} ${statusClass}" data-q-index="${idx}">
-                <span class="question-nav-badge">P${idx + 1}</span>
+              <button class="question-nav-btn ${idx === qIndex ? 'active' : ''} ${statusClass}" data-q-index="${idx}" ${isLockedByDemo ? 'data-is-locked="true"' : ''}>
+                <span class="question-nav-badge">${isLockedByDemo ? '🔒' : `P${idx + 1}`}</span>
                 <span>Pregunta ${idx + 1}</span>
                 ${statusIcon ? `<span style="font-size: 0.72rem; font-family: var(--font-mono); opacity: 0.9;">${statusIcon}</span>` : ''}
               </button>
@@ -446,109 +461,211 @@ var CaseSolver = {
           }).join('')}
         </div>
 
-        <!-- TARJETA PRINCIPAL DE LA PREGUNTA ACTIVA -->
-        <div class="mc-question-wrapper" id="question-card-${currentQ.id}">
-          <div class="mc-question-header">
-            <div>
-              <span class="mc-area-badge">
-                <i data-lucide="bookmark"></i>
-                ${currentQ.area || 'Pregunta de Grado'}
-              </span>
-              <h2 class="mc-question-title">
-                Pregunta ${qIndex + 1}: ${currentQ.questionText}
-              </h2>
+        ${isDemo && qIndex > 0 ? `
+          <!-- TARJETA DE BLOQUEO DEMO: VENTAJAS EXCLUSIVAS DEL PASE DE GRADO -->
+          <div class="case-demo-locked-card" id="demo-locked-card">
+            <div class="demo-locked-header">
+              <div class="demo-locked-icon-badge">
+                <i data-lucide="lock"></i>
+              </div>
+              <h2 class="demo-locked-title">Pregunta ${qIndex + 1} Reservada para Pase de Grado</h2>
+              <p class="demo-locked-description">
+                En la <strong>Versión Demo</strong> puedes resolver y validar la primera pregunta de este caso. Para desbloquear las preguntas avanzadas, el análisis procesal correlativo y la retroalimentación argumentativa completa con IA, activa tu Pase de Grado con tu código de acceso.
+              </p>
             </div>
-          </div>
 
-          <!-- LISTA DE ALTERNATIVAS A, B, C, D, E -->
-          <div class="mc-options-list">
-            ${(currentQ.options || []).map(opt => {
-              const isSelected = selectedOption === opt.id;
-              let cardClass = isSelected ? "selected" : "";
-              let iconHtml = "";
+            <div class="demo-advantages-header">
+              <i data-lucide="sparkles"></i>
+              <span>Ventajas Exclusivas de la Versión con Código de Acceso</span>
+            </div>
 
-              if (isEvaluated) {
-                cardClass += " evaluated";
-                if (opt.id === currentQ.correctAnswer) {
-                  cardClass += " correct";
-                  iconHtml = `<i data-lucide="check-circle" style="color: var(--success); width: 20px; height: 20px;"></i>`;
-                } else if (isSelected && !evaluation.isCorrect) {
-                  cardClass += " incorrect";
-                  iconHtml = `<i data-lucide="x-circle" style="color: var(--danger); width: 20px; height: 20px;"></i>`;
-                }
-              }
-
-              return `
-                <div class="mc-option-card ${cardClass}" data-option-id="${opt.id}">
-                  <div class="mc-option-letter">${opt.id.toUpperCase()}</div>
-                  <div class="mc-option-text">${opt.text}</div>
-                  <div class="mc-option-status-icon">${iconHtml}</div>
+            <div class="demo-advantages-grid">
+              <div class="advantage-item-card">
+                <div class="advantage-icon-wrap">
+                  <i data-lucide="layers"></i>
                 </div>
-              `;
-            }).join('')}
-          </div>
-
-          <!-- ÁREA DE JUSTIFICACIÓN -->
-          <div class="mc-justification-section">
-            <div class="mc-justification-header">
-              <div class="mc-justification-title">
-                <i data-lucide="align-left"></i>
-                <span>Justificación Técnico-Jurídica (Componente Argumentativo)</span>
+                <div class="advantage-info">
+                  <h4>Resolución Integral del Caso (Todas las Preguntas)</h4>
+                  <p>Acceso irrestricto a las 3 a 5 preguntas de alternativas de cada caso práctico, cubriendo todo el espectro de la litis civil y procesal.</p>
+                </div>
               </div>
-              <div class="rubric-weights-pills">
-                <span class="rubric-mini-pill" title="Dimensión 1: Marco Jurídico">Marco: <strong>0.5 pt</strong></span>
-                <span class="rubric-mini-pill" title="Dimensión 2: Hechos Relevantes">Hechos: <strong>1.0 pt</strong></span>
-                <span class="rubric-mini-pill" title="Dimensión 3: Subsunción y Razonamiento">Subsunción: <strong>2.0 pts</strong></span>
-                <span class="rubric-mini-pill" title="Dimensión 4: Claridad Técnica">Claridad: <strong>0.5 pt</strong></span>
+
+              <div class="advantage-item-card">
+                <div class="advantage-icon-wrap">
+                  <i data-lucide="scale"></i>
+                </div>
+                <div class="advantage-info">
+                  <h4>Evaluación Argumentativa con Rúbrica Oficial AIME 2026-20</h4>
+                  <p>Justifica jurídicamente cada opción con retroalimentación en 4 dimensiones: Marco Jurídico, Hechos Relevantes, Subsunción y Precisión Técnica (hasta 5.0 pts por pregunta).</p>
+                </div>
+              </div>
+
+              <div class="advantage-item-card">
+                <div class="advantage-icon-wrap">
+                  <i data-lucide="bot"></i>
+                </div>
+                <div class="advantage-info">
+                  <h4>Generador Inédito de Casos con IA Ilimitado</h4>
+                  <p>Crea infinitos casos prácticos inéditos adaptados a tu cédula o materia de interés con pauta de corrección y desglose dogmático en tiempo real.</p>
+                </div>
+              </div>
+
+              <div class="advantage-item-card">
+                <div class="advantage-icon-wrap">
+                  <i data-lucide="check-circle-2"></i>
+                </div>
+                <div class="advantage-info">
+                  <h4>Soluciones Dogmáticas de Nivel Grado</h4>
+                  <p>Consulta las soluciones estratégicas modelo, normas de fondo/forma aplicables y jurisprudencia doctrinaria de respaldo para cada caso.</p>
+                </div>
               </div>
             </div>
 
-            <!-- Guía oficial de argumentación -->
-            <div class="justification-guidance-box">
-              <div class="guidance-box-title">
-                <i data-lucide="compass"></i>
-                Estructura de la Justificación según Rúbrica de la Universidad:
-              </div>
-              <ol class="guidance-steps-list">
-                <li><strong>1. Marco Jurídico:</strong> Identifica con precisión la regla, garantía o principio positivo aplicable.</li>
-                <li><strong>2. Hechos Relevantes:</strong> Selecciona los hechos precisos del caso que activan la norma identificada.</li>
-                <li><strong>3. Subsunción y Razonamiento:</strong> Desarrolla el silogismo jurídico que explica por qué tu opción es la correcta y descarta las demás.</li>
-                <li><strong>4. Precisión Técnica:</strong> Redacta con lenguaje técnico riguroso, sin ambigüedades.</li>
-              </ol>
-            </div>
-
-            <textarea 
-              id="input-mc-justification" 
-              class="mc-justification-textarea" 
-              placeholder="Escribe aquí tu justificación técnico-jurídica fundamentando la alternativa marcada..."
-            >${this.escapeText(justificationText)}</textarea>
-          </div>
-
-          <!-- BARRA DE ACCIONES -->
-          <div class="mc-actions-bar">
-            <button id="btn-save-mc-draft" class="btn btn-secondary">
-              <i data-lucide="save"></i>
-              <span>Guardar Borrador</span>
-            </button>
-
-            <div style="display: flex; gap: 10px; align-items: center;">
-              ${isEvaluated ? `
-                <button id="btn-reset-evaluation" class="btn btn-secondary btn-sm" title="Reintentar esta pregunta">
-                  <i data-lucide="rotate-ccw"></i>
-                  <span>Reintentar</span>
-                </button>
-              ` : ''}
-              <button id="btn-evaluate-question" class="btn btn-primary">
-                <i data-lucide="award"></i>
-                <span>${isEvaluated ? 'Recalcular Evaluación' : 'Evaluar según Rúbrica Oficial (AIME 2026-20)'}</span>
+            <div class="demo-locked-cta-bar">
+              <button type="button" class="btn btn-secondary btn-back-to-q1" data-goto-q1="true">
+                <i data-lucide="arrow-left"></i>
+                <span>Volver a Pregunta 1 (Disponible en Demo)</span>
+              </button>
+              <button type="button" class="btn btn-primary btn-trigger-convalidate">
+                <i data-lucide="key"></i>
+                <span>Convalidar mi Código de Acceso</span>
               </button>
             </div>
           </div>
+        ` : `
+          <!-- TARJETA PRINCIPAL DE LA PREGUNTA ACTIVA -->
+          <div class="mc-question-wrapper" id="question-card-${currentQ.id}">
+            <div class="mc-question-header">
+              <div>
+                <span class="mc-area-badge">
+                  <i data-lucide="bookmark"></i>
+                  ${currentQ.area || 'Pregunta de Grado'}
+                </span>
+                <h2 class="mc-question-title">
+                  Pregunta ${qIndex + 1}: ${currentQ.questionText}
+                </h2>
+              </div>
+            </div>
 
-          <!-- RESULTADO DE LA EVALUACIÓN SEGÚN RÚBRICA OFICIAL -->
-          ${isEvaluated ? this.renderEvaluationResult(currentQ, evaluation) : ''}
+            <!-- LISTA DE ALTERNATIVAS A, B, C, D, E -->
+            <div class="mc-options-list">
+              ${(currentQ.options || []).map(opt => {
+                const isSelected = selectedOption === opt.id;
+                let cardClass = isSelected ? "selected" : "";
+                let iconHtml = "";
 
-        </div>
+                if (isEvaluated) {
+                  cardClass += " evaluated";
+                  if (opt.id === currentQ.correctAnswer) {
+                    cardClass += " correct";
+                    iconHtml = '<i data-lucide="check-circle" style="color: var(--success); width: 20px; height: 20px;"></i>';
+                  } else if (isSelected && !evaluation.isCorrect) {
+                    cardClass += " incorrect";
+                    iconHtml = '<i data-lucide="x-circle" style="color: var(--danger); width: 20px; height: 20px;"></i>';
+                  }
+                }
+
+                return `
+                  <div class="mc-option-card ${cardClass}" data-option-id="${opt.id}">
+                    <div class="mc-option-letter">${opt.id.toUpperCase()}</div>
+                    <div class="mc-option-text">${opt.text}</div>
+                    <div class="mc-option-status-icon">${iconHtml}</div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+
+            <!-- ÁREA DE JUSTIFICACIÓN -->
+            ${isDemo ? `
+              <!-- MODO DEMO: JUSTIFICACIÓN BLOQUEADA / NOTIFICACIÓN EXPLICATIVA -->
+              <div class="demo-justification-notice">
+                <div class="demo-justification-notice-header">
+                  <div class="demo-justification-notice-title">
+                    <i data-lucide="lock"></i>
+                    <span>Redacción Argumentativa Reservada para Pase de Grado</span>
+                  </div>
+                  <span class="demo-justification-pill">Modo Demo</span>
+                </div>
+                <p class="demo-justification-notice-text">
+                  En la <strong>Versión Demo</strong> la evaluación se concentra exclusivamente en acertar la alternativa correcta (+1.0 pto). La redacción argumentativa y la calificación en 4 dimensiones según la Rúbrica Oficial AIME 2026-20 están disponibles con tu <button type="button" class="btn-link-convalidate">Pase de Acceso</button>.
+                </p>
+              </div>
+            ` : `
+              <div class="mc-justification-section">
+                <div class="mc-justification-header">
+                  <div class="mc-justification-title">
+                    <i data-lucide="align-left"></i>
+                    <span>Justificación Técnico-Jurídica (Componente Argumentativo)</span>
+                  </div>
+                  <div class="rubric-weights-pills">
+                    <span class="rubric-mini-pill" title="Dimensión 1: Marco Jurídico">Marco: <strong>0.5 pt</strong></span>
+                    <span class="rubric-mini-pill" title="Dimensión 2: Hechos Relevantes">Hechos: <strong>1.0 pt</strong></span>
+                    <span class="rubric-mini-pill" title="Dimensión 3: Subsunción y Razonamiento">Subsunción: <strong>2.0 pts</strong></span>
+                    <span class="rubric-mini-pill" title="Dimensión 4: Claridad Técnica">Claridad: <strong>0.5 pt</strong></span>
+                  </div>
+                </div>
+
+                <!-- Guía oficial de argumentación -->
+                <div class="justification-guidance-box">
+                  <div class="guidance-box-title">
+                    <i data-lucide="compass"></i>
+                    Estructura de la Justificación según Rúbrica de la Universidad:
+                  </div>
+                  <ol class="guidance-steps-list">
+                    <li><strong>1. Marco Jurídico:</strong> Identifica con precisión la regla, garantía o principio positivo aplicable.</li>
+                    <li><strong>2. Hechos Relevantes:</strong> Selecciona los hechos precisos del caso que activan la norma identificada.</li>
+                    <li><strong>3. Subsunción y Razonamiento:</strong> Desarrolla el silogismo jurídico que explica por qué tu opción es la correcta y descarta las demás.</li>
+                    <li><strong>4. Precisión Técnica:</strong> Redacta con lenguaje técnico riguroso, sin ambigüedades.</li>
+                  </ol>
+                </div>
+
+                <textarea 
+                  id="input-mc-justification" 
+                  class="mc-justification-textarea" 
+                  placeholder="Escribe aquí tu justificación técnico-jurídica fundamentando la alternativa marcada..."
+                >${this.escapeText(justificationText)}</textarea>
+              </div>
+            `}
+
+            <!-- BARRA DE ACCIONES -->
+            <div class="mc-actions-bar">
+              ${isDemo ? `
+                ${isEvaluated ? `
+                  <button id="btn-reset-evaluation" class="btn btn-secondary btn-sm" title="Reintentar esta pregunta">
+                    <i data-lucide="rotate-ccw"></i>
+                    <span>Reintentar Alternativa</span>
+                  </button>
+                ` : ''}
+                <button id="btn-evaluate-question" class="btn btn-primary">
+                  <i data-lucide="check-circle-2"></i>
+                  <span>${isEvaluated ? 'Reevaluar Alternativa (Modo Demo)' : 'Evaluar Alternativa (Modo Demo)'}</span>
+                </button>
+              ` : `
+                <button id="btn-save-mc-draft" class="btn btn-secondary">
+                  <i data-lucide="save"></i>
+                  <span>Guardar Borrador</span>
+                </button>
+
+                <div style="display: flex; gap: 10px; align-items: center;">
+                  ${isEvaluated ? `
+                    <button id="btn-reset-evaluation" class="btn btn-secondary btn-sm" title="Reintentar esta pregunta">
+                      <i data-lucide="rotate-ccw"></i>
+                      <span>Reintentar</span>
+                    </button>
+                  ` : ''}
+                  <button id="btn-evaluate-question" class="btn btn-primary">
+                    <i data-lucide="award"></i>
+                    <span>${isEvaluated ? 'Recalcular Evaluación' : 'Evaluar según Rúbrica Oficial (AIME 2026-20)'}</span>
+                  </button>
+                </div>
+              `}
+            </div>
+
+            <!-- RESULTADO DE LA EVALUACIÓN SEGÚN RÚBRICA OFICIAL -->
+            ${isEvaluated ? this.renderEvaluationResult(currentQ, evaluation) : ''}
+
+          </div>
+        `}
       </div>
     `;
   },
@@ -557,6 +674,42 @@ var CaseSolver = {
    * Renderiza el resultado de la evaluación aplicando el Criterio Excluyente o la Rúbrica Oficial de 4 Dimensiones
    */
   renderEvaluationResult(question, evaluation) {
+    if (evaluation.isDemoEvaluation) {
+      const isCorrect = Boolean(evaluation.isCorrect);
+      return `
+        <div class="demo-eval-result-card ${isCorrect ? 'correct' : 'incorrect'}">
+          <div class="demo-eval-badge-row">
+            <div class="demo-eval-result-badge ${isCorrect ? 'correct' : 'incorrect'}">
+              <i data-lucide="${isCorrect ? 'check-circle-2' : 'x-circle'}"></i>
+              <span>${isCorrect ? '¡Alternativa Correcta! (+1.0 pto)' : 'Alternativa Incorrecta (0.0 pts)'}</span>
+            </div>
+            <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); font-family: var(--font-mono);">
+              Modo Demo: Alternativa ${isCorrect ? '1.0 / 1.0 pt' : '0.0 / 1.0 pt'}
+            </span>
+          </div>
+
+          <div class="demo-eval-explanation">
+            <h4><i data-lucide="book-open"></i> Fundamentación Dogmática Oficial (Opción ${question.correctAnswer.toUpperCase()}):</h4>
+            <p>${question.explanation}</p>
+          </div>
+
+          <div class="demo-eval-upsell-box">
+            <div class="demo-eval-upsell-header">
+              <i data-lucide="lock"></i>
+              <span>¿Deseas justificar tus respuestas y ser evaluado con la Rúbrica Oficial?</span>
+            </div>
+            <p class="demo-eval-upsell-text">
+              Con el <strong>Pase de Grado</strong> puedes redactar tu justificación jurídica y recibir calificación cuantitativa en 4 dimensiones (Marco Jurídico, Hechos, Subsunción y Precisión Técnica) hasta 5.0 puntos por pregunta, además de desbloquear todas las preguntas restantes del caso.
+            </p>
+            <button type="button" class="btn btn-primary btn-sm btn-trigger-convalidate" style="margin-top: 8px;">
+              <i data-lucide="key"></i>
+              <span>Convalidar Pase de Grado</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
     const isCorrect = evaluation.isCorrect;
     const isExclusionary = evaluation.isExclusionary || !isCorrect;
 
@@ -1160,13 +1313,32 @@ var CaseSolver = {
     }
 
     // Activación inline en caso bloqueado
-    const btnInlineCase = this.container.querySelector('#btn-inline-case-activate');
-    if (btnInlineCase) {
-      btnInlineCase.addEventListener('click', () => {
+    const btnInlineCase = this.container.querySelector('#inline-case-license-code');
+    const btnInlineCaseAct = this.container.querySelector('#btn-inline-case-activate');
+    if (btnInlineCaseAct) {
+      btnInlineCaseAct.addEventListener('click', () => {
         const code = this.container.querySelector('#inline-case-license-code')?.value || '';
         App.processActivation(code);
       });
     }
+
+    // Convalidar desde CTA de ventajas demo o notice
+    this.container.querySelectorAll('.btn-trigger-convalidate, .btn-link-convalidate').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (typeof App !== 'undefined' && typeof App.openUnlockModal === 'function') {
+          App.openUnlockModal();
+        }
+      });
+    });
+
+    // Volver a la pregunta 1 desde el bloqueo de preguntas demo
+    this.container.querySelectorAll('.btn-back-to-q1, [data-goto-q1]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.setQuestionIndex(0);
+      });
+    });
   },
 
   /**
@@ -1205,16 +1377,60 @@ var CaseSolver = {
     const currentQ = questions[this.currentQuestionIndex];
     if (!currentQ) return;
 
+    const isDemo = (typeof LicenseService !== 'undefined' && typeof LicenseService.isDemoMode === 'function') 
+      ? LicenseService.isDemoMode() 
+      : false;
+
     const selectedOption = (draft.answers && draft.answers[currentQ.id]) || null;
-    const rawJustification = (draft.justifications && draft.justifications[currentQ.id]) || "";
-    const justificationText = (typeof SecurityShield !== 'undefined') 
-      ? SecurityShield.sanitizeText(rawJustification) 
-      : rawJustification.trim();
 
     if (!selectedOption) {
       App.showToast("Debes marcar una alternativa antes de evaluar", "warning");
       return;
     }
+
+    // FLUJO EXCLUSIVO MODO DEMO:
+    // Solo permite responder la pregunta 1 (índice 0), sin justificación obligatoria y califica solo la alternativa (+1.0 / 0.0 pt).
+    if (isDemo) {
+      if (this.currentQuestionIndex > 0) {
+        App.showToast("En Modo Demo solo puedes responder la Pregunta 1. Activa tu Pase de Grado para desbloquear el caso completo.", "warning");
+        return;
+      }
+
+      const isCorrect = selectedOption.toLowerCase() === currentQ.correctAnswer.toLowerCase();
+      if (!draft.evaluations) draft.evaluations = {};
+
+      draft.evaluations[currentQ.id] = {
+        isEvaluated: true,
+        isDemoEvaluation: true,
+        isCorrect: isCorrect,
+        isExclusionary: !isCorrect,
+        selectedOption,
+        scoreAlternative: isCorrect ? 1.0 : 0.0,
+        rubricScores: { criterio1: 0.0, criterio2: 0.0, criterio3: 0.0, criterio4: 0.0 },
+        totalScore: isCorrect ? 1.0 : 0.0,
+        evaluatedAt: new Date().toISOString()
+      };
+
+      StorageService.saveCaseDraft(activeCase.id, draft);
+      this.render();
+
+      if (isCorrect) {
+        App.showToast("¡Alternativa Correcta! (+1.0 pto en Modo Demo)", "success");
+      } else {
+        App.showToast("Alternativa Incorrecta (0.0 pts en Modo Demo)", "error");
+      }
+
+      const evalResult = this.container.querySelector('.demo-eval-result-card');
+      if (evalResult) {
+        evalResult.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      return;
+    }
+
+    const rawJustification = (draft.justifications && draft.justifications[currentQ.id]) || "";
+    const justificationText = (typeof SecurityShield !== 'undefined') 
+      ? SecurityShield.sanitizeText(rawJustification) 
+      : rawJustification.trim();
 
     if (!justificationText.trim()) {
       App.showToast("Debes ingresar una justificación para ser calificada por la rúbrica", "warning");

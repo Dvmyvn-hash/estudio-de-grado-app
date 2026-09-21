@@ -84,6 +84,17 @@ El agente opera bajo reglas estructurales inmutables:
   * Payloads ejecutables o etiquetas `<script>`.
   * *Acción:* La justificación recibe **0.0 pts inmediatos** por incidente de seguridad, registrando la evidencia en el borrador de evaluación.
 
+* **Limitación de Resolución de Casos en Modo Demo vs. Pase Activo (v6.4):**
+  * **Modo Demo (Sin Pase Activo Convalidado):**
+    * **Pregunta 1 (índice 0):** Es la única pregunta habilitada para responder. El postulante puede seleccionar libremente su alternativa (A-E).
+    * **Bloqueo de Justificación Argumentativa:** Se suprime el área de redacción (`#input-mc-justification`) y se despliega en su lugar el componente informativo `.demo-justification-notice`, advirtiendo que la fundamentación jurídica está reservada para usuarios con Pase de Grado.
+    * **Evaluación Unidimensional Exclusiva:** La evaluación califica única y exclusivamente la alternativa seleccionada: **+1.0 pto** si acierta, **0.0 pts** si erra. No se exige ni penaliza la ausencia de justificación (`isDemoEvaluation: true`).
+    * **Preguntas Avanzadas (Preguntas 2 en adelante):** Bloqueadas por diseño con la tarjeta `.case-demo-locked-card`, impidiendo su resolución y desplegando las **4 ventajas exclusivas de la versión con código de acceso** junto con botones de convalidación rápida (`.btn-trigger-convalidate`) y retorno a la Pregunta 1 (`.btn-back-to-q1`).
+  * **Modo con Pase Activo (Código de Acceso Convalidado):**
+    * Desbloqueo irrestricto de todas las preguntas del caso (3 a 5 preguntas).
+    * Habilitación plena del componente argumentativo (`#input-mc-justification`).
+    * Calificación multidimensional oficial con la Rúbrica Oficial AIME 2026-20 en 4 dimensiones (hasta 5.0 pts por pregunta).
+
 * **Custodia Documental Obligatoria de CONTEXT.md:**
   El agente tiene terminantemente prohibido realizar modificaciones estructurales, lógicas, visuales o de seguridad sin actualizar de manera inmediata este archivo `CONTEXT.md`. Cada nuevo componente, selector de interfaz o endpoint debe quedar aquí reflejado.
 
@@ -576,12 +587,22 @@ stateDiagram-v2
 | `#input-license-code` | Input de Texto | Entrada para el código de invitación con auto-conversión a mayúsculas y envío con Enter. |
 | `#btn-submit-license` | Botón de Acción | Ejecuta `AuthService.convalidateAccount(code)` con feedback visual. |
 | `#unlock-step-active` | Vista de Cuenta Activa | Desplegada si el usuario ya posee su Pase de Grado convalidado. |
+| `.question-nav-btn.locked-demo` | Botón de Pregunta | Pregunta bloqueada en Modo Demo (índice > 0) con distintivo de candado `🔒 Pase Activo`. |
+| `.case-demo-locked-card` | Tarjeta de Bloqueo | Panel desplegado en preguntas > 0 para usuarios en Modo Demo que expone las ventajas del Pase Activo. |
+| `.demo-locked-header` | Encabezado | Título e introducción de la tarjeta de bloqueo demo. |
+| `.demo-advantages-grid` | Grilla de Ventajas | Exhibe las 4 ventajas principales de contar con Pase de Grado convalidado. |
+| `.btn-trigger-convalidate` | Botón de Acción | Disparador que abre el modal `#unlock-modal` para convalidar código de acceso desde el taller de casos. |
+| `.btn-back-to-q1` | Botón de Navegación | Permite al usuario en demo regresar rápidamente a la Pregunta 1 (`setQuestionIndex(0)`). |
+| `.demo-justification-notice` | Contenedor Notice | Reemplaza el área de redacción en la Pregunta 1 para usuarios demo, informando el bloqueo de justificación. |
+| `.btn-link-convalidate` | Enlace Interactivo | Enlace inline dentro del notice demo para abrir el modal de convalidación. |
+| `.demo-eval-result-card` | Tarjeta de Resultado | Muestra el resultado de evaluación en Modo Demo (1.0 / 1.0 pt o 0.0 / 1.0 pt) con fundamentación oficial y upsell. |
+| `.demo-eval-upsell-box` | Banner de Upsell | Destaca las ventajas de la justificación argumentativa y convoca a activar el Pase de Grado. |
 
 ---
 
 ### 7.3. Contratos de Seguridad y Pruebas Automatizadas
-* **Suite de Autenticación Autónoma (`test_unlock_auth_flow.cjs`):** Ejecuta 74 pruebas cubriendo estado inicial, validación de política de contraseñas, rechazo por discrepancia, registro con emisión de código de verificación, prevención de duplicados, login fallido de cuenta no verificada (HTTP 403), verificación con código erróneo, invalidación tras 5 intentos fallidos, reenvío de nuevo código con reseteo de intentos, verificación exitosa con código válido, autenticación directa en Versión Demo, convalidación con código de activación, desbloqueo integral de materias en `LicenseService`, cierre de sesión, login exitoso con credenciales correctas tras verificación, pruebas de regresión reactivas para el botón `#btn-submit-register` y la subvista `#unlock-step-verify-code`, pruebas de blindaje HTTP 503 ante caída del proveedor de correo y verificación de confidencialidad en producción (`ALLOW_TEST_AUTH=0`).
-* **Suite de Regresión e Integración (`test_e2e_case_flow.cjs`):** Ejecuta 65 pruebas integrales que verifican la confidencialidad de modelos docentes, casos IA, rúbrica AIME 2026-20, ciberseguridad y sincronización multi-dispositivo sin regresiones.
+* **Suite de Autenticación Autónoma (`test_unlock_auth_flow.cjs`):** Ejecuta 101 pruebas cubriendo estado inicial, validación de política de contraseñas, rechazo por discrepancia, registro con emisión de código de verificación, prevención de duplicados, login fallido de cuenta no verificada (HTTP 403), verificación con código erróneo, invalidación tras 5 intentos fallidos, reenvío de nuevo código con reseteo de intentos, verificación exitosa con código válido, autenticación directa en Versión Demo, convalidación con código de activación, desbloqueo integral de materias en `LicenseService`, cierre de sesión, login exitoso con credenciales correctas tras verificación, pruebas de regresión reactivas para el botón `#btn-submit-register` y la subvista `#unlock-step-verify-code`, pruebas de blindaje HTTP 503 ante caída del proveedor de correo, verificación de confidencialidad en producción (`ALLOW_TEST_AUTH=0`), creación y revocación de códigos por PIN de administrador, persistencia en SQLite, consumo atómico y normalización canónica de espacios.
+* **Suite de Regresión e Integración (`test_e2e_case_flow.cjs`):** Ejecuta 91 pruebas integrales que verifican la confidencialidad de modelos docentes, casos IA, rúbrica AIME 2026-20, ciberseguridad, sincronización multi-dispositivo y la **regla de limitación de resolución de casos en Modo Demo vs. Pase Activo (v6.4)**.
 * **Sanitización Defensiva y Prevención XSS:** Todos los datos de usuario son escapados contra inyección XSS mediante `SecurityShield.escapeHtml` y los mensajes de error se renderizan estrictamente con `textContent` en el DOM.
 * **Hashing Seguro en Cliente (Modo Estático / GitHub Pages):** La función `AuthService.hashClientPassword()` emplea la Web Crypto API (`crypto.subtle.digest("SHA-256")`) con salt local, asegurando que **nunca se almacenen contraseñas en texto plano** en `localStorage`.
 * **Resiliencia y Modo Desarrollo:** Si no se define un proveedor de correo en el servidor, `server.py` no interrumpe la ejecución; imprime el código de verificación en consola con la etiqueta `[SMTP Dev]` permitiendo pruebas locales transparentes y suites automatizadas deterministas.
@@ -605,16 +626,16 @@ stateDiagram-v2
 | `css/main.css` | Estilos | Sistema de diseño *Dark Academy*, variables tipográficas (`Playfair Display`, `Plus Jakarta Sans`), tokens WCAG AA y header responsive. |
 | `css/modal.css` | Estilos | Diálogos modales, backdrop difuminado y estructura responsive para dispositivos móviles. |
 | `css/concept-graph.css` | Estilos | Lienzo de grafo HTML5 con `touch-action: none;` y controles flotantes adaptados a pantallas táctiles. |
-| `css/case-workshop.css` | Estilos | Taller de casos prácticos, rúbrica AIME 2026-20 y badges con tokens de contraste accesibles. |
+| `css/case-workshop.css` | Estilos | Taller de casos prácticos, rúbrica AIME 2026-20, estilos de bloqueo demo (`.case-demo-locked-card`), grilla de ventajas exclusivas (`.demo-advantages-grid`), notice informativo (`.demo-justification-notice`) y resultados demo. |
 | `js/app.js` | Orquestador | Controlador principal de GRADOMANÍA, navegación, vinculación del candado y auto-sincronizador de fuentes. |
 | `js/auth-service.js` | Servicio | Autenticación autónoma (registro, verificación de código de 6 dígitos, reenvío con throttling, login, logout), hashing seguro cliente con Web Crypto, validación reactiva y sesiones. |
-| `js/auth-license.js` | Servicio | Lógica de licencias (`LicenseService`), cálculo de materias desbloqueadas y persistencia local. |
+| `js/auth-license.js` | Servicio | Lógica de licencias (`LicenseService`), cálculo de materias desbloqueadas, método `isDemoMode()` y persistencia local. |
 | `js/auth-config.js` | Configuración | Configuración de cliente, códigos de invitación para modo estático y parámetros de sesión. |
 | `js/concept-graph.js` | Visualizador | Grafo interactivo con física de fuerzas y soporte móvil completo (arrastre de nodos, pan y pinch-to-zoom con dos dedos). |
 | `js/case-generator-agent.js` | Agente IA | Síntesis dogmática de casos inéditos, matriz de compatibilidad y poda FIFO. |
-| `js/case-solver.js` | Workbench | Interrogación, compuertas excluyentes, rúbrica AIME 2026-20 y evaluación de justificaciones. |
+| `js/case-solver.js` | Workbench | Interrogación, compuertas excluyentes, rúbrica AIME 2026-20, limitación a pregunta 1 en Modo Demo sin justificación, visualización de ventajas en preguntas > 0 y evaluación unidimensional. |
 | `js/security-shield.js` | Ciberseguridad | Detección de prompt injection, anti-XSS, escape seguro y cuotas de caracteres. |
-| `server.py` | Backend | Servidor HTTP Python multi-hilo, enlace dinámico (0.0.0.0 en nube/Render, 127.0.0.1 en local), soporte `PORT`/`SESSION_SECRET`, transporte de correo dual nativo (Resend REST API HTTPS vía `urllib.request` / SMTP con `smtplib`), endpoints `/api/auth/*`, Zero Exposure y rate limiting. |
+| `server.py` | Backend | Servidor HTTP Python multi-hilo, enlace dinámico (0.0.0.0 en nube/Render, 127.0.0.1 en local), soporte `PORT`/`SESSION_SECRET`, transporte de correo dual nativo (Resend REST API HTTPS vía `urllib.request` / SMTP con `smtplib`), endpoints `/api/auth/*` y `/api/admin/*`, Zero Exposure y rate limiting. |
 | `db.py` | Base de Datos | Conexión relacional SQLite (`estudio_grado.db`), hashing PBKDF2, esquema de usuarios con `is_verified`, `verification_code`, `verification_code_expires_at`, `verification_attempts`, lockout y códigos de acceso. Auto-sanación y auto-migración en `init_db()`. |
 | `manage_access_codes.py` | CLI Admin | Generador y administrador de códigos de invitación tipo beta cerrada. |
 | `scripts/test_email_manual.py` | CLI Diagnóstico | Herramienta CLI unificada para diagnóstico y prueba directa de despacho de correo mediante Resend API HTTPS (puerto 443) o SMTP. |
@@ -622,8 +643,8 @@ stateDiagram-v2
 | `.env.example` | Plantilla Config | Plantilla canónica de variables de entorno para configuración local y despliegue (Resend API, SMTP Gmail, puertos, secretos de sesión). |
 | `requirements.txt` | Dependencias | Paquetes de producción mínimos (`pypdf`, `python-docx`, `google-auth`) para despliegues en contenedores e infraestructura cloud. |
 | `render.yaml` | Infraestructura | Blueprint declarativo de infraestructura como código para despliegue automatizado en Render.com con Resend HTTPS API. |
-| `test_unlock_auth_flow.cjs` | Test E2E | Suite ampliada de 74 pruebas que valida el flujo Candado -> Correo/Contraseña -> Verificación 6 Dígitos -> Demo -> Convalidación -> Pase Activo, blindaje fail-safe HTTP 503 y cero exposición en producción. |
-| `test_e2e_case_flow.cjs` | Test E2E | Suite integral de 65 pruebas (casos IA, seguridad, rúbrica, confidencialidad y multi-dispositivo). |
+| `test_unlock_auth_flow.cjs` | Test E2E | Suite ampliada de 101 pruebas que valida el flujo Candado -> Correo/Contraseña -> Verificación 6 Dígitos -> Demo -> Convalidación -> Pase Activo, endpoints de administración, consumo atómico, normalización y marca. |
+| `test_e2e_case_flow.cjs` | Test E2E | Suite integral de 91 pruebas (casos IA, seguridad, rúbrica, confidencialidad, multi-dispositivo y limitación en Modo Demo vs. Pase Activo). |
 
 ---
 
@@ -662,6 +683,13 @@ stateDiagram-v2
   - **Normalización Canónica de Códigos (`normalize_access_code`):** Sanitización robusta en backend (`db.py`) y frontend (`js/auth-license.js`) que elimina espacios en blanco normales, espacios no separables (`\u00a0`), caracteres de ancho cero (`\u200b`) y fuerza mayúsculas antes de consultas e inserciones SQL, tolerando pegado imperfecto desde WhatsApp o correos.
   - **Rebranding Visual Estricto a GRADOMANIACOS:** Actualización visual integral de la marca a **`GRADOMANIACOS`** en `<title>`, metadatos Open Graph, Twitter Cards, `h1.brand-title`, modales, alertas y correos electrónicos, preservando con estricta rigurosidad los nombres técnicos internos (`CaseGeneratorAgent`, `AuthService`, `LicenseService`, base de datos `estudio_grado.db`, etc.).
   - **Verificación Automatizada Exhaustiva (166 Pruebas / 100% PASS):** Incorporación de la sección 21 en `test_unlock_auth_flow.cjs` para validar el ciclo completo: admin crea código con PIN -> persistencia en SQLite -> consulta y validación -> postulante en incógnito se registra, verifica correo y convalida -> consumo atómico impide segundo uso -> normalización de espacios -> revocación -> validación de marca. 101/101 pruebas exitosas en `test_unlock_auth_flow.cjs` y 65/65 pruebas exitosas en `test_e2e_case_flow.cjs`. Actualización canónica de `CONTEXT.md`.
+* **v6.4 (Limitación de Resolución de Casos en Modo Demo vs. Pase Activo con Código de Acceso):**
+  - **Compuerta Estricta de Modo Demo en Taller de Casos:** Los usuarios sin código de acceso convalidado (`LicenseService.isDemoMode() === true`) solo pueden responder y evaluar la **primera pregunta de alternativas** (Pregunta 1, índice 0) de cada caso práctico.
+  - **Bloqueo Total de Redacción Argumentativa en Demo:** Se suprime el área de texto (`#input-mc-justification`) en Modo Demo y se sustituye por el componente informativo `.demo-justification-notice`, impidiendo que los usuarios demo justifiquen sus respuestas y orientándolos a adquirir o convalidar el Pase de Grado.
+  - **Evaluación Unidimensional Exclusiva de Alternativa:** La evaluación en Modo Demo (`evaluateCurrentQuestion`) califica única y exclusivamente la alternativa seleccionada: **1.0 / 1.0 pt** si acierta, **0.0 / 1.0 pt** si erra (`isDemoEvaluation: true`). No se exige ni se evalúa redacción argumentativa, y se despliega la retroalimentación dogmática oficial de la opción con el banner upsell `.demo-eval-upsell-box`.
+  - **Exposición de Ventajas Exclusivas en Preguntas Avanzadas (P2 en adelante):** Al seleccionar las preguntas posteriores en Modo Demo, el sistema no expone las alternativas ni el formulario, sino la tarjeta premium `.case-demo-locked-card` con la grilla `.demo-advantages-grid` exhibiendo las 4 ventajas del Pase Activo: Resolución Integral de todas las preguntas, Rúbrica Oficial AIME 2026-20 (hasta 5.0 pts), Generador Inédito de Casos con IA Ilimitado y Soluciones Dogmáticas Modelo; con llamadas de acción directa para abrir el modal de convalidación (`.btn-trigger-convalidate`) o volver a la Pregunta 1 (`.btn-back-to-q1`).
+  - **Preservación Íntegra de la Experiencia con Pase Activo:** Para postulantes con código de acceso convalidado (`LicenseService.isDemoMode() === false`), todas las preguntas del caso permanecen 100% desbloqueadas, con redacción de justificación activa y calificación multidimensional oficial (Marco Jurídico, Hechos Relevantes, Subsunción y Precisión Técnica) hasta 5.0 puntos por pregunta.
+  - **Aprobación de Suites Automatizadas al 100% (192 Pruebas en Total):** 101/101 pruebas exitosas en `test_unlock_auth_flow.cjs` y 91/91 pruebas exitosas en `test_e2e_case_flow.cjs` (incluyendo 26 nuevas aserciones en el Test 8 dedicadas al flujo Demo vs. Pase Activo). Actualización canónica y obligatoria de `CONTEXT.md`.
 
 
 
