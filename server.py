@@ -626,9 +626,25 @@ def mask_email(email: str) -> str:
         return f"{local[0]}***@{domain}"
 
 
+def parse_sender_info(raw_sender: str, default_name: str = "GRADOMANIACOS", default_email: str = "gradomaniacos@gmail.com") -> Tuple[str, str]:
+    """Extrae (name, email) de strings como 'GRADOMANIACOS <correo@ejemplo.com>' o 'correo@ejemplo.com'."""
+    if not raw_sender or not raw_sender.strip():
+        return default_name, default_email
+    clean = raw_sender.strip()
+    match = re.match(r"^([^<]+)<([^>]+)>$", clean)
+    if match:
+        name = match.group(1).strip().strip('"\'')
+        email = match.group(2).strip()
+        return name or default_name, email or default_email
+    if "@" in clean:
+        return default_name, clean
+    return default_name, default_email
+
+
 def get_email_config() -> Dict[str, Any]:
     """Obtiene la configuración de correo actual desde variables de entorno."""
     raw_provider = os.environ.get("EMAIL_PROVIDER", "").strip().lower()
+    brevo_key = os.environ.get("BREVO_API_KEY", "").strip() or os.environ.get("SENDINBLUE_API_KEY", "").strip()
     resend_key = os.environ.get("RESEND_API_KEY", "").strip()
     smtp_host = os.environ.get("SMTP_HOST", "").strip()
     try:
@@ -640,10 +656,14 @@ def get_email_config() -> Dict[str, Any]:
     email_from = os.environ.get("EMAIL_FROM", "").strip()
 
     # Determinación jerárquica del proveedor activo
-    if raw_provider == "resend":
+    if raw_provider in ("brevo", "sendinblue"):
+        provider = "brevo"
+    elif raw_provider == "resend":
         provider = "resend"
     elif raw_provider == "smtp":
         provider = "smtp"
+    elif brevo_key:
+        provider = "brevo"
     elif resend_key:
         provider = "resend"
     elif smtp_host:
@@ -653,6 +673,7 @@ def get_email_config() -> Dict[str, Any]:
 
     return {
         "provider": provider,
+        "brevo_key": brevo_key,
         "resend_key": resend_key,
         "smtp_host": smtp_host,
         "smtp_port": smtp_port,
@@ -669,16 +690,95 @@ def get_smtp_config() -> Tuple[str, int, str, str, str]:
     return cfg["smtp_host"], cfg["smtp_port"], cfg["smtp_user"], cfg["smtp_pass"], from_addr
 
 
+def _send_via_brevo(to_email: str, code: str, api_key: str, from_addr: str) -> Tuple[bool, str]:
+    """
+    Envía código de verificación de 6 dígitos mediante la API REST HTTPS oficial de Brevo (Sendinblue).
+    Funciona 100% por HTTPS (puerto 443 estándar) y permite enviar a CUALQUIER destinatario
+    validando únicamente el correo remitente ('Sender Verification' gratuito sin exigir dominio DNS).
+    """
+    if not api_key:
+        print("[Email Error] Provider=brevo status=missing_api_key")
+        return False, "Configuración incompleta de Brevo API Key."
+
+    sender_name, sender_email = parse_sender_info(from_addr, default_name="GRADOMANIACOS", default_email="gradomaniacos@gmail.com")
+    subject = f"Tu código de verificación de GRADOMANIACOS es: {code}"
+    body_text = (
+        f"Hola,\n\n"
+        f"Tu código de verificación de GRADOMANIACOS es: {code}\n\n"
+        f"Este código vence en 15 minutos. Ingrésalo en la plataforma para activar tu cuenta.\n\n"
+        f"Si no solicitaste este código, puedes desestimar este mensaje con total seguridad.\n"
+    )
+    body_html = (
+        f"<div style='font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif; "
+        f"max-width: 520px; margin: 0 auto; padding: 28px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #ffffff;'>"
+        f"<h2 style='color: #1e293b; margin: 0 0 16px 0; font-size: 20px; letter-spacing: -0.5px;'>GRADOMANIACOS</h2>"
+        f"<p style='color: #475569; font-size: 15px; line-height: 1.5;'>Tu código de verificación de seguridad es:</p>"
+        f"<div style='background-color: #f8fafc; border: 1px dashed #cbd5e1; padding: 18px; border-radius: 6px; text-align: center; margin: 20px 0;'>"
+        f"<span style='font-size: 32px; font-weight: 700; letter-spacing: 8px; color: #0f172a; font-family: monospace;'>{code}</span>"
+        f"</div>"
+        f"<p style='color: #64748b; font-size: 13px; line-height: 1.4;'>Este código vence en <strong>15 minutos</strong>. Ingrésalo en la plataforma para activar tu cuenta.</p>"
+        f"<hr style='border: none; border-top: 1px solid #e2e8f0; margin: 24px 0 16px 0;'>"
+        f"<p style='color: #94a3b8; font-size: 12px; margin: 0;'>Si no solicitaste este código, puedes ignorar este correo con total seguridad.</p>"
+        f"</div>"
+    )
+
+    payload = {
+        "sender": {"name": sender_name, "email": sender_email},
+        "to": [{"email": to_email}],
+        "subject": subject,
+        "textContent": body_text,
+        "htmlContent": body_html
+    }
+
+    try:
+        req = urllib.request.Request(
+            "https://api.brevo.com/v3/smtp/email",
+            data=json.dumps(payload).encode("utf-8"),
+            headers={
+                "accept": "application/json",
+                "api-key": api_key,
+                "content-type": "application/json",
+                "User-Agent": "Gradomaniacos-App/1.0"
+            },
+            method="POST"
+        )
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            status = resp.status
+            if 200 <= status < 300:
+                print(f"[Email] Provider=brevo Verification email sent successfully to {mask_email(to_email)}")
+                return True, ""
+            else:
+                print(f"[Email Error] Provider=brevo status={status}")
+                return False, f"Brevo API error status={status}"
+    except urllib.error.HTTPError as e:
+        err_body = e.read().decode("utf-8", errors="replace")
+        try:
+            err_json = json.loads(err_body)
+            err_msg = err_json.get("message") or err_body
+        except Exception:
+            err_msg = err_body
+        print(f"[Email Error] Provider=brevo status={e.code} detail={err_msg}")
+        return False, f"Brevo API error (status {e.code}): {err_msg}"
+    except urllib.error.URLError as e:
+        print(f"[Email Error] Provider=brevo status=network_error error={type(e.reason).__name__}")
+        return False, "Error de red al conectar con Brevo API."
+    except Exception as e:
+        print(f"[Email Error] Provider=brevo status=unexpected error={type(e).__name__}")
+        return False, "Error inesperado al despachar el correo."
+
+
 def _send_via_resend(to_email: str, code: str, api_key: str, from_addr: str) -> Tuple[bool, str]:
     """
     Envía código de verificación de 6 dígitos mediante la API REST HTTPS oficial de Resend.
-    Compatible con Web Services gratuitos de Render.com (puerto 443 sin bloqueos SMTP).
+    Compatible con Web Services de Render.com (puerto 443 sin bloqueos SMTP).
     """
     if not api_key:
         print("[Email Error] Provider=resend status=missing_api_key")
-        return False, "Configuración incompleta del servicio de correo."
+        return False, "Configuración incompleta del servicio de correo (Resend API Key ausente)."
 
-    sender = from_addr or "GRADOMANIACOS <onboarding@resend.dev>"
+    clean_from = (from_addr or "").strip()
+    sender = clean_from if clean_from else "GRADOMANIACOS <onboarding@resend.dev>"
+
     subject = f"Tu código de verificación de GRADOMANIACOS es: {code}"
     body_text = (
         f"Hola,\n\n"
@@ -728,8 +828,21 @@ def _send_via_resend(to_email: str, code: str, api_key: str, from_addr: str) -> 
                 print(f"[Email Error] Provider=resend status={status}")
                 return False, f"Resend API error status={status}"
     except urllib.error.HTTPError as e:
-        print(f"[Email Error] Provider=resend status={e.code}")
-        return False, f"Resend API error (status {e.code})"
+        err_body = e.read().decode("utf-8", errors="replace")
+        try:
+            err_json = json.loads(err_body)
+            err_msg = err_json.get("message") or err_json.get("error") or err_body
+        except Exception:
+            err_msg = err_body
+
+        if e.code == 403 and ("testing" in err_msg.lower() or "only send" in err_msg.lower()):
+            print(f"[Email Error] Provider=resend status=403 [DOMINIO RESTRINGIDO]: Resend sólo permite enviar al correo del titular de la cuenta de Resend mientras no verifiques un dominio en resend.com/domains. Usa Brevo (BREVO_API_KEY) para enviar sin dominio. Detalle: {err_msg}")
+        elif "domain" in err_msg.lower() or "not verified" in err_msg.lower():
+            print(f"[Email Error] Provider=resend status={e.code} [DOMINIO NO VERIFICADO]: El remitente '{sender}' requiere verificación DNS en resend.com/domains o usar Brevo. Detalle: {err_msg}")
+        else:
+            print(f"[Email Error] Provider=resend status={e.code} detail={err_msg}")
+
+        return False, f"Resend API error (status {e.code}): {err_msg}"
     except urllib.error.URLError as e:
         print(f"[Email Error] Provider=resend status=network_error error={type(e.reason).__name__}")
         return False, "Error de red al conectar con el servicio de correo."
@@ -786,21 +899,50 @@ def _send_via_smtp(to_email: str, code: str, host: str, port: int, user: str, pa
 def send_verification_email(to_email: str, code: str) -> Tuple[bool, str]:
     """
     Envía código de verificación de 6 dígitos mediante el proveedor activo:
-    - HTTPS Resend API (para producción en Render.com / sin bloqueos de puerto)
+    - Brevo API REST HTTPS (recomendado: sin restricciones de dominio DNS, 300/día gratis)
+    - Resend API REST HTTPS (para producción con dominio propio verificado)
     - SMTP (para desarrollo local con Gmail)
+    - Multi-provider Fallback automático si hay más de una clave disponible
     - Dev Fallback si no hay proveedor configurado (imprime en consola)
     Retorna (éxito: bool, mensaje_error: str).
     """
     cfg = get_email_config()
     provider = cfg["provider"]
 
-    if provider == "resend":
-        return _send_via_resend(
+    if provider == "brevo":
+        sent, err = _send_via_brevo(
+            to_email=to_email,
+            code=code,
+            api_key=cfg["brevo_key"],
+            from_addr=cfg["email_from"]
+        )
+        if sent:
+            return True, ""
+        # Multi-provider fallback hacia Resend si está disponible
+        if cfg["resend_key"]:
+            print("[Email Fallback] Brevo no pudo despachar, intentando con Resend...")
+            res_sent, res_err = _send_via_resend(to_email, code, cfg["resend_key"], cfg["email_from"])
+            if res_sent:
+                return True, ""
+        return False, err
+
+    elif provider == "resend":
+        sent, err = _send_via_resend(
             to_email=to_email,
             code=code,
             api_key=cfg["resend_key"],
             from_addr=cfg["email_from"]
         )
+        if sent:
+            return True, ""
+        # Multi-provider fallback hacia Brevo si está disponible
+        if cfg["brevo_key"]:
+            print("[Email Fallback] Resend no pudo despachar, intentando con Brevo...")
+            brv_sent, brv_err = _send_via_brevo(to_email, code, cfg["brevo_key"], cfg["email_from"])
+            if brv_sent:
+                return True, ""
+        return False, err
+
     elif provider == "smtp":
         return _send_via_smtp(
             to_email=to_email,
@@ -1411,9 +1553,10 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_json_response({"ok": False, "error": reason}, status_code=400)
                 return
 
-            # Enviar correo mediante SMTP
+            # Enviar correo mediante el proveedor activo (Brevo HTTPS / Resend HTTPS / SMTP)
             email_sent, email_err = send_verification_email(email, verification_code)
             if not email_sent:
+                print(f"[Auth Register Error] No se pudo despachar correo a {mask_email(email)}: {email_err}")
                 self.send_json_response({
                     "ok": False,
                     "error": "No pudimos enviar el correo de verificación. Por favor intenta nuevamente en unos minutos."
@@ -1553,6 +1696,7 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                 db.update_verification_code(user["id"], new_code, new_expires_at)
                 email_sent, email_err = send_verification_email(email, new_code)
                 if not email_sent:
+                    print(f"[Auth Resend Error] No se pudo despachar correo a {mask_email(email)}: {email_err}")
                     self.send_json_response({
                         "ok": False,
                         "error": "No pudimos enviar el correo de verificación. Por favor intenta nuevamente en unos minutos."

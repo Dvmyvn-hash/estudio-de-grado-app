@@ -412,9 +412,39 @@ def create_user(
 
     with get_db_connection(db_path) as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT id FROM users WHERE LOWER(email) = ?", (clean_email,))
-        if cursor.fetchone():
-            return False, "El correo electrónico ya se encuentra registrado.", None
+        cursor.execute("SELECT id, is_verified, access_code, verification_code_expires_at FROM users WHERE LOWER(email) = ?", (clean_email,))
+        existing_user = cursor.fetchone()
+        if existing_user:
+            if existing_user["is_verified"] == 1:
+                return False, "El correo electrónico ya se encuentra registrado.", None
+
+            # Si el usuario no está verificado pero su código sigue vigente: rechazar duplicado
+            expires_at = existing_user["verification_code_expires_at"] or 0
+            if now_ms <= expires_at:
+                return False, "El correo electrónico ya se encuentra registrado y pendiente de verificación.", None
+
+            # Si el código previo ya expiró, permitir re-registro seguro con nuevo código y contraseña
+            clean_code = normalize_access_code(access_code) if access_code else None
+            cursor.execute(
+                """
+                UPDATE users
+                SET password_hash = ?,
+                    password_salt = ?,
+                    name = COALESCE(?, name),
+                    access_code = COALESCE(?, access_code),
+                    verification_code = ?,
+                    verification_code_expires_at = ?,
+                    verification_attempts = 0,
+                    failed_login_attempts = 0,
+                    locked_until = NULL
+                WHERE id = ?
+                """,
+                (pwd_hash, pwd_salt, clean_name, clean_code, verification_code, verification_code_expires_at, existing_user["id"])
+            )
+            conn.commit()
+            cursor.execute("SELECT id, email, name, access_code, failed_login_attempts, locked_until, is_verified, verification_code, verification_code_expires_at, verification_attempts, created_at, last_login_at FROM users WHERE id = ?", (existing_user["id"],))
+            row = cursor.fetchone()
+            return True, "Código de verificación actualizado para la cuenta.", dict(row) if row else None
 
         clean_code = normalize_access_code(access_code) if access_code else None
         if clean_code:

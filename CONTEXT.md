@@ -363,20 +363,25 @@ Cuando el sistema se conecte con APIs de LLM externas (ej. Gemini API, Cloud Run
 
 ---
 
-### 4.4. Manejo de Errores en Proveedores de Correo y Blindaje Fail-Safe (HTTP 503)
+### 4.4. Manejo de Errores en Proveedores de Correo, Brevo HTTPS y Blindaje Fail-Safe (HTTP 503)
 * **Bloqueo de Puertos SMTP en Render Free:** Las plataformas de nube modernas como Render.com bloquean por defecto el tráfico saliente por los puertos SMTP estándar (25, 465 y 587) en planes gratuitos para mitigar spam.
-* **Capa de Transporte HTTPS Resend API:** La aplicación sortea esta restricción direccionando las comunicaciones en producción a la API REST HTTPS de **Resend** (`https://api.resend.com/emails`) a través del puerto 443 (abierto y sin restricciones en Render).
-* **Contrato Fail-Safe Unificado:** Si el despacho del correo falla (por clave `RESEND_API_KEY` ausente o no autorizada, rechazo de dominio remitente `HTTPError`, indisponibilidad de red `URLError` o credenciales SMTP inválidas), la función `send_verification_email` captura la excepción sin filtrar información sensible y los endpoints `POST /api/auth/register` y `POST /api/auth/resend-code` responden inmediatamente con **HTTP 503 Service Unavailable**:
+* **Capa de Transporte HTTPS Multi-Proveedor (Brevo y Resend):**
+  - **Brevo (Sendinblue) API REST HTTPS (`https://api.brevo.com/v3/smtp/email`):** Solución recomendada para producción en Render. Funciona 100% sobre HTTPS (puerto 443) y permite enviar correos transaccionales a cualquier destinatario (`@gmail.com`, `@hotmail.com`, etc.) validando únicamente el correo remitente (`gradomaniacos@gmail.com`) mediante el enlace de verificación gratuito de Brevo (*Sender Verification*), sin requerir la compra de un dominio web ni la configuración de registros DNS complejos.
+  - **Resend API REST HTTPS (`https://api.resend.com/emails`):** Soporte activo sobre puerto 443. Si no se cuenta con un dominio verificado en `resend.com/domains`, Resend restringe los envíos con `onboarding@resend.dev` exclusivamente al correo del titular de la cuenta de Resend (retornando HTTP 403 ante correos de terceros). El servidor captura el error e imprime un diagnóstico explícito en consola alertando de la restricción.
+  - **Multi-Provider Fallback Automático:** Si están configuradas ambas claves (`BREVO_API_KEY` y `RESEND_API_KEY`) y el proveedor principal falla por restricciones o cuotas, el servidor intenta automáticamente el proveedor de respaldo antes de rechazar la solicitud.
+* **Resiliencia en SQLite para Cuentas No Verificadas (`db.py`):** Si un usuario intentó registrarse y su código de verificación previo expiró tras 15 minutos, `create_user` permite actualizar las credenciales y emitir un nuevo código en lugar de bloquear el registro con error de duplicado.
+* **Contrato Fail-Safe Unificado:** Si el despacho del correo falla (por claves ausentes, rechazo de dominio remitente `HTTPError`, indisponibilidad de red `URLError` o credenciales SMTP inválidas), la función `send_verification_email` captura la excepción sin filtrar información sensible y los endpoints `POST /api/auth/register` y `POST /api/auth/resend-code` responden inmediatamente con **HTTP 503 Service Unavailable**:
   ```json
   {
     "ok": false,
     "error": "No pudimos enviar el correo de verificación. Por favor intenta nuevamente en unos minutos."
   }
   ```
-* **Logs Sanitizados de Auditoría:** En todo momento se mantiene estricta confidencialidad. Los registros de consola reportan:
-  `[Email] Provider=resend Verification email sent successfully to d***@gmail.com`
+* **Logs Sanitizados y Diagnóstico Detallado:** Los registros de consola reportan:
+  `[Email] Provider=brevo Verification email sent successfully to d***@gmail.com`
   o ante fallos:
-  `[Email Error] Provider=resend status=XXX`
+  `[Email Error] Provider=resend status=403 [DOMINIO RESTRINGIDO]: ...`
+  `[Auth Register Error] No se pudo despachar correo a d***@gmail.com: ...`
   **Nunca** se imprime en consola o en red la API key, la contraseña SMTP, la contraseña del postulante o el código de verificación de 6 dígitos.
 
 ---
@@ -699,12 +704,14 @@ stateDiagram-v2
   - **Seguridad y Navegación:** Integración estricta de `target="_blank"` y `rel="noopener noreferrer"` en todas las etiquetas `<a>`.
   - **Diseño Visual e Iconografía:** Actualización de iconos a `data-lucide="instagram"`, textos dinámicos "Solicitar mi Pase por Instagram" / "Solicitar mi Pase de Grado por Instagram", y adopción del gradiente característico de Instagram en `.btn-whatsapp-buy` y `.btn-instagram-buy` (`css/paywall.css`) con sombras de profundidad y texto blanco, eliminando por completo el color verde WhatsApp del entorno.
   - **Aprobación del 100% de Pruebas Automatizadas:** 101/101 pruebas exitosas en `test_unlock_auth_flow.cjs` y 91/91 en `test_e2e_case_flow.cjs`.
-* **v6.6 (Trazabilidad y Registro de Gmail Vinculado y Asignado a Códigos de Acceso):**
-  - **Modelo Relacional Extendido en SQLite (`db.py`):** Incorporación de migración idempotente para la columna `assigned_email TEXT` en la tabla `access_codes`; actualización de `list_access_codes` con subconsulta correlacionada `GROUP_CONCAT(u.email, ', ')` sobre la tabla `users` para exponer en tiempo real la cuenta Gmail efectiva que convalidó cada licencia (`linked_emails`), así como el correo de pre-asignación (`assigned_email`).
-  - **Contratos de API Centralizada (`server.py`):** El endpoint `GET /api/admin/codes` retorna `linked_emails`, `assigned_email` y `associated_email` para cada código; `POST /api/admin/create-code` permite opcionalmente recibir `email` o `assigned_email` para asociar un destinatario desde la emisión.
-  - **Capa Cliente y Memoria Local (`js/auth-license.js`):** Sincronización bidireccional en `fetchAdminCodes` y `generateCode` para mapear y persistir `linkedEmail` y `assignedEmail`.
-  - **Panel de Control de Administrador Actualizado (`index.html` y `js/app.js`):** Inclusión de input `#admin-student-email` ("Gmail / Correo del Alumno (Opcional)") en el modal de emisión; sustitución de la columna local de progreso por la columna **"Gmail Vinculado"** en la tabla `.admin-codes-table`, exhibiendo badges de estado claros: `✓ Convalidado: usuario@gmail.com` con icono de verificación verde, `Pendiente de canje: usuario@gmail.com` o `Sin vincular`.
-  - **Verificación Automatizada Completa (194 Pruebas / 100% PASS):** 103/103 pruebas exitosas en `test_unlock_auth_flow.cjs` (con validación de trazabilidad de Gmail tras convalidación en incógnito) y 91/91 en `test_e2e_case_flow.cjs`.
+* **v6.7 (Integración Nativa de Brevo HTTPS, Diagnóstico de Restricciones en Resend y Reintento Resiliente en SQLite):**
+  - **Diagnóstico y Resolución de Causa Raíz en Despacho de Correos en Producción:** Identificación de la restricción antispam de Resend que limita el dominio de prueba `onboarding@resend.dev` únicamente a la cuenta del titular de Resend (bloqueando con HTTP 403 los envíos a amigos y terceros), así como el rechazo estricto de remitentes públicos (`@gmail.com`) sin dominio DNS propio.
+  - **Soporte Oficial de Brevo (Sendinblue) API REST HTTPS (`https://api.brevo.com/v3/smtp/email`):** Integración nativa por puerto 443 sin bloqueos en Render. Permite despachar códigos de 6 dígitos a cualquier cuenta de correo del mundo (`@gmail.com`, `@derecho.uchile.cl`, etc.) validando únicamente el remitente mediante verificación gratuita por correo (*Sender Verification*), sin requerir compra de dominio ni configuración de registros DNS.
+  - **Diagnóstico y Multi-Provider Fallback en `server.py`:** Lectura y parsing completo del cuerpo de error HTTP de Resend y Brevo, logueando en la consola de Render advertencias explícitas sobre dominios restringidos. Fallback automático entre Brevo y Resend cuando ambas claves se encuentran provistas.
+  - **Resiliencia en SQLite para Cuentas No Verificadas (`db.py`):** Modificación de `create_user` para que cuando un usuario no verificado con código expirado (>15 min) reintente el registro, se actualicen sus credenciales y se emita un nuevo código en lugar de bloquear el proceso con mensaje de duplicado.
+  - **Herramienta CLI de Verificación Multi-Proveedor (`scripts/test_email_manual.py`):** Actualización completa con soporte para probar Brevo, Resend y SMTP por línea de comandos con diagnóstico y recomendaciones de configuración.
+  - **Aprobación del 100% de Pruebas Automatizadas (194 Pruebas):** 103/103 pruebas exitosas en `test_unlock_auth_flow.cjs` y 91/91 en `test_e2e_case_flow.cjs`. Actualización canónica de `CONTEXT.md`.
+
 
 
 
