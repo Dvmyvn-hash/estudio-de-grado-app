@@ -971,9 +971,9 @@ const App = {
                 </div>
               </div>
 
-              <a href="https://wa.me/?text=Hola!%20Deseo%20adquirir%20el%20Pase%20de%20Grado%20para%20desbloquear%20la%20plataforma." target="_blank" class="btn-whatsapp-buy">
-                <i data-lucide="message-circle"></i>
-                <span>Solicitar mi Pase de Grado por WhatsApp</span>
+              <a href="https://www.instagram.com/gradomaniacos?stkn=MXNtMDF1OHBhMmRhcA%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" class="btn-whatsapp-buy btn-instagram-buy">
+                <i data-lucide="instagram"></i>
+                <span>Solicitar mi Pase de Grado por Instagram</span>
               </a>
             </div>
           `}

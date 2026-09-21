@@ -246,9 +246,9 @@ var CaseSolver = {
                 </button>
               </div>
             </div>
-            <a href="https://wa.me/?text=Hola!%20Deseo%20adquirir%20el%20Pase%20de%20Grado%20para%20desbloquear%20los%20casos%20pr%C3%A1cticos." target="_blank" class="btn-whatsapp-buy">
-              <i data-lucide="message-circle"></i>
-              <span>Solicitar mi Pase por WhatsApp</span>
+            <a href="https://www.instagram.com/gradomaniacos?stkn=MXNtMDF1OHBhMmRhcA%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" class="btn-whatsapp-buy btn-instagram-buy">
+              <i data-lucide="instagram"></i>
+              <span>Solicitar mi Pase por Instagram</span>
             </a>
           </div>
         </div>

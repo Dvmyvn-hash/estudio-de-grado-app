@@ -189,25 +189,30 @@
   box-shadow: 0 0 0 3px var(--gold-glow);
 }
 
-.btn-whatsapp-buy {
+.btn-whatsapp-buy,
+.btn-instagram-buy {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   padding: 12px 24px;
-  background: #25d366;
-  color: #0f172a;
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  color: #ffffff;
   border-radius: var(--radius-md);
   font-weight: 700;
   font-size: 0.92rem;
   text-decoration: none;
   transition: var(--transition-fast);
   width: 100%;
+  box-shadow: 0 4px 15px rgba(220, 39, 67, 0.25);
 }
 
-.btn-whatsapp-buy:hover {
-  background: #22bf5b;
+.btn-whatsapp-buy:hover,
+.btn-instagram-buy:hover {
+  background: linear-gradient(45deg, #e08322 0%, #d5572b 25%, #cb1632 50%, #bb1255 75%, #ab0777 100%);
   transform: translateY(-1px);
+  color: #ffffff;
+  box-shadow: 0 6px 20px rgba(220, 39, 67, 0.4);
 }
 
 /* ==========================================================================
