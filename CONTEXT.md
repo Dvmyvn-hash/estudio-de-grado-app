@@ -425,6 +425,37 @@ La plataforma implementa un esquema de autenticación resiliente, autónomo y si
 
 ---
 
+### 6.2. Especificación Técnica de Endpoints de Autenticación y Verificación (`server.py`)
+
+| Endpoint | Método | Autenticación | Códigos HTTP | Propósito y Contrato de Respuesta |
+| :--- | :---: | :---: | :---: | :--- |
+| `/api/auth/register` | `POST` | Pública | `201`, `400`, `409`, `503` | **Registro de Postulante:** Valida email y política de contraseñas (10+ caracteres, mayúscula, minúscula, número). Genera código numérico aleatorio de 6 dígitos con expiración de 15 minutos e inserta usuario con `is_verified = 0`. Despacha el correo mediante `send_verification_email`. Si `SMTP_HOST` está configurado y el envío falla, aborta y retorna **HTTP 503 Service Unavailable**. En éxito responde **HTTP 201** con `{ ok: true, requiresVerification: true, email: ... }`. |
+| `/api/auth/verify-code` | `POST` | Pública | `200`, `400`, `404` | **Validación de Código de 6 Dígitos:** Valida el código enviado. Si es incorrecto, incrementa `verification_attempts`; al 5to intento fallido, borra el código y responde **HTTP 400**. Si es válido y no ha expirado, actualiza `is_verified = 1`, resetea intentos, emite cookie `session_token` (HMAC-SHA256) y responde **HTTP 200** con `{ ok: true, user: { ... isDemo: true } }`, promoviendo al usuario directamente a Versión Demo. |
+| `/api/auth/resend-code` | `POST` | Pública (Rate Limited) | `200`, `429`, `503` | **Reenvío Seguro de Código:** Rate limiting defensivo (10 req/min). Si el usuario existe y `is_verified = 0`, genera un nuevo código de 6 dígitos independiente, renueva expiración a 15 min y resetea intentos a 0. Despacha vía SMTP; si `SMTP_HOST` está configurado y falla el envío, retorna **HTTP 503**. Retorna **HTTP 200** con mensaje uniforme anti-enumeración. |
+| `/api/auth/login` | `POST` | Pública (Rate Limited) | `200`, `400`, `401`, `403`, `423` | **Inicio de Sesión:** Verifica bloqueo de cuenta (15 min tras 5 intentos fallidos, **HTTP 423 Locked**). Compara hash PBKDF2 (con mitigación de timing attacks). Si la cuenta no está verificada (`is_verified = 0`), responde **HTTP 403 Forbidden** con `{ ok: false, unverified: true, email: ... }` sin emitir sesión. Si las credenciales son válidas, emite cookie `session_token` y responde **HTTP 200**. |
+| `/api/auth/link-code` | `POST` | Sesión requerida | `200`, `400`, `401`, `403` | **Convalidación de Licencia:** Valida código con regex canónico `^[A-Z0-9_\-]{4,36}$`. Descuenta atómicamente usos en SQLite y asocia el código a la cuenta, promoviendo al postulante de Versión Demo (`isDemo: true`) a Pase de Grado Activo (`isDemo: false`). |
+| `/api/auth/me` | `GET` | Cookie `session_token` | `200`, `401` | **Estado de Sesión:** Valida firma HMAC de la cookie y retorna los datos del usuario en sesión (`id`, `email`, `name`, `isDemo`, `access_code`). |
+| `/api/auth/logout` | `POST` | Cookie opcional | `200` | **Cierre de Sesión:** Invalida y expira la cookie `session_token` con encabezado `Set-Cookie: session_token=; Max-Age=0`. |
+
+---
+
+### 6.3. Variables de Entorno y Configuración SMTP
+
+El backend implementa un sistema de configuración jerárquico mediante la función nativa `load_env_file()` en `server.py`, la cual parsea el archivo local `.env` sin sobreescribir variables ya inyectadas por el sistema operativo o la plataforma de despliegue (Render.com).
+
+| Variable de Entorno | Tipo | Valor Predeterminado | Obligatoria | Rol y Comportamiento Arquitectónico |
+| :--- | :---: | :---: | :---: | :--- |
+| `SMTP_HOST` | String | `""` (Vacío) | Sí (en Producción) | Servidor SMTP saliente. Para Gmail oficial: `smtp.gmail.com`. Si no se define, activa el modo `[SMTP Dev]` que imprime el código en consola sin fallar. |
+| `SMTP_PORT` | Entero | `587` | No | Puerto de conexión. `587` activa STARTTLS con negociación bidireccional `ehlo()` -> `starttls()` -> `ehlo()`. Puerto `465` conmuta automáticamente a SSL directo (`smtplib.SMTP_SSL`). |
+| `SMTP_USER` | String | `""` (Vacío) | Sí (en Producción) | Usuario autenticador del servicio de correo. Cuenta oficial: `gradomaniacos@gmail.com`. |
+| `SMTP_PASS` | String | `""` (Vacío) | Sí (en Producción) | Contraseña de Aplicación de 16 letras de Google generada con 2FA activo. **Estrictamente protegida por `.gitignore`.** |
+| `EMAIL_FROM` | String | `SMTP_USER` o `no-reply@...` | No | Dirección o cabecera remitente visible para el destinatario. |
+| `PORT` | Entero | `8080` | No | Puerto de escucha HTTP del servidor local o asignado dinámicamente por Render.com. |
+| `SESSION_SECRET` | String | Auto-generado dinámico | No | Clave secreta para la firma criptográfica HMAC-SHA256 de las cookies de sesión. |
+| `ALLOW_TEST_AUTH` | String | `""` | No | Si es `"1"`, habilita el campo `testVerificationCode` en respuestas de registro y reenvío para permitir suites automatizadas E2E. |
+
+---
+
 ## 7. Flujo Unificado del Candado: Acceso en 2 Pasos y Convalidación de Licencia
 
 ### 7.1. Dinámica del Flujo de Acceso
@@ -524,7 +555,10 @@ stateDiagram-v2
 * **Suite de Regresión e Integración (`test_e2e_case_flow.cjs`):** Ejecuta 65 pruebas integrales que verifican la confidencialidad de modelos docentes, casos IA, rúbrica AIME 2026-20, ciberseguridad y sincronización multi-dispositivo sin regresiones.
 * **Sanitización Defensiva y Prevención XSS:** Todos los datos de usuario son escapados contra inyección XSS mediante `SecurityShield.escapeHtml` y los mensajes de error se renderizan estrictamente con `textContent` en el DOM.
 * **Hashing Seguro en Cliente (Modo Estático / GitHub Pages):** La función `AuthService.hashClientPassword()` emplea la Web Crypto API (`crypto.subtle.digest("SHA-256")`) con salt local, asegurando que **nunca se almacenen contraseñas en texto plano** en `localStorage`.
-* **Resiliencia y Modo Desarrollo SMTP:** Si `SMTP_HOST` no está configurado en el servidor, `server.py` no falla ni interrumpe la ejecución; imprime el código de verificación en consola con la etiqueta `[SMTP Dev]` permitiendo pruebas locales transparentes.
+* **Resiliencia y Modo Desarrollo SMTP:** Si `SMTP_HOST` no está configurado en el servidor, `server.py` no falla ni interrumpe la ejecución; imprime el código de verificación en consola con la etiqueta `[SMTP Dev]` permitiendo pruebas locales transparentes y suites automatizadas deterministas.
+* **Contrato Fail-Safe de Transporte SMTP (HTTP 503):** Si `SMTP_HOST` está definido y la entrega del correo electrónico falla (autenticación errónea, bloqueo de Google o timeout de red), los endpoints `/api/auth/register` y `/api/auth/resend-code` interceptan la excepción e inmediatamente retornan **HTTP 503 Service Unavailable** con un mensaje sanitizado (`{"ok": false, "error": "No pudimos enviar el correo de verificación. Por favor intenta nuevamente en unos minutos."}`). Esto previene que el postulante quede varado esperando un código no emitido y garantiza la coherencia del estado del sistema.
+* **Diagnóstico Interactivo CLI (`scripts/test_smtp_manual.py`):** Script independiente para verificar de forma segura y directa la conectividad SMTP de Gmail (STARTTLS 587 / SSL 465) antes de registrar usuarios reales, proporcionando diagnósticos asistidos paso a paso ante errores de autenticación 2FA.
+* **Cero Fuga de Secretos y Aislamiento de Credenciales:** La contraseña de aplicación `SMTP_PASS` nunca se almacena en el código ni en el historial de Git. Se gestiona localmente mediante `.env` (estrictamente filtrado por `.gitignore`) y en Render.com mediante variables de entorno declaradas con `sync: false` en `render.yaml`.
 * **Accesibilidad Visual WCAG AA y Contraste Real:** Tokens semánticos tipográficos y de estado (`--gold-primary: #92400e;`, `--danger-text: #b91c1c;`, `--warning-text: #92400e;`, `--success-text: #047857;`, `--info-text: #0284c7;`) que garantizan relaciones de contraste superiores a 4.5:1 (texto normal) y 7:1 (encabezados/estados) contra fondos claros, eliminando colores amarillos pálidos o rojos claros inaccesibles.
 * **Experiencia y Accesibilidad Táctil Móvil:** Dimensiones mínimas de touch targets $\ge 44 \times 44\text{ px}$ en botones de navegación, badges de estado e interactores de formulario; entradas de texto a 16px para evitar auto-zoom indeseado en iOS Safari; y propiedad `touch-action: none;` con gestos multitáctiles (pan y pinch-to-zoom de 2 dedos) en el visor de instituciones interconectadas (`ConceptGraph`).
 
