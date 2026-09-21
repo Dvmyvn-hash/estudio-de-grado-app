@@ -14,7 +14,8 @@
 
 | # | Archivo | Descripción | Estado |
 | :-: | :--- | :--- | :--- |
-| 001 | `001_sync_apuntes_admin.md` | Subida de apuntes desde el Panel de Administrador con sincronización inmediata a la Sección de Apuntes e índice temático. | 📝 Por ejecutar |
+| 001 | `001_sync_apuntes_admin.md` | Subida de apuntes desde el Panel de Administrador con sincronización inmediata a la Sección de Apuntes e índice temático. | ✅ Implementado |
+| 002 | `002_mejorar_agente_casos_complejidad_pauta.md` | Mejora integral del agente de creación de casos: complejidad lógica e interdisciplinaria, cobertura completa del temario, rúbrica AIME 2026-20 al 100 %, soluciones modelo sin vaguedad, apego estricto a las fuentes implementadas y **nutrición dinámica desde los apuntes cargados** (`/api/sync-topics`, `linkedApuntes`, refresco ≤ 3.5 s). | 📝 Por ejecutar |
 
 ## Reglas transversales para cualquier prompt (las heredan todos)
 

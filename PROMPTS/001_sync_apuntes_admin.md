@@ -1,7 +1,7 @@
 # PROMPT 001 — Subida de Apuntes desde Panel de Administrador con Sincronización Inmediata al Índice de Apuntes
 
 > **Versión:** v1.0 · **Fecha:** 2026-09-21 · **Autor:** puente (dpint)
-> **Estado:** 📝 Por ejecutar · **Depende de:** ninguno
+> **Estado:** ✅ Implementado (v6.8) · **Depende de:** ninguno
 
 > Copia y pega este bloque completo como prompt inicial en tu agente de Antigravity IDE. Está redactado para ejecutarse dentro del repositorio `estudio-de-grado-app` (GRADOMANIACOS) conforme a las reglas de `AGENTS.md`.
 

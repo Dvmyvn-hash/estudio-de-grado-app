@@ -108,13 +108,68 @@ FILES_CONFIG = [
     }
 ]
 
+REGISTRY_PATH = os.path.join(BASE_DIR, "apuntes_registry.json")
+DISCIPLINE_MAP = {
+    "civil": "I. Derecho Civil",
+    "procesal": "II. Derecho Procesal",
+    "constitucional": "III. Derecho Constitucional"
+}
+
+def build_files_config():
+    """Construye la lista de configuraciones de archivos fusionando la base fija con apuntes_registry.json."""
+    import copy
+    configs = copy.deepcopy(FILES_CONFIG)
+    existing_files = {c["file"]: c for c in configs}
+
+    if os.path.exists(REGISTRY_PATH):
+        try:
+            with open(REGISTRY_PATH, "r", encoding="utf-8") as f:
+                registry = json.load(f)
+            for entry in registry.get("files", []):
+                fname = entry.get("file")
+                if not fname:
+                    continue
+                subj = entry.get("subject", "civil")
+                disc = entry.get("discipline") or DISCIPLINE_MAP.get(subj, "I. Derecho Civil")
+                cat = entry.get("defaultCategory") or entry.get("chapterTitle") or "General"
+                chap_num = int(entry.get("defaultChapterNum") or 1)
+                chap_title = entry.get("chapterTitle") or cat
+
+                if fname in existing_files:
+                    target = existing_files[fname]
+                    target["subject"] = subj
+                    target["discipline"] = disc
+                    target["defaultCategory"] = cat
+                    target["defaultChapterNum"] = chap_num
+                    target["chapterTitle"] = chap_title
+                    target["source"] = entry.get("source", "admin-upload")
+                else:
+                    new_cfg = {
+                        "file": fname,
+                        "subject": subj,
+                        "discipline": disc,
+                        "defaultCategory": cat,
+                        "defaultChapterNum": chap_num,
+                        "chapterTitle": chap_title,
+                        "categoryMap": entry.get("categoryMap") or {},
+                        "source": entry.get("source", "admin-upload")
+                    }
+                    configs.append(new_cfg)
+                    existing_files[fname] = new_cfg
+        except Exception as e:
+            print("Error cargando apuntes_registry.json:", e)
+
+    return configs
+
 def extract_sections_from_file(cfg):
     fpath = os.path.join(APUNTES_DIR, cfg["file"])
     if not os.path.exists(fpath):
-        print(f"ALERTA: Archivo no encontrado {fpath}")
+        fpath = os.path.join(BASE_DIR, "fuentes", cfg["file"])
+    if not os.path.exists(fpath):
+        print(f"ALERTA: Archivo no encontrado {cfg['file']} (buscado en APUNTES y fuentes)")
         return []
 
-    with open(fpath, "r", encoding="utf-8", errors="ignore") as f:
+    with open(fpath, "r", encoding="utf-8", errors="replace") as f:
         text = f.read()
 
     lines = text.split("\n")
@@ -137,6 +192,60 @@ def extract_sections_from_file(cfg):
             continue
         filtered_headers.append((idx, code, title, raw))
 
+    stem_raw = os.path.splitext(cfg["file"])[0].lower()
+    clean_stem = re.sub(r'[^a-zA-Z0-9]', '', stem_raw)[:10] or "nota"
+
+    # Caso sin encabezados Sección N.N: generar una única sección con el archivo completo
+    if not filtered_headers:
+        clean_title = ""
+        for line in lines:
+            l_strip = line.strip()
+            if l_strip.startswith("#"):
+                clean_title = re.sub(r"^#+\s*", "", l_strip).strip()
+                break
+        if not clean_title:
+            clean_title = os.path.splitext(cfg["file"])[0].replace("_", " ").title()
+
+        code = "1.1"
+        cat_info = cfg.get("categoryMap", {}).get(code)
+        if cat_info:
+            category, chap_num = cat_info
+        else:
+            category = cfg.get("defaultCategory") or cfg.get("chapterTitle") or "General"
+            chap_num = cfg.get("defaultChapterNum", 1)
+
+        tags = []
+        for kw in ["dominio", "posesión", "nulidad", "responsabilidad", "contrato", "obligación", "prueba", "resolución", "garantías", "protección", "amparo", "debido proceso", "propiedad"]:
+            if kw in text.lower():
+                tags.append(kw.capitalize())
+        if not tags:
+            tags = ["Examen de Grado", "Derecho"]
+
+        sec_id = f"{cfg['subject']}-{clean_stem}-{code.replace('.', '-')}"
+        sec_content = text.strip()
+        is_free = False if cfg.get("source") == "admin-upload" else (code in ["1.1", "2.1"] and chap_num == 1)
+
+        return [{
+            "id": sec_id,
+            "subject": cfg["subject"],
+            "discipline": cfg["discipline"],
+            "sectionName": cfg["discipline"],
+            "chapterNumber": chap_num,
+            "chapterTitle": category,
+            "category": category,
+            "code": code,
+            "title": f"Sección {code}: {clean_title}",
+            "cleanTitle": clean_title,
+            "sourceFile": cfg["file"],
+            "userSourceFiles": [cfg["file"]],
+            "hasUserNotes": True,
+            "tags": tags[:5],
+            "isFree": is_free,
+            "content": sec_content,
+            "charCount": len(sec_content),
+            "connections": []
+        }]
+
     sections = []
     for i in range(len(filtered_headers)):
         start_idx, code, clean_title, raw = filtered_headers[i]
@@ -154,14 +263,15 @@ def extract_sections_from_file(cfg):
             tags = ["Examen de Grado", "Derecho"]
 
         # Determinar categoría y número de capítulo
-        cat_info = cfg["categoryMap"].get(code)
+        cat_info = cfg.get("categoryMap", {}).get(code)
         if cat_info:
             category, chap_num = cat_info
         else:
-            category = cfg["defaultCategory"]
-            chap_num = cfg["defaultChapterNum"]
+            category = cfg.get("defaultCategory") or cfg.get("chapterTitle") or "General"
+            chap_num = cfg.get("defaultChapterNum", 1)
 
-        sec_id = f"{cfg['subject']}-{cfg['file'][:4].lower().replace('_', '')}-{code.replace('.', '-')}"
+        sec_id = f"{cfg['subject']}-{clean_stem}-{code.replace('.', '-')}"
+        is_free = False if cfg.get("source") == "admin-upload" else (code in ["1.1", "2.1"] and chap_num == 1)
 
         sections.append({
             "id": sec_id,
@@ -178,16 +288,56 @@ def extract_sections_from_file(cfg):
             "userSourceFiles": [cfg["file"]],
             "hasUserNotes": True,
             "tags": tags[:5],
-            "isFree": (code in ["1.1", "2.1"] and chap_num == 1),
+            "isFree": is_free,
             "content": sec_content,
-            "charCount": len(sec_content)
+            "charCount": len(sec_content),
+            "connections": []
         })
 
     return sections
 
+def update_data_js(all_sections):
+    """Actualiza topics en js/data.js manteniendo intactos los casos y el grafo institucional."""
+    if not os.path.exists(DATA_JS_PATH):
+        return
+    try:
+        with open(DATA_JS_PATH, "r", encoding="utf-8") as f:
+            old_data = f.read()
+
+        cases_start = old_data.find("cases: [")
+        graph_start = old_data.find("graph: {")
+        if cases_start == -1 or graph_start == -1:
+            return
+        cases_match = old_data[cases_start:graph_start].strip().rstrip(",")
+        graph_match = old_data[graph_start:old_data.rfind("};")].strip()
+
+        new_data_js = f"""/**
+ * ESTUDIO DE GRADO - APUNTES COMPLETOS DESARROLLADOS
+ * Cada sección del temario corresponde exactamente al contenido desarrollado de los apuntes.
+ * Enriquecido automáticamente con Conexiones Dogmáticas y Aplicaciones Prácticas con IA.
+ */
+
+const INITIAL_DATA = {{
+  // 1. SECCIONES COMPLETAS Y DESARROLLADAS DEL APUNTE ({len(all_sections)} SECCIONES EN TOTAL)
+  topics: {json.dumps(all_sections, ensure_ascii=False, indent=2)},
+
+  // 2. TALLER DE CASOS PRÁCTICOS
+  {cases_match},
+
+  // 3. GRAFO INTERACTIVO DE INSTITUCIONES
+  {graph_match}
+}};
+"""
+        with open(DATA_JS_PATH, "w", encoding="utf-8") as f:
+            f.write(new_data_js)
+        print(f"Guardado exitosamente en: {DATA_JS_PATH}")
+    except Exception as e:
+        print("Error actualizando js/data.js:", e)
+
 def main():
+    configs = build_files_config()
     all_sections = []
-    for cfg in FILES_CONFIG:
+    for cfg in configs:
         secs = extract_sections_from_file(cfg)
         print(f"Cargadas {len(secs)} secciones de {cfg['file']} ({cfg['discipline']})")
         all_sections.extend(secs)
@@ -211,36 +361,9 @@ def main():
         json.dump(all_sections, f, ensure_ascii=False, indent=2)
     print(f"Guardado exitosamente en: {ALL_TOPICS_PATH}")
 
-    # Leer viejo data.js para mantener casos prácticos y grafo
-    with open(DATA_JS_PATH, "r", encoding="utf-8") as f:
-        old_data = f.read()
-
-    cases_start = old_data.find("cases: [")
-    graph_start = old_data.find("graph: {")
-    cases_match = old_data[cases_start:graph_start].strip().rstrip(",")
-    graph_match = old_data[graph_start:old_data.rfind("};")].strip()
-
-    new_data_js = f"""/**
- * ESTUDIO DE GRADO - APUNTES COMPLETOS DESARROLLADOS
- * Cada sección del temario corresponde exactamente al contenido desarrollado de los apuntes.
- * Enriquecido automáticamente con Conexiones Dogmáticas y Aplicaciones Prácticas con IA.
- */
-
-const INITIAL_DATA = {{
-  // 1. SECCIONES COMPLETAS Y DESARROLLADAS DEL APUNTE ({len(all_sections)} SECCIONES EN TOTAL)
-  topics: {json.dumps(all_sections, ensure_ascii=False, indent=2)},
-
-  // 2. TALLER DE CASOS PRÁCTICOS
-  {cases_match},
-
-  // 3. GRAFO INTERACTIVO DE INSTITUCIONES
-  {graph_match}
-}};
-"""
-    with open(DATA_JS_PATH, "w", encoding="utf-8") as f:
-        f.write(new_data_js)
-    print(f"Guardado exitosamente en: {DATA_JS_PATH}")
+    update_data_js(all_sections)
 
 if __name__ == "__main__":
     main()
+
 
