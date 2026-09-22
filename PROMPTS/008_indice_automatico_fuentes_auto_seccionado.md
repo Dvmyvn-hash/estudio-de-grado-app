@@ -1,7 +1,7 @@
 # PROMPT 008 — Índice Automático en `fuentes/`: Suelta el `.md` y el Temario se Secciona, Numera y Ordena Solo
 
 > **Versión:** v1.0 · **Fecha:** 2026-09-22 · **Autor:** puente (dpint)
-> **Estado:** 📝 Por ejecutar · **Depende de:** `007_fuentes_canonicas_eliminar_subida_admin_regen_ci.md`
+> **Estado:** ✅ Implementado (v7.9) · **Depende de:** `007_fuentes_canonicas_eliminar_subida_admin_regen_ci.md`
 
 > Copia y pega este bloque completo como prompt inicial en tu agente de Antigravity IDE. Está redactado para ejecutarse dentro del repositorio `estudio-de-grado-app` (GRADOMANIACOS) conforme a las reglas de `AGENTS.md`.
 

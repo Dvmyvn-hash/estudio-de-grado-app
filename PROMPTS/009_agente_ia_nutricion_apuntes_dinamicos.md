@@ -1,7 +1,7 @@
 # PROMPT 009 — El Agente de IA se Nutre en Vivo de los Apuntes Dinámicos de `fuentes/` (Corpus Dinámico, Citas Corpus-Driven y Validador Integrado)
 
 > **Versión:** v1.0 · **Fecha:** 2026-09-22 · **Autor:** puente (dpint)
-> **Estado:** 📝 Por ejecutar · **Depende de:** `008_indice_automatico_fuentes_auto_seccionado.md`
+> **Estado:** 📝 Por ejecutar · **Depende de:** `008_indice_automatico_fuentes_auto_seccionado.md` (✅ implementado en **v7.9** — este PROMPT es incremental, no debe repetir sus cambios)
 
 > Copia y pega este bloque completo como prompt inicial en tu agente de Antigravity IDE. Está redactado para ejecutarse dentro del repositorio `estudio-de-grado-app` (GRADOMANIACOS) conforme a las reglas de `AGENTS.md`.
 
@@ -22,12 +22,12 @@ Garantizar que el **Agente de IA (`js/case-generator-agent.js`) se nutra correct
 
 ## REGLAS OBLIGATORIAS DEL REPOSITORIO (ADEMÁS DEL CÓDIGO)
 
-1. **`CONTEXT.md` es la única fuente canónica de verdad:** actualizarlo al terminar (Secciones 2.5 y 3.1 → convención de IDs y corpus dinámico; Sección 8 → responsabilidad ampliada de `js/case-generator-agent.js`; Bitácora Sección 9 → **v7.9**, ejecutada en conjunto con el PROMPT 008).
+1. **`CONTEXT.md` es la única fuente canónica de verdad:** actualizarlo al terminar (Secciones 2.5 y 3.1 → convención de IDs y corpus dinámico; Sección 8 → responsabilidad ampliada de `js/case-generator-agent.js`; Bitácora Sección 9 → **v7.10** — el PROMPT 008 ya está implementado como **v7.9** en `bea2cf7`, por lo que este PROMPT NO repite su alcance).
 2. Ejecutar y dejar al 100 % PASS: `node test_unlock_auth_flow.cjs`, `node test_e2e_case_flow.cjs`, `node test_deduplication_flow.cjs` y `node test_mobile_header_theme.cjs`; ampliar la Sección 23 de `test_e2e_case_flow.cjs` con la nutrición dinámica.
 3. Stack vanilla (Python `http.server`/`sqlite3`, JS ES6 sin bundlers); no añadir dependencias sin justificación.
 4. **No romper contratos existentes:** `INITIAL_DATA`, `StorageService`, `LicenseService`, `AuthService`, `CaseGeneratorAgent`, `linkedFuentes`, `linkedApuntes`, campos `pauta`/`errorFatalDeGrado`/`officialRubric`/`modelSolution`, flujo demo/desbloqueo.
 5. Sanitización en el origen (`SecurityShield.escapeHtml`/`MarkdownParser`), `sourceFile` sin separadores, cero path-traversal, cero ejecución de contenido de apuntes.
-6. Si el PROMPT 008 aún no está ejecutado, implementar este PROMPT suponiendo su contrato (funciones de auto-descubrimiento/seccionado) con **fallback defensivo** si alguna no existiera.
+6. El PROMPT 008 ya está implementado (v7.9): `discover_fuentes_files()`, `infer_file_config()`, `extract_sections_from_auto_discovered_file()` y `build_files_config(fuentes_dir=None)` existen y están commiteados; este PROMPT solo debe consumir sus contratos reales, con **fallback defensivo** si alguna función no existiera.
 
 ## CONTEXTO/DESCRIPCIÓN DE LA IDEA ORIGINAL (en palabras del humano)
 
@@ -46,7 +46,7 @@ Garantizar que el **Agente de IA (`js/case-generator-agent.js`) se nutra correct
   - Generación (~3308-3343): `linkedApuntes = getLinkedApuntesForArchetype(...)`, `linkedFuentes = resolveLinkedFuente(...)`, y luego `validateGeneratedCase` + `assertCitationIntegrity`.
 - **`js/app.js`:** `App.startLiveSync()` ya invoca `CaseGeneratorAgent.syncFuentesFromServer()` + `syncApuntesFromServer()` al arranque (~198-202) y `invalidateApuntes()` + `syncApuntesFromServer()` tras un cambio de hash (`syncWithServer`, ~361-365). El ciclo de re-nutrición en vivo **ya está cableado**; falta que la nutrición use contenido real y que el validador sea corpus-driven.
 - **`js/case-solver.js`:** renderiza las píldoras `.linked-apuntes-section`/`.btn-linked-apunte` con `[data-goto-topic]` (salto directo a `App.openTopic`).
-- **PARSER (PROMPT 008 previsto):** `build_files_config()` escaneará `fuentes/` (auto-descubrimiento) y `extract_sections_from_file()` generará cédulas `N.1, N.2…` con ids `{subject}-{stem}-{code-sin-puntos}`, `indexCode` canónico `N.M` por disciplina, y campos `content`, `code`, `chapterNumber`, `chapterTitle`, `category`. Las cédulas viajan en `/api/sync-topics` y en `INITIAL_DATA.topics`.
+- **PARSER (PROMPT 008 implementado en v7.9):** `discover_fuentes_files()` escanea `fuentes/` en runtime (orden alfabético determinista, guardrail case-insensitive contra los 6 canónicos); `infer_file_config()` detecta materia por heurística ponderada (constitucional → procesal → civil); `extract_sections_from_auto_discovered_file()` auto-secciona por módulos (`Módulo N`/`Capítulo N`/`UNIDAD N`), headings `##`/`###` o fallback monolítico, con renumeración consecutiva `N.1, N.2…`; `build_files_config(fuentes_dir=None)` integra el descubrimiento con `FILES_CONFIG` como semilla. Las cédulas viajan en `/api/sync-topics` y en `INITIAL_DATA.topics` con ids `{subject}-{stem}-{code-sin-puntos}`, `indexCode` canónico `N.M`, `content`, `code`, `chapterNumber`, `chapterTitle`, `category`.
 
 ## CAMBIOS A IMPLEMENTAR
 
@@ -98,14 +98,14 @@ Nuevo orden de pasos:
 
 ### PARTE F — PRUEBAS Y CONTEXT.md (OBLIGATORIO)
 
-1. **Sección 23 de `test_e2e_case_flow.cjs` (ampliar, sin romper las 651 aserciones actuales):**
+1. **Sección 23 de `test_e2e_case_flow.cjs` (ampliar, sin romper las 671 aserciones actuales post-v7.9):**
    - Nutrición dinámica: `CaseGeneratorAgent.populateApuntesIndex([... tópico 1.5 nuevo de `Módulo 2` ...])` → `getLinkedApuntesForArchetype(arquetipo con 'linkedTopics' que lo referencie por clave secundaria)` incluye el tópico nuevo con `sourceFile` real y `indexCode` correcto.
    - `resolveLinkedFuente({file: "MODULO_NUEVO.md"})` con `DYNAMIC_CORPUS` poblado → devuelve `rules` derivadas del contenido (no vacío, no hardcodeado).
    - `assertCitationIntegrity` corpus-driven: cita presente solo en un tópico dinámico (`Art. 999 CC` simulado en contenido) → `valid: true`; cita inventada (`Art. 9999 CC`) → `valid: false`; y los 13 arquetipos con corpus semilla siguen `valid: true` (cero regresión).
    - `validateGeneratedCase` con `linkedTopics` de id real → `valid: true`; con `linkedFuentes.file` con separador → error de sanitización.
    - Invariante PROMPT 008: tras la sincronización, siguen siendo **53 tópicos canónicos** y el corpus dinámico del repo real contiene solo las 6 fuentes canónicas (assert de no-contaminación).
 2. Ejecutar las 4 suites y dejar **100 % PASS**. Registrar el total en la bitácora.
-3. **Actualizar `CONTEXT.md`:** Sección 2.5 (convención de IDs + claves secundarias), 3.1 (nutrición en vivo del agente y re-nutrición en sync), Sección 7.3 (nuevas aserciones de la Sección 23), Sección 8 (fila `js/case-generator-agent.js`: corpus semilla + dinámico, validador corpus-driven), y **Bitácora Sección 9 → v7.9** (junto al PROMPT 008) con fecha, alcance, archivos y nº de pruebas.
+3. **Actualizar `CONTEXT.md`:** Sección 2.5 (convención de IDs + claves secundarias), 3.1 (nutrición en vivo del agente y re-nutrición en sync), Sección 7.3 (nuevas aserciones de la Sección 23), Sección 8 (fila `js/case-generator-agent.js`: corpus semilla + dinámico, validador corpus-driven), y **Bitácora Sección 9 → v7.10** con fecha, alcance, archivos y nº de pruebas.
 
 ## DEFINITION OF DONE
 
@@ -116,12 +116,12 @@ Nuevo orden de pasos:
 - [ ] `validateGeneratedCase` verifica `linkedTopics` contra el índice vivo (soft-warning si no hay índice) y sanea `linkedFuentes.file`.
 - [ ] En servidor en vivo, tras soltar un `.md` nuevo en `fuentes/`, el agente se re-nutre al siguiente ciclo de sync (≤ 3.5 s) y las píldoras `.btn-linked-apunte` reflejan las cédulas nuevas.
 - [ ] En GitHub Pages (estático), la nutrición usa `INITIAL_DATA.topics` regenerado por CI (sin servidor).
-- [ ] Las 4 suites pasan al 100 % (las 651 aserciones previas intactas + nuevas de nutrición dinámica y citas).
-- [ ] `CONTEXT.md` actualizado (2.5, 3.1, 7.3, 8) y Bitácora v7.9 registrada; `PROMPTS/README.md` indexa el 009 como ✅ Implementado (v7.9) al cierre.
+- [ ] Las 4 suites pasan al 100 % (las 671 aserciones previas intactas tras v7.9 + nuevas de nutrición dinámica y citas).
+- [ ] `CONTEXT.md` actualizado (2.5, 3.1, 7.3, 8) y Bitácora v7.10 registrada; `PROMPTS/README.md` indexa el 009 como ✅ Implementado (v7.10) al cierre.
 
 ## NOTAS PARA EL EJECUTOR
 
-- **Ejecución recomendada:** implementar en serie con el PROMPT 008 en un único hito **v7.9** ("Índice automático desde `fuentes/` + nutrición viva del agente"). Si 008 ya está implementado, este PROMPT es incremental y no debe repetir sus cambios.
+- **Ejecución recomendada:** el PROMPT 008 ya está implementado (v7.9, commit `bea2cf7`); este PROMPT es **incremental** y avanza la bitácora a **v7.10** ("Nutrición viva del agente: corpus dinámico, citas corpus-driven y validador integrado"). No repitas los cambios del 008: consumí sus contratos reales.
 - No instales dependencias nuevas; el stack es vanilla.
 - La extracción de citas debe tolerar los formatos reales de los apuntes: `Art. 2320 inc. 4 CC`, `Art. 19 N° 24 CPR`, `Arts. 686, 724 CC`, `Art. 464 N° 7 CPC`, `Art. 529 COT`, `Auto Acordado CS…` (este último, si aparece, se conserva sin entrar al índice canónico de artículos).
 - Mantén intacto el contrato de `officialRubric`/`pauta`/`errorFatalDeGrado`/`modelSolution` y el barajado Fisher-Yates; este PROMPT toca exclusivamente **nutrición, citas, vinculación y sincronización**.
