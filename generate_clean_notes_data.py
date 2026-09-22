@@ -114,14 +114,363 @@ DISCIPLINE_MAP = {
     "constitucional": "III. Derecho Constitucional"
 }
 
-def build_files_config():
-    """Construye la lista de configuraciones de archivos desde la base fija FILES_CONFIG.
+def discover_fuentes_files(fuentes_dir=None):
+    """
+    Escanea fuentes/ (o el directorio parametrizado) buscando archivos Markdown (*.md, *.markdown).
+    Filtra:
+      - Archivos ya declarados en FILES_CONFIG (comparación case-insensitive para Windows).
+      - Archivos ocultos o temporales (iniciados con '.' o '~').
+      - 'README.md' (case-insensitive).
+      - Archivos con contenido menor a 50 caracteres (emitiendo advertencia).
+    Retorna la lista de nombres de archivo (basenames) ordenados alfabéticamente (case-insensitive).
+    """
+    if fuentes_dir is None:
+        fuentes_dir = os.path.join(BASE_DIR, "fuentes")
+
+    if not os.path.isdir(fuentes_dir):
+        return []
+
+    known_canonical_map = {cfg["file"].lower(): cfg["file"] for cfg in FILES_CONFIG}
+    discovered = []
+
+    try:
+        entries = sorted(os.listdir(fuentes_dir), key=lambda x: x.lower())
+    except Exception as e:
+        print(f"Error listando {fuentes_dir}: {e}")
+        return []
+
+    for entry in entries:
+        lower_entry = entry.lower()
+        if not (lower_entry.endswith(".md") or lower_entry.endswith(".markdown")):
+            continue
+        if entry.startswith(".") or entry.startswith("~"):
+            continue
+        if lower_entry == "readme.md":
+            continue
+
+        # Guardrail Windows: Si coincide con FILES_CONFIG ignorando mayúsculas/minúsculas
+        if lower_entry in known_canonical_map:
+            canon_name = known_canonical_map[lower_entry]
+            if entry != canon_name:
+                print(f"ALERTA: Archivo '{entry}' coincide con '{canon_name}' en FILES_CONFIG ignorando mayúsculas/minúsculas. Se usa la entrada de FILES_CONFIG.")
+            continue
+
+        full_path = os.path.join(fuentes_dir, entry)
+        try:
+            with open(full_path, "r", encoding="utf-8", errors="replace") as fp:
+                content = fp.read()
+            if len(content.strip()) < 50:
+                print(f"ALERTA: Archivo ignorado por contenido insuficiente (<50 chars): {entry}")
+                continue
+        except Exception as e:
+            print(f"ALERTA: Error leyendo archivo {entry}: {e}")
+            continue
+
+        discovered.append(entry)
+
+    return sorted(discovered, key=lambda x: x.lower())
+
+def infer_file_config(filename, filepath):
+    """
+    Infiere los metadatos (subject, discipline, defaultCategory, defaultChapterNum)
+    para un archivo Markdown auto-descubierto a partir de su contenido y estructura.
+    """
+    try:
+        with open(filepath, "r", encoding="utf-8", errors="replace") as f:
+            text = f.read()
+    except Exception:
+        text = ""
+
+    lower_text = text.lower()
+
+    # Heurística ponderada de materia con orden de precedencia:
+    # 1. Constitucional
+    const_keywords = [
+        "constitución", "constitucion", "cpr", "art. 19", "art. 20", "artículo 19", "articulo 19",
+        "recurso de protección", "recurso de proteccion", "amparo", "tribunal constitucional",
+        "derechos fundamentales", "garantías constitucionales", "garantias constitucionales",
+        "supremacía constitucional", "supremacia constitucional", "bases de la institucionalidad"
+    ]
+    # 2. Procesal
+    proc_keywords = [
+        "código de procedimiento civil", "codigo de procedimiento civil", "cpc",
+        "código orgánico de tribunales", "codigo organico de tribunales", "cot",
+        "juicio", "incidente", "recurso", "demanda", "prueba", "tribunal", "juzgado",
+        "carga de la prueba", "casación", "casacion", "apelación", "apelacion",
+        "medida precautoria", "medidas precautorias", "juicio ejecutivo", "notificación", "notificacion"
+    ]
+    # 3. Civil (fallback)
+    civ_keywords = [
+        "código civil", "codigo civil", "cc", "acto jurídico", "acto juridico",
+        "bienes", "obligaciones", "contrato", "dominio", "posesión", "posesion",
+        "responsabilidad", "nulidad", "prescripción", "prescripcion", "compraventa",
+        "tradición", "tradicion", "derechos reales"
+    ]
+
+    const_score = sum(lower_text.count(kw) for kw in const_keywords)
+    proc_score = sum(lower_text.count(kw) for kw in proc_keywords)
+    civ_score = sum(lower_text.count(kw) for kw in civ_keywords)
+
+    if const_score > 0 and const_score >= proc_score and const_score >= civ_score:
+        subject = "constitucional"
+    elif proc_score > 0 and proc_score >= civ_score:
+        subject = "procesal"
+    else:
+        subject = "civil"
+
+    discipline = DISCIPLINE_MAP.get(subject, "I. Derecho Civil")
+
+    # Inferencia de categoría por el primer encabezado #
+    default_category = ""
+    for line in text.split("\n"):
+        l_strip = line.strip()
+        if l_strip.startswith("#"):
+            default_category = re.sub(r"^#+\s*", "", l_strip).strip().replace("*", "").strip()
+            break
+
+    if not default_category:
+        default_category = os.path.splitext(filename)[0].replace("_", " ").title()
+
+    # Inferencia de número de capítulo/módulo por encabezado
+    mod_match = re.search(r'^(?:#{1,4}\s*)?(?:M[oó]dulo|Cap[ií]tulo|UNIDAD)\s*[:–—]?\s*(\d+)', text, re.IGNORECASE | re.MULTILINE)
+    default_chap_num = int(mod_match.group(1)) if mod_match else 1
+
+    return {
+        "file": filename,
+        "filePath": filepath,
+        "subject": subject,
+        "discipline": discipline,
+        "defaultCategory": default_category,
+        "defaultChapterNum": default_chap_num,
+        "categoryMap": {},
+        "isAutoDiscovered": True
+    }
+
+def build_files_config(fuentes_dir=None):
+    """Construye la lista de configuraciones de archivos: base fija FILES_CONFIG + archivos descubiertos en fuentes/.
 
     La carpeta `fuentes/` del repositorio es la única fuente canónica de apuntes:
-    la configuración es 100% determinista (sin merging de apuntes_registry.json,
-    mecanismo eliminado en v7.8). Cualquier cambio se propaga vía git push."""
+    cualquier archivo nuevo se auto-descubre, se infiere su materia y se secciona
+    automáticamente, preservando intactos los 6 archivos canónicos."""
     import copy
-    return copy.deepcopy(FILES_CONFIG)
+    configs = copy.deepcopy(FILES_CONFIG)
+    discovered = discover_fuentes_files(fuentes_dir=fuentes_dir)
+    target_dir = fuentes_dir if fuentes_dir is not None else os.path.join(BASE_DIR, "fuentes")
+    for f in discovered:
+        full_path = os.path.join(target_dir, f)
+        inferred = infer_file_config(f, full_path)
+        configs.append(inferred)
+    return configs
+
+def extract_sections_from_auto_discovered_file(cfg, text, lines, clean_stem):
+    """
+    Auto-secciona un archivo descubierto en fuentes/ según módulos/capítulos o headings Markdown.
+    Precedencia:
+    1. Módulos explícitos (Módulo N, Capítulo N, UNIDAD N):
+       Agrupa el texto por módulo N y genera/renumera secciones N.1, N.2, N.3...
+    2. Headings Markdown ## (o ###):
+       Si no hay módulos explícitos, cada heading ## delimita una sección 1.1, 1.2...
+    3. Fallback monolítico:
+       Si no hay estructura, una sola sección M.1 (donde M es defaultChapterNum).
+    Garantiza numeración consecutiva por capítulo sin huecos y esquema canónico de cédula.
+    """
+    mod_regex = re.compile(r'^(?:#{1,4}\s*)?(?:M[oó]dulo|Cap[ií]tulo|UNIDAD)\s*[:–—]?\s*(\d+)\s*[:–\-—]?\s*(.*)$', re.IGNORECASE)
+    sec_regex = re.compile(r'^(?:#{1,4}\s*\*{0,2}|\*{2})\s*Secci[oó]n\s*(\d+\.\d+)\s*[:–\-—]\s*(.*?)(?:\*{0,2})$', re.IGNORECASE)
+    h2_regex = re.compile(r'^##\s+(.+)$')
+    h3_regex = re.compile(r'^###\s+(.+)$')
+
+    # 1. Buscar módulos explícitos
+    module_spans = []
+    for idx, line in enumerate(lines):
+        m = mod_regex.match(line.strip())
+        if m:
+            m_num = int(m.group(1))
+            m_title = m.group(2).strip().replace("*", "").strip()
+            module_spans.append((idx, m_num, m_title))
+
+    sections_raw = []
+
+    if module_spans:
+        for mi in range(len(module_spans)):
+            m_idx, m_num, m_title = module_spans[mi]
+            next_m_idx = module_spans[mi + 1][0] if mi + 1 < len(module_spans) else len(lines)
+            mod_lines = lines[m_idx:next_m_idx]
+            chap_title = m_title or f"Módulo {m_num}"
+
+            # Dentro del módulo, buscar secciones explícitas o headings ##
+            sub_sec_headers = []
+            for sub_i, line in enumerate(mod_lines):
+                if sub_i == 0:
+                    continue
+                s_match = sec_regex.match(line.strip())
+                if s_match:
+                    sub_sec_headers.append((sub_i, s_match.group(2).strip().replace("*", "").strip(), s_match.group(1).strip()))
+                    continue
+                h2_match = h2_regex.match(line.strip())
+                if h2_match:
+                    sub_sec_headers.append((sub_i, h2_match.group(1).strip().replace("*", "").strip(), None))
+                    continue
+                h3_match = h3_regex.match(line.strip())
+                if h3_match and not any(h[2] is None for h in sub_sec_headers):
+                    sub_sec_headers.append((sub_i, h3_match.group(1).strip().replace("*", "").strip(), None))
+
+            if sub_sec_headers:
+                for si in range(len(sub_sec_headers)):
+                    s_idx, s_title, s_orig_code = sub_sec_headers[si]
+                    next_s_idx = sub_sec_headers[si + 1][0] if si + 1 < len(sub_sec_headers) else len(mod_lines)
+                    sec_content = "\n".join(mod_lines[s_idx:next_s_idx]).strip()
+                    sections_raw.append({
+                        "chapterNumber": m_num,
+                        "chapterTitle": chap_title,
+                        "category": chap_title,
+                        "cleanTitle": s_title or f"Sección {si + 1}",
+                        "origCode": s_orig_code,
+                        "content": sec_content
+                    })
+            else:
+                # Módulo monolítico
+                sec_content = "\n".join(mod_lines).strip()
+                sections_raw.append({
+                    "chapterNumber": m_num,
+                    "chapterTitle": chap_title,
+                    "category": chap_title,
+                    "cleanTitle": chap_title,
+                    "origCode": None,
+                    "content": sec_content
+                })
+    else:
+        # No hay módulos explícitos: buscar Sección N.N o headings ## / ###
+        sec_headers = []
+        for idx, line in enumerate(lines):
+            s_match = sec_regex.match(line.strip())
+            if s_match:
+                if "..." in line or "|" in line:
+                    continue
+                sec_headers.append((idx, s_match.group(2).strip().replace("*", "").strip(), s_match.group(1).strip(), "sec"))
+                continue
+            h2_match = h2_regex.match(line.strip())
+            if h2_match:
+                sec_headers.append((idx, h2_match.group(1).strip().replace("*", "").strip(), None, "h2"))
+                continue
+            h3_match = h3_regex.match(line.strip())
+            if h3_match:
+                sec_headers.append((idx, h3_match.group(1).strip().replace("*", "").strip(), None, "h3"))
+
+        explicit_secs = [h for h in sec_headers if h[3] == "sec"]
+        if explicit_secs:
+            filtered_secs = []
+            for h in explicit_secs:
+                if h[0] < 45 and any(other[2] == h[2] for other in explicit_secs if other[0] >= 45):
+                    continue
+                filtered_secs.append(h)
+            for i in range(len(filtered_secs)):
+                s_idx, s_title, s_orig_code, _ = filtered_secs[i]
+                next_s_idx = filtered_secs[i + 1][0] if i + 1 < len(filtered_secs) else len(lines)
+                sec_content = "\n".join(lines[s_idx:next_s_idx]).strip()
+                c_parts = (s_orig_code or "1.1").split(".")
+                c_num = int(c_parts[0]) if c_parts[0].isdigit() else cfg.get("defaultChapterNum", 1)
+                sections_raw.append({
+                    "chapterNumber": c_num,
+                    "chapterTitle": cfg.get("defaultCategory") or "General",
+                    "category": cfg.get("defaultCategory") or "General",
+                    "cleanTitle": s_title or f"Sección {s_orig_code}",
+                    "origCode": s_orig_code,
+                    "content": sec_content
+                })
+        else:
+            h2_secs = [h for h in sec_headers if h[3] == "h2"]
+            target_headings = h2_secs if h2_secs else [h for h in sec_headers if h[3] == "h3"]
+
+            if target_headings:
+                chap_num = cfg.get("defaultChapterNum", 1)
+                chap_title = cfg.get("defaultCategory") or "General"
+                for i in range(len(target_headings)):
+                    s_idx, s_title, _, _ = target_headings[i]
+                    next_s_idx = target_headings[i + 1][0] if i + 1 < len(target_headings) else len(lines)
+                    sec_content = "\n".join(lines[s_idx:next_s_idx]).strip()
+                    sections_raw.append({
+                        "chapterNumber": chap_num,
+                        "chapterTitle": chap_title,
+                        "category": chap_title,
+                        "cleanTitle": s_title or f"Tema {i + 1}",
+                        "origCode": None,
+                        "content": sec_content
+                    })
+            else:
+                # Fallback monolítico
+                clean_title = ""
+                for line in lines:
+                    l_strip = line.strip()
+                    if l_strip.startswith("#"):
+                        clean_title = re.sub(r"^#+\s*", "", l_strip).strip().replace("*", "").strip()
+                        break
+                if not clean_title:
+                    clean_title = os.path.splitext(cfg["file"])[0].replace("_", " ").title()
+
+                chap_num = cfg.get("defaultChapterNum", 1)
+                chap_title = cfg.get("defaultCategory") or "General"
+                sec_content = text.strip()
+                sections_raw.append({
+                    "chapterNumber": chap_num,
+                    "chapterTitle": chap_title,
+                    "category": chap_title,
+                    "cleanTitle": clean_title,
+                    "origCode": None,
+                    "content": sec_content
+                })
+
+    # Post-proceso: Renumerar consecutivamente N.1, N.2, N.3... por capítulo para garantizar sin huecos
+    chap_counters = {}
+    final_sections = []
+
+    for item in sections_raw:
+        chap_num = item["chapterNumber"]
+        chap_counters[chap_num] = chap_counters.get(chap_num, 0) + 1
+        seq = chap_counters[chap_num]
+        code = f"{chap_num}.{seq}"
+
+        sec_content = item["content"]
+        clean_title = item["cleanTitle"]
+        clean_title = re.sub(r'^(?:Secci[oó]n\s*\d+\.\d+|M[oó]dulo\s*\d+|Cap[ií]tulo\s*\d+)\s*[:–\-—]\s*', '', clean_title, flags=re.IGNORECASE).strip()
+        if not clean_title:
+            clean_title = f"Cédula {code}"
+
+        tags = []
+        for kw in ["dominio", "posesión", "nulidad", "responsabilidad", "contrato", "obligación", "prueba", "resolución", "garantías", "protección", "amparo", "debido proceso", "propiedad", "competencia", "jurisdicción"]:
+            if kw in sec_content.lower():
+                tags.append(kw.capitalize())
+        if not tags:
+            tags = ["Examen de Grado", "Derecho"]
+
+        sec_id = f"{cfg['subject']}-{clean_stem}-{code.replace('.', '-')}"
+        is_free = (code in ["1.1", "2.1"] and chap_num == 1)
+
+        sec_obj = {
+            "id": sec_id,
+            "subject": cfg["subject"],
+            "discipline": cfg["discipline"],
+            "sectionName": cfg["discipline"],
+            "chapterNumber": chap_num,
+            "chapterTitle": item["chapterTitle"],
+            "category": item["category"],
+            "code": code,
+            "title": f"Sección {code}: {clean_title}",
+            "cleanTitle": clean_title,
+            "sourceFile": cfg["file"],
+            "userSourceFiles": [cfg["file"]],
+            "hasUserNotes": True,
+            "tags": tags[:5],
+            "isFree": is_free,
+            "content": sec_content,
+            "charCount": len(sec_content),
+            "connections": []
+        }
+        if item.get("origCode"):
+            sec_obj["origCode"] = item["origCode"]
+
+        final_sections.append(sec_obj)
+
+    return final_sections
 
 def extract_sections_from_file(cfg):
     # Prioridad canónica: fuentes/ del repositorio (git-trackeable), luego Desktop/Fuentes_Grado/APUNTES.
@@ -129,13 +478,23 @@ def extract_sections_from_file(cfg):
     if not os.path.exists(fpath):
         fpath = os.path.join(APUNTES_DIR, cfg["file"])
     if not os.path.exists(fpath):
-        print(f"ALERTA: Archivo no encontrado {cfg['file']} (buscado en fuentes y APUNTES)")
-        return []
+        if "filePath" in cfg and os.path.exists(cfg["filePath"]):
+            fpath = cfg["filePath"]
+        else:
+            print(f"ALERTA: Archivo no encontrado {cfg['file']} (buscado en fuentes y APUNTES)")
+            return []
 
     with open(fpath, "r", encoding="utf-8", errors="replace") as f:
         text = f.read()
 
     lines = text.split("\n")
+
+    stem_raw = os.path.splitext(cfg["file"])[0].lower()
+    clean_stem = re.sub(r'[^a-zA-Z0-9]', '', stem_raw)[:10] or "nota"
+
+    if cfg.get("isAutoDiscovered"):
+        return extract_sections_from_auto_discovered_file(cfg, text, lines, clean_stem)
+
     sec_regex = re.compile(r'^(?:#{1,4}\s*\*{0,2}|\*{2})\s*Secci[oó]n\s*(\d+\.\d+)\s*[:–\-—]\s*(.*?)(?:\*{0,2})$', re.IGNORECASE)
 
     section_headers = []

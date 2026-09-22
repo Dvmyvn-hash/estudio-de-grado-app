@@ -1654,32 +1654,85 @@ const App = {
     if (contentInput) contentInput.value = "";
   },
 
-  renderSourcesList() {
+  async renderSourcesList() {
     const container = document.getElementById("sources-list-container");
     if (!container) return;
 
-    // Fuentes canónicas (v7.8): los 6 apuntes reales de fuentes/ son la única fuente de verdad.
-    const sources = [
-      { name: "ACTO JURIDICO.md", subject: "Derecho Civil", desc: "Teoría del Acto Jurídico: requisitos, vicios, nulidades e ineficacia" },
-      { name: "LOS BIENES.md", subject: "Derecho Civil", desc: "Teoría de los Bienes: dominio, posesión, modos de adquirir y derechos reales" },
-      { name: "LAS OBLIGACIONES.md", subject: "Derecho Civil", desc: "Teoría de las Obligaciones: fuente, efectos, cumplimiento e incumplimiento" },
-      { name: "CLASE_9_11.md", subject: "Derecho Civil", desc: "RCE, contratos, promesa y compraventa (clases 9 a 11)" },
-      { name: "PROCESAL.md", subject: "Derecho Procesal", desc: "Jurisdicción, juicio ordinario, recursos y normas comunes" },
-      { name: "CONSTITUCIONAL.md", subject: "Derecho Constitucional", desc: "Bases de institucionalidad, DD.FF. y acciones constitucionales" }
-    ];
+    const knownDescs = {
+      "ACTO JURIDICO.md": { subject: "Derecho Civil", desc: "Teoría del Acto Jurídico: requisitos, vicios, nulidades e ineficacia" },
+      "LOS BIENES.md": { subject: "Derecho Civil", desc: "Teoría de los Bienes: dominio, posesión, modos de adquirir y derechos reales" },
+      "LAS OBLIGACIONES.md": { subject: "Derecho Civil", desc: "Teoría de las Obligaciones: fuente, efectos, cumplimiento e incumplimiento" },
+      "CLASE_9_11.md": { subject: "Derecho Civil", desc: "RCE, contratos, promesa y compraventa (clases 9 a 11)" },
+      "PROCESAL.md": { subject: "Derecho Procesal", desc: "Jurisdicción, juicio ordinario, recursos y normas comunes" },
+      "CONSTITUCIONAL.md": { subject: "Derecho Constitucional", desc: "Bases de institucionalidad, DD.FF. y acciones constitucionales" }
+    };
+
+    const sourceFilesMap = new Map();
+
+    // 1. Intentar obtener desde /api/fuentes si el backend está activo
+    try {
+      if (typeof fetch === "function") {
+        const res = await fetch("/api/fuentes");
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.fuentes) {
+            Object.values(data.fuentes).forEach(f => {
+              const fname = f.filename || f.name;
+              if (fname) {
+                sourceFilesMap.set(fname, {
+                  name: fname,
+                  subject: knownDescs[fname]?.subject || (f.discipline || "Apunte"),
+                  desc: knownDescs[fname]?.desc || (f.title || "Apunte desarrollado en fuentes/")
+                });
+              }
+            });
+          }
+        }
+      }
+    } catch (e) {}
+
+    // 2. Si no hay fuentes del backend, derivar de StorageService o INITIAL_DATA.topics
+    if (sourceFilesMap.size === 0) {
+      const allTopics = (typeof StorageService !== "undefined" && StorageService.getData)
+        ? (StorageService.getData().topics || [])
+        : ((typeof INITIAL_DATA !== "undefined" && INITIAL_DATA.topics) ? INITIAL_DATA.topics : []);
+
+      allTopics.forEach(t => {
+        const fname = t.sourceFile ? t.sourceFile.replace(/^.*[\\\/]/, '') : "";
+        if (fname && !sourceFilesMap.has(fname)) {
+          const subjName = t.discipline || (t.subject === 'procesal' ? 'Derecho Procesal' : t.subject === 'constitucional' ? 'Derecho Constitucional' : 'Derecho Civil');
+          sourceFilesMap.set(fname, {
+            name: fname,
+            subject: knownDescs[fname]?.subject || subjName,
+            desc: knownDescs[fname]?.desc || `Apunte desarrollado (${t.chapterTitle || subjName})`
+          });
+        }
+      });
+    }
+
+    // 3. Fallback defensivo si no hubiese tópicos cargados
+    if (sourceFilesMap.size === 0) {
+      Object.entries(knownDescs).forEach(([fname, info]) => {
+        sourceFilesMap.set(fname, { name: fname, subject: info.subject, desc: info.desc });
+      });
+    }
+
+    const sources = Array.from(sourceFilesMap.values()).sort((a, b) => a.name.localeCompare(b.name));
 
     container.innerHTML = sources.map(s => `
       <div class="source-item-row">
         <div class="source-item-info">
           <i data-lucide="file-text" style="color: var(--gold-primary);"></i>
           <div>
-            <div>${s.name} <span class="badge-count" style="font-size: 0.65rem; margin-left: 6px;">${s.subject}</span></div>
-            <div style="font-size: 0.75rem; color: var(--text-muted);">${s.desc}</div>
+            <div>${typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(s.name) : s.name} <span class="badge-count" style="font-size: 0.65rem; margin-left: 6px;">${typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(s.subject) : s.subject}</span></div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">${typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(s.desc) : s.desc}</div>
           </div>
         </div>
         <span style="font-size: 0.75rem; color: var(--success); font-weight: 600;">Sincronizado</span>
       </div>
     `).join('');
+
+    if (window.lucide) window.lucide.createIcons();
   },
 
   async renderCasosFilesList() {

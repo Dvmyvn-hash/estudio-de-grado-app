@@ -42,6 +42,13 @@ var CaseGeneratorAgent = {
         { name: "Responsabilidad Civil Extracontractual", rules: "Arts. 2314-2334 CC", doctrine: "Capacidad delictual, culpa y dolo, daño cierto, causalidad adecuada. Presunciones de culpa y responsabilidad solidaria de coautores (Art. 2317 CC)." }
       ]
     },
+    "CLASE_9_11.md": {
+      title: "Derecho Civil: Responsabilidad Extracontractual y Contratos (Promesa y Compraventa)",
+      sections: [
+        { name: "Responsabilidad Civil Extracontractual", rules: "Arts. 2314-2334 CC", doctrine: "Modelos de imputabilidad subjetiva y objetiva. Presunciones por hecho ajeno y de las cosas. Daño patrimonial y moral. Causalidad y eximentes." },
+        { name: "Contrato de Promesa y Compraventa", rules: "Arts. 1438, 1444, 1545, 1554, 1793-1896 CC", doctrine: "Requisitos de validez del Art. 1554 CC. Eficacia obligacional de hacer vs título traslaticio. Compraventa, cosa, precio y rescisión por lesión enorme." }
+      ]
+    },
     "PROCESAL.md": {
       title: "Derecho Procesal - Apunte Canónico",
       sections: [
@@ -70,6 +77,56 @@ var CaseGeneratorAgent = {
         }
       }
     } catch (e) {}
+  },
+
+  resolveLinkedFuente(fuenteRef) {
+    if (!fuenteRef) return null;
+    const file = typeof fuenteRef === "string" ? fuenteRef : (fuenteRef.file || "");
+    if (!file) return null;
+
+    const cleanFile = file.replace(/^.*[\\\/]/, "").trim();
+    // 1. Coincidencia directa en FUENTES_CORPUS canónico
+    if (this.FUENTES_CORPUS[cleanFile]) {
+      return {
+        file: cleanFile,
+        section: fuenteRef.section || "",
+        rules: fuenteRef.rules || ""
+      };
+    }
+
+    // 2. Coincidencia best-effort insensible a mayúsculas y extensiones (.md)
+    const targetStem = cleanFile.toLowerCase().replace(/\.md$/i, "").trim();
+    for (const [key, val] of Object.entries(this.FUENTES_CORPUS)) {
+      const keyStem = key.toLowerCase().replace(/\.md$/i, "").trim();
+      if (keyStem === targetStem || key.toLowerCase() === cleanFile.toLowerCase()) {
+        return {
+          file: key,
+          section: fuenteRef.section || "",
+          rules: fuenteRef.rules || ""
+        };
+      }
+    }
+
+    // 3. Coincidencia contra fuentes descubiertas en el servidor si están cargadas
+    if (this.serverFuentes && Array.isArray(this.serverFuentes)) {
+      const serverMatch = this.serverFuentes.find(f => {
+        const fname = (f.file || f.filename || "").replace(/^.*[\\\/]/, "").toLowerCase();
+        return fname === cleanFile.toLowerCase() || fname.replace(/\.md$/i, "") === targetStem;
+      });
+      if (serverMatch) {
+        return {
+          file: serverMatch.file || cleanFile,
+          section: fuenteRef.section || "",
+          rules: fuenteRef.rules || ""
+        };
+      }
+    }
+
+    // 4. Tolerancia defensiva para archivos desconocidos: omitir vínculo con warning sin romper nutrición
+    if (typeof console !== "undefined" && console.warn) {
+      console.warn(`[CaseGeneratorAgent] Fuente desconocida omitida de la nutrición: '${cleanFile}'`);
+    }
+    return null;
   },
 
   TOPICS_INDEX: null,
@@ -3271,7 +3328,7 @@ var CaseGeneratorAgent = {
       sourceCategory: "generado_ia",
       sourceCategoryLabel: "Agente IA (Protocolo AFG 2026-20)",
       sourceFile: `IA-Grado-Caso-${new Date().toISOString().slice(0, 10)}.md`,
-      linkedFuentes: chosenArchetype.linkedFuentes || null,
+      linkedFuentes: this.resolveLinkedFuente(chosenArchetype.linkedFuentes) || chosenArchetype.linkedFuentes || null,
       linkedTopics: chosenArchetype.linkedTopics || [],
       linkedApuntes: linkedApuntes || [],
       dogmaticPrinciples: chosenArchetype.dogmaticPrinciples || "", 
