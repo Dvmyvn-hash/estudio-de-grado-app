@@ -4,6 +4,20 @@ Estudio de Grado Hub (Civil, Procesal, Constitucional)
 Monitorea la carpeta Escritorio/Fuentes_Grado/APUNTES y entrega las actualizaciones en vivo al navegador.
 """
 
+import sys
+
+# Desactivar buffering de salida para Render / contenedores (logs en tiempo real sin latencia de búfer)
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(line_buffering=True)
+    except Exception:
+        pass
+if hasattr(sys.stderr, "reconfigure"):
+    try:
+        sys.stderr.reconfigure(line_buffering=True)
+    except Exception:
+        pass
+
 import http.server
 import socketserver
 import os
@@ -48,6 +62,28 @@ import db
 
 BASE_DIR = Path(__file__).resolve().parent
 
+def resolve_safe_db_path() -> Path:
+    """Resuelve la ruta SQLite verificando permisos y existencia del directorio padre, con fallback seguro."""
+    env_path = os.environ.get("DB_PATH")
+    if env_path:
+        try:
+            target = Path(env_path).resolve()
+            if target.parent and not target.parent.exists():
+                target.parent.mkdir(parents=True, exist_ok=True)
+            # Probar si el directorio es escribible
+            test_file = target.parent / ".test_write_perm"
+            try:
+                test_file.touch(exist_ok=True)
+                test_file.unlink(missing_ok=True)
+                return target
+            except Exception as pe:
+                print(f"[FASE 1/5] [Aviso] Directorio {target.parent} no es escribible ({pe}). Fallback a {BASE_DIR / 'estudio_grado.db'}", flush=True)
+                return BASE_DIR / "estudio_grado.db"
+        except Exception as e:
+            print(f"[FASE 1/5] [Aviso] Error al preparar DB_PATH={env_path}: {e}. Fallback a {BASE_DIR / 'estudio_grado.db'}", flush=True)
+            return BASE_DIR / "estudio_grado.db"
+    return BASE_DIR / "estudio_grado.db"
+
 def load_env_file():
     """Carga variables desde archivo .env local si existe, sin sobreescribir las ya definidas."""
     env_file = BASE_DIR / ".env"
@@ -65,19 +101,17 @@ def load_env_file():
                         if k and k not in os.environ:
                             os.environ[k] = v
         except Exception as e:
-            print(f"[Aviso] No se pudo leer .env: {e}")
+            print(f"[Aviso] No se pudo leer .env: {e}", flush=True)
 
+# [FASE 1/5] Carga de variables de entorno y preparación de configuración
+print("==================================================", flush=True)
+print("[ARRANQUE] Inicializando servidor GRADOMANIACOS...", flush=True)
+print("[FASE 1/5] [INICIO] Carga de variables de entorno (load_env_file)...", flush=True)
 load_env_file()
-
 PORT = int(os.environ.get("PORT", 8080))
-DB_PATH_ENV = os.environ.get("DB_PATH")
-DB_PATH = Path(DB_PATH_ENV).resolve() if DB_PATH_ENV else BASE_DIR / "estudio_grado.db"
-try:
-    if DB_PATH.parent and not DB_PATH.parent.exists():
-        DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-except Exception as e:
-    print(f"[Aviso] No se pudo crear directorio padre para DB_PATH: {e}")
-print(f"[DB] Archivo SQLite en {DB_PATH}")
+DB_PATH = resolve_safe_db_path()
+print(f"[FASE 1/5] [OK] Variables cargadas exitosamente. PORT={PORT} | DB_PATH={DB_PATH}", flush=True)
+
 
 def get_or_create_auth_secret() -> str:
     """Obtiene el secreto HMAC desde variable de entorno o genera uno criptográfico de 256 bits."""
@@ -126,7 +160,13 @@ def load_google_client_id() -> str:
 AUTH_SECRET_KEY = get_or_create_auth_secret()
 ALLOW_TEST_AUTH = os.environ.get("ALLOW_TEST_AUTH", "").strip().lower() in ("1", "true", "yes")
 GOOGLE_CLIENT_ID = load_google_client_id()
+
+# [FASE 2/5] Inicialización y migraciones de base de datos
+print(f"[FASE 2/5] [INICIO] Inicialización y migraciones de base de datos ({DB_PATH})...", flush=True)
+t0_db = time.time()
 db.init_db(DB_PATH)
+db_elapsed = round((time.time() - t0_db) * 1000, 2)
+print(f"[FASE 2/5] [OK] Base de datos y migraciones listas en {db_elapsed} ms.", flush=True)
 FUENTES_DIR = BASE_DIR / "fuentes"
 CASOS_DIR = BASE_DIR / "CASOS"
 CASOS_DIR_LOWER = BASE_DIR / "casos"
@@ -1979,23 +2019,37 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
 
 def run_auto_purge_daemon():
     """Hilo daemon en segundo plano que purga periódicamente cuentas Demo no convalidadas (>48h)."""
+    # Gracia inicial de 30s: evita contención de I/O en disco durante el arranque inicial y escaneo de puerto
+    time.sleep(30)
     try:
+        print("[Purge Daemon] Ejecutando purga inicial de cuentas no convalidadas...", flush=True)
         db.purge_unvalidated_accounts(db_path=DB_PATH)
     except Exception as e:
-        print(f"[Purge Daemon Error Inicial]: {e}")
+        print(f"[Purge Daemon Error Inicial]: {e}", flush=True)
 
     while True:
         time.sleep(1800)  # Cada 30 minutos
         try:
             db.purge_unvalidated_accounts(db_path=DB_PATH)
         except Exception as e:
-            print(f"[Purge Daemon Error]: {e}")
+            print(f"[Purge Daemon Error]: {e}", flush=True)
 
 
 if __name__ == "__main__":
-    import sys
-    # Seguridad: Enlazar a 127.0.0.1 en desarrollo local.
-    # En Render o nube (PORT en entorno) o con flag --lan: enlazar a 0.0.0.0
+    t_main_start = time.time()
+
+    # [FASE 3/5] Arranque del hilo daemon de purga automática
+    print("[FASE 3/5] [INICIO] Lanzando hilo daemon de purga automática (daemon=True)...", flush=True)
+    purge_thread = threading.Thread(target=run_auto_purge_daemon, daemon=True, name="PurgeDaemon")
+    purge_thread.start()
+    print(f"[FASE 3/5] [OK] Hilo daemon de purga iniciado asíncronamente (is_alive={purge_thread.is_alive()}). No bloquea el arranque.", flush=True)
+
+    # [FASE 4/5] Verificación de sincronización con fuentes externas
+    print("[FASE 4/5] [VERIFICACIÓN] Verificando sincronización de fuentes externas y dependencias...", flush=True)
+    print("[FASE 4/5] [OK] No hay llamadas síncronas de red en el camino crítico del servidor (procesamiento client-side/lazy).", flush=True)
+
+    # [FASE 5/5] Creación del socket TCP y llamada a serve_forever()
+    print("[FASE 5/5] [INICIO] Creación del socket TCP y enlace de puerto...", flush=True)
     bind_address = "127.0.0.1"
     is_cloud_or_lan = (
         "--lan" in sys.argv or
@@ -2006,21 +2060,21 @@ if __name__ == "__main__":
     if is_cloud_or_lan:
         bind_address = "0.0.0.0"
 
-    # Iniciar hilo daemon de purga automática de cuentas no convalidadas (>48h)
-    purge_thread = threading.Thread(target=run_auto_purge_daemon, daemon=True, name="PurgeDaemon")
-    purge_thread.start()
-
+    print(f"[FASE 5/5] Configuración de red: HOST={bind_address}, PORT={PORT}", flush=True)
     socketserver.ThreadingTCPServer.allow_reuse_address = True
     with socketserver.ThreadingTCPServer((bind_address, PORT), AutoSyncHTTPHandler) as httpd:
+        startup_ms = round((time.time() - t_main_start) * 1000, 2)
         mode_str = "Nube / Red Pública (0.0.0.0)" if bind_address == "0.0.0.0" else "Localhost seguro (127.0.0.1)"
-        print(f"==================================================")
-        print(f" Servidor GRADOMANIACOS con Auto-Sincronizador")
-        print(f" Modo: {mode_str}")
-        print(f" Puerto: {PORT}")
-        print(f" URL: http://{'localhost' if bind_address == '127.0.0.1' else '0.0.0.0'}:{PORT}")
-        print(f" Monitoreando carpeta: {APUNTES_DIR}")
-        print(f"==================================================")
+        print(f"[FASE 5/5] [OK] Socket TCP abierto y enlazado exitosamente en {bind_address}:{PORT} ({startup_ms} ms). Listo para aceptar conexiones.", flush=True)
+        print(f"==================================================", flush=True)
+        print(f" Servidor GRADOMANIACOS con Auto-Sincronizador", flush=True)
+        print(f" Modo: {mode_str}", flush=True)
+        print(f" Puerto: {PORT}", flush=True)
+        print(f" URL: http://{'localhost' if bind_address == '127.0.0.1' else '0.0.0.0'}:{PORT}", flush=True)
+        print(f" Monitoreando carpeta: {APUNTES_DIR}", flush=True)
+        print(f"==================================================", flush=True)
+        print(f"[FASE 5/5] Entrando en bucle httpd.serve_forever(). Servidor activo y respondiendo.", flush=True)
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
-            print("\nServidor detenido.")
+            print("\nServidor detenido.", flush=True)

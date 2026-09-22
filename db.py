@@ -19,21 +19,43 @@ BASE_DIR = Path(__file__).resolve().parent
 def get_default_db_path() -> Path:
     env_path = os.environ.get("DB_PATH")
     if env_path:
-        return Path(env_path).resolve()
+        try:
+            target = Path(env_path).resolve()
+            if target.parent and not target.parent.exists():
+                target.parent.mkdir(parents=True, exist_ok=True)
+            return target
+        except Exception as e:
+            print(f"[DB Warning] No se pudo acceder a DB_PATH={env_path}: {e}. Fallback a estudio_grado.db", flush=True)
+            return BASE_DIR / "estudio_grado.db"
     return BASE_DIR / "estudio_grado.db"
 
 DEFAULT_DB_PATH = get_default_db_path()
 
 
 def get_db_connection(db_path: Optional[Path] = None) -> sqlite3.Connection:
-    """Crea y retorna una conexión con integridad referencial activa, WAL mode y row_factory."""
+    """Crea y retorna una conexión con integridad referencial activa, busy_timeout prioritario y WAL tolerante."""
     path = db_path or get_default_db_path()
-    if path.parent and not path.parent.exists():
-        path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        if path.parent and not path.parent.exists():
+            path.parent.mkdir(parents=True, exist_ok=True)
+    except Exception as e:
+        print(f"[DB Warning] Error al verificar carpeta de BD {path.parent}: {e}. Fallback a local.", flush=True)
+        path = BASE_DIR / "estudio_grado.db"
+
     conn = sqlite3.connect(str(path), timeout=15.0)
-    conn.execute("PRAGMA foreign_keys = ON;")
-    conn.execute("PRAGMA journal_mode = WAL;")
-    conn.execute("PRAGMA busy_timeout = 5000;")
+    # Establecer busy_timeout primero para que cualquier contención de locks espere hasta 5s
+    try:
+        conn.execute("PRAGMA busy_timeout = 5000;")
+    except Exception:
+        pass
+    try:
+        conn.execute("PRAGMA foreign_keys = ON;")
+    except Exception:
+        pass
+    try:
+        conn.execute("PRAGMA journal_mode = WAL;")
+    except Exception as je:
+        print(f"[DB Info] WAL mode no disponible ({je}). Usando modo journal estándar.", flush=True)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -537,7 +559,6 @@ def purge_unvalidated_accounts(max_age_ms: int = 48 * 3600 * 1000, db_path: Opti
     También purga las filas asociadas en user_progress para no dejar huérfanos.
     Retorna el número de cuentas eliminadas.
     """
-    init_db(db_path)
     now_ms = int(time.time() * 1000)
     threshold_ms = now_ms - max_age_ms
 

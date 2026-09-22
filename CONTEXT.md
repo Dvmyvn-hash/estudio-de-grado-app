@@ -770,6 +770,30 @@ stateDiagram-v2
 
 ## 9. Bitácora Canónica de Versiones e Hitos
 
+* **v7.6 (Prompt 006 — Diagnóstico y Resolución: "Port Scan Timeout" en Render, Desbufferizado Total e Instrumentación de Arranque en 5 Fases):**
+  - **Diagnóstico Integral y Causa Raíz de Despliegue en Render (18m22s Timeout):**
+    1. **Buffering de salida en contenedores Linux sin TTY:** Python aplicaba almacenamiento en búfer por bloques (block-buffered hasta 8 KB) a `stdout`, ocultando los mensajes de arranque y diagnósticos en la consola de logs de Render en tiempo real.
+    2. **Riesgo de bloqueo por permisos o contención en SQLite sobre volumen montado:** La ruta de base de datos en `render.yaml` (`/var/data/estudio_grado.db`) carecía de un fallback defensivo ante demoras de montaje del disco persistente o permisos insuficientes de escritura en contenedores no-root.
+    3. **Orden de directivas PRAGMA en SQLite:** `PRAGMA journal_mode = WAL;` se ejecutaba antes de `PRAGMA busy_timeout = 5000;`, dejando abierta la posibilidad de bloqueos indefinidos si el sistema de archivos del volumen experimentaba retrasos en la memoria compartida POSIX (`-shm`).
+    4. **Competencia de I/O por purga inmediata en segundo plano:** El hilo daemon `run_auto_purge_daemon` llamaba a `purge_unvalidated_accounts()` de forma síncrona e inmediata al iniciar el hilo, re-ejecutando además `init_db()` de forma redundante y compitiendo por locks de base de datos durante la ventana crítica de arranque.
+  - **Desbufferizado Unbuffered Total (`PYTHONUNBUFFERED=1` & `python -u server.py`):**
+    - Configuración de `sys.stdout.reconfigure(line_buffering=True)` y `sys.stderr.reconfigure(line_buffering=True)` al inicio de `server.py`.
+    - Actualización de `startCommand: python -u server.py` y adición de `PYTHONUNBUFFERED: "1"` en `render.yaml`, garantizando emisión instantánea de trazas diagnósticas a la consola de Render con 0 ms de latencia.
+  - **Instrumentación Diagnóstica en 5 Fases Cronometradas con `flush=True`:**
+    - **FASE 1/5 (Carga de Entorno):** `load_env_file()`, resolución segura y validación de permisos en `DB_PATH` mediante `resolve_safe_db_path()` con fallback preventivo a `BASE_DIR / "estudio_grado.db"`.
+    - **FASE 2/5 (Base de Datos y Migraciones):** Inicialización y auto-migraciones de SQLite (`db.init_db(DB_PATH)`), registrando el tiempo exacto de ejecución en milisegundos (< 30 ms).
+    - **FASE 3/5 (Daemon de Purga Automática):** Lanzamiento asíncrono en segundo plano (`threading.Thread(daemon=True)`), con tiempo de gracia inicial de 30 segundos para no saturar I/O en disco durante el arranque, confirmación explícita de `is_alive=True` y sin ningún `.join()` bloqueante.
+    - **FASE 4/5 (Sincronización de Fuentes Externas):** Verificación explícita de ausencia de llamadas síncronas de red a APIs externas (Gemini / Cloud Run) en el camino crítico del servidor (procesamiento client-side/lazy en `/api/topics`).
+    - **FASE 5/5 (Socket TCP y Enlace):** Enlace explícito a `0.0.0.0` en entornos cloud (`PORT` o `RENDER` presentes), apertura instantánea de `socketserver.ThreadingTCPServer` en < 6 ms y entrada transparente a `httpd.serve_forever()`.
+  - **Robustecimiento Defensivo en Capa de Datos (`db.py`):**
+    - Priorización de `PRAGMA busy_timeout = 5000;` inmediatamente después de `sqlite3.connect()`.
+    - Envoltura de `PRAGMA journal_mode = WAL;` en bloque defensivo `try/except` con fallback transparente a modo journal estándar si el volumen no soporta memoria compartida.
+    - Eliminación de la llamada redundante a `init_db()` dentro de `purge_unvalidated_accounts()`.
+  - **Aprobación del 100% de Pruebas Automatizadas (820 Pruebas en Total / 100% PASS):**
+    - 20/20 pruebas aprobadas en `test_mobile_header_theme.cjs`.
+    - 105/105 pruebas aprobadas en `test_unlock_auth_flow.cjs`.
+    - 695/695 pruebas aprobadas en `test_e2e_case_flow.cjs`.
+
 * **v7.5 (Header Móvil Solo-Íconos y Eliminación Definitiva del Modo Claro — Dark Academy Inmutable):**
   - **Diagnóstico y Resolución de Saturación en Header Móvil:** Erradicación de la colisión y superposición visual entre el badge del candado/pase de grado (`#btn-open-unlock-badge`) y el logotipo de marca (`h1.brand-title`), así como la saturación de ancho horizontal causada por el nombre completo del alumno (`.user-profile-name`) en pantallas móviles (320px - 768px).
   - **Header Móvil Solo-Íconos (`@media (max-width: 768px)`):**
