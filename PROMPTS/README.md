@@ -21,6 +21,7 @@
 | 005 | `005_header_movil_iconos_eliminar_modo_claro.md` | Header móvil solo-íconos (eliminación de superposición entre logotipo y candado, chip de usuario compacto con solo avatar y logout) y eliminación definitiva del selector de Modo Claro (Dark Academy único e inmutable en `:root`). | ✅ Implementado (v7.5) |
 | 006 | `006_diagnostico_port_timeout_render.md` | Diagnóstico e instrumentación en 5 fases del arranque en Render (resolución de 'Port scan timeout' tras 18m), desbufferizado unbuffered total (PYTHONUNBUFFERED=1, python -u server.py), robustecimiento de SQLite contra bloqueos de disco/WAL y gracia en daemon de purga. | ✅ Implementado (v7.6) |
 | 007 | `007_fuentes_canonicas_eliminar_subida_admin_regen_ci.md` | Eliminación definitiva de la subida de apuntes de administrador (endpoints → 404) tras el incidente que borró el índice; `fuentes/` como base canónica del temario (6 apuntes oficiales); parser determinista (53 tópicos, 34/9/10) y regeneración del índice en CI para que `git push` de `fuentes/*.md` actualice la página desplegada. | ✅ Implementado (v7.8) |
+| 008 | `008_indice_automatico_fuentes_auto_seccionado.md` | Índice automático desde `fuentes/`: al soltar un `.md` se auto-descubre (sin editar `FILES_CONFIG`), se secciona solo en cédulas `N.1, N.2…` según módulo/capítulo detectado (o headings `##`, o fallback monolítico), se ordena solo en la página y se publica con `git push` (CI). | 📝 Por ejecutar |
 
 ## Reglas transversales para cualquier prompt (las heredan todos)
 
