@@ -254,6 +254,15 @@ def init_db(db_path: Optional[Path] = None) -> None:
           updated_at INTEGER NOT NULL,
           PRIMARY KEY (user_id, case_id)
         );
+
+        CREATE TABLE IF NOT EXISTS user_topic_mastery (
+          user_id INTEGER NOT NULL,
+          topic_id TEXT NOT NULL,
+          mastered INTEGER NOT NULL DEFAULT 1,
+          updated_at INTEGER NOT NULL,
+          PRIMARY KEY (user_id, topic_id),
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
         """)
         # Backfill idempotente de usuarios con código convalidado hacia access_code_usages
         cursor.execute("PRAGMA table_info(users)")
@@ -581,8 +590,9 @@ def purge_unvalidated_accounts(max_age_ms: int = 48 * 3600 * 1000, db_path: Opti
         expired_ids = [u["id"] for u in expired_users]
         placeholders = ",".join("?" for _ in expired_ids)
 
-        # Eliminar progreso asociado
+        # Eliminar progreso y dominio de cédulas asociado
         cursor.execute(f"DELETE FROM user_progress WHERE user_id IN ({placeholders})", expired_ids)
+        cursor.execute(f"DELETE FROM user_topic_mastery WHERE user_id IN ({placeholders})", expired_ids)
         # Eliminar usuarios
         cursor.execute(f"DELETE FROM users WHERE id IN ({placeholders})", expired_ids)
         conn.commit()
@@ -938,6 +948,110 @@ def upsert_user_progress(
         )
         conn.commit()
         return True, now_ms
+
+
+# ==========================================
+# GESTIÓN DE DOMINIO DE CÉDULAS (TOPIC MASTERY)
+# ==========================================
+
+def get_user_topic_mastery(user_id: int, db_path: Optional[Path] = None) -> Dict[str, Dict[str, Any]]:
+    """
+    Recupera el estado de dominio de cédulas (topic mastery) del usuario.
+    Retorna un diccionario { topic_id: { "mastered": bool, "updatedAt": int } } ordenado por updated_at ASC.
+    """
+    init_db(db_path)
+    with get_db_connection(db_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT topic_id, mastered, updated_at
+            FROM user_topic_mastery
+            WHERE user_id = ?
+            ORDER BY updated_at ASC
+            """,
+            (user_id,)
+        )
+        rows = cursor.fetchall()
+        result = {}
+        for row in rows:
+            result[row["topic_id"]] = {
+                "mastered": bool(row["mastered"]),
+                "updatedAt": row["updated_at"]
+            }
+        return result
+
+
+def upsert_user_topic_mastery(
+    user_id: int,
+    topic_id: str,
+    mastered: bool,
+    updated_at: Optional[int] = None,
+    db_path: Optional[Path] = None
+) -> Tuple[bool, int]:
+    """
+    Guarda o actualiza atómicamente el dominio de una cédula aplicando resolución LWW:
+    una escritura con timestamp anterior no sobrescribe una con timestamp más reciente.
+    Retorna (éxito, updated_at_ms).
+    """
+    init_db(db_path)
+    now_ms = updated_at if updated_at is not None else int(time.time() * 1000)
+    mastered_int = 1 if mastered else 0
+    clean_topic_id = str(topic_id).strip()
+
+    with get_db_connection(db_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            INSERT INTO user_topic_mastery (user_id, topic_id, mastered, updated_at)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(user_id, topic_id) DO UPDATE SET
+              mastered = excluded.mastered,
+              updated_at = excluded.updated_at
+            WHERE excluded.updated_at >= user_topic_mastery.updated_at
+            """,
+            (user_id, clean_topic_id, mastered_int, now_ms)
+        )
+        conn.commit()
+        return True, now_ms
+
+
+def upsert_many_user_topic_mastery(
+    user_id: int,
+    changes: List[Dict[str, Any]],
+    now_ms: Optional[int] = None,
+    db_path: Optional[Path] = None
+) -> Tuple[int, int]:
+    """
+    Actualiza en una única transacción atómica un lote de cambios de dominio aplicando LWW.
+    Retorna (filas_afectadas, now_ms).
+    """
+    init_db(db_path)
+    default_now = now_ms if now_ms is not None else int(time.time() * 1000)
+    affected_count = 0
+
+    with get_db_connection(db_path) as conn:
+        cursor = conn.cursor()
+        for item in changes:
+            tid = str(item.get("topicId", "")).strip()
+            mastered = bool(item.get("mastered", True))
+            ts = item.get("ts")
+            item_ts = ts if ts is not None and isinstance(ts, int) and not isinstance(ts, bool) and ts > 0 else default_now
+            mastered_int = 1 if mastered else 0
+
+            cursor.execute(
+                """
+                INSERT INTO user_topic_mastery (user_id, topic_id, mastered, updated_at)
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT(user_id, topic_id) DO UPDATE SET
+                  mastered = excluded.mastered,
+                  updated_at = excluded.updated_at
+                WHERE excluded.updated_at >= user_topic_mastery.updated_at
+                """,
+                (user_id, tid, mastered_int, item_ts)
+            )
+            affected_count += cursor.rowcount
+        conn.commit()
+        return affected_count, default_now
 
 
 if __name__ == "__main__":

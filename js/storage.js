@@ -77,6 +77,14 @@ const StorageService = {
             return isAi && notExpired;
           });
         }
+
+        // Asegurar estructura de topicQuizzes en el progreso de usuario
+        if (!parsed.userProgress) parsed.userProgress = {};
+        Object.keys(parsed.userProgress).forEach(k => {
+          if (parsed.userProgress[k] && !parsed.userProgress[k].topicQuizzes) {
+            parsed.userProgress[k].topicQuizzes = {};
+          }
+        });
         return parsed;
       }
     } catch (e) {
@@ -129,8 +137,34 @@ const StorageService = {
     const key = userKey || this.getActiveUserKey();
     const data = this.getData();
     if (!data.userProgress) data.userProgress = {};
-    if (!data.userProgress[key]) data.userProgress[key] = { masteredTopicIds: [], lastActivity: null };
+    if (!data.userProgress[key]) data.userProgress[key] = { masteredTopicIds: [], lastActivity: null, topicQuizzes: {}, masteredTimestamps: {} };
+    if (!data.userProgress[key].masteredTimestamps) data.userProgress[key].masteredTimestamps = {};
     return data.userProgress[key].masteredTopicIds || [];
+  },
+
+  // Marcar un tema como dominado de forma idempotente (usado por auto-completado de quiz)
+  markTopicMastered(topicId, userKey = null) {
+    const key = userKey || this.getActiveUserKey();
+    const data = this.getData();
+    if (!data.userProgress) data.userProgress = {};
+    if (!data.userProgress[key]) data.userProgress[key] = { masteredTopicIds: [], lastActivity: null, topicQuizzes: {}, masteredTimestamps: {} };
+    if (!data.userProgress[key].masteredTopicIds) data.userProgress[key].masteredTopicIds = [];
+    if (!data.userProgress[key].masteredTimestamps) data.userProgress[key].masteredTimestamps = {};
+
+    const list = data.userProgress[key].masteredTopicIds;
+    let newlyAdded = false;
+    if (!list.includes(topicId)) {
+      list.push(topicId);
+      newlyAdded = true;
+    }
+    const nowEpoch = Date.now();
+    data.userProgress[key].masteredTimestamps[topicId] = nowEpoch;
+    data.userProgress[key].lastActivity = new Date().toISOString();
+    this.saveData(data);
+
+    this._pushMasteryChange(topicId, true, nowEpoch);
+
+    return { mastered: true, newlyAdded, masteredCount: list.length, timestamp: nowEpoch };
   },
 
   // Cambiar estado de dominio de un tema para el usuario activo
@@ -138,7 +172,8 @@ const StorageService = {
     const key = userKey || this.getActiveUserKey();
     const data = this.getData();
     if (!data.userProgress) data.userProgress = {};
-    if (!data.userProgress[key]) data.userProgress[key] = { masteredTopicIds: [], lastActivity: null };
+    if (!data.userProgress[key]) data.userProgress[key] = { masteredTopicIds: [], lastActivity: null, topicQuizzes: {}, masteredTimestamps: {} };
+    if (!data.userProgress[key].masteredTimestamps) data.userProgress[key].masteredTimestamps = {};
 
     const list = data.userProgress[key].masteredTopicIds;
     const idx = list.indexOf(topicId);
@@ -152,15 +187,104 @@ const StorageService = {
       isMastered = true;
     }
 
+    const nowEpoch = Date.now();
+    data.userProgress[key].masteredTimestamps[topicId] = nowEpoch;
     data.userProgress[key].lastActivity = new Date().toISOString();
     this.saveData(data);
-    return { isMastered, masteredCount: list.length };
+
+    this._pushMasteryChange(topicId, isMastered, nowEpoch);
+
+    return { isMastered, masteredCount: list.length, timestamp: nowEpoch };
   },
 
   // Comprobar si un tema específico está dominado por el usuario
   isTopicMasteredByUser(topicId, userKey = null) {
     const mastered = this.getUserMasteredTopics(userKey);
     return mastered.includes(topicId);
+  },
+
+  // Obtener estado del cuestionario de verificación de una cédula
+  getTopicQuizState(topicId, userKey = null) {
+    const key = userKey || this.getActiveUserKey();
+    const data = this.getData();
+    if (!data.userProgress || !data.userProgress[key] || !data.userProgress[key].topicQuizzes) {
+      return null;
+    }
+    return data.userProgress[key].topicQuizzes[topicId] || null;
+  },
+
+  // Registrar respuesta a una pregunta del cuestionario de verificación
+  recordTopicAnswer(topicId, qIndex, chosenLetter, correctLetter, userKey = null) {
+    const key = userKey || this.getActiveUserKey();
+    const data = this.getData();
+    if (!data.userProgress) data.userProgress = {};
+    if (!data.userProgress[key]) data.userProgress[key] = { masteredTopicIds: [], lastActivity: null, topicQuizzes: {} };
+    if (!data.userProgress[key].topicQuizzes) data.userProgress[key].topicQuizzes = {};
+
+    const quizzes = data.userProgress[key].topicQuizzes;
+    const existing = quizzes[topicId] || {
+      correctCount: 0,
+      answers: [null, null, null, null],
+      questionResults: [false, false, false, false],
+      completed: false,
+      completedAt: null,
+      updatedAt: null
+    };
+
+    if (!existing.questionResults) existing.questionResults = [false, false, false, false];
+    if (!Array.isArray(existing.answers)) existing.answers = [null, null, null, null];
+
+    const isCorrect = (chosenLetter === correctLetter);
+    existing.answers[qIndex] = chosenLetter;
+    existing.questionResults[qIndex] = isCorrect;
+    existing.correctCount = existing.questionResults.filter(Boolean).length;
+    existing.updatedAt = new Date().toISOString();
+
+    let newlyMastered = false;
+    if (existing.correctCount === 4 && !existing.completed) {
+      existing.completed = true;
+      existing.completedAt = new Date().toISOString();
+      if (!data.userProgress[key].masteredTopicIds) data.userProgress[key].masteredTopicIds = [];
+      if (!data.userProgress[key].masteredTimestamps) data.userProgress[key].masteredTimestamps = {};
+      const list = data.userProgress[key].masteredTopicIds;
+      if (!list.includes(topicId)) {
+        list.push(topicId);
+        newlyMastered = true;
+      }
+      const nowEpoch = Date.now();
+      data.userProgress[key].masteredTimestamps[topicId] = nowEpoch;
+      this._pushMasteryChange(topicId, true, nowEpoch);
+    }
+
+    quizzes[topicId] = existing;
+    data.userProgress[key].lastActivity = new Date().toISOString();
+    this.saveData(data);
+
+    return {
+      isCorrect,
+      correctCount: existing.correctCount,
+      completed: existing.completed,
+      newlyMastered
+    };
+  },
+
+  // Comprobar si el cuestionario de una cédula fue completado con 4/4
+  isTopicQuizCompleted(topicId, userKey = null) {
+    const state = this.getTopicQuizState(topicId, userKey);
+    return Boolean(state && state.completed);
+  },
+
+  // Reiniciar estado del cuestionario de una cédula
+  resetTopicQuiz(topicId, userKey = null) {
+    const key = userKey || this.getActiveUserKey();
+    const data = this.getData();
+    if (data.userProgress && data.userProgress[key] && data.userProgress[key].topicQuizzes) {
+      delete data.userProgress[key].topicQuizzes[topicId];
+      data.userProgress[key].lastActivity = new Date().toISOString();
+      this.saveData(data);
+      return true;
+    }
+    return false;
   },
 
   // Calcular porcentaje de avance por materia y total para un usuario
@@ -269,6 +393,263 @@ const StorageService = {
       }
     } catch (e) {
       console.warn("[StorageService] Error sincronizando progreso:", e);
+    }
+  },
+
+  // Comprueba si la sincronización de avance con el servidor está habilitada
+  // (solo usuarios autenticados con Pase Activo, no cuentas demo ni anónimas)
+  isServerSyncAvailable() {
+    return typeof AuthService !== "undefined" &&
+      Boolean(AuthService.currentUser) &&
+      AuthService.currentUser.isDemo === false;
+  },
+
+  // Envía un cambio de dominio de cédula al backend (fire-and-forget)
+  async _pushMasteryChange(topicId, mastered, ts = null) {
+    if (!this.isServerSyncAvailable()) return;
+    const timestamp = ts || Date.now();
+    try {
+      await fetch("/api/user/topic-mastery", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          topicId: String(topicId),
+          mastered: Boolean(mastered),
+          ts: timestamp
+        })
+      });
+    } catch (e) {
+      // Silencioso (local-first)
+    }
+  },
+
+  // Sincroniza el dominio de cédulas con el servidor aplicando Last-Write-Wins (LWW) por cédula
+  async pullMasteryFromServer() {
+    if (!this.isServerSyncAvailable()) {
+      return { changed: false, reason: "no-server-sync" };
+    }
+    try {
+      const res = await fetch("/api/user/topic-mastery", {
+        headers: { "Accept": "application/json" }
+      });
+      if (!res.ok) {
+        return { changed: false, reason: `http-${res.status}` };
+      }
+      const dataJson = await res.json();
+      if (!dataJson.ok || !dataJson.mastery) {
+        return { changed: false, reason: "invalid-response" };
+      }
+
+      const remoteMastery = dataJson.mastery;
+      const key = this.getActiveUserKey();
+      const data = this.getData();
+      if (!data.userProgress) data.userProgress = {};
+      if (!data.userProgress[key]) data.userProgress[key] = { masteredTopicIds: [], lastActivity: null, topicQuizzes: {}, masteredTimestamps: {} };
+      if (!data.userProgress[key].masteredTopicIds) data.userProgress[key].masteredTopicIds = [];
+      if (!data.userProgress[key].masteredTimestamps) data.userProgress[key].masteredTimestamps = {};
+
+      const localList = data.userProgress[key].masteredTopicIds;
+      const localTimestamps = data.userProgress[key].masteredTimestamps;
+      let changed = false;
+      const pendingPushes = [];
+
+      // 1. Integrar datos del servidor aplicando LWW por cédula
+      for (const [topicId, rItem] of Object.entries(remoteMastery)) {
+        const remoteMastered = Boolean(rItem.mastered);
+        const remoteTs = Number(rItem.updatedAt || 0);
+        const localTs = Number(localTimestamps[topicId] || 0);
+        const isCurrentlyMastered = localList.includes(topicId);
+
+        if (remoteTs > localTs) {
+          // Servidor más reciente: aplicar cambio remoto
+          if (remoteMastered && !isCurrentlyMastered) {
+            localList.push(topicId);
+            changed = true;
+          } else if (!remoteMastered && isCurrentlyMastered) {
+            const idx = localList.indexOf(topicId);
+            if (idx >= 0) localList.splice(idx, 1);
+            changed = true;
+          }
+          localTimestamps[topicId] = remoteTs;
+        } else if (localTs > remoteTs) {
+          // Local más reciente: reconciliar subiendo al servidor
+          pendingPushes.push({ topicId, mastered: isCurrentlyMastered, ts: localTs });
+        }
+      }
+
+      // 2. Comprobar cédulas locales con timestamp que no existen en el servidor
+      for (const [topicId, localTs] of Object.entries(localTimestamps)) {
+        if (!remoteMastery[topicId]) {
+          const isCurrentlyMastered = localList.includes(topicId);
+          pendingPushes.push({ topicId, mastered: isCurrentlyMastered, ts: Number(localTs) || Date.now() });
+        }
+      }
+
+      if (changed) {
+        data.userProgress[key].lastActivity = new Date().toISOString();
+        this.saveData(data);
+      }
+
+      // 3. Despachar actualizaciones locales pendientes en lotes de máx 500
+      if (pendingPushes.length > 0) {
+        for (let i = 0; i < pendingPushes.length; i += 500) {
+          const batch = pendingPushes.slice(i, i + 500);
+          fetch("/api/user/topic-mastery", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ changes: batch })
+          }).catch(() => {});
+        }
+      }
+
+      return { changed };
+    } catch (e) {
+      return { changed: false, reason: "network-error" };
+    }
+  },
+
+  // Construye el payload de respaldo del avance del usuario activo (solo userProgress del usuario,
+  // sin topics/cases/auth). Usado por exportUserProgressFile().
+  buildUserProgressExportPayload(userKey = null) {
+    const key = userKey || this.getActiveUserKey();
+    const data = this.getData();
+    const progress = (data.userProgress && data.userProgress[key]) || {};
+    return {
+      app: "GRADOMANIACOS",
+      type: "user-progress-backup",
+      formatVersion: 1,
+      exportedAt: new Date().toISOString(),
+      userKey: key,
+      progress: {
+        masteredTopicIds: Array.isArray(progress.masteredTopicIds) ? progress.masteredTopicIds.slice() : [],
+        masteredTimestamps: (progress.masteredTimestamps && typeof progress.masteredTimestamps === "object")
+          ? { ...progress.masteredTimestamps }
+          : {},
+        topicQuizzes: (progress.topicQuizzes && typeof progress.topicQuizzes === "object")
+          ? JSON.parse(JSON.stringify(progress.topicQuizzes))
+          : {},
+        lastActivity: progress.lastActivity || null
+      }
+    };
+  },
+
+  // Exporta el avance del usuario activo como archivo JSON descargable (puente manual multi-dispositivo
+  // para Modo Estático / GitHub Pages). Retorna true si se generó la descarga.
+  exportUserProgressFile(userKey = null) {
+    try {
+      const payload = this.buildUserProgressExportPayload(userKey);
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const dateTag = new Date().toISOString().split("T")[0];
+      a.href = url;
+      a.download = `gradomania-progreso-${dateTag}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 0);
+      return true;
+    } catch (e) {
+      console.error("[StorageService] Error exportando avance:", e);
+      return false;
+    }
+  },
+
+  // Fusiona un respaldo JSON de avance aportado por el usuario (unión aditiva + LWW por cédula).
+  // Valida estrictamente la estructura: type "user-progress-backup", masteredTopicIds array de strings,
+  // masteredTimestamps números, quizzes objetos; nunca renderiza el contenido en el DOM (solo merge de datos).
+  // Únicamente toca userProgress[key] del usuario activo. Retorna { ok, imported, quizzesImported } | { ok:false, error }.
+  mergeUserProgressFromJsonString(jsonString) {
+    try {
+      const parsed = JSON.parse(jsonString);
+      if (!parsed || parsed.type !== "user-progress-backup") {
+        return { ok: false, error: "El archivo no es un respaldo de avance válido de GRADOMANIACOS." };
+      }
+      const payload = parsed.progress;
+      if (!payload || typeof payload !== "object") {
+        return { ok: false, error: "El respaldo no contiene datos de progreso." };
+      }
+
+      // Validación estricta de estructura
+      const incomingIds = Array.isArray(payload.masteredTopicIds) ? payload.masteredTopicIds : null;
+      const incomingTimestamps = (payload.masteredTimestamps && typeof payload.masteredTimestamps === "object") ? payload.masteredTimestamps : null;
+      const incomingQuizzes = (payload.topicQuizzes && typeof payload.topicQuizzes === "object") ? payload.topicQuizzes : {};
+
+      if (!incomingIds || !incomingTimestamps) {
+        return { ok: false, error: "La estructura del respaldo es inválida (faltan masteredTopicIds o masteredTimestamps)." };
+      }
+      if (!incomingIds.every(id => typeof id === "string")) {
+        return { ok: false, error: "masteredTopicIds debe contener solo identificadores de texto." };
+      }
+      if (!Object.values(incomingTimestamps).every(v => typeof v === "number")) {
+        return { ok: false, error: "masteredTimestamps debe contener solo marcas de tiempo numéricas." };
+      }
+
+      const key = this.getActiveUserKey();
+      const data = this.getData();
+      if (!data.userProgress) data.userProgress = {};
+      if (!data.userProgress[key]) data.userProgress[key] = { masteredTopicIds: [], lastActivity: null, topicQuizzes: {}, masteredTimestamps: {} };
+      if (!data.userProgress[key].masteredTopicIds) data.userProgress[key].masteredTopicIds = [];
+      if (!data.userProgress[key].masteredTimestamps) data.userProgress[key].masteredTimestamps = {};
+      if (!data.userProgress[key].topicQuizzes) data.userProgress[key].topicQuizzes = {};
+
+      const local = data.userProgress[key];
+      let imported = 0;
+      let quizzesImported = 0;
+
+      // 1. Unión aditiva de masteredTopicIds aplicando LWW por cédula
+      incomingIds.forEach(topicId => {
+        const incomingTs = Number(incomingTimestamps[topicId] || 0);
+        const localTs = Number(local.masteredTimestamps[topicId] || 0);
+        const alreadyIncluded = local.masteredTopicIds.includes(topicId);
+
+        if (incomingTs > localTs) {
+          // El respaldo es más reciente para esta cédula
+          if (!alreadyIncluded) {
+            local.masteredTopicIds.push(topicId);
+            imported++;
+          }
+          local.masteredTimestamps[topicId] = incomingTs;
+        } else if (incomingTs === localTs && !alreadyIncluded) {
+          // Mismo timestamp y ausente localmente: unión aditiva sin perder nada
+          local.masteredTopicIds.push(topicId);
+          local.masteredTimestamps[topicId] = incomingTs || Date.now();
+          imported++;
+        }
+      });
+
+      // 2. Timestamps presentes en el respaldo para cédulas NO listadas como dominadas
+      //    (desmarcadas con LWW: si el respaldo es más reciente, aplicar desmarcado)
+      Object.keys(incomingTimestamps).forEach(topicId => {
+        if (incomingIds.includes(topicId)) return;
+        const incomingTs = Number(incomingTimestamps[topicId] || 0);
+        const localTs = Number(local.masteredTimestamps[topicId] || 0);
+        const idx = local.masteredTopicIds.indexOf(topicId);
+        if (incomingTs > localTs && idx >= 0) {
+          local.masteredTopicIds.splice(idx, 1);
+          local.masteredTimestamps[topicId] = incomingTs;
+          imported++;
+        }
+      });
+
+      // 3. Quizzes: solo se importan los que el usuario local NO tenga ya (nunca sobrescribir local)
+      Object.keys(incomingQuizzes).forEach(topicId => {
+        const q = incomingQuizzes[topicId];
+        if (!q || typeof q !== "object") return;
+        if (local.topicQuizzes[topicId]) return; // el local prevalece
+        local.topicQuizzes[topicId] = q;
+        quizzesImported++;
+      });
+
+      if (imported > 0 || quizzesImported > 0) {
+        data.userProgress[key].lastActivity = new Date().toISOString();
+        this.saveData(data);
+      }
+
+      return { ok: true, imported, quizzesImported };
+    } catch (e) {
+      console.warn("[StorageService] Respaldo de avance inválido:", e);
+      return { ok: false, error: "El archivo no es un JSON de respaldo válido." };
     }
   },
 

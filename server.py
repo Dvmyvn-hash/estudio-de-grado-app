@@ -1107,6 +1107,16 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json_response({"ok": True, "progress": progress})
             return
 
+        # API 7.1: Obtener dominio de cédulas (topic mastery) sincronizado del usuario autenticado
+        if clean_path == "/api/user/topic-mastery":
+            user = self.get_authenticated_user()
+            if not user:
+                self.send_json_response({"ok": False, "error": "No autenticado"}, status_code=401)
+                return
+            mastery = db.get_user_topic_mastery(user["id"], db_path=DB_PATH)
+            self.send_json_response({"ok": True, "mastery": mastery})
+            return
+
         # API 8: Listar Códigos de Acceso (Admin)
         if clean_path == "/api/admin/codes":
             admin_pin = self.headers.get("X-Admin-PIN", "").strip()
@@ -1567,6 +1577,83 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
 
             ok, updated_at = db.upsert_user_progress(user["id"], case_id, data)
             self.send_json_response({"ok": True, "caseId": case_id, "updatedAt": updated_at})
+            return
+
+        # API: Guardar / Actualizar Dominio de Cédulas (Topic Mastery Multi-dispositivo)
+        if clean_path == "/api/user/topic-mastery":
+            user = self.get_authenticated_user()
+            if not user:
+                self.send_json_response({"ok": False, "error": "No autenticado"}, status_code=401)
+                return
+
+            body = self.rfile.read(content_length).decode("utf-8", errors="replace")
+            try:
+                req_data = json.loads(body)
+            except Exception:
+                self.send_json_response({"ok": False, "error": "Cuerpo JSON inválido"}, status_code=400)
+                return
+
+            if not isinstance(req_data, dict):
+                self.send_json_response({"ok": False, "error": "El cuerpo debe ser un objeto JSON"}, status_code=400)
+                return
+
+            topic_regex = re.compile(r"^[a-z0-9_\-]{1,64}$")
+
+            # Forma 1: Bulk ({ "changes": [ {topicId, mastered, ts}, ... ] })
+            if "changes" in req_data:
+                changes = req_data.get("changes")
+                if not isinstance(changes, list):
+                    self.send_json_response({"ok": False, "error": "El campo 'changes' debe ser un array"}, status_code=400)
+                    return
+                if len(changes) > 500:
+                    self.send_json_response({"ok": False, "error": "Lote excede el máximo permitido de 500 cédulas"}, status_code=400)
+                    return
+                now_ms = int(time.time() * 1000)
+                valid_changes = []
+                for item in changes:
+                    if not isinstance(item, dict):
+                        self.send_json_response({"ok": False, "error": "Cada elemento de 'changes' debe ser un objeto"}, status_code=400)
+                        return
+                    tid = str(item.get("topicId", "")).strip()
+                    mastered = item.get("mastered")
+                    ts = item.get("ts")
+                    if not tid or not topic_regex.match(tid):
+                        self.send_json_response({"ok": False, "error": f"topicId inválido: '{tid}'"}, status_code=400)
+                        return
+                    if not isinstance(mastered, bool):
+                        self.send_json_response({"ok": False, "error": "El campo 'mastered' debe ser booleano estricto"}, status_code=400)
+                        return
+                    if ts is not None:
+                        if not isinstance(ts, int) or isinstance(ts, bool) or ts <= 0:
+                            self.send_json_response({"ok": False, "error": "El campo 'ts' debe ser un entero positivo"}, status_code=400)
+                            return
+                    else:
+                        ts = now_ms
+                    valid_changes.append({"topicId": tid, "mastered": mastered, "ts": ts})
+
+                affected, _ = db.upsert_many_user_topic_mastery(user["id"], valid_changes, now_ms=now_ms, db_path=DB_PATH)
+                self.send_json_response({"ok": True, "upserted": affected, "updatedAt": now_ms})
+                return
+
+            # Forma 2: Single ({ "topicId": "...", "mastered": true, "ts": 1774... })
+            tid = str(req_data.get("topicId", "")).strip()
+            mastered = req_data.get("mastered")
+            ts = req_data.get("ts")
+            if not tid or not topic_regex.match(tid):
+                self.send_json_response({"ok": False, "error": "Identificador de cédula 'topicId' inválido"}, status_code=400)
+                return
+            if not isinstance(mastered, bool):
+                self.send_json_response({"ok": False, "error": "El campo 'mastered' debe ser booleano estricto"}, status_code=400)
+                return
+            if ts is not None:
+                if not isinstance(ts, int) or isinstance(ts, bool) or ts <= 0:
+                    self.send_json_response({"ok": False, "error": "El campo 'ts' debe ser un entero positivo"}, status_code=400)
+                    return
+            else:
+                ts = int(time.time() * 1000)
+
+            ok, updated_at = db.upsert_user_topic_mastery(user["id"], tid, mastered, updated_at=ts, db_path=DB_PATH)
+            self.send_json_response({"ok": True, "topicId": tid, "mastered": mastered, "updatedAt": updated_at})
             return
 
         # API 3: Configurar carpeta externa (ej: Google Drive o carpeta de apuntes)

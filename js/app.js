@@ -191,6 +191,7 @@ const App = {
     this.setupSidebar();
     this.setupGlobalSearch();
     this.setupImportModal();
+    this.setupProgressBackup();
     this.setupKeyboardShortcuts();
 
     // Sincronizar fuentes doctrinales y apuntes oficiales en el agente generador de casos
@@ -214,6 +215,8 @@ const App = {
         if (typeof this.updateUnlockModalState === "function") {
           this.updateUnlockModalState();
         }
+        // Al cambiar la sesión (login/logout) reconciliar el avance con el servidor de forma determinista
+        this.pullMasteryProgress();
       });
     }
 
@@ -251,6 +254,7 @@ const App = {
   isSyncing: false,
   syncErrorsCount: 0,
   syncIntervalId: null,
+  _isPullingMastery: false,
 
   startLiveSync() {
     const badge = document.getElementById("live-sync-badge");
@@ -312,6 +316,9 @@ const App = {
 
     check();
     this.syncIntervalId = setInterval(check, 3500);
+
+    // Arranque: sincronizar el avance de cédulas dominadas con el servidor (LWW por cédula, v7.12)
+    this.pullMasteryProgress();
   },
 
   async syncWithServer() {
@@ -402,6 +409,33 @@ const App = {
     } finally {
       this.isSyncing = false;
       if (badge) badge.classList.remove("syncing");
+
+      // Tras cada sincronización de contenidos, reconciliar avance de cédulas con el servidor
+      // (no bloqueante; LWW por cédula; guard de re-entrancia interno)
+      this.pullMasteryProgress();
+    }
+  },
+
+  // Sincroniza el avance de cédulas dominadas con el servidor (LWW por cédula).
+  // Solo refresca la UI y notifica si hubo cambios reales aplicados desde el servidor.
+  async pullMasteryProgress() {
+    if (this._isPullingMastery) return;
+    this._isPullingMastery = true;
+    try {
+      const res = await StorageService.pullMasteryFromServer();
+      if (res && res.changed) {
+        this.renderSidebar();
+        if (this.currentView === "topics") {
+          this.renderTopicViewer();
+        }
+        this.showToast("🔄 Progreso sincronizado con tus otros dispositivos", "success");
+      }
+      return res;
+    } catch (e) {
+      console.warn("Error sincronizando avance de cédulas:", e);
+      return { changed: false, reason: "client-error" };
+    } finally {
+      this._isPullingMastery = false;
     }
   },
 
@@ -549,6 +583,11 @@ const App = {
     if (this.currentView === "topics") {
       this.renderTopicViewer();
     } else if (this.currentView === "cases") {
+      if (typeof CaseGeneratorAgent !== "undefined" && (!CaseGeneratorAgent.APUNTES_INDEX || CaseGeneratorAgent.APUNTES_INDEX.length === 0)) {
+        if (typeof CaseGeneratorAgent.syncApuntesFromServer === "function") {
+          CaseGeneratorAgent.syncApuntesFromServer();
+        }
+      }
       const casesContainer = document.getElementById("view-cases");
       CaseSolver.init(casesContainer);
     } else if (this.currentView === "graph") {
@@ -900,6 +939,120 @@ const App = {
       ? topic.officialBreakdown.map(b => `<li class="official-bullet-item"><i data-lucide="check" class="bullet-icon"></i><span>${b}</span></li>`).join('')
       : `<li class="official-bullet-item"><span>Programa oficial DUN 11/2022 - Periodo 2026</span></li>`;
 
+    // Desarrollador de Preguntas de Grado (v7.11)
+    let quizHtml = '';
+    if (isUnlocked && typeof QuestionDeveloper !== 'undefined') {
+      const questions = QuestionDeveloper.getSectionQuestions(topic);
+      const quizState = StorageService.getTopicQuizState(topic.id) || {
+        correctCount: 0,
+        answers: [null, null, null, null],
+        questionResults: [false, false, false, false],
+        completed: false
+      };
+      const nature = QuestionDeveloper.detectNature(topic);
+      const tax = QuestionDeveloper.NATURE_TAXONOMY[nature] || QuestionDeveloper.NATURE_TAXONOMY.dogmatic;
+      const extractedCites = QuestionDeveloper.extractCitations(topic.content) || [];
+      const citesCount = extractedCites.length;
+      const correctCount = quizState.correctCount || 0;
+      const pct = Math.round((correctCount / 4) * 100);
+      const isCompleted = Boolean(quizState.completed);
+
+      const questionsHtml = questions.map((q, idx) => {
+        const isAnswered = Boolean(quizState.answers && quizState.answers[idx] !== null);
+        const chosenLetter = isAnswered ? quizState.answers[idx] : null;
+        const isCorrect = isAnswered ? (chosenLetter === q.correctAnswer) : false;
+
+        const optionsHtml = q.options.map(opt => {
+          let optClass = 'quiz-option';
+          if (isAnswered) {
+            if (opt.id === q.correctAnswer) optClass += ' correct';
+            else if (opt.id === chosenLetter) optClass += ' incorrect';
+            if (opt.id === chosenLetter) optClass += ' selected';
+          }
+          return `
+            <button type="button" class="${optClass}" data-q-index="${idx}" data-option="${opt.id}" ${isAnswered ? 'disabled' : ''}>
+              <span class="quiz-opt-letter">${opt.id.toUpperCase()}</span>
+              <span>${typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(opt.text) : opt.text}</span>
+            </button>
+          `;
+        }).join('');
+
+        const feedbackHtml = isAnswered ? `
+          <div class="quiz-answer-feedback ${isCorrect ? 'success' : 'warning'}">
+            <i data-lucide="${isCorrect ? 'check-circle' : 'alert-circle'}" style="width: 16px; height: 16px;"></i>
+            <span>${isCorrect ? '✓ ¡Respuesta Correcta!' : '✗ Opción Incorrecta'}</span>
+          </div>
+        ` : `<div class="quiz-answer-feedback hidden"></div>`;
+
+        const citesHtml = (q.sourceCitations && q.sourceCitations.length > 0) ? `
+          <div class="quiz-cites-wrap">
+            ${q.sourceCitations.map(c => `<span class="quiz-cite-pill"><i data-lucide="book-open" style="width: 11px; height: 11px; margin-right: 4px;"></i>${typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(c) : c}</span>`).join('')}
+          </div>
+        ` : '';
+
+        const solutionHtml = `
+          <div class="quiz-solution ${isAnswered ? '' : 'hidden'}">
+            <div class="quiz-solution-title"><i data-lucide="award" style="width: 13px; height: 13px; vertical-align: middle; margin-right: 4px;"></i>Solución Dogmática Oficial</div>
+            <div>${typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(q.solucionDogmatica) : q.solucionDogmatica}</div>
+            <div class="quiz-pauta-title"><i data-lucide="clipboard-check" style="width: 13px; height: 13px; vertical-align: middle; margin-right: 4px;"></i>Pauta de Corrección de la Comisión</div>
+            <div>${typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(q.pauta) : q.pauta}</div>
+            ${citesHtml}
+          </div>
+        `;
+
+        const qNatureTax = QuestionDeveloper.NATURE_TAXONOMY[q.nature] || tax;
+
+        return `
+          <div class="quiz-question-card" data-q-index="${idx}">
+            <div class="quiz-question-header">
+              <span class="quiz-q-num">Pregunta ${idx + 1} de 4</span>
+              <span class="quiz-q-nature-tag" style="border-left: 2px solid ${qNatureTax.color};">${qNatureTax.label}</span>
+            </div>
+            <div class="quiz-q-statement" data-quiz-question>${typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(q.questionText) : q.questionText}</div>
+            <div class="quiz-options-list">
+              ${optionsHtml}
+            </div>
+            ${feedbackHtml}
+            ${solutionHtml}
+          </div>
+        `;
+      }).join('');
+
+      quizHtml = `
+        <section id="section-quiz-developer">
+          <div class="quiz-dev-header">
+            <div class="quiz-dev-title-wrap">
+              <h2 class="quiz-dev-main-title">🎓 Verificación de Cédula — Desarrollador de Preguntas del Agente</h2>
+              <span id="quiz-nature-badge" style="background: ${tax.color}22; color: ${tax.color}; border-color: ${tax.color}44;">
+                <i data-lucide="sparkles" style="width: 12px; height: 12px;"></i> ${tax.label} (${citesCount} cita${citesCount === 1 ? '' : 's'} real${citesCount === 1 ? '' : 'es'})
+              </span>
+            </div>
+            <div class="quiz-progress-box">
+              <div class="quiz-progress-meta">
+                <span>Progreso</span>
+                <span id="quiz-progress-count">${correctCount}/4 verificadas</span>
+              </div>
+              <div class="quiz-progress-bar">
+                <div id="quiz-progress-fill" style="width: ${pct}%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="quiz-completed-banner" class="${isCompleted ? '' : 'hidden'}">
+            <i data-lucide="check-circle" style="width: 20px; height: 20px; flex-shrink: 0;"></i>
+            <div>
+              <strong>🎉 Cédula Completada por Verificación — 4/4 correctas</strong>
+              <div style="font-size: 0.82rem; opacity: 0.9;">Tu dominio de esta cédula ha sido acreditado y tu porcentaje de avance general se ha actualizado.</div>
+            </div>
+          </div>
+
+          <div class="quiz-questions-grid">
+            ${questionsHtml}
+          </div>
+        </section>
+      `;
+    }
+
     container.innerHTML = `
       <div class="topic-viewer-container">
         
@@ -1025,6 +1178,8 @@ const App = {
               </div>
             ` : ''}
 
+            ${quizHtml}
+
             <!-- TARJETA DE FINALIZACIÓN Y AVANCE DE ESTUDIO -->
             <div class="topic-completion-box" style="margin-top: 40px; padding: 24px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: space-between; gap: 20px;">
               <div>
@@ -1054,6 +1209,10 @@ const App = {
                 <div class="paywall-feature-item">
                   <i data-lucide="check-circle-2"></i>
                   <span>Acceso ilimitado a las 57 cédulas oficiales de Civil, Procesal y Constitucional.</span>
+                </div>
+                <div class="paywall-feature-item">
+                  <i data-lucide="check-circle-2"></i>
+                  <span>4 preguntas de verificación del agente por cédula con cierre automático.</span>
                 </div>
                 <div class="paywall-feature-item">
                   <i data-lucide="check-circle-2"></i>
@@ -1189,6 +1348,82 @@ const App = {
 
     container.querySelector('#btn-toggle-mastery')?.addEventListener('click', handleMasteryClick);
     container.querySelector('#btn-bottom-mastery')?.addEventListener('click', handleMasteryClick);
+
+    // Evento de interacción con el Desarrollador de Preguntas de Cédula (v7.11)
+    const quizContainer = container.querySelector('#section-quiz-developer');
+    if (quizContainer) {
+      quizContainer.addEventListener('click', (e) => {
+        const btn = e.target.closest('.quiz-option');
+        if (!btn || btn.disabled) return;
+
+        const qIndex = parseInt(btn.dataset.qIndex, 10);
+        const chosenLetter = btn.dataset.option;
+        const questions = typeof QuestionDeveloper !== 'undefined' ? QuestionDeveloper.getSectionQuestions(topic) : [];
+        const question = questions[qIndex];
+        if (!question) return;
+
+        const result = StorageService.recordTopicAnswer(topic.id, qIndex, chosenLetter, question.correctAnswer);
+
+        // Actualizar UI de la tarjeta en el DOM sin re-render completo para preservar el scroll
+        const card = btn.closest('.quiz-question-card');
+        if (card) {
+          const allOpts = card.querySelectorAll('.quiz-option');
+          allOpts.forEach(optBtn => {
+            optBtn.disabled = true;
+            const optLetter = optBtn.dataset.option;
+            if (optLetter === question.correctAnswer) {
+              optBtn.classList.add('correct');
+            } else if (optLetter === chosenLetter) {
+              optBtn.classList.add('incorrect');
+            }
+          });
+          btn.classList.add('selected');
+
+          // Feedback de la respuesta
+          const feedbackEl = card.querySelector('.quiz-answer-feedback');
+          if (feedbackEl) {
+            feedbackEl.className = `quiz-answer-feedback ${result.isCorrect ? 'success' : 'warning'}`;
+            feedbackEl.innerHTML = `<i data-lucide="${result.isCorrect ? 'check-circle' : 'alert-circle'}" style="width: 16px; height: 16px;"></i><span>${result.isCorrect ? '✓ ¡Respuesta Correcta!' : '✗ Opción Incorrecta'}</span>`;
+          }
+
+          // Solución dogmática oficial revelada
+          const solutionEl = card.querySelector('.quiz-solution');
+          if (solutionEl) {
+            solutionEl.classList.remove('hidden');
+          }
+        }
+
+        // Actualizar contador y barra de progreso
+        const fillEl = quizContainer.querySelector('#quiz-progress-fill');
+        const countEl = quizContainer.querySelector('#quiz-progress-count');
+        if (fillEl) fillEl.style.width = `${Math.round((result.correctCount / 4) * 100)}%`;
+        if (countEl) countEl.textContent = `${result.correctCount}/4 verificadas`;
+
+        if (window.lucide) window.lucide.createIcons();
+
+        // Si se completaron las 4/4 y se dominó la cédula
+        if (result.newlyMastered) {
+          const bannerEl = quizContainer.querySelector('#quiz-completed-banner');
+          if (bannerEl) bannerEl.classList.remove('hidden');
+
+          this.showToast("🎉 ¡Cédula completada por verificación (4/4)!", "success");
+          this.renderSidebar();
+
+          // Refrescar el estado y texto de los botones de mastery
+          const btnBottom = container.querySelector('#btn-bottom-mastery');
+          const btnTop = container.querySelector('#btn-toggle-mastery');
+          if (btnBottom) {
+            btnBottom.className = 'btn btn-secondary';
+            btnBottom.innerHTML = `<i data-lucide="rotate-ccw"></i><span>Marcar para Repasar</span>`;
+          }
+          if (btnTop) {
+            btnTop.className = 'btn btn-secondary btn-sm';
+            btnTop.innerHTML = `<i data-lucide="check-circle"></i><span>Dominado ✅</span>`;
+          }
+          if (window.lucide) window.lucide.createIcons();
+        }
+      });
+    }
 
     // Toggle y supresión del panel lateral de cruces dogmáticos
     const asidePanel = container.querySelector('#topic-aside-panel');
@@ -1568,6 +1803,65 @@ const App = {
 
     // Renderizar lista de fuentes directas disponibles
     this.renderSourcesList();
+  },
+
+  // Respaldo manual del avance de cédulas dominadas (Exportar/Importar JSON) para
+  // el puente multi-dispositivo en Modo Estático / GitHub Pages (v7.12).
+  setupProgressBackup() {
+    const btnExport = document.getElementById("btn-export-progress");
+    const btnImport = document.getElementById("btn-import-progress");
+    const inputImport = document.getElementById("input-import-progress");
+
+    if (btnExport) {
+      btnExport.addEventListener("click", () => {
+        const ok = StorageService.exportUserProgressFile();
+        this.showToast(ok ? "✅ Avance exportado como JSON (impórtalo en tu otro dispositivo)" : "⚠️ No se pudo exportar el avance", ok ? "success" : "warning");
+      });
+    }
+
+    if (btnImport && inputImport) {
+      btnImport.addEventListener("click", () => {
+        inputImport.click();
+      });
+
+      inputImport.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Límite de seguridad: 512 KB
+        if (file.size > 512 * 1024) {
+          this.showToast("⚠️ El archivo de respaldo supera 512 KB y fue rechazado.", "warning");
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const result = StorageService.mergeUserProgressFromJsonString(String(event.target.result || ""));
+            if (result && result.ok) {
+              this.renderSidebar();
+              if (this.currentView === "topics") {
+                this.renderTopicViewer();
+              }
+              this.showToast(`✅ Avance importado y fusionado (${result.imported} cédulas actualizadas)`, "success");
+              // Reconciliar con el servidor si hay sesión activa
+              this.pullMasteryProgress();
+            } else {
+              this.showToast(`⚠️ ${(result && result.error) || "El archivo no es un respaldo de avance válido."}`, "warning");
+            }
+          } catch (err) {
+            this.showToast("⚠️ No se pudo procesar el archivo de respaldo.", "warning");
+          } finally {
+            e.target.value = "";
+          }
+        };
+        reader.onerror = () => {
+          this.showToast("⚠️ No se pudo leer el archivo de respaldo.", "warning");
+          e.target.value = "";
+        };
+        reader.readAsText(file);
+      });
+    }
   },
 
   loadFileIntoForm(file) {

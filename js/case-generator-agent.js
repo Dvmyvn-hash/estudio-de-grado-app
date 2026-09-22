@@ -67,6 +67,11 @@ var CaseGeneratorAgent = {
     }
   },
 
+  corpusSeed: null, // Semilla canónica de fuentes (respaldo de FUENTES_CORPUS)
+  DYNAMIC_CORPUS: {}, // Corpus dinámico alimentado por auto-descubrimiento en tiempo real
+  corpusSources: null, // Listado ordenado de fuentes activas desde /api/fuentes
+  validCitationsIndex: null, // Set de citas pre-computadas O(1) [NORM:ART]
+
   async syncFuentesFromServer() {
     try {
       const res = await fetch("/api/fuentes");
@@ -74,19 +79,206 @@ var CaseGeneratorAgent = {
         const data = await res.json();
         if (data.ok && data.fuentes) {
           this.serverFuentes = data.fuentes;
+          this.corpusSources = data.fuentes
+            .map(f => (f.file || f.filename || "").replace(/^.*[\\\/]/, "").trim())
+            .filter(Boolean);
         }
       }
     } catch (e) {}
   },
 
+  /**
+   * Helper central de extracción de citas jurídicas en normativa chilena.
+   * Tolerante a formatos singulares, plurales y desglosados (ej. Arts. 686, 724 CC; Art. 19 N° 24 CPR).
+   */
+  extractCitations(text) {
+    if (!text || typeof text !== "string") return [];
+    const citationRegex = /\b(?:Arts?\.?|Artículos?)\s+([0-9]+(?:\s*(?:N[°oº]|número)\s*[0-9]+)?(?:\s*inc(?:\.|iso)?\s*[0-9]+)?(?:(?:\s*,\s*|\s+y\s+)[0-9]+(?:\s*(?:N[°oº]|número)\s*[0-9]+)?(?:\s*inc(?:\.|iso)?\s*[0-9]+)?)*)\s*(?:del\s+)?(CC|CPC|COT|CPR|Código\s+Civil|Código\s+de\s+Procedimiento\s+Civil|Código\s+Orgánico\s+de\s+Tribunales|Constitución(?:\s+Política)?)/gi;
+    const matches = [];
+    let match;
+    while ((match = citationRegex.exec(text)) !== null) {
+      const raw = match[0];
+      const articleStr = match[1].trim();
+      const codeStr = match[2].trim();
+
+      let normGroup = "CC";
+      const uCode = codeStr.toUpperCase();
+      if (uCode.includes("PROCEDIMIENTO") || uCode === "CPC") normGroup = "CPC";
+      else if (uCode.includes("ORGÁNICO") || uCode.includes("ORGANICO") || uCode === "COT") normGroup = "COT";
+      else if (uCode.includes("CONSTITUCIÓN") || uCode.includes("CONSTITUCION") || uCode === "CPR") normGroup = "CPR";
+
+      const artTokens = articleStr.split(/(?:,|\by\b)/i);
+      const artNums = [];
+      artTokens.forEach(tok => {
+        const m = tok.match(/(\d+)/);
+        if (m) {
+          const num = parseInt(m[1], 10);
+          if (!isNaN(num) && !artNums.includes(num)) {
+            artNums.push(num);
+          }
+        }
+      });
+
+      const firstArtMatch = articleStr.match(/^\s*(\d+)/);
+      const primaryArtNum = firstArtMatch ? parseInt(firstArtMatch[1], 10) : (artNums[0] || parseInt(articleStr.replace(/[^0-9]/g, ""), 10));
+
+      matches.push({
+        raw,
+        article: articleStr,
+        code: codeStr,
+        normGroup,
+        artNum: primaryArtNum,
+        artNums: artNums.length > 0 ? artNums : (isNaN(primaryArtNum) ? [] : [primaryArtNum])
+      });
+    }
+    return matches;
+  },
+
+  /**
+   * Deriva reglas normativas y síntesis dogmática a partir del contenido real de las cédulas de un archivo.
+   */
+  deriveRulesFromSections(sourceFile, cedulas) {
+    const cleanFile = (sourceFile || "").replace(/^.*[\\\/]/, "").trim();
+    if (!Array.isArray(cedulas) || cedulas.length === 0) {
+      return {
+        file: cleanFile,
+        title: cleanFile,
+        sections: [{ name: "General", rules: "", doctrine: "" }],
+        cedulas: []
+      };
+    }
+
+    const fullText = cedulas.map(c => [c.cleanTitle || c.title || "", c.content || ""].join(" ")).join(" ");
+    const citations = this.extractCitations(fullText);
+
+    const seenCits = new Set();
+    const uniqueRules = [];
+    citations.forEach(c => {
+      (c.artNums || [c.artNum]).forEach(num => {
+        const key = `${c.normGroup}:${num}`;
+        if (!seenCits.has(key)) {
+          seenCits.add(key);
+          uniqueRules.push(`Art. ${num} ${c.normGroup}`);
+        }
+      });
+    });
+
+    const firstCedula = cedulas[0];
+    const sectionName = firstCedula.cleanTitle || firstCedula.title || firstCedula.sectionName || "General";
+    const fileTitle = firstCedula.chapterTitle || firstCedula.category || cleanFile.replace(/\.md$/i, "");
+    
+    const doctrineSnippets = cedulas.map(c => (c.cleanTitle || c.title || "").trim()).filter(Boolean);
+    const doctrineSummary = doctrineSnippets.slice(0, 5).join(". ") + (doctrineSnippets.length > 0 ? "." : "");
+
+    return {
+      file: cleanFile,
+      title: fileTitle,
+      sections: [
+        {
+          name: sectionName,
+          rules: uniqueRules.join("; "),
+          doctrine: doctrineSummary
+        }
+      ],
+      cedulas: cedulas.map(c => ({
+        id: c.id,
+        code: c.code,
+        indexCode: c.indexCode,
+        title: c.cleanTitle || c.title || "",
+        subject: c.subject || ""
+      }))
+    };
+  },
+
+  /**
+   * Pre-computa el índice O(1) de citas jurídicas válidas en 3 capas:
+   * Capa 1: Corpus semilla canónico (FUENTES_CORPUS)
+   * Capa 2: Corpus dinámico (DYNAMIC_CORPUS derivado de contenidos reales)
+   * Capa 3: Whitelist canónico histórico (validNorms)
+   */
+  buildValidCitationsIndex() {
+    const index = new Set();
+
+    // Capa 3: Whitelist canónico histórico (validNorms)
+    const validNorms = {
+      CC: [
+        44, 45, 580, 581, 670, 686, 688, 700, 714, 724, 728, 882, 889, 894, 895, 
+        1438, 1439, 1444, 1445, 1446, 1447, 1448, 1449, 1450, 1451, 1452, 1453, 1454, 1455, 1456, 1457, 1458, 1459, 1460, 1461, 1462, 1463, 1464, 1465, 1466, 1467, 1468, 1469, 1470,
+        1489, 1490, 1491, 1535, 1537, 1544, 1545, 1546, 1547, 1550, 1551, 1552, 1553, 1554, 1555, 1557, 
+        1681, 1682, 1683, 1684, 1687, 1689, 1691, 1693, 1700, 1702, 1713, 1793, 1815, 1817, 1824, 1826, 1828, 1873, 1877, 1878, 1879, 1888, 1889, 1890, 1891, 1915, 
+        2116, 2118, 2129, 2158, 2163, 2174, 2196, 2314, 2317, 2320, 2329, 2330, 2446, 2460, 2465, 2468, 2505, 2510, 2511
+      ],
+      CPC: [
+        6, 7, 17, 38, 40, 41, 44, 48, 50, 54, 55, 59, 60, 61, 64, 65, 66, 79, 80, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 
+        113, 114, 119, 125, 148, 149, 150, 151, 152, 153, 154, 155, 158, 170, 174, 175, 176, 177, 181, 182, 186, 187, 189, 194, 
+        254, 262, 263, 279, 280, 289, 290, 291, 292, 293, 294, 295, 296, 297, 298, 299, 300, 301, 302, 303, 304, 305, 309, 310, 327, 432, 434, 464, 530, 532, 533, 709, 766, 767, 768, 775, 795, 810
+      ],
+      COT: [
+        1, 76, 108, 109, 110, 111, 112, 113, 114, 115, 130, 134, 138, 178, 181, 182, 187, 195, 196, 199, 227, 528, 529
+      ],
+      CPR: [
+        1, 5, 6, 7, 19, 20, 21, 76, 93
+      ]
+    };
+    for (const [norm, arts] of Object.entries(validNorms)) {
+      arts.forEach(a => index.add(`${norm}:${a}`));
+    }
+
+    // Capa 1: Corpus semilla canónico (FUENTES_CORPUS)
+    const seedCorpus = this.corpusSeed || this.FUENTES_CORPUS || {};
+    for (const fileObj of Object.values(seedCorpus)) {
+      if (fileObj && Array.isArray(fileObj.sections)) {
+        fileObj.sections.forEach(sec => {
+          const pool = `${sec.rules || ""} ${sec.doctrine || ""}`;
+          const cits = this.extractCitations(pool);
+          cits.forEach(c => {
+            (c.artNums || [c.artNum]).forEach(num => {
+              if (num && !isNaN(num)) index.add(`${c.normGroup}:${num}`);
+            });
+          });
+        });
+      }
+    }
+
+    // Capa 2: Corpus dinámico (DYNAMIC_CORPUS) derivado del contenido real
+    if (this.DYNAMIC_CORPUS && typeof this.DYNAMIC_CORPUS === "object") {
+      for (const dynObj of Object.values(this.DYNAMIC_CORPUS)) {
+        if (dynObj && Array.isArray(dynObj.sections)) {
+          dynObj.sections.forEach(sec => {
+            const pool = `${sec.rules || ""} ${sec.doctrine || ""}`;
+            const cits = this.extractCitations(pool);
+            cits.forEach(c => {
+              (c.artNums || [c.artNum]).forEach(num => {
+                if (num && !isNaN(num)) index.add(`${c.normGroup}:${num}`);
+              });
+            });
+          });
+        }
+      }
+    }
+
+    this.validCitationsIndex = index;
+    return this.validCitationsIndex;
+  },
+
+  /**
+   * Resuelve la referencia de fuente vinculada con prioridad viva:
+   * 1. Coincidencia directa en corpus semilla (FUENTES_CORPUS).
+   * 2. Coincidencia insensible a mayúsculas/stem en semilla.
+   * 3. Coincidencia contra DYNAMIC_CORPUS (rules derivadas del contenido real).
+   * 4. Coincidencia contra serverFuentes.
+   * 5. Warning defensivo y retorno seguro de null.
+   */
   resolveLinkedFuente(fuenteRef) {
     if (!fuenteRef) return null;
     const file = typeof fuenteRef === "string" ? fuenteRef : (fuenteRef.file || "");
     if (!file) return null;
 
     const cleanFile = file.replace(/^.*[\\\/]/, "").trim();
-    // 1. Coincidencia directa en FUENTES_CORPUS canónico
-    if (this.FUENTES_CORPUS[cleanFile]) {
+    const seedCorpus = this.corpusSeed || this.FUENTES_CORPUS || {};
+
+    // 1. Coincidencia directa en FUENTES_CORPUS canónico (semilla)
+    if (seedCorpus[cleanFile]) {
       return {
         file: cleanFile,
         section: fuenteRef.section || "",
@@ -94,9 +286,9 @@ var CaseGeneratorAgent = {
       };
     }
 
-    // 2. Coincidencia best-effort insensible a mayúsculas y extensiones (.md)
+    // 2. Coincidencia best-effort insensible a mayúsculas y extensiones (.md) en semilla
     const targetStem = cleanFile.toLowerCase().replace(/\.md$/i, "").trim();
-    for (const [key, val] of Object.entries(this.FUENTES_CORPUS)) {
+    for (const [key, val] of Object.entries(seedCorpus)) {
       const keyStem = key.toLowerCase().replace(/\.md$/i, "").trim();
       if (keyStem === targetStem || key.toLowerCase() === cleanFile.toLowerCase()) {
         return {
@@ -107,7 +299,29 @@ var CaseGeneratorAgent = {
       }
     }
 
-    // 3. Coincidencia contra fuentes descubiertas en el servidor si están cargadas
+    // 3. Coincidencia contra DYNAMIC_CORPUS (archivos auto-descubiertos con rules derivadas en vivo)
+    if (this.DYNAMIC_CORPUS && typeof this.DYNAMIC_CORPUS === "object") {
+      let dynMatch = this.DYNAMIC_CORPUS[cleanFile];
+      if (!dynMatch) {
+        for (const [key, val] of Object.entries(this.DYNAMIC_CORPUS)) {
+          const kStem = key.toLowerCase().replace(/\.md$/i, "").trim();
+          if (kStem === targetStem || key.toLowerCase() === cleanFile.toLowerCase()) {
+            dynMatch = val;
+            break;
+          }
+        }
+      }
+      if (dynMatch) {
+        const sec = (dynMatch.sections && dynMatch.sections[0]) ? dynMatch.sections[0] : null;
+        return {
+          file: dynMatch.file || cleanFile,
+          section: fuenteRef.section || (sec ? sec.name : "") || dynMatch.title || "",
+          rules: (sec && sec.rules) ? sec.rules : (fuenteRef.rules || "")
+        };
+      }
+    }
+
+    // 4. Coincidencia contra fuentes descubiertas en el servidor si están cargadas
     if (this.serverFuentes && Array.isArray(this.serverFuentes)) {
       const serverMatch = this.serverFuentes.find(f => {
         const fname = (f.file || f.filename || "").replace(/^.*[\\\/]/, "").toLowerCase();
@@ -122,7 +336,7 @@ var CaseGeneratorAgent = {
       }
     }
 
-    // 4. Tolerancia defensiva para archivos desconocidos: omitir vínculo con warning sin romper nutrición
+    // 5. Tolerancia defensiva para archivos desconocidos: omitir vínculo con warning sin romper nutrición
     if (typeof console !== "undefined" && console.warn) {
       console.warn(`[CaseGeneratorAgent] Fuente desconocida omitida de la nutrición: '${cleanFile}'`);
     }
@@ -133,16 +347,20 @@ var CaseGeneratorAgent = {
   APUNTES_INDEX: null,
 
   async syncApuntesFromServer() {
+    let synced = false;
     try {
       if (typeof window !== "undefined" && window.INITIAL_DATA && window.INITIAL_DATA.topics) {
         this.populateApuntesIndex(window.INITIAL_DATA.topics);
+        synced = true;
       }
       if (typeof fetch === "function") {
-        const res = await fetch("/api/sync-topics");
+        const url = (typeof window !== "undefined" && window.location) ? "/api/sync-topics" : (typeof baseUrl !== "undefined" ? `${baseUrl}/api/sync-topics` : "/api/sync-topics");
+        const res = await fetch(url);
         if (res.ok) {
           const data = await res.json();
           if (data && data.topics) {
             this.populateApuntesIndex(data.topics);
+            synced = true;
           }
         }
       }
@@ -150,7 +368,7 @@ var CaseGeneratorAgent = {
       // Fallback para entornos Node.js o sin conexión
     }
 
-    if (!this.APUNTES_INDEX && typeof require !== "undefined") {
+    if (!synced && typeof require !== "undefined") {
       try {
         const fs = require("fs");
         const path = require("path");
@@ -165,6 +383,7 @@ var CaseGeneratorAgent = {
             const list = Array.isArray(raw) ? raw : (raw.topics || []);
             if (list.length > 0) {
               this.populateApuntesIndex(list);
+              synced = true;
               break;
             }
           }
@@ -174,22 +393,51 @@ var CaseGeneratorAgent = {
     return this.APUNTES_INDEX;
   },
 
+  /**
+   * Puebla el índice de apuntes y construye el corpus dinámico en memoria derivando reglas de cada fuente.
+   */
   populateApuntesIndex(topicsList) {
     if (!Array.isArray(topicsList)) return;
     const map = new Map();
+    const bySourceFile = new Map();
+
     topicsList.forEach(t => {
       if (t && t.id) {
-        map.set(t.id, {
+        const cleanFile = t.sourceFile ? t.sourceFile.replace(/^.*[\\\/]/, '').trim() : "";
+        const entry = {
           id: t.id,
+          code: t.code || t.indexCode || "",
           indexCode: t.indexCode || t.code || "",
           title: t.cleanTitle || t.title || "",
           subject: t.subject || "",
-          sourceFile: t.sourceFile ? t.sourceFile.replace(/^.*[\\\/]/, '') : ""
-        });
+          chapterNumber: t.chapterNumber || 1,
+          chapterTitle: t.chapterTitle || "",
+          category: t.category || "",
+          sourceFile: cleanFile,
+          content: typeof t.content === "string" ? t.content.slice(0, 4000) : ""
+        };
+        map.set(t.id, entry);
+
+        if (cleanFile) {
+          if (!bySourceFile.has(cleanFile)) {
+            bySourceFile.set(cleanFile, []);
+          }
+          bySourceFile.get(cleanFile).push(entry);
+        }
       }
     });
+
     this.APUNTES_INDEX = Array.from(map.values());
     this.TOPICS_INDEX = this.APUNTES_INDEX;
+
+    // Construir / aumentar DYNAMIC_CORPUS con las cédulas reales por archivo
+    this.DYNAMIC_CORPUS = {};
+    for (const [sourceFile, fileCedulas] of bySourceFile.entries()) {
+      this.DYNAMIC_CORPUS[sourceFile] = this.deriveRulesFromSections(sourceFile, fileCedulas);
+    }
+
+    // Reconstruir el índice O(1) de citas válidas integrando semilla, dinámico y whitelist
+    this.buildValidCitationsIndex();
   },
 
   invalidateApuntes() {
@@ -198,28 +446,56 @@ var CaseGeneratorAgent = {
     return this.syncApuntesFromServer();
   },
 
+  /**
+   * Resuelve cédulas vinculadas para un arquetipo por ID primario o clave secundaria (subject, indexCode|code).
+   */
   getLinkedApuntesForArchetype(arch) {
     if (!this.APUNTES_INDEX) {
       this.syncApuntesFromServer();
     }
-    const indexMap = new Map((this.APUNTES_INDEX || []).map(a => [a.id, a]));
+    const indexList = this.APUNTES_INDEX || [];
+    const indexMap = new Map(indexList.map(a => [a.id, a]));
+    
+    // Mapeo secundario tolerante por (subject, indexCode) y (subject, code)
+    const secondaryMap = new Map();
+    indexList.forEach(a => {
+      const subj = (a.subject || "civil").toLowerCase();
+      if (a.indexCode) secondaryMap.set(`${subj}:${a.indexCode}`, a);
+      if (a.code) secondaryMap.set(`${subj}:${a.code}`, a);
+    });
+
+    const archSubject = (arch.subjects && arch.subjects[0]) ? arch.subjects[0].toLowerCase() : "civil";
     const linked = [];
+
     (arch.linkedTopics || []).forEach(lt => {
-      const match = indexMap.get(lt.id);
+      // 1. Búsqueda por ID exacto
+      let match = indexMap.get(lt.id);
+
+      // 2. Búsqueda por clave secundaria (subject, indexCode) o (subject, code)
+      if (!match) {
+        const ltSubj = (lt.subject || archSubject).toLowerCase();
+        const codeKey1 = `${ltSubj}:${lt.indexCode || lt.code || ""}`;
+        const codeKey2 = `${ltSubj}:${lt.code || lt.indexCode || ""}`;
+        match = secondaryMap.get(codeKey1) || secondaryMap.get(codeKey2);
+      }
+
       if (match) {
         linked.push({
           id: match.id,
           indexCode: match.indexCode || lt.code || "",
           title: match.title || lt.title || "",
-          subject: match.subject || (arch.subjects ? arch.subjects[0] : "civil"),
+          subject: match.subject || archSubject,
           sourceFile: (match.sourceFile || "").replace(/^.*[\\\/]/, '')
         });
       } else {
+        if (typeof console !== "undefined" && console.warn) {
+          console.warn(`[CaseGeneratorAgent] Cédula no encontrada en índice temático: '${lt.id || lt.title}'`);
+        }
         linked.push({
           id: lt.id,
           indexCode: lt.code || lt.indexCode || "",
           title: lt.title || "",
-          subject: arch.subjects ? arch.subjects[0] : "civil",
+          subject: archSubject,
           sourceFile: ""
         });
       }
@@ -227,6 +503,9 @@ var CaseGeneratorAgent = {
     return linked;
   },
 
+  /**
+   * Validación corpus-driven de citas en 3 capas con resolución O(1) vía validCitationsIndex.
+   */
   assertCitationIntegrity(caseObj) {
     if (!caseObj) return { valid: false, errors: ["Caso nulo o indefinido"] };
     const textPool = [
@@ -243,51 +522,20 @@ var CaseGeneratorAgent = {
       ])
     ].join(" ");
 
-    const citationRegex = /\b(?:Arts?\.?|Artículos?)\s+([0-9]+(?:\s*N[°oº]\s*[0-9]+)?(?:\s*inc(?:\.|iso)?\s*[0-9]+)?)\s*(?:del\s+)?(CC|CPC|COT|CPR|Código Civil|Código de Procedimiento Civil|Código Orgánico de Tribunales|Constitución)/gi;
-    const matches = [];
-    let match;
-    while ((match = citationRegex.exec(textPool)) !== null) {
-      matches.push({
-        raw: match[0],
-        article: match[1].trim(),
-        code: match[2].trim()
-      });
-    }
+    const matches = this.extractCitations(textPool);
 
-    const validNorms = {
-      CC: [
-        44, 45, 580, 581, 670, 686, 688, 700, 714, 724, 728, 882, 889, 894, 895, 
-        1438, 1439, 1444, 1445, 1446, 1447, 1448, 1449, 1450, 1451, 1452, 1453, 1454, 1455, 1456, 1457, 1458, 1459, 1460, 1461, 1462, 1463, 1464, 1465, 1466, 1467, 1468, 1469, 1470,
-        1489, 1535, 1537, 1544, 1545, 1546, 1547, 1550, 1551, 1552, 1553, 1554, 1555, 1557, 
-        1681, 1682, 1683, 1684, 1687, 1689, 1691, 1693, 1700, 1702, 1713, 1793, 1815, 1817, 1824, 1826, 1828, 1873, 1877, 1878, 1879, 1888, 1889, 1890, 1891, 1915, 
-        2116, 2118, 2129, 2158, 2163, 2174, 2196, 2314, 2317, 2320, 2329, 2330, 2446, 2460, 2465, 2468, 2505, 2510, 2511
-      ],
-      CPC: [
-        6, 7, 17, 38, 40, 41, 44, 48, 50, 54, 55, 59, 60, 61, 64, 65, 66, 79, 80, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 
-        113, 114, 119, 125, 148, 149, 150, 151, 152, 153, 154, 155, 158, 170, 174, 175, 176, 177, 181, 182, 186, 187, 189, 194, 
-        254, 262, 263, 279, 280, 289, 290, 291, 292, 293, 294, 295, 296, 297, 298, 299, 300, 301, 302, 303, 304, 305, 309, 310, 327, 432, 434, 464, 530, 532, 533, 709, 766, 767, 768, 775, 795, 810
-      ],
-      COT: [
-        1, 76, 108, 109, 110, 111, 112, 113, 114, 115, 130, 134, 138, 178, 181, 182, 187, 195, 196, 199, 227, 528, 529
-      ],
-      CPR: [
-        1, 5, 6, 7, 19, 20, 21, 76, 93
-      ]
-    };
+    if (!this.validCitationsIndex) {
+      this.buildValidCitationsIndex();
+    }
 
     const errors = [];
     matches.forEach(c => {
-      let normGroup = "CC";
-      const uCode = c.code.toUpperCase();
-      if (uCode.includes("PROCEDIMIENTO") || uCode === "CPC") normGroup = "CPC";
-      else if (uCode.includes("ORGÁNICO") || uCode.includes("ORGANICO") || uCode === "COT") normGroup = "COT";
-      else if (uCode.includes("CONSTITUCIÓN") || uCode.includes("CONSTITUCION") || uCode === "CPR") normGroup = "CPR";
-      
-      const matchNum = c.article.match(/^\s*(\d+)/);
-      const artNum = matchNum ? parseInt(matchNum[1], 10) : parseInt(c.article.replace(/[^0-9]/g, ""), 10);
-      if (isNaN(artNum) || !validNorms[normGroup] || !validNorms[normGroup].includes(artNum)) {
-        errors.push(`Cita legal no verificada en fuentes oficiales: ${c.raw} (Art. ${artNum} en ${normGroup})`);
-      }
+      const artNumsToCheck = (c.artNums && c.artNums.length > 0) ? c.artNums : [c.artNum];
+      artNumsToCheck.forEach(num => {
+        if (isNaN(num) || !this.validCitationsIndex.has(`${c.normGroup}:${num}`)) {
+          errors.push(`Cita legal no verificada en fuentes oficiales: ${c.raw} (Art. ${num} en ${c.normGroup})`);
+        }
+      });
     });
 
     return {
@@ -366,6 +614,31 @@ var CaseGeneratorAgent = {
 
     if (!Array.isArray(caseObj.linkedTopics) || caseObj.linkedTopics.length === 0) {
       errors.push("El caso debe contener al menos una cédula vinculada en 'linkedTopics'");
+    } else if (this.APUNTES_INDEX && this.APUNTES_INDEX.length > 0) {
+      const knownIds = new Set(this.APUNTES_INDEX.map(a => a.id));
+      const knownCodes = new Set(this.APUNTES_INDEX.flatMap(a => [
+        `${(a.subject || 'civil').toLowerCase()}:${a.indexCode}`,
+        `${(a.subject || 'civil').toLowerCase()}:${a.code}`
+      ]));
+
+      caseObj.linkedTopics.forEach(lt => {
+        const subj = (lt.subject || (caseObj.subjects ? caseObj.subjects[0] : "civil")).toLowerCase();
+        const codeKey1 = `${subj}:${lt.indexCode || lt.code || ""}`;
+        const codeKey2 = `${subj}:${lt.code || lt.indexCode || ""}`;
+        if (!knownIds.has(lt.id) && !knownCodes.has(codeKey1) && !knownCodes.has(codeKey2)) {
+          errors.push(`linkedTopics: la cédula '${lt.id || lt.title}' no existe en el índice temático activo`);
+        }
+      });
+    } else {
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn("[CaseGeneratorAgent] APUNTES_INDEX vacío; omitiendo validación estricta de linkedTopics");
+      }
+    }
+
+    if (caseObj.linkedFuentes && caseObj.linkedFuentes.file) {
+      if (caseObj.linkedFuentes.file.includes("/") || caseObj.linkedFuentes.file.includes("\\")) {
+        errors.push(`linkedFuentes: file contiene separadores de directorio prohibidos ('${caseObj.linkedFuentes.file}')`);
+      }
     }
 
     if (!Array.isArray(caseObj.linkedApuntes)) {
