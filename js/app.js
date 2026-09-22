@@ -328,18 +328,32 @@ const App = {
         if (serverTopics.length > 0) {
           const localData = StorageService.getData();
           
-          // Fusionar temas manteniendo estados de 'mastered'
-          const existingMap = new Map((localData.topics || []).map(t => [t.id, t]));
-          serverTopics.forEach(st => {
-            const existing = existingMap.get(st.id);
-            if (existing) {
-              existingMap.set(st.id, { ...existing, ...st, mastered: existing.mastered });
-            } else {
-              existingMap.set(st.id, st);
+          // Indexar estados de 'mastered' del cliente (por id y por clave natural para soportar migraciones de ID)
+          const masteredIdSet = new Set();
+          const masteredKeySet = new Set();
+
+          (localData.topics || []).forEach(t => {
+            if (t.mastered || (StorageService.isTopicMasteredByUser && StorageService.isTopicMasteredByUser(t.id))) {
+              masteredIdSet.add(t.id);
+              masteredKeySet.add(`${t.subject}-${t.chapterNumber}-${t.code}`);
             }
           });
 
-          localData.topics = Array.from(existingMap.values());
+          // Deduplicar serverTopics por clave natural (subject, chapterNumber, code)
+          const dedupedServerTopicsMap = new Map();
+          serverTopics.forEach(st => {
+            const key = `${st.subject || 'civil'}-${st.chapterNumber || 1}-${st.code || '1.1'}`;
+            const isMastered = masteredIdSet.has(st.id) || masteredKeySet.has(key);
+            if (!dedupedServerTopicsMap.has(key)) {
+              dedupedServerTopicsMap.set(key, { ...st, mastered: isMastered });
+            } else {
+              const existing = dedupedServerTopicsMap.get(key);
+              dedupedServerTopicsMap.set(key, { ...st, mastered: existing.mastered || isMastered });
+            }
+          });
+
+          // Reemplazar localData.topics con el conjunto canónico del servidor (purgando tópicos huérfanos o duplicados)
+          localData.topics = Array.from(dedupedServerTopicsMap.values());
           StorageService.saveData(localData);
 
           // Invalidar y re-sincronizar apuntes en el agente generador de casos
@@ -580,11 +594,27 @@ const App = {
     }
   },
 
+  _isRenderingSidebar: false,
+
   renderSidebar() {
-    const data = StorageService.getData();
-    const topics = data.topics || [];
-    const container = document.getElementById("topics-tree-container");
-    if (!container) return;
+    if (this._isRenderingSidebar) return;
+    this._isRenderingSidebar = true;
+
+    try {
+      const data = StorageService.getData();
+      
+      // Deduplicación defensiva en capa de presentación (clave natural: subject, chapterNumber, code)
+      const dedupedTopicsMap = new Map();
+      (data.topics || []).forEach(t => {
+        const key = `${t.subject || 'civil'}-${t.chapterNumber || 1}-${t.code || '1.1'}`;
+        if (!dedupedTopicsMap.has(key)) {
+          dedupedTopicsMap.set(key, t);
+        }
+      });
+      const topics = Array.from(dedupedTopicsMap.values());
+
+      const container = document.getElementById("topics-tree-container");
+      if (!container) return;
 
     const isAdmin = LicenseService.isAdminMode();
 
@@ -756,7 +786,13 @@ const App = {
       });
     });
 
-    container.innerHTML = html;
+    if (typeof container.replaceChildren === "function") {
+      const tempWrapper = document.createElement("div");
+      tempWrapper.innerHTML = html;
+      container.replaceChildren(...tempWrapper.childNodes);
+    } else {
+      container.innerHTML = html;
+    }
 
     if (window.lucide) {
       window.lucide.createIcons();
@@ -787,6 +823,9 @@ const App = {
         header.parentElement.classList.toggle('open');
       });
     });
+    } finally {
+      this._isRenderingSidebar = false;
+    }
   },
 
   // 4. VISOR DE APUNTES (TOPIC VIEWER)

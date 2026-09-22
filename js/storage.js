@@ -25,16 +25,47 @@ const StorageService = {
         return freshData;
       } else {
         const parsed = JSON.parse(stored);
-        // Asegurar que las conexiones dogmáticas actualizadas se reflejen siempre
+        // Asegurar que las conexiones dogmáticas actualizadas se reflejen siempre y sanear tópicos
         if (INITIAL_DATA && INITIAL_DATA.topics && Array.isArray(parsed.topics)) {
           const initMap = new Map(INITIAL_DATA.topics.map(t => [t.id, t]));
-          parsed.topics = parsed.topics.map(t => {
-            const initTopic = initMap.get(t.id);
-            if (initTopic && initTopic.connections) {
-              return { ...t, connections: initTopic.connections };
+          const initKeyMap = new Map(INITIAL_DATA.topics.map(t => [`${t.subject}-${t.chapterNumber}-${t.code}`, t]));
+
+          const dedupedMap = new Map();
+          let needsSanitization = false;
+
+          parsed.topics.forEach(t => {
+            const canonical = initMap.get(t.id) || initKeyMap.get(`${t.subject}-${t.chapterNumber}-${t.code}`);
+            const resolvedId = canonical ? canonical.id : t.id;
+            const naturalKey = `${t.subject || 'civil'}-${t.chapterNumber || 1}-${t.code || '1.1'}`;
+
+            if (t.id !== resolvedId) {
+              needsSanitization = true;
             }
-            return t;
+
+            if (!dedupedMap.has(naturalKey)) {
+              if (canonical) {
+                dedupedMap.set(naturalKey, { ...canonical, mastered: Boolean(t.mastered) });
+              } else {
+                dedupedMap.set(naturalKey, t);
+              }
+            } else {
+              needsSanitization = true;
+              const existing = dedupedMap.get(naturalKey);
+              const isMastered = Boolean(existing.mastered || t.mastered);
+              if (canonical) {
+                dedupedMap.set(naturalKey, { ...canonical, mastered: isMastered });
+              } else {
+                existing.mastered = isMastered;
+              }
+            }
           });
+
+          parsed.topics = Array.from(dedupedMap.values());
+          if (needsSanitization) {
+            try {
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+            } catch (e) {}
+          }
         }
 
         // Confidencialidad de Modelos y Expiración Temporal: Solo conservar casos generados por IA no expirados

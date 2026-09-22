@@ -533,13 +533,16 @@ def get_all_synced_topics():
     Entrega todas las secciones reales de los apuntes desarrollados en vivo desde APUNTES y fuentes.
     """
     try:
-        from generate_clean_notes_data import extract_sections_from_file, build_files_config, update_data_js, assign_index_codes
+        from generate_clean_notes_data import extract_sections_from_file, build_files_config, update_data_js, assign_index_codes, deduplicate_sections
         configs = build_files_config()
         all_sections = []
         for cfg in configs:
             secs = extract_sections_from_file(cfg)
             all_sections.extend(secs)
         if all_sections:
+            # Deduplicar canónicamente por (disciplina, capítulo, código)
+            all_sections = deduplicate_sections(all_sections)
+
             # Cargar conexiones dogmáticas si existen
             conn_path = BASE_DIR / "dogmatic_connections.json"
             if conn_path.exists():
@@ -1373,8 +1376,14 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
             files_list = reg_data.get("files", [])
             now_ms = int(time.time() * 1000)
             found = False
+            target_fname = filename.strip().lower()
+
             for item in files_list:
-                if item.get("file") == filename:
+                item_fname = str(item.get("file") or "").strip().lower()
+                same_file = (item_fname == target_fname)
+                same_chapter = (str(item.get("subject")).lower() == subject.lower() and int(item.get("defaultChapterNum") or 0) == chapter_number)
+                if same_file or same_chapter:
+                    item["file"] = filename
                     item["subject"] = subject
                     item["discipline"] = discipline
                     item["defaultCategory"] = category

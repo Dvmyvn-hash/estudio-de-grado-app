@@ -116,27 +116,38 @@ DISCIPLINE_MAP = {
 }
 
 def build_files_config():
-    """Construye la lista de configuraciones de archivos fusionando la base fija con apuntes_registry.json."""
+    """Construye la lista de configuraciones de archivos fusionando la base fija con apuntes_registry.json.
+    Deduplica para que apuntes administrados (subidos por admin) prevalezcan sobre apuntes fijos."""
     import copy
     configs = copy.deepcopy(FILES_CONFIG)
-    existing_files = {c["file"]: c for c in configs}
+    existing_files = {c["file"].lower(): c for c in configs}
 
     if os.path.exists(REGISTRY_PATH):
         try:
             with open(REGISTRY_PATH, "r", encoding="utf-8") as f:
                 registry = json.load(f)
-            for entry in registry.get("files", []):
-                fname = entry.get("file")
+            
+            # Deduplicar entradas del registro si hubiesen duplicados por archivo o capítulo
+            raw_entries = registry.get("files", [])
+            seen_entries = {}
+            for entry in raw_entries:
+                fname = (entry.get("file") or "").strip()
                 if not fname:
                     continue
+                seen_entries[fname.lower()] = entry  # Última versión subida prevalece
+
+            for fname_key, entry in seen_entries.items():
+                fname = entry.get("file")
                 subj = entry.get("subject", "civil")
                 disc = entry.get("discipline") or DISCIPLINE_MAP.get(subj, "I. Derecho Civil")
                 cat = entry.get("defaultCategory") or entry.get("chapterTitle") or "General"
                 chap_num = int(entry.get("defaultChapterNum") or 1)
                 chap_title = entry.get("chapterTitle") or cat
 
-                if fname in existing_files:
-                    target = existing_files[fname]
+                # Coincidencia 1: Mismo nombre de archivo (case-insensitive)
+                if fname_key in existing_files:
+                    target = existing_files[fname_key]
+                    target["file"] = fname
                     target["subject"] = subj
                     target["discipline"] = disc
                     target["defaultCategory"] = cat
@@ -155,7 +166,7 @@ def build_files_config():
                         "source": entry.get("source", "admin-upload")
                     }
                     configs.append(new_cfg)
-                    existing_files[fname] = new_cfg
+                    existing_files[fname_key] = new_cfg
         except Exception as e:
             print("Error cargando apuntes_registry.json:", e)
 
@@ -308,7 +319,9 @@ def update_data_js(all_sections):
         graph_start = old_data.find("graph: {")
         if cases_start == -1 or graph_start == -1:
             return
-        cases_match = old_data[cases_start:graph_start].strip().rstrip(",")
+        cases_raw = old_data[cases_start:graph_start]
+        # Limpiar cualquier comentario acumulado de grafo al final de cases
+        cases_clean = re.sub(r'//\s*3\.\s*GRAFO.*$', '', cases_raw, flags=re.MULTILINE).strip().rstrip(",")
         graph_match = old_data[graph_start:old_data.rfind("};")].strip()
 
         new_data_js = f"""/**
@@ -322,7 +335,7 @@ const INITIAL_DATA = {{
   topics: {json.dumps(all_sections, ensure_ascii=False, indent=2)},
 
   // 2. TALLER DE CASOS PRÁCTICOS
-  {cases_match},
+  {cases_clean},
 
   // 3. GRAFO INTERACTIVO DE INSTITUCIONES
   {graph_match}
@@ -343,13 +356,79 @@ def parse_code_tuple(code_str):
         res.append(int(digits[0]) if digits else 0)
     return tuple(res)
 
+def deduplicate_sections(all_sections):
+    """
+    Deduplica las secciones por tupla canónica (subject, chapterNumber, code) o id.
+    Criterio de prevalencia:
+    1. Si una sección proviene de un apunte administrado (source == 'admin-upload' o archivo registrado),
+       prevalece sobre la sección fija preconfigurada.
+    2. En caso de igualdad de origen, prevalece la versión con mayor contenido (charCount) o la procesada más recientemente.
+    Preserva el orden relativo original.
+    """
+    if not all_sections:
+        return []
+
+    unique_sections = []
+    seen_map = {}  # (subject, chapterNumber, code) -> index in unique_sections
+    seen_ids = {}  # id -> index in unique_sections
+
+    fixed_filenames = {c["file"].lower() for c in FILES_CONFIG}
+
+    for sec in all_sections:
+        subj = sec.get("subject", "civil")
+        chap = sec.get("chapterNumber", 1)
+        code = sec.get("code", "1.1")
+        sec_id = sec.get("id")
+
+        primary_key = (subj, chap, code)
+
+        target_idx = None
+        if primary_key in seen_map:
+            target_idx = seen_map[primary_key]
+        elif sec_id and sec_id in seen_ids:
+            target_idx = seen_ids[sec_id]
+
+        if target_idx is None:
+            idx = len(unique_sections)
+            unique_sections.append(sec)
+            seen_map[primary_key] = idx
+            if sec_id:
+                seen_ids[sec_id] = idx
+        else:
+            existing = unique_sections[target_idx]
+            new_is_admin = (sec.get("source") == "admin-upload") or (sec.get("sourceFile", "").lower() not in fixed_filenames)
+            existing_is_admin = (existing.get("source") == "admin-upload") or (existing.get("sourceFile", "").lower() not in fixed_filenames)
+
+            should_replace = False
+            if new_is_admin and not existing_is_admin:
+                should_replace = True
+            elif new_is_admin == existing_is_admin:
+                new_len = sec.get("charCount") or len(sec.get("content", ""))
+                exist_len = existing.get("charCount") or len(existing.get("content", ""))
+                if new_len >= exist_len:
+                    should_replace = True
+
+            if should_replace:
+                if not sec.get("connections") and existing.get("connections"):
+                    sec["connections"] = existing["connections"]
+                unique_sections[target_idx] = sec
+                if sec_id:
+                    seen_ids[sec_id] = target_idx
+
+    return unique_sections
+
 def assign_index_codes(all_sections):
     """
     Asigna un indexCode canónico único y secuencial ('N.M') por disciplina a todas las secciones.
     N = 1 (Civil), 2 (Procesal), 3 (Constitucional).
     Ordena determinísticamente por (chapterNumber asc, parse_code_tuple(code) asc, original_index asc).
+    Deduplica primero para asegurar que ninguna sección se repita.
     Muta all_sections in-place y la retorna.
     """
+    deduped = deduplicate_sections(all_sections)
+    all_sections.clear()
+    all_sections.extend(deduped)
+
     discipline_prefixes = {
         "civil": 1,
         "procesal": 2,
