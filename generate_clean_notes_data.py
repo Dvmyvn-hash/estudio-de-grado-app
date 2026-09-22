@@ -105,6 +105,37 @@ FILES_CONFIG = [
             "2.5": ("Derechos Fundamentales en Específico (Art. 19 CPR)", 2),
             "2.6": ("Derechos Fundamentales en Específico (Art. 19 CPR)", 2)
         }
+    },
+    {
+        "file": "DERECHO_PROCESAL_LA_PRUEBA.md",
+        "subject": "procesal",
+        "discipline": "II. Derecho Procesal",
+        "defaultCategory": "La Prueba Procesal Civil",
+        "defaultChapterNum": 3,
+        "categoryMap": {
+            "1.1": ("Teoría General de la Prueba Procesal Civil", 3),
+            "1.2": ("Teoría General de la Prueba Procesal Civil", 3),
+            "1.3": ("Teoría General de la Prueba Procesal Civil", 3),
+            "1.4": ("Teoría General de la Prueba Procesal Civil", 3),
+            "2.1": ("Etapa Probatoria en el Juicio Ordinario de Mayor Cuantía", 4),
+            "2.2": ("Etapa Probatoria en el Juicio Ordinario de Mayor Cuantía", 4),
+            "2.3": ("Etapa Probatoria en el Juicio Ordinario de Mayor Cuantía", 4),
+            "2.4": ("Etapa Probatoria en el Juicio Ordinario de Mayor Cuantía", 4),
+            "3.1": ("Los Medios de Prueba en Particular (Art. 341 CPC)", 5),
+            "3.2": ("Los Medios de Prueba en Particular (Art. 341 CPC)", 5),
+            "3.3": ("Los Medios de Prueba en Particular (Art. 341 CPC)", 5),
+            "3.4": ("Los Medios de Prueba en Particular (Art. 341 CPC)", 5),
+            "3.5": ("Los Medios de Prueba en Particular (Art. 341 CPC)", 5),
+            "3.6": ("Los Medios de Prueba en Particular (Art. 341 CPC)", 5)
+        }
+    },
+    {
+        "file": "PROCE ORDINARIO DE MAYOR CUANTIA.md",
+        "subject": "procesal",
+        "discipline": "II. Derecho Procesal",
+        "defaultCategory": "Procedimiento Ordinario de Mayor Cuantía",
+        "defaultChapterNum": 6,
+        "categoryMap": {}
     }
 ]
 
