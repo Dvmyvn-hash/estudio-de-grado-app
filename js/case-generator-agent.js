@@ -21,15 +21,13 @@ var CaseGeneratorAgent = {
 
   // 0. CORPUS DOGMÁTICO DE FUENTES OFICIALES (fuentes/*.md) Y APUNTES (53 CÉDULAS)
   FUENTES_CORPUS: {
-    "civil.md": {
-      title: "Derecho Civil - Resumen de Cédulas de Examen de Grado",
+    "ACTO JURIDICO.md": {
+      title: "Derecho Civil - Teoría del Acto Jurídico (Apunte Canónico)",
       sections: [
-        { name: "Teoría del Acto Jurídico", rules: "Arts. 1444-1458, 1681-1691 CC", doctrine: "Requisitos de existencia y validez. Error esencial y sustancial. Fuerza grave y determinante. Dolo coetáneo y determinante (reticencia). Lesión enorme como vicio objetivo taxativo. Nulidad absoluta (orden público, 10 años) vs Nulidad relativa (4 años)." },
-        { name: "Teoría General de las Obligaciones", rules: "Arts. 1489, 1535, 1544, 1551, 1552 CC", doctrine: "Incumplimiento y condición resolutoria tácita. La mora purga la mora (exceptio non adimpleti contractus). Cláusula penal enorme y reducción legal al duplo del principal (Art. 1544 CC)." },
-        { name: "Responsabilidad Civil Extracontractual", rules: "Arts. 2314-2334 CC", doctrine: "Capacidad delictual, culpa y dolo, daño cierto, causalidad adecuada. Presunciones de culpa y responsabilidad solidaria de coautores (Art. 2317 CC)." }
+        { name: "Teoría del Acto Jurídico", rules: "Arts. 1444-1458, 1681-1691 CC", doctrine: "Requisitos de existencia y validez. Error esencial y sustancial. Fuerza grave y determinante. Dolo coetáneo y determinante (reticencia). Lesión enorme como vicio objetivo taxativo. Nulidad absoluta (orden público, 10 años) vs Nulidad relativa (4 años)." }
       ]
     },
-    "derecho_de_bienes.md": {
+    "LOS BIENES.md": {
       title: "Derecho Civil: Teoría de los Bienes y Derechos Reales",
       sections: [
         { name: "La Posesión y sus Elementos", rules: "Arts. 700, 714 CC", doctrine: "Corpus y animus. Posesión regular e irregular. Posesión viciosa. Mera tenencia que reconoce dominio ajeno." },
@@ -37,16 +35,23 @@ var CaseGeneratorAgent = {
         { name: "Protección del Dominio", rules: "Arts. 889, 895 CC", doctrine: "Acción reivindicatoria privativa del dueño no poseedor contra el poseedor no dueño." }
       ]
     },
-    "procesal.md": {
-      title: "Derecho Procesal - Resumen de Cédulas de Examen de Grado",
+    "LAS OBLIGACIONES.md": {
+      title: "Derecho Civil - Teoría General de las Obligaciones",
+      sections: [
+        { name: "Teoría General de las Obligaciones", rules: "Arts. 1489, 1535, 1544, 1551, 1552 CC", doctrine: "Incumplimiento y condición resolutoria tácita. La mora purga la mora (exceptio non adimpleti contractus). Cláusula penal enorme y reducción legal al duplo del principal (Art. 1544 CC)." },
+        { name: "Responsabilidad Civil Extracontractual", rules: "Arts. 2314-2334 CC", doctrine: "Capacidad delictual, culpa y dolo, daño cierto, causalidad adecuada. Presunciones de culpa y responsabilidad solidaria de coautores (Art. 2317 CC)." }
+      ]
+    },
+    "PROCESAL.md": {
+      title: "Derecho Procesal - Apunte Canónico",
       sections: [
         { name: "Jurisdicción y Competencia", rules: "Arts. 76 CPR, Arts. 1, 108-114, 134-187, 529 COT", doctrine: "Momentos jurisdiccionales. Reglas generales de competencia (radicación, grado, extensión, prevención, inexcusabilidad). Fuero general del demandado en acciones muebles. Perpetuidad del mandato judicial constituido a favor de abogados frente a la muerte del mandante (Art. 529 COT)." },
         { name: "Juicio Ordinario y Medidas Cautelares", rules: "Arts. 254, 279, 290, 298, 303, 309, 310 CPC", doctrine: "Período de discusión. Excepciones dilatorias y mixtas. Medidas prejudiciales y precautorias sujetas a proporcionalidad estricta y limitación a bienes necesarios (Art. 298 CPC)." },
         { name: "Recursos Procesales", rules: "Arts. 767, 768 CPC", doctrine: "Apelación ordinaria, casación en la forma (vicios in procedendo, ultra petita, falta de fundamentos) y casación en el fondo (errores in iudicando de derecho sustantivo)." }
       ]
     },
-    "constitucional.md": {
-      title: "Derecho Constitucional - Resumen de Cédulas de Examen de Grado",
+    "CONSTITUCIONAL.md": {
+      title: "Derecho Constitucional - Apunte Canónico",
       sections: [
         { name: "Bases de la Institucionalidad y Juridicidad", rules: "Arts. 1, 6, 7 CPR", doctrine: "Supremacía constitucional, vinculación directa, servicialidad del Estado y sanción de nulidad de derecho público." },
         { name: "Garantías Fundamentales", rules: "Art. 19 N° 1, 2, 3, 21, 24 CPR", doctrine: "Debido proceso, tribunal natural, orden público económico, derecho de propiedad y expropiación por daño patrimonial efectivamente causado." },
@@ -1411,7 +1416,7 @@ var CaseGeneratorAgent = {
         id: "bienes_posesion_doble_venta",
         subjects: ["civil"],
         targetInsts: ["civ_tradicion_posesion", "civ_reivindicatoria", "civ_mera_tenencia_arriendo"],
-        linkedFuentes: { file: "derecho_de_bienes.md", section: "La Posesión y Modos de Adquirir", rules: "Arts. 686, 700, 724, 728, 1817 CC" },
+        linkedFuentes: { file: "LOS BIENES.md", section: "La Posesión y Modos de Adquirir", rules: "Arts. 686, 700, 724, 728, 1817 CC" },
         linkedTopics: [
           { id: "civil-losbienes-1-3", code: "1.3", title: "El Modo de Adquirir Tradición (Arts. 670 y ss. CC)" },
           { id: "civil-losbienes-1-4", code: "1.4", title: "La Posesión y la Teoría de la Posesión Inscrita" },
@@ -1540,7 +1545,7 @@ var CaseGeneratorAgent = {
         id: "lesion_enorme_dolo_mandato",
         subjects: ["civil"],
         targetInsts: ["civ_lesion_enorme", "civ_dolo_vicio_consentimiento", "civ_mandato_civil"],
-        linkedFuentes: { file: "civil.md", section: "Teoría del Acto Jurídico - Vicios del Consentimiento", rules: "Arts. 1458, 1888, 1889, 2116, 2129 CC" },
+        linkedFuentes: { file: "ACTO JURIDICO.md", section: "Teoría del Acto Jurídico - Vicios del Consentimiento", rules: "Arts. 1458, 1888, 1889, 2116, 2129 CC" },
         linkedTopics: [
           { id: "civil-clase911-4-4", code: "4.4", title: "Rescisión por Lesión Enorme y Pactos Accesorios" },
           { id: "civil-actojuridi-1-4", code: "1.4", title: "Requisitos de Validez: Vicios del Consentimiento y Capacidad" },
@@ -1669,7 +1674,7 @@ var CaseGeneratorAgent = {
         id: "cautelares_radicacion_mandato",
         subjects: ["procesal"],
         targetInsts: ["proc_medidas_precautorias", "proc_competencia_accion_mueble", "proc_regla_radicacion", "proc_mandato_judicial_muerte", "proc_capacidad_ius_postulandi", "proc_excepcion_dilatoria_incompetencia"],
-        linkedFuentes: { file: "procesal.md", section: "Disposiciones Comunes y Juicio Ordinario", rules: "Arts. 580, 581 CC, Arts. 109, 138, 178, 529 COT, Arts. 279, 298 CPC" },
+        linkedFuentes: { file: "PROCESAL.md", section: "Disposiciones Comunes y Juicio Ordinario", rules: "Arts. 580, 581 CC, Arts. 109, 138, 178, 529 COT, Arts. 279, 298 CPC" },
         linkedTopics: [
           { id: "procesal-procesal-1-3", code: "1.3", title: "La Competencia Judicial y sus Reglas" },
           { id: "procesal-procesal-2-2", code: "2.2", title: "Comparecencia en Juicio (Patrocinio y Mandato)" },
@@ -1823,7 +1828,7 @@ var CaseGeneratorAgent = {
         id: "clausula_penal_ejecutivo",
         subjects: ["civil", "procesal"],
         targetInsts: ["civ_clausula_penal_enorme", "proc_juicio_ejecutivo_excepciones", "civ_resolucion_1489"],
-        linkedFuentes: { file: "civil.md", section: "Teoría General de las Obligaciones", rules: "Arts. 1535, 1537, 1544 CC, Art. 464 N° 7 CPC" },
+        linkedFuentes: { file: "LAS OBLIGACIONES.md", section: "Teoría General de las Obligaciones", rules: "Arts. 1535, 1537, 1544 CC, Art. 464 N° 7 CPC" },
         linkedTopics: [
           { id: "civil-lasobligac-1-6", code: "1.6", title: "El Incumplimiento Contractual y Responsabilidad" },
           { id: "civil-lasobligac-1-7", code: "1.7", title: "Factores de Imputabilidad, Mora, Cláusula Penal y Perjuicios" },
@@ -1962,7 +1967,7 @@ var CaseGeneratorAgent = {
         id: "responsabilidad_medica_chance",
         subjects: ["civil"],
         targetInsts: ["civ_resp_extracontractual", "civ_perdida_chance", "civ_cumulo_responsabilidades"],
-        linkedFuentes: { file: "civil.md", section: "Responsabilidad Civil Extracontractual", rules: "Arts. 2314, 2317, 2320 inc. 4, 2329 CC" },
+        linkedFuentes: { file: "CLASE_9_11.md", section: "Responsabilidad Civil Extracontractual", rules: "Arts. 2314, 2317, 2320 inc. 4, 2329 CC" },
         linkedTopics: [
           { id: "civil-clase911-1-1", code: "1.1", title: "Fundamentos y Principios de la Responsabilidad Extracontractual" },
           { id: "civil-clase911-1-3", code: "1.3", title: "Requisitos Constitutivos: Culpa, Causalidad y Daño" },
@@ -2118,7 +2123,7 @@ var CaseGeneratorAgent = {
         id: "transaccion_equivalente_excepcion",
         subjects: ["procesal", "civil"],
         targetInsts: ["proc_transaccion_metodos", "civ_resolucion_1489", "proc_capacidad_ius_postulandi"],
-        linkedFuentes: { file: "procesal.md", section: "Juicio Ordinario - Excepciones", rules: "Arts. 2446, 2460 CC, Arts. 304, 309, 310 CPC" },
+        linkedFuentes: { file: "PROCESAL.md", section: "Juicio Ordinario - Excepciones", rules: "Arts. 2446, 2460 CC, Arts. 304, 309, 310 CPC" },
         linkedTopics: [
           { id: "procesal-procesal-2-3", code: "2.3", title: "Actos Procesales y Cosa Juzgada" },
           { id: "civil-clase911-2-2", code: "2.2", title: "Contratos y Equivalentes Jurisdiccionales" }
@@ -2271,7 +2276,7 @@ var CaseGeneratorAgent = {
         id: "imparcialidad_prejuzgamiento_momentos",
         subjects: ["procesal"],
         targetInsts: ["proc_imparcialidad_prejuzgamiento", "proc_momentos_jurisdiccionales", "proc_prorroga_competencia"],
-        linkedFuentes: { file: "procesal.md", section: "Jurisdicción y Competencia", rules: "Art. 19 N° 3 CPR, Arts. 181, 182, 187 N° 2, 196 N° 10 COT" },
+        linkedFuentes: { file: "PROCESAL.md", section: "Jurisdicción y Competencia", rules: "Art. 19 N° 3 CPR, Arts. 181, 182, 187 N° 2, 196 N° 10 COT" },
         linkedTopics: [
           { id: "procesal-procesal-1-2", code: "1.2", title: "La Función Jurisdiccional: Imparcialidad y Bases Orgánicas" },
           { id: "procesal-procesal-1-3", code: "1.3", title: "Reglas Generales de Competencia y Prórroga" }
@@ -2424,7 +2429,7 @@ var CaseGeneratorAgent = {
         id: "resolucion_pacto_comisorio",
         subjects: ["civil"],
         targetInsts: ["civ_resolucion_1489", "civ_excepcion_1552", "civ_pacto_comisorio_calificado", "civ_culpa_mora_deudor"],
-        linkedFuentes: { file: "civil.md", section: "Efectos del Incumplimiento Sinalagmático", rules: "Arts. 1489, 1552, 1877, 1879 CC" },
+        linkedFuentes: { file: "LAS OBLIGACIONES.md", section: "Efectos del Incumplimiento Sinalagmático", rules: "Arts. 1489, 1552, 1877, 1879 CC" },
         linkedTopics: [
           { id: "civil-lasobligac-1-6", code: "1.6", title: "Incumplimiento Contractual y Condición Resolutoria" },
           { id: "civil-clase911-4-4", code: "4.4", title: "Pacto Comisorio Calificado en la Compraventa" }
@@ -2552,7 +2557,7 @@ var CaseGeneratorAgent = {
         id: "nulidad_absoluta_simulacion",
         subjects: ["civil"],
         targetInsts: ["civ_nulidad_absoluta", "civ_ratificacion_saneamiento_4anos", "civ_reivindicatoria"],
-        linkedFuentes: { file: "civil.md", section: "Requisitos de Validez y Sanciones de Ineficacia", rules: "Arts. 1467, 1682, 1683, 1689 CC" },
+        linkedFuentes: { file: "ACTO JURIDICO.md", section: "Requisitos de Validez y Sanciones de Ineficacia", rules: "Arts. 1467, 1682, 1683, 1689 CC" },
         linkedTopics: [
           { id: "civil-actojuridi-1-5", code: "1.5", title: "Objeto Lícito y Causa Lícita" },
           { id: "civil-actojuridi-1-6", code: "1.6", title: "Ineficacias del Acto Jurídico (Nulidad Absoluta)" }
@@ -2680,7 +2685,7 @@ var CaseGeneratorAgent = {
         id: "recurso_proteccion_autotutela",
         subjects: ["constitucional"],
         targetInsts: ["const_recurso_proteccion", "const_derechos_litigiosos_dudosos"],
-        linkedFuentes: { file: "constitucional.md", section: "Acciones Constitucionales - Recurso de Protección", rules: "Arts. 19 N° 24 y 20 CPR" },
+        linkedFuentes: { file: "CONSTITUCIONAL.md", section: "Acciones Constitucionales - Recurso de Protección", rules: "Arts. 19 N° 24 y 20 CPR" },
         linkedTopics: [
           { id: "constitucional-constituci-1-2", code: "1.2", title: "Acciones Cautelares de Tutela Directa (Protección)" },
           { id: "constitucional-constituci-2-5", code: "2.5", title: "Orden Público Económico y Propiedad" }
@@ -2808,7 +2813,7 @@ var CaseGeneratorAgent = {
         id: "responsabilidad_extracontractual_competencia_cautelar",
         subjects: ["civil", "procesal"],
         targetInsts: ["civ_resp_extracontractual", "proc_competencia_accion_mueble", "proc_medidas_precautorias", "proc_excepcion_dilatoria_incompetencia"],
-        linkedFuentes: { file: "procesal.md", section: "Jurisdicción y Medidas Precautorias", rules: "Arts. 138 COT, Arts. 290, 298, 303 N° 1 CPC, Arts. 2314, 2317 CC" },
+        linkedFuentes: { file: "PROCESAL.md", section: "Jurisdicción y Medidas Precautorias", rules: "Arts. 138 COT, Arts. 290, 298, 303 N° 1 CPC, Arts. 2314, 2317 CC" },
         linkedTopics: [
           { id: "civil-clase911-1-1", code: "1.1", title: "Responsabilidad Extracontractual y Elementos de la Acción" },
           { id: "procesal-procesal-1-3", code: "1.3", title: "Reglas Generales y Especiales de Competencia Territorial" },
@@ -2961,7 +2966,7 @@ var CaseGeneratorAgent = {
         id: "promesa_clausula_penal_ejecutivo_hacer",
         subjects: ["civil", "procesal"],
         targetInsts: ["civ_resolucion_1489", "civ_clausula_penal_enorme", "proc_juicio_ejecutivo_excepciones"],
-        linkedFuentes: { file: "civil.md", section: "Contrato de Promesa y Juicio Ejecutivo de Hacer", rules: "Art. 1554 CC, Arts. 1535, 1544 CC, Arts. 464, 532 CPC" },
+        linkedFuentes: { file: "CLASE_9_11.md", section: "Contrato de Promesa y Juicio Ejecutivo de Hacer", rules: "Art. 1554 CC, Arts. 1535, 1544 CC, Arts. 464, 532 CPC" },
         linkedTopics: [
           { id: "civil-clase911-4-1", code: "4.1", title: "Contrato de Promesa y Requisitos de Validez (Art. 1554 CC)" },
           { id: "civil-lasobligac-1-7", code: "1.7", title: "Cláusula Penal y Liquidación Convencional de Perjuicios" },
@@ -3090,7 +3095,7 @@ var CaseGeneratorAgent = {
         id: "constitucional_dominio_proteccion_apelacion",
         subjects: ["constitucional", "procesal", "civil"],
         targetInsts: ["const_recurso_proteccion", "civ_tradicion_posesion", "civ_reivindicatoria", "proc_recurso_apelacion"],
-        linkedFuentes: { file: "constitucional.md", section: "Acciones Constitucionales y Recursos Procesales", rules: "Arts. 19 N° 24, 20 CPR, Auto Acordado CS sobre Tramitación de Recurso de Protección, Arts. 186 y ss. CPC" },
+        linkedFuentes: { file: "CONSTITUCIONAL.md", section: "Acciones Constitucionales y Recursos Procesales", rules: "Arts. 19 N° 24, 20 CPR, Auto Acordado CS sobre Tramitación de Recurso de Protección, Arts. 186 y ss. CPC" },
         linkedTopics: [
           { id: "constitucional-constituci-1-2", code: "1.2", title: "Acciones Cautelares de Tutela Directa (Protección)" },
           { id: "civil-losbienes-1-6", code: "1.6", title: "Protección del Dominio Registral y de la Posesión" },

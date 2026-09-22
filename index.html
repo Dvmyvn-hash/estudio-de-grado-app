@@ -570,66 +570,6 @@
             </div>
           </div>
 
-          <!-- TARJETA: SUBIDA DE APUNTES Y SINCRONIZACIÓN AL INSTANTE -->
-          <div class="admin-notes-upload-card" style="margin-bottom: 24px; padding: 16px; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-md);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <i data-lucide="upload-cloud" style="color: var(--gold-primary); width: 20px; height: 20px;"></i>
-                <h4 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: var(--text-main);">Subir Apuntes y Sincronizar al Instante</h4>
-              </div>
-              <button type="button" id="btn-admin-open-advanced-notes" class="btn btn-ghost btn-sm" style="font-size: 0.75rem;" title="Abrir Gestor de Apuntes y NotebookLM">
-                <i data-lucide="external-link"></i>
-                <span>Abrir Gestor Avanzado</span>
-              </button>
-            </div>
-            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px;">
-              Sube archivos Markdown (.md, .markdown, .txt) con tus apuntes desarrollados. Se integrarán canónicamente en el servidor y se vincularán al índice temático de todos los clientes.
-            </p>
-
-            <!-- Zona Drag & Drop -->
-            <div id="drop-zone-admin-notes" class="drop-zone-box" style="padding: 20px 16px; margin-bottom: 14px; cursor: pointer;">
-              <i data-lucide="file-up" class="drop-zone-icon" style="width: 28px; height: 28px; margin-bottom: 6px;"></i>
-              <div>
-                <strong id="drop-zone-admin-label" style="font-size: 0.85rem;">Arrastra aquí tu apunte (.md, .markdown, .txt) o haz clic para seleccionarlo</strong>
-                <p class="text-muted" id="drop-zone-admin-sublabel" style="font-size: 0.75rem; margin-top: 2px;">Detecta automáticamente secciones (§ N.N) o genera una sección completa</p>
-              </div>
-              <input type="file" id="input-admin-notes-file" accept=".md,.markdown,.txt" class="visually-hidden">
-            </div>
-
-            <!-- Metadatos de la Cédula / Capítulo -->
-            <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 12px;">
-              <div class="form-group">
-                <label for="admin-notes-subject" style="font-size: 0.8rem;">Materia Oficial:</label>
-                <select id="admin-notes-subject" class="form-control" style="font-size: 0.85rem;">
-                  <option value="civil">I. Derecho Civil</option>
-                  <option value="procesal">II. Derecho Procesal</option>
-                  <option value="constitucional">III. Derecho Constitucional</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="admin-notes-chapter" style="font-size: 0.8rem;">Nº de Capítulo:</label>
-                <input type="number" id="admin-notes-chapter" class="form-control" min="1" max="20" value="1" style="font-size: 0.85rem;">
-              </div>
-              <div class="form-group">
-                <label for="admin-notes-chapter-title" style="font-size: 0.8rem;">Título del Capítulo:</label>
-                <input type="text" id="admin-notes-chapter-title" class="form-control" placeholder="Ej: Teoría de los Contratos" style="font-size: 0.85rem;">
-              </div>
-              <div class="form-group">
-                <label for="admin-notes-category" style="font-size: 0.8rem;">Módulo / Institución:</label>
-                <input type="text" id="admin-notes-category" class="form-control" placeholder="Ej: Contratos en Particular" style="font-size: 0.85rem;">
-              </div>
-            </div>
-
-            <!-- Botón de Envío y Contenedor de Resultado -->
-            <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
-              <div id="admin-notes-result" aria-live="polite" style="font-size: 0.8rem; flex-grow: 1;"></div>
-              <button id="btn-upload-admin-notes" class="btn btn-primary" style="height: 38px; font-size: 0.82rem;">
-                <i data-lucide="cloud-lightning"></i>
-                <span id="btn-upload-admin-text">Subir y Sincronizar</span>
-              </button>
-            </div>
-          </div>
-
           <div class="form-grid">
 
             <div class="form-group">

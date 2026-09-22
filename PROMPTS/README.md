@@ -14,17 +14,18 @@
 
 | # | Archivo | Descripción | Estado |
 | :-: | :--- | :--- | :--- |
-| 001 | `001_sync_apuntes_admin.md` | Subida de apuntes desde el Panel de Administrador con sincronización inmediata a la Sección de Apuntes e índice temático. | ✅ Implementado |
+| 001 | `001_sync_apuntes_admin.md` | Subida de apuntes desde el Panel de Administrador con sincronización inmediata a la Sección de Apuntes e índice temático. | ⚠️ Superseded por 007 (v7.8) — la subida por servidor fue eliminada; `fuentes/` es la base canónica |
 | 002 | `002_mejorar_agente_casos_complejidad_pauta.md` | Mejora integral del agente de creación de casos: complejidad lógica e interdisciplinaria, cobertura completa del temario, rúbrica AIME 2026-20 al 100 %, soluciones modelo sin vaguedad, apego estricto a las fuentes implementadas y **nutrición dinámica desde los apuntes cargados** (`/api/sync-topics`, `linkedApuntes`, refresco ≤ 3.5 s). | ✅ Implementado (v7.3) |
 | 003 | `003_indice_unificado_sin_duplicados_solo_apuntes.md` | Índice de Apuntes unificado: elimina códigos duplicados (`1.1`, `1.3`…) vía `indexCode` canónico por disciplina (`N.N`) sin tocar `code`/`id`, orden continuo y completo acorde a las secciones reales de los apuntes, y **gatea el índice solo a la vista Apuntes** (oculto/cerrado en Casos y Grafo; `#btn-toggle-sidebar` deshabilitado fuera de Apuntes). | ✅ Implementado (v7.2) |
 | 004 | `004_registro_persistente_codigos_acceso_operativo.md` | Registro persistente y operativo de códigos de acceso usados: disco durable en Render, tabla de auditoría `access_code_usages`, restauración del Pase Activo al ingresar desde cualquier plataforma y cliente que prioriza la verdad del servidor sobre el `localStorage`. | ✅ Implementado (v7.4) |
 | 005 | `005_header_movil_iconos_eliminar_modo_claro.md` | Header móvil solo-íconos (eliminación de superposición entre logotipo y candado, chip de usuario compacto con solo avatar y logout) y eliminación definitiva del selector de Modo Claro (Dark Academy único e inmutable en `:root`). | ✅ Implementado (v7.5) |
 | 006 | `006_diagnostico_port_timeout_render.md` | Diagnóstico e instrumentación en 5 fases del arranque en Render (resolución de 'Port scan timeout' tras 18m), desbufferizado unbuffered total (PYTHONUNBUFFERED=1, python -u server.py), robustecimiento de SQLite contra bloqueos de disco/WAL y gracia en daemon de purga. | ✅ Implementado (v7.6) |
+| 007 | `007_fuentes_canonicas_eliminar_subida_admin_regen_ci.md` | Eliminación definitiva de la subida de apuntes de administrador (endpoints → 404) tras el incidente que borró el índice; `fuentes/` como base canónica del temario (6 apuntes oficiales); parser determinista (53 tópicos, 34/9/10) y regeneración del índice en CI para que `git push` de `fuentes/*.md` actualice la página desplegada. | ✅ Implementado (v7.8) |
 
 ## Reglas transversales para cualquier prompt (las heredan todos)
 
-- `CONTEXT.md` es la única fuente canónica de verdad; todo cambio de código DEBE actualizarlo (Sección 9 → Bitácora v6.8+).
-- Las suites `node test_unlock_auth_flow.cjs` y `node test_e2e_case_flow.cjs` deben quedar al 100 % PASS tras la implementación.
+- `CONTEXT.md` es la única fuente canónica de verdad; todo cambio de código DEBE actualizarlo (Sección 9 → Bitácora de versiones).
+- Las suites `node test_unlock_auth_flow.cjs`, `node test_e2e_case_flow.cjs`, `node test_deduplication_flow.cjs` y `node test_mobile_header_theme.cjs` deben quedar al 100 % PASS tras la implementación.
 - Stack vanilla: Python `http.server`/`sqlite3` y JavaScript ES6 sin bundlers; no añadir dependencias nuevas sin justificación.
 - Sanitización en el origen (`SecurityShield.escapeHtml` / `textContent`), PIN admin vía SHA-256, anti path-traversal y límites de payload en `server.py`.
 - Nomenclatura jurídica chilena: materias `civil | procesal | constitucional`, "cédula", "capítulo", "sección N.N".

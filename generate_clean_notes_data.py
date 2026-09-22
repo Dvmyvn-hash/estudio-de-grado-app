@@ -108,7 +108,6 @@ FILES_CONFIG = [
     }
 ]
 
-REGISTRY_PATH = os.path.join(BASE_DIR, "apuntes_registry.json")
 DISCIPLINE_MAP = {
     "civil": "I. Derecho Civil",
     "procesal": "II. Derecho Procesal",
@@ -116,68 +115,21 @@ DISCIPLINE_MAP = {
 }
 
 def build_files_config():
-    """Construye la lista de configuraciones de archivos fusionando la base fija con apuntes_registry.json.
-    Deduplica para que apuntes administrados (subidos por admin) prevalezcan sobre apuntes fijos."""
+    """Construye la lista de configuraciones de archivos desde la base fija FILES_CONFIG.
+
+    La carpeta `fuentes/` del repositorio es la única fuente canónica de apuntes:
+    la configuración es 100% determinista (sin merging de apuntes_registry.json,
+    mecanismo eliminado en v7.8). Cualquier cambio se propaga vía git push."""
     import copy
-    configs = copy.deepcopy(FILES_CONFIG)
-    existing_files = {c["file"].lower(): c for c in configs}
-
-    if os.path.exists(REGISTRY_PATH):
-        try:
-            with open(REGISTRY_PATH, "r", encoding="utf-8") as f:
-                registry = json.load(f)
-            
-            # Deduplicar entradas del registro si hubiesen duplicados por archivo o capítulo
-            raw_entries = registry.get("files", [])
-            seen_entries = {}
-            for entry in raw_entries:
-                fname = (entry.get("file") or "").strip()
-                if not fname:
-                    continue
-                seen_entries[fname.lower()] = entry  # Última versión subida prevalece
-
-            for fname_key, entry in seen_entries.items():
-                fname = entry.get("file")
-                subj = entry.get("subject", "civil")
-                disc = entry.get("discipline") or DISCIPLINE_MAP.get(subj, "I. Derecho Civil")
-                cat = entry.get("defaultCategory") or entry.get("chapterTitle") or "General"
-                chap_num = int(entry.get("defaultChapterNum") or 1)
-                chap_title = entry.get("chapterTitle") or cat
-
-                # Coincidencia 1: Mismo nombre de archivo (case-insensitive)
-                if fname_key in existing_files:
-                    target = existing_files[fname_key]
-                    target["file"] = fname
-                    target["subject"] = subj
-                    target["discipline"] = disc
-                    target["defaultCategory"] = cat
-                    target["defaultChapterNum"] = chap_num
-                    target["chapterTitle"] = chap_title
-                    target["source"] = entry.get("source", "admin-upload")
-                else:
-                    new_cfg = {
-                        "file": fname,
-                        "subject": subj,
-                        "discipline": disc,
-                        "defaultCategory": cat,
-                        "defaultChapterNum": chap_num,
-                        "chapterTitle": chap_title,
-                        "categoryMap": entry.get("categoryMap") or {},
-                        "source": entry.get("source", "admin-upload")
-                    }
-                    configs.append(new_cfg)
-                    existing_files[fname_key] = new_cfg
-        except Exception as e:
-            print("Error cargando apuntes_registry.json:", e)
-
-    return configs
+    return copy.deepcopy(FILES_CONFIG)
 
 def extract_sections_from_file(cfg):
-    fpath = os.path.join(APUNTES_DIR, cfg["file"])
+    # Prioridad canónica: fuentes/ del repositorio (git-trackeable), luego Desktop/Fuentes_Grado/APUNTES.
+    fpath = os.path.join(BASE_DIR, "fuentes", cfg["file"])
     if not os.path.exists(fpath):
-        fpath = os.path.join(BASE_DIR, "fuentes", cfg["file"])
+        fpath = os.path.join(APUNTES_DIR, cfg["file"])
     if not os.path.exists(fpath):
-        print(f"ALERTA: Archivo no encontrado {cfg['file']} (buscado en APUNTES y fuentes)")
+        print(f"ALERTA: Archivo no encontrado {cfg['file']} (buscado en fuentes y APUNTES)")
         return []
 
     with open(fpath, "r", encoding="utf-8", errors="replace") as f:
@@ -234,7 +186,7 @@ def extract_sections_from_file(cfg):
 
         sec_id = f"{cfg['subject']}-{clean_stem}-{code.replace('.', '-')}"
         sec_content = text.strip()
-        is_free = False if cfg.get("source") == "admin-upload" else (code in ["1.1", "2.1"] and chap_num == 1)
+        is_free = (code in ["1.1", "2.1"] and chap_num == 1)
 
         return [{
             "id": sec_id,
@@ -282,7 +234,7 @@ def extract_sections_from_file(cfg):
             chap_num = cfg.get("defaultChapterNum", 1)
 
         sec_id = f"{cfg['subject']}-{clean_stem}-{code.replace('.', '-')}"
-        is_free = False if cfg.get("source") == "admin-upload" else (code in ["1.1", "2.1"] and chap_num == 1)
+        is_free = (code in ["1.1", "2.1"] and chap_num == 1)
 
         sections.append({
             "id": sec_id,
@@ -359,11 +311,8 @@ def parse_code_tuple(code_str):
 def deduplicate_sections(all_sections):
     """
     Deduplica las secciones por tupla canónica (subject, chapterNumber, code) o id.
-    Criterio de prevalencia:
-    1. Si una sección proviene de un apunte administrado (source == 'admin-upload' o archivo registrado),
-       prevalece sobre la sección fija preconfigurada.
-    2. En caso de igualdad de origen, prevalece la versión con mayor contenido (charCount) o la procesada más recientemente.
-    Preserva el orden relativo original.
+    Criterio de prevalencia (v7.8): en igualdad de origen, prevalece la versión con mayor
+    contenido (charCount). Preserva el orden relativo original.
     """
     if not all_sections:
         return []
@@ -371,8 +320,6 @@ def deduplicate_sections(all_sections):
     unique_sections = []
     seen_map = {}  # (subject, chapterNumber, code) -> index in unique_sections
     seen_ids = {}  # id -> index in unique_sections
-
-    fixed_filenames = {c["file"].lower() for c in FILES_CONFIG}
 
     for sec in all_sections:
         subj = sec.get("subject", "civil")
@@ -396,19 +343,9 @@ def deduplicate_sections(all_sections):
                 seen_ids[sec_id] = idx
         else:
             existing = unique_sections[target_idx]
-            new_is_admin = (sec.get("source") == "admin-upload") or (sec.get("sourceFile", "").lower() not in fixed_filenames)
-            existing_is_admin = (existing.get("source") == "admin-upload") or (existing.get("sourceFile", "").lower() not in fixed_filenames)
-
-            should_replace = False
-            if new_is_admin and not existing_is_admin:
-                should_replace = True
-            elif new_is_admin == existing_is_admin:
-                new_len = sec.get("charCount") or len(sec.get("content", ""))
-                exist_len = existing.get("charCount") or len(existing.get("content", ""))
-                if new_len >= exist_len:
-                    should_replace = True
-
-            if should_replace:
+            new_len = sec.get("charCount") or len(sec.get("content", ""))
+            exist_len = existing.get("charCount") or len(existing.get("content", ""))
+            if new_len >= exist_len:
                 if not sec.get("connections") and existing.get("connections"):
                     sec["connections"] = existing["connections"]
                 unique_sections[target_idx] = sec

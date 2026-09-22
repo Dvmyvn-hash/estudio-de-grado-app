@@ -25,6 +25,11 @@ jobs:
       - name: Checkout del repositorio
         uses: actions/checkout@v4
 
+      # v7.8: Regenerar el índice temático (all_afg_topics.json + js/data.js) desde fuentes/.
+      # Cualquier cambio en fuentes/*.md se refleja en la página tras el git push, sin pasos manuales.
+      - name: Regenerar índice temático desde fuentes/ (generate_clean_notes_data.py)
+        run: python3 generate_clean_notes_data.py
+
       - name: Configurar GitHub Pages
         uses: actions/configure-pages@v5
 

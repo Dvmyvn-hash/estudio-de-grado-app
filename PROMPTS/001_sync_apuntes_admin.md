@@ -1,7 +1,9 @@
 # PROMPT 001 — Subida de Apuntes desde Panel de Administrador con Sincronización Inmediata al Índice de Apuntes
 
 > **Versión:** v1.0 · **Fecha:** 2026-09-21 · **Autor:** puente (dpint)
-> **Estado:** ✅ Implementado (v6.8) · **Depende de:** ninguno
+> **Estado:** ❌ **DEPRECADO / SUPERSEDED por `007_fuentes_canonicas_eliminar_subida_admin_regen_ci.md` (v7.8)** · **Depende de:** ninguno
+>
+> ⚠️ **Aviso (v7.8):** este prompt quedó **obsoleto**. Describe la subida de apuntes por servidor, funcionalidad que fue **eliminada** tras un incidente que borró el índice temático completo. **NO ejecutar.** La base canónica del temario es `fuentes/` + `git push` + regeneración en CI (ver PROMPT 007). Se conserva solo como registro histórico.
 
 > Copia y pega este bloque completo como prompt inicial en tu agente de Antigravity IDE. Está redactado para ejecutarse dentro del repositorio `estudio-de-grado-app` (GRADOMANIACOS) conforme a las reglas de `AGENTS.md`.
 

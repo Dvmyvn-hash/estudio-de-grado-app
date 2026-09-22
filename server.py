@@ -193,7 +193,6 @@ SUPPORTED_EXTENSIONS = ('.md', '.txt', '.markdown', '.pdf', '.docx', '.json')
 
 # Políticas de Seguridad y Optimización de Almacenamiento
 MAX_PAYLOAD_SIZE = 131072  # 128 KB máximo de carga útil para prevenir DoS / saturación de memoria
-MAX_NOTES_UPLOAD_SIZE = 8388608  # 8 MB máximo dedicado para subida de archivos de apuntes admin
 MAX_AI_PRACTICE_CASES = 10  # Límite FIFO de casos de práctica IA para evitar sobrecarga de almacenamiento
 SAFE_CASE_ID_REGEX = re.compile(r"^caso-ia-[0-9a-zA-Z_-]{4,36}$")
 
@@ -1069,6 +1068,10 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", "application/json; charset=utf-8")
             self.send_header("Content-Length", str(len(response_bytes)))
+            self.end_headers()
+            self.wfile.write(response_bytes)
+            return
+
         # API 6: Consultar estado de sesión del usuario actual
         if clean_path == "/api/auth/me":
             user = self.get_authenticated_user()
@@ -1128,27 +1131,8 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json_response({"ok": True, "codes": codes})
             return
 
-        # API 9: Listar Apuntes Registrados (Admin)
-        if clean_path == "/api/admin/notes":
-            admin_pin = self.headers.get("X-Admin-PIN", "").strip()
-            if not admin_pin and "?" in self.path:
-                query_str = self.path.split("?", 1)[1]
-                params = urllib.parse.parse_qs(query_str)
-                admin_pin = params.get("pin", [""])[0].strip()
-            if not verify_admin_pin(admin_pin):
-                self.send_json_response({"ok": False, "error": "Acceso de administrador no autorizado."}, status_code=401)
-                return
-            notes = []
-            reg_path = BASE_DIR / "apuntes_registry.json"
-            if reg_path.exists():
-                try:
-                    with open(reg_path, "r", encoding="utf-8") as f:
-                        reg_data = json.load(f)
-                    notes = reg_data.get("files", [])
-                except Exception as e:
-                    print("Error leyendo apuntes_registry.json:", e)
-            self.send_json_response({"ok": True, "notes": notes})
-            return
+        # API 9: (ELIMINADO en v7.8) Listar Apuntes Registrados — la subida admin de apuntes se retiró;
+        # la carpeta fuentes/ es la única fuente canónica y la regeneración ocurre en CI/arranque.
 
         # Servir archivos estáticos normales
         super().do_GET()
@@ -1183,14 +1167,12 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps({"ok": False, "error": "Cuerpo de solicitud vacío"}).encode("utf-8"))
             return
 
-        max_allowed = MAX_NOTES_UPLOAD_SIZE if clean_path == "/api/admin/upload-notes" else MAX_PAYLOAD_SIZE
-        if content_length > max_allowed:
+        if content_length > MAX_PAYLOAD_SIZE:
             self.send_response(413)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
-            self.wfile.write(json.dumps({"ok": False, "error": f"Carga útil excede el límite máximo de seguridad ({max_allowed // 1024} KB)"}).encode("utf-8"))
+            self.wfile.write(json.dumps({"ok": False, "error": f"Carga útil excede el límite máximo de seguridad ({MAX_PAYLOAD_SIZE // 1024} KB)"}).encode("utf-8"))
             return
-
 
         # API Admin: Crear Código de Acceso
         if clean_path == "/api/admin/create-code":
@@ -1267,223 +1249,9 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_json_response({"ok": False, "error": f"No se encontró el código '{clean_code}' o ya estaba inactivo."}, status_code=404)
             return
 
-        # API Admin: Subir Apuntes con Sincronización Canónica Inmediata
-        if clean_path == "/api/admin/upload-notes":
-            body = self.rfile.read(content_length).decode("utf-8", errors="replace")
-            try:
-                req_data = json.loads(body)
-            except Exception:
-                self.send_json_response({"ok": False, "error": "Cuerpo JSON inválido"}, status_code=400)
-                return
-
-            admin_pin = req_data.get("pin") or self.headers.get("X-Admin-PIN", "")
-            if not verify_admin_pin(admin_pin):
-                self.send_json_response({"ok": False, "error": "Acceso de administrador no autorizado. Clave incorrecta."}, status_code=401)
-                return
-
-            raw_filename = req_data.get("filename", "")
-            if not raw_filename or "\x00" in raw_filename:
-                self.send_json_response({"ok": False, "error": "Nombre de archivo inválido o vacío"}, status_code=400)
-                return
-
-            # Blindaje contra path traversal y caracteres no permitidos
-            if ".." in raw_filename or "/" in raw_filename or "\\" in raw_filename:
-                self.send_json_response({"ok": False, "error": "Ruta no permitida (intento de path traversal detectado)"}, status_code=400)
-                return
-
-            filename = Path(raw_filename).name
-            if not re.match(r"^[0-9A-Za-zÀ-ÿñÑ_\-\. ()]{1,120}\.(md|markdown|txt)$", filename, re.IGNORECASE):
-                self.send_json_response({"ok": False, "error": "Nombre de archivo inválido o extensión no soportada (.md, .markdown, .txt)"}, status_code=400)
-                return
-
-            ext = Path(filename).suffix.lower()
-            if ext not in ('.md', '.markdown', '.txt'):
-                self.send_json_response({"ok": False, "error": f"Extensión '{ext}' no permitida. Solo se admiten archivos .md, .markdown o .txt."}, status_code=400)
-                return
-
-            content = req_data.get("content")
-            if content is None or not isinstance(content, str):
-                self.send_json_response({"ok": False, "error": "Contenido del archivo faltante o inválido"}, status_code=400)
-                return
-            if not content.strip():
-                self.send_json_response({"ok": False, "error": "El contenido del archivo no puede estar vacío"}, status_code=400)
-                return
-            if "\x00" in content:
-                self.send_json_response({"ok": False, "error": "Contenido inválido: byte nulo detectado"}, status_code=400)
-                return
-
-            subject = str(req_data.get("subject", "civil")).strip().lower()
-            if subject not in ("civil", "procesal", "constitucional"):
-                self.send_json_response({"ok": False, "error": f"Materia '{subject}' no válida. Debe ser civil, procesal o constitucional."}, status_code=400)
-                return
-
-            disc_map = {
-                "civil": "I. Derecho Civil",
-                "procesal": "II. Derecho Procesal",
-                "constitucional": "III. Derecho Constitucional"
-            }
-            discipline = disc_map.get(subject, "I. Derecho Civil")
-            try:
-                chapter_number = max(1, int(req_data.get("chapterNumber") or 1))
-            except (ValueError, TypeError):
-                chapter_number = 1
-
-            chapter_title = str(req_data.get("chapterTitle") or "").strip()
-            category = str(req_data.get("category") or "").strip() or chapter_title or "General"
-            if not chapter_title:
-                chapter_title = category
-
-            # Blindaje adicional de resolución canónica de rutas
-            target_apuntes = (APUNTES_DIR / filename).resolve()
-            target_fuentes = (FUENTES_DIR / filename).resolve()
-            try:
-                if not target_apuntes.is_relative_to(APUNTES_DIR.resolve()):
-                    self.send_json_response({"ok": False, "error": "Destino APUNTES fuera del directorio permitido"}, status_code=400)
-                    return
-                if not target_fuentes.is_relative_to(FUENTES_DIR.resolve()):
-                    self.send_json_response({"ok": False, "error": "Destino FUENTES fuera del directorio permitido"}, status_code=400)
-                    return
-            except AttributeError:
-                if not str(target_apuntes).startswith(str(APUNTES_DIR.resolve())):
-                    self.send_json_response({"ok": False, "error": "Destino APUNTES fuera del directorio permitido"}, status_code=400)
-                    return
-                if not str(target_fuentes).startswith(str(FUENTES_DIR.resolve())):
-                    self.send_json_response({"ok": False, "error": "Destino FUENTES fuera del directorio permitido"}, status_code=400)
-                    return
-
-            # Escribir en APUNTES_DIR y espejar en FUENTES_DIR
-            try:
-                APUNTES_DIR.mkdir(parents=True, exist_ok=True)
-                FUENTES_DIR.mkdir(parents=True, exist_ok=True)
-                with open(target_apuntes, "w", encoding="utf-8") as f:
-                    f.write(content)
-                with open(target_fuentes, "w", encoding="utf-8") as f:
-                    f.write(content)
-            except Exception as e:
-                self.send_json_response({"ok": False, "error": f"Error persistiendo archivo en disco: {str(e)}"}, status_code=500)
-                return
-
-            # Actualizar registro central apuntes_registry.json (idempotente por filename)
-            reg_path = BASE_DIR / "apuntes_registry.json"
-            reg_data = {"files": []}
-            if reg_path.exists():
-                try:
-                    with open(reg_path, "r", encoding="utf-8") as f:
-                        reg_data = json.load(f)
-                except Exception:
-                    reg_data = {"files": []}
-
-            files_list = reg_data.get("files", [])
-            now_ms = int(time.time() * 1000)
-            found = False
-            target_fname = filename.strip().lower()
-
-            for item in files_list:
-                item_fname = str(item.get("file") or "").strip().lower()
-                same_file = (item_fname == target_fname)
-                same_chapter = (str(item.get("subject")).lower() == subject.lower() and int(item.get("defaultChapterNum") or 0) == chapter_number)
-                if same_file or same_chapter:
-                    item["file"] = filename
-                    item["subject"] = subject
-                    item["discipline"] = discipline
-                    item["defaultCategory"] = category
-                    item["defaultChapterNum"] = chapter_number
-                    item["chapterTitle"] = chapter_title
-                    item["source"] = "admin-upload"
-                    item["uploadedAt"] = now_ms
-                    found = True
-                    break
-            if not found:
-                files_list.append({
-                    "file": filename,
-                    "subject": subject,
-                    "discipline": discipline,
-                    "defaultCategory": category,
-                    "defaultChapterNum": chapter_number,
-                    "chapterTitle": chapter_title,
-                    "source": "admin-upload",
-                    "uploadedAt": now_ms
-                })
-            reg_data["files"] = files_list
-
-            try:
-                with open(reg_path, "w", encoding="utf-8") as f:
-                    json.dump(reg_data, f, ensure_ascii=False, indent=2)
-            except Exception as e:
-                print("Error actualizando apuntes_registry.json:", e)
-
-            # Regenerar secciones en vivo en all_afg_topics.json y data.js
-            all_topics = get_all_synced_topics()
-            file_topics = [t for t in all_topics if t.get("sourceFile") == filename]
-            topics_summary = [
-                {
-                    "id": t.get("id"),
-                    "code": t.get("code"),
-                    "title": t.get("title"),
-                    "cleanTitle": t.get("cleanTitle"),
-                    "subject": t.get("subject"),
-                    "chapterNumber": t.get("chapterNumber")
-                }
-                for t in file_topics
-            ]
-
-            self.send_json_response({
-                "ok": True,
-                "filename": filename,
-                "savedTo": ["APUNTES", "fuentes"],
-                "sectionsCreated": len(file_topics),
-                "topics": topics_summary
-            }, status_code=201)
-            return
-
-        # API Admin: Eliminar Apuntes Registrados
-        if clean_path == "/api/admin/delete-notes":
-            body = self.rfile.read(content_length).decode("utf-8", errors="replace")
-            try:
-                req_data = json.loads(body)
-            except Exception:
-                self.send_json_response({"ok": False, "error": "Cuerpo JSON inválido"}, status_code=400)
-                return
-
-            admin_pin = req_data.get("pin") or self.headers.get("X-Admin-PIN", "")
-            if not verify_admin_pin(admin_pin):
-                self.send_json_response({"ok": False, "error": "Acceso de administrador no autorizado."}, status_code=401)
-                return
-
-            raw_filename = req_data.get("filename", "")
-            if not raw_filename or ".." in raw_filename or "/" in raw_filename or "\\" in raw_filename:
-                self.send_json_response({"ok": False, "error": "Nombre de archivo inválido"}, status_code=400)
-                return
-            filename = Path(raw_filename).name
-
-            target_apuntes = APUNTES_DIR / filename
-            target_fuentes = FUENTES_DIR / filename
-            if target_apuntes.exists():
-                try:
-                    target_apuntes.unlink()
-                except Exception as e:
-                    print(f"Error eliminando {target_apuntes}: {e}")
-            if target_fuentes.exists():
-                try:
-                    target_fuentes.unlink()
-                except Exception as e:
-                    print(f"Error eliminando {target_fuentes}: {e}")
-
-            reg_path = BASE_DIR / "apuntes_registry.json"
-            if reg_path.exists():
-                try:
-                    with open(reg_path, "r", encoding="utf-8") as f:
-                        reg_data = json.load(f)
-                    reg_data["files"] = [x for x in reg_data.get("files", []) if x.get("file") != filename]
-                    with open(reg_path, "w", encoding="utf-8") as f:
-                        json.dump(reg_data, f, ensure_ascii=False, indent=2)
-                except Exception as e:
-                    print("Error actualizando apuntes_registry.json al borrar:", e)
-
-            get_all_synced_topics()
-            self.send_json_response({"ok": True, "message": f"Apunte '{filename}' eliminado correctamente."})
-            return
-
+        # API Admin: (ELIMINADO en v7.8) Subir Apuntes y Eliminar Apuntes — la subida admin de apuntes
+        # se retiró por riesgo de corrupción del índice. La carpeta fuentes/ del repo es la única
+        # fuente canónica: se edita el .md, se hace git push y la regeneración ocurre en CI/arranque.
 
         # API: Registro Directo de Usuario (Correo + Contraseña PBKDF2 -> Versión Demo Directa)
         if clean_path == "/api/auth/register":
