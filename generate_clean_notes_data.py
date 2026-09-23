@@ -176,6 +176,68 @@ FILES_CONFIG = [
     }
 ]
 
+# ═══════════════════════════════════════════════════════════════
+# TEMARIO CANÓNICO DEL EXAMEN DE GRADO — Orden Oficial
+# ═══════════════════════════════════════════════════════════════
+# Estructura: {subject: [(orden, chapterNumber, category_keywords[], display_name), ...]}
+# - orden: prioridad global (1 = primero en temario, 99 = último)
+# - chapterNumber: número de capítulo en el archivo fuente
+# - category_keywords: lista de palabras clave para auto-detectar categoría en archivos nuevos
+# - display_name: nombre legible para logs/debug
+# ═══════════════════════════════════════════════════════════════
+
+TEMARIO_CANONICO = {
+    "civil": [
+        # Orden oficial: Acto Jurídico → Bienes → Obligaciones → Incumplimiento → RCE → Contratos → Sucesiones → Familia → Garantías
+        (1,  1, ["acto juridico", "teoria general del acto", "estructura", "clasificaciones", "voluntad", "consentimiento", "objeto", "causa", "solemnidades", "ineficacias", "representacion", "simulacion"], "Teoría General del Acto Jurídico"),
+        (2,  2, ["bienes", "derechos reales", "dominio", "posesion", "tradicion", "prescripcion", "proteccion", "clasificacion", "modos de adquirir"], "Teoría de los Bienes y Derechos Reales"),
+        (3,  3, ["obligaciones", "cumplimiento", "pago", "extinguir", "modalidad", "condicion", "plazo", "accion resolutoria", "fuentes", "clasificaciones", "sujetos", "pluralidad"], "Teoría General de las Obligaciones y Cumplimiento"),
+        (4,  4, ["incumplimiento", "responsabilidad contractual", "resolucion", "clausula penal", "mora", "culpa", "daños", "perjuicios"], "Incumplimiento y Responsabilidad Contractual"),
+        (5,  5, ["responsabilidad extracontractual", "rce", "daño", "culpa", "hecho ilicito", "chance", "medica", "cumulo"], "Responsabilidad Extracontractual (RCE)"),
+        (6,  6, ["generalidades de los contratos", "clasificacion contratos", "consentimiento contractual", "formacion del consentimiento"], "Generalidades de los Contratos"),
+        (7,  7, ["contrato de promesa", "promesa", "1554 cc", "solemnidad promesa", "plazo o condicion promesa"], "Contrato de Promesa"),
+        (8,  8, ["contrato de compraventa", "compraventa", "precio compraventa", "cosa vendida", "vicios redhibitorios", "eviccion"], "Contrato de Compraventa"),
+        (9,  9, ["sucesiones", "herencia", "testamento", "legitima", "particion", "sucesion", "intestada", "forzosa"], "Derecho de Sucesiones"),
+        (10, 10, ["familia", "matrimonio", "filiacion", "alimentos", "regimen patrimonial", "divorcio", "sociedad conyugal", "bienes reservados"], "Derecho de Familia"),
+        (11, 11, ["garantias", "hipoteca", "prenda", "fianza", "caucion", "reales de garantia"], "Derechos Reales de Garantía"),
+    ],
+    "procesal": [
+        # Orden oficial: Orgánico → Normas Comunes → Mayor Cuantía (6-13) → La Prueba (3-5) → Ejecutivo → Cautelares → Recursos → Especiales
+        (1,  1, ["accion", "pretension", "proceso", "jurisdiccion", "competencia", "organico", "derecho de accion", "teoria dualista", "teoria monista"], "Parte General (Derecho Procesal Orgánico)"),
+        (2,  2, ["partes", "terceros", "comparecencia", "patrocinio", "mandato judicial", "actos procesales", "plazos", "notificaciones", "nulidad procesal", "incidentes", "capacidad procesal", "ius postulandi"], "Normas Comunes a Todo Procedimiento"),
+        # MAYOR CUANTÍA — capítulos 6-13 en PROCEMAYORCUANTIA-pulido.md
+        (3,  6, ["medidas prejudiciales", "prejudicial", "preparatoria", "probatoria", "precautoria", "declaracion jurada", "exhibicion", "reconocimiento firma"], "Las Medidas Prejudiciales"),
+        (4,  7, ["demanda", "libelo", "requisitos demanda", "254 cpc", "individualizacion", "hechos", "fundamentos", "peticiones"], "La Demanda"),
+        (5,  8, ["control admisibilidad", "examen oficio", "256 cpc", "ineptitud libelo", "patrocinio legal", "saneamiento"], "Control de Admisibilidad (Examen de Oficio)"),
+        (6,  9, ["retiro demanda", "desistimiento", "modificacion demanda", "261 cpc", "148 cpc", "150 cpc", "inmutabilidad litis"], "Retiro, Desistimiento y Modificación de la Demanda"),
+        (7, 10, ["emplazamiento", "notificacion demanda", "258 cpc", "259 cpc"], "El Emplazamiento"),
+        (8, 11, ["rebeldia", "allanamiento", "excepciones dilatorias", "contestacion demanda", "ficcion negativa", "311 cpc", "313 cpc"], "Actitudes del Demandado frente a la Demanda"),
+        (9, 12, ["replica", "duplica", "311 cpc", "312 cpc", "nuevos hechos", "excepciones perentorias"], "Réplica y Dúplica"),
+        (10, 13, ["sentencia", "cita oir sentencia", "observaciones prueba", "430 cpc", "desasimiento", "modos anormales termino", "432 cpc", "433 cpc", "162 cpc", "cosajuicio"], "Etapa de Sentencia y Modos Anormales de Término"),
+        # LA PRUEBA — capítulos 3-5 en DERECHO_PROCESAL_LA_PRUEBA.md
+        (11, 3, ["teoria general prueba", "objeto prueba", "carga prueba", "valoracion prueba", "sana critica", "318 cpc", "hechos sustanciales", "pertinentes", "controvertidos"], "Teoría General de la Prueba Procesal Civil"),
+        (12, 4, ["recepcion causa prueba", "auto prueba", "ampliacion prueba", "321 cpc", "322 cpc", "periodo observaciones", "430 cpc", "hechos nuevos", "conocimiento superveniente"], "Etapa Probatoria en el Juicio Ordinario de Mayor Cuantía"),
+        (13, 5, ["medios prueba", "documental", "testimonial", "confesional", "absolucion posiciones", "inspeccion personal", "pericial", "presunciones", "341 cpc", "426 cpc", "427 cpc", "1712 cc"], "Los Medios de Prueba en Particular (Art. 341 CPC)"),
+        # OTROS PROCEDIMIENTOS
+        (14, 14, ["ejecutivo", "titulo ejecutivo", "excepcion ejecutiva", "embargo", "pago", "mandamiento", "oposicion"], "Juicio Ejecutivo"),
+        (15, 15, ["cautelar", "medida precautoria", "medidas especificas", "innominadas", "fumus boni iuris", "periculum in mora"], "Medidas Precautorias"),
+        (16, 16, ["recurso", "apelacion", "casacion", "queja", "reposicion", "768 cpc", "772 cpc"], "Sistema de Recursos"),
+        (17, 17, ["menor cuantia", "sumario", "arriendo", "familia", "laboral", "especial", "monitorio"], "Procedimientos Especiales"),
+    ],
+    "constitucional": [
+        (1,  1, ["accion", "garantias", "amparo", "proteccion", "inconstitucionalidad", "tribunal constitucional", "requisitos", "procedencia"], "Acciones y Garantías Constitucionales"),
+        (2,  2, ["derechos fundamentales", "articulo 19", "igualdad", "libertad", "propiedad", "debido proceso", "vida", "honra", "intimidad", "conciencia", "culto", "expresion", "reunion", "asociacion"], "Derechos Fundamentales en Específico (Art. 19 CPR)"),
+        (3,  3, ["organos estado", "congreso", "presidente", "poder judicial", "ministerio publico", "contraloria", "tribunal constitucional", "bases institucionalidad"], "Órganos del Estado y Organización Política"),
+        (4,  4, ["reforma constitucion", "estado de excepcion", "plebiscito", "soberania", "asamblea constituyente", "congreso pleno"], "Reforma Constitucional y Estado de Excepción"),
+    ]
+}
+
+# Mapa rápido: (subject, chapterNumber) → (orden_temario, category_name)
+TEMARIO_ORDER_MAP = {}
+for subj, entries in TEMARIO_CANONICO.items():
+    for orden, chap, keywords, name in entries:
+        TEMARIO_ORDER_MAP[(subj, chap)] = (orden, name)
+
 DISCIPLINE_MAP = {
     "civil": "I. Derecho Civil",
     "procesal": "II. Derecho Procesal",
@@ -313,6 +375,39 @@ def infer_file_config(filename, filepath):
         "categoryMap": {},
         "isAutoDiscovered": True
     }
+
+def infer_temario_position(cfg, sections_raw):
+    """
+    Determina la posición en el temario canónico para un archivo auto-descubierto.
+    Analiza el contenido de las secciones extraídas y hace matching por palabras clave.
+    Retorna: (orden_temario, chapterNumber_sugerido, category_canonica)
+    """
+    subject = cfg.get("subject", "civil")
+    if subject not in TEMARIO_CANONICO:
+        return (99, cfg.get("defaultChapterNum", 1), cfg.get("defaultCategory", "General"))
+    
+    # Concatenar todo el contenido para análisis
+    full_text = " ".join([s.get("content", "") for s in sections_raw]).lower()
+    
+    best_match = None
+    best_score = 0
+    
+    for orden, chap, keywords, name in TEMARIO_CANONICO[subject]:
+        score = sum(full_text.count(kw.lower()) for kw in keywords)
+        if score > best_score:
+            best_score = score
+            best_match = (orden, chap, name)
+    
+    if best_match and best_score > 0:
+        return best_match
+    
+    # Fallback: usar chapterNumber del archivo si existe en temario
+    chap = cfg.get("defaultChapterNum", 1)
+    for orden, c, kw, name in TEMARIO_CANONICO[subject]:
+        if c == chap:
+            return (orden, chap, name)
+    
+    return (99, chap, cfg.get("defaultCategory", "General"))
 
 def build_files_config(fuentes_dir=None):
     """Construye la lista de configuraciones de archivos: base fija FILES_CONFIG + archivos descubiertos en fuentes/.
@@ -487,6 +582,18 @@ def extract_sections_from_auto_discovered_file(cfg, text, lines, clean_stem):
                     "content": sec_content
                 })
 
+    # Inferencia de posición canónica a nivel de archivo/documento en el temario oficial
+    file_temario_order, file_sugg_chap, file_canon_cat = infer_temario_position(cfg, sections_raw)
+    has_explicit_chap = (cfg.get("defaultChapterNum", 1) != 1) or any(
+        item.get("chapterNumber", 1) != 1 for item in sections_raw
+    )
+    single_chap = (len(set(item["chapterNumber"] for item in sections_raw)) <= 1)
+    if file_temario_order < 99 and single_chap and not has_explicit_chap:
+        for item in sections_raw:
+            item["chapterNumber"] = file_sugg_chap
+            item["chapterTitle"] = file_canon_cat
+            item["category"] = file_canon_cat
+
     # Post-proceso: Renumerar consecutivamente N.1, N.2, N.3... por capítulo para garantizar sin huecos
     chap_counters = {}
     final_sections = []
@@ -537,6 +644,32 @@ def extract_sections_from_auto_discovered_file(cfg, text, lines, clean_stem):
             sec_obj["origCode"] = item["origCode"]
 
         final_sections.append(sec_obj)
+
+    # ═══════════════════════════════════════════════════════════════
+    # ASIGNAR POSICIÓN TEMARIO CANÓNICA A CADA SECCIÓN (auto-descubiertos)
+    # ═══════════════════════════════════════════════════════════════
+    for item in final_sections:
+        subj = cfg["subject"]
+        chap = item["chapterNumber"]
+        key = (subj, chap)
+        if key in TEMARIO_ORDER_MAP:
+            orden_temario, category_canonica = TEMARIO_ORDER_MAP[key]
+            item["_temario_order"] = orden_temario
+            item["category"] = category_canonica
+            item["chapterTitle"] = category_canonica
+        else:
+            # Inferir por contenido de la sección individual
+            sec_text = item.get("content", "").lower()
+            best_orden = 99
+            best_cat = item["category"]
+            for orden, c, keywords, name in TEMARIO_CANONICO.get(subj, []):
+                score = sum(sec_text.count(kw.lower()) for kw in keywords)
+                if score > 0 and orden < best_orden:
+                    best_orden = orden
+                    best_cat = name
+            item["_temario_order"] = best_orden
+            item["category"] = best_cat
+            item["chapterTitle"] = best_cat
 
     return final_sections
 
@@ -615,6 +748,14 @@ def extract_sections_from_file(cfg):
         sec_content = text.strip()
         is_free = (code in ["1.1", "2.1"] and chap_num == 1)
 
+        # Temario canónico para caso monolítico
+        key = (cfg["subject"], chap_num)
+        if key in TEMARIO_ORDER_MAP:
+            orden_temario, category_canonica = TEMARIO_ORDER_MAP[key]
+            category = category_canonica
+        else:
+            orden_temario = 99
+
         return [{
             "id": sec_id,
             "subject": cfg["subject"],
@@ -633,7 +774,8 @@ def extract_sections_from_file(cfg):
             "isFree": is_free,
             "content": sec_content,
             "charCount": len(sec_content),
-            "connections": []
+            "connections": [],
+            "_temario_order": orden_temario
         }]
 
     sections = []
@@ -660,10 +802,21 @@ def extract_sections_from_file(cfg):
             category = cfg.get("defaultCategory") or cfg.get("chapterTitle") or "General"
             chap_num = cfg.get("defaultChapterNum", 1)
 
+        # ═══════════════════════════════════════════════════════════════
+        # ASIGNAR ORDEN TEMARIO CANÓNICO (archivos canónicos - sobrescribe categoryMap)
+        # ═══════════════════════════════════════════════════════════════
+        key = (cfg["subject"], chap_num)
+        if key in TEMARIO_ORDER_MAP:
+            orden_temario, category_canonica = TEMARIO_ORDER_MAP[key]
+            category = category_canonica  # sobrescribe categoryMap
+            chap_num = chap_num  # mantener chapterNumber del archivo
+        else:
+            orden_temario = 99
+
         sec_id = f"{cfg['subject']}-{clean_stem}-{code.replace('.', '-')}"
         is_free = (code in ["1.1", "2.1"] and chap_num == 1)
 
-        sections.append({
+        sec_obj = {
             "id": sec_id,
             "subject": cfg["subject"],
             "discipline": cfg["discipline"],
@@ -681,8 +834,10 @@ def extract_sections_from_file(cfg):
             "isFree": is_free,
             "content": sec_content,
             "charCount": len(sec_content),
-            "connections": []
-        })
+            "connections": [],
+            "_temario_order": orden_temario
+        }
+        sections.append(sec_obj)
 
     return sections
 
@@ -785,9 +940,13 @@ def assign_index_codes(all_sections):
     """
     Asigna un indexCode canónico único y secuencial ('N.M') por disciplina a todas las secciones.
     N = 1 (Civil), 2 (Procesal), 3 (Constitucional).
-    Ordena determinísticamente por (chapterNumber asc, parse_code_tuple(code) asc, original_index asc).
+    Ordena determinísticamente según el Temario Canónico del Examen de Grado:
+      1. _temario_order asc (prioridad canónica absoluta)
+      2. chapterNumber asc (capítulo dentro del bloque)
+      3. parse_code_tuple(code) asc (código ordinal 1.1, 1.2...)
+      4. _orig_idx asc (tie-breaker determinista)
     Deduplica primero para asegurar que ninguna sección se repita.
-    Muta all_sections in-place y la retorna.
+    Limpia los campos temporales y muta all_sections in-place.
     """
     deduped = deduplicate_sections(all_sections)
     all_sections.clear()
@@ -808,22 +967,32 @@ def assign_index_codes(all_sections):
         if s not in disciplines:
             disciplines.append(s)
 
+    ordered_sections = []
     for d_idx, subj in enumerate(disciplines, start=1):
         prefix = discipline_prefixes.get(subj, d_idx)
         subj_sections = [sec for sec in all_sections if sec.get("subject", "civil") == subj]
 
         def sort_key(s):
+            temario_orden = s.get("_temario_order")
             chap = s.get("chapterNumber") or 1
+            if temario_orden is None:
+                temario_orden = TEMARIO_ORDER_MAP.get((subj, chap), (99, ""))[0]
             c_tuple = parse_code_tuple(s.get("code", ""))
-            return (chap, c_tuple, s.get("_orig_idx", 0))
+            return (temario_orden, chap, c_tuple, s.get("_orig_idx", 0))
 
         subj_sections.sort(key=sort_key)
 
         for seq, sec in enumerate(subj_sections, start=1):
             sec["indexCode"] = f"{prefix}.{seq}"
 
+        ordered_sections.extend(subj_sections)
+
+    all_sections.clear()
+    all_sections.extend(ordered_sections)
+
     for sec in all_sections:
         sec.pop("_orig_idx", None)
+        sec.pop("_temario_order", None)
 
     return all_sections
 
