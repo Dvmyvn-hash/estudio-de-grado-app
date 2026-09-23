@@ -2106,6 +2106,12 @@ const App = {
   },
 
   openImportModal(tabName = "paste") {
+    // Modo Presentación Docente (v7.16): la gestión e importación/exportación de archivos
+    // está deshabilitada (defensa en profundidad además del guard de canManageNotes).
+    if (LicenseService.isDocente()) {
+      this.showToast("Modo Presentación Docente: la gestión e importación/exportación de archivos está deshabilitada.", "warning");
+      return;
+    }
     if (!LicenseService.canManageNotes()) {
       this.showToast("Acceso restringido: Solo el administrador o cuentas con permiso pueden agregar o gestionar apuntes.", "warning");
       return;
@@ -2203,7 +2209,11 @@ const App = {
       adminModal.classList.remove("hidden");
       document.getElementById("admin-login-screen")?.classList.add("hidden");
       document.getElementById("admin-dashboard-screen")?.classList.remove("hidden");
-      this.renderAdminCodesTable();
+      if (LicenseService.isFullAdmin()) {
+        this.renderAdminCodesTable();
+      } else {
+        this.applyDocenteRestrictions();
+      }
     });
 
     btnOpenAdmin?.addEventListener("click", () => {
@@ -2211,7 +2221,11 @@ const App = {
       if (LicenseService.isAdminMode()) {
         document.getElementById("admin-login-screen")?.classList.add("hidden");
         document.getElementById("admin-dashboard-screen")?.classList.remove("hidden");
-        this.renderAdminCodesTable();
+        if (LicenseService.isFullAdmin()) {
+          this.renderAdminCodesTable();
+        } else {
+          this.applyDocenteRestrictions();
+        }
       } else {
         document.getElementById("admin-login-screen")?.classList.remove("hidden");
         document.getElementById("admin-dashboard-screen")?.classList.add("hidden");
@@ -2226,9 +2240,9 @@ const App = {
 
     btnAdminLogin?.addEventListener("click", async () => {
       const pin = document.getElementById("admin-pin-input")?.value || "";
-      const isValid = await LicenseService.verifyAdminPin(pin);
-      if (isValid) {
-        LicenseService.setAdminMode(true);
+      const role = await LicenseService.verifyAdminPin(pin);
+      if (role) {
+        LicenseService.setAdminMode(true, role);
         this.renderAdminIndicator();
         this.renderSidebar();
         if (this.currentView === "topics") {
@@ -2236,8 +2250,13 @@ const App = {
         }
         document.getElementById("admin-login-screen").classList.add("hidden");
         document.getElementById("admin-dashboard-screen").classList.remove("hidden");
-        this.renderAdminCodesTable();
-        this.showToast("👑 Modo Administrador activado: Tienes acceso total y visibilidad de desarrollo de apuntes.", "success");
+        if (LicenseService.isFullAdmin()) {
+          this.renderAdminCodesTable();
+          this.showToast("👑 Modo Administrador activado: Tienes acceso total y visibilidad de desarrollo de apuntes.", "success");
+        } else {
+          this.applyDocenteRestrictions();
+          this.showToast("🎓 Modo Presentación Docente activado: visualiza y prueba las herramientas; la gestión de códigos y archivos está deshabilitada.", "info");
+        }
       } else {
         document.getElementById("admin-login-error").style.display = "block";
       }
@@ -2262,6 +2281,11 @@ const App = {
     });
 
     btnGenerate?.addEventListener("click", async () => {
+      // Modo Presentación Docente (v7.16): la generación de códigos está deshabilitada.
+      if (LicenseService.isDocente()) {
+        this.showToast("Modo Presentación Docente: la generación de códigos está deshabilitada.", "warning");
+        return;
+      }
       const studentName = document.getElementById("admin-student-name")?.value.trim() || "Alumno";
       const studentEmail = document.getElementById("admin-student-email")?.value.trim() || "";
       const customCode = document.getElementById("admin-custom-code")?.value.trim() || "";
@@ -2334,6 +2358,30 @@ const App = {
         sidebarFooter.style.display = "none";
       }
     }
+
+    // MODE-DOCENTE (v7.16, PROMPT 013): la cuenta de presentación docente no puede cargar ni
+    // descargar archivos, así que oculta el respaldo Exportar/Importar avance. Si se desea
+    // permitir al profesor respaldar su propio avance, eliminar este bloque.
+    const isDocente = LicenseService.isDocente();
+    const progressActions = document.getElementById("sidebar-progress-actions");
+    if (progressActions) {
+      progressActions.classList.toggle("hidden", isDocente);
+      progressActions.style.display = isDocente ? "none" : "";
+    }
+  },
+
+  // Modo Presentación Docente (v7.16, PROMPT 013): el panel de administrador se muestra en
+  // modo solo-visualización. Se ocultan el formulario de generación de códigos, la tabla de
+  // códigos emitidos y el gestor de apuntes, y se muestra el banner aclaratorio.
+  applyDocenteRestrictions() {
+    const form = document.getElementById("admin-license-form");
+    const panel = document.getElementById("admin-codes-panel");
+    const banner = document.getElementById("docente-mode-banner");
+    const manageNotes = document.getElementById("btn-admin-manage-notes");
+    if (form) form.style.display = "none";
+    if (panel) panel.style.display = "none";
+    if (manageNotes) manageNotes.style.display = "none";
+    if (banner) banner.style.display = "block";
   },
 
   async renderAdminCodesTable() {
@@ -2403,6 +2451,11 @@ const App = {
     // Eventos de revocación
     tbody.querySelectorAll('[data-revoke-code]').forEach(btn => {
       btn.addEventListener('click', async () => {
+        // Modo Presentación Docente (v7.16): la revocación de códigos está deshabilitada.
+        if (LicenseService.isDocente()) {
+          this.showToast("Modo Presentación Docente: la revocación de códigos está deshabilitada.", "warning");
+          return;
+        }
         const code = btn.dataset.revokeCode;
         if (confirm(`¿Estás seguro de revocar la licencia ${code}?`)) {
           await LicenseService.revokeCode(code);

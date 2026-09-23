@@ -581,7 +581,13 @@
                 <span>Cerrar Sesión</span>
               </button>
             </div>
+            <!-- Banner de cuenta de PRESENTACIÓN DOCENTE (v7.16): solo-visualización, sin gestión -->
+            <p id="docente-mode-banner" style="display: none; width: 100%; font-size: 0.78rem; color: var(--text-muted); border: 1px dashed rgba(217, 119, 6, 0.45); border-radius: 4px; padding: 8px 10px; margin: 2px 0 0;">
+              🎓 <strong>Modo Presentación Docente:</strong> cuenta de visualización para demostración. No genera ni gestiona códigos, ni sube, importa o descarga archivos.
+            </p>
           </div>
+
+          <div id="admin-license-form">
 
           <div class="form-grid">
 
@@ -637,7 +643,10 @@
             </label>
           </div>
 
-          <!-- Historial de Códigos Emitidos -->
+          </div><!-- /#admin-license-form (oculto en Modo Presentación Docente) -->
+
+          <!-- Historial de Códigos Emitidos (oculto en Modo Presentación Docente) -->
+          <div id="admin-codes-panel">
           <div style="margin-top: 24px;">
             <h4 style="font-size: 0.9rem; color: var(--gold-primary); text-transform: uppercase; margin-bottom: 8px;">
               Códigos Emitidos Activos
@@ -661,6 +670,7 @@
               </table>
             </div>
           </div>
+          </div><!-- /#admin-codes-panel -->
         </div>
       </div>
     </div>

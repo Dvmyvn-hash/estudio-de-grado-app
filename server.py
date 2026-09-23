@@ -683,6 +683,8 @@ LINK_CODE_LIMITER = SecurityRateLimiter(max_entries=2000)
 AUTH_LIMITER = SecurityRateLimiter(max_entries=5000)
 LOGIN_BACKOFF_LIMITER = SecurityRateLimiter(max_entries=5000)
 GOOGLE_AUTH_LIMITER = SecurityRateLimiter(max_entries=5000)
+# Anti fuerza bruta sobre las claves de administración (v7.16): retroceso exponencial por IP.
+ADMIN_LIMITER = SecurityRateLimiter(max_entries=2000)
 
 def mask_email(email: str) -> str:
     """Enmascara correo para logs de auditoría seguros (ej. david@gmail.com -> d***@gmail.com)."""
@@ -719,21 +721,61 @@ def validate_password_policy(password: str) -> Tuple[bool, str]:
     return True, ""
 
 
-# Hash criptográfico SHA-256 de la clave de administración
-ADMIN_PIN_HASH = "75cfc5343b1e254fc0e4f909e980e14cda4d24dc223718749855ba3ec28457d8"
+# Hashes criptográficos SHA-256 de las claves de administración (nunca texto plano en el repo).
+# - "admin":   clave plena de gestión (generar/revocar/listar códigos, gestor de apuntes/archivos).
+# - "docente": cuenta de PRESENTACIÓN DOCENTE (v7.16): acceso visual completo de administrador
+#              (desbloqueo total de contenido, panel, cobertura) pero SIN gestión.
+# Los overrides por variable de entorno ADMIN_PIN / ADMIN_PIN_DOCENTE permiten rotar claves en
+# despliegue sin recompilar; las constantes del repositorio siguen siendo válidas en paralelo.
+ADMIN_PIN_HASHES: Dict[str, str] = {
+    "admin": "75cfc5343b1e254fc0e4f909e980e14cda4d24dc223718749855ba3ec28457d8",
+    "docente": "28f5e0c2764fecec65663fe4d72aff9330340a18e02232362c92a07736b808ba",
+}
 
-def verify_admin_pin(entered_pin: Any) -> bool:
-    """Verifica en tiempo constante el PIN de administración usando SHA-256."""
+
+def _sha256_hex(value: str) -> str:
+    """SHA-256 hexadecimal de un string (uso exclusivo en verificación de PIN)."""
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def verify_admin_pin(entered_pin: Any) -> Optional[str]:
+    """
+    Verifica en tiempo constante la clave de administración usando SHA-256.
+    Retorna el rol ("admin" | "docente") si la clave es válida, o None en caso contrario.
+    - Todas las comparaciones contra ADMIN_PIN_HASHES se calculan SIEMPRE (no hay
+      ramificación por coincidencia), de modo que el tiempo de respuesta no revela
+      cuál de las claves pudo coincidir (mitigación de ataques de temporización).
+    """
     if not entered_pin or not isinstance(entered_pin, str):
-        return False
+        return None
     pin_clean = entered_pin.strip()
-    calc_hash = hashlib.sha256(pin_clean.encode("utf-8")).hexdigest()
+    calc_hash = _sha256_hex(pin_clean)
+
+    matches: Dict[str, bool] = {
+        role: hmac.compare_digest(calc_hash, expected_hash)
+        for role, expected_hash in ADMIN_PIN_HASHES.items()
+    }
+
     env_pin = os.environ.get("ADMIN_PIN")
     if env_pin:
-        env_hash = hashlib.sha256(env_pin.strip().encode("utf-8")).hexdigest()
-        if hmac.compare_digest(calc_hash, env_hash):
-            return True
-    return hmac.compare_digest(calc_hash, ADMIN_PIN_HASH)
+        matches["admin"] = matches["admin"] or hmac.compare_digest(calc_hash, _sha256_hex(env_pin.strip()))
+    env_pin_docente = os.environ.get("ADMIN_PIN_DOCENTE")
+    if env_pin_docente:
+        matches["docente"] = matches["docente"] or hmac.compare_digest(calc_hash, _sha256_hex(env_pin_docente.strip()))
+
+    # Comparación dummy de longitud fija para igualar el tiempo de respuesta ante claves inválidas.
+    hmac.compare_digest(calc_hash, "0" * 64)
+
+    if matches.get("admin"):
+        return "admin"
+    if matches.get("docente"):
+        return "docente"
+    return None
+
+
+def admin_manage_allowed(role: Optional[str]) -> bool:
+    """Solo el rol pleno 'admin' puede operar recursos de gestión (códigos, archivos)."""
+    return role == "admin"
 
 
 def create_session_token(sub: str) -> str:
@@ -937,6 +979,43 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
             return None
         return db.get_user_by_sub(sub)
 
+    def _require_admin_manage(self, admin_pin: str) -> Optional[str]:
+        """
+        Autorización de recursos de administración con defensa en profundidad (v7.16):
+        1. Anti fuerza bruta: retroceso exponencial por IP en ADMIN_LIMITER (fuera de modo test).
+        2. Verificación de la clave en tiempo constante -> rol ("admin" | "docente") o 401 si es inválida.
+        3. Permiso de gestión: solo el rol pleno "admin" (403 al rol "docente" de presentación).
+        Retorna el rol autorizado a gestionar (siempre "admin"), o None si ya envió la respuesta de error.
+        """
+        client_ip = self.client_address[0]
+        is_test = os.environ.get("ALLOW_TEST_AUTH") == "1"
+        if not is_test:
+            allowed, wait_sec = ADMIN_LIMITER.check_exponential_backoff(client_ip, max_free_attempts=8, window_seconds=900.0)
+            if not allowed:
+                self.send_json_response({
+                    "ok": False,
+                    "error": f"Demasiados intentos de administración. Reintenta en {int(wait_sec) + 1} segundos."
+                }, status_code=429)
+                return None
+
+        role = verify_admin_pin(admin_pin)
+        if role is None:
+            if not is_test:
+                ADMIN_LIMITER.record_attempt(client_ip)
+            self.send_json_response({"ok": False, "error": "Acceso de administrador no autorizado."}, status_code=401)
+            return None
+
+        if not admin_manage_allowed(role):
+            self.send_json_response({
+                "ok": False,
+                "error": "Modo Presentación Docente: sin permisos de gestión (visualización únicamente)."
+            }, status_code=403)
+            return None
+
+        if not is_test:
+            ADMIN_LIMITER.reset(client_ip)
+        return role
+
     def do_GET(self):
         raw_clean_path = self.path.split('?')[0].split('#')[0]
 
@@ -1117,15 +1196,15 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json_response({"ok": True, "mastery": mastery})
             return
 
-        # API 8: Listar Códigos de Acceso (Admin)
+        # API 8: Listar Códigos de Acceso (Admin — rol pleno 'admin' únicamente)
         if clean_path == "/api/admin/codes":
             admin_pin = self.headers.get("X-Admin-PIN", "").strip()
             if not admin_pin and "?" in self.path:
                 query_str = self.path.split("?", 1)[1]
                 params = urllib.parse.parse_qs(query_str)
                 admin_pin = params.get("pin", [""])[0].strip()
-            if not verify_admin_pin(admin_pin):
-                self.send_json_response({"ok": False, "error": "Acceso de administrador no autorizado."}, status_code=401)
+            role = self._require_admin_manage(admin_pin)
+            if role is None:
                 return
             raw_codes = db.list_access_codes(db_path=DB_PATH)
             codes = []
@@ -1184,7 +1263,7 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps({"ok": False, "error": f"Carga útil excede el límite máximo de seguridad ({MAX_PAYLOAD_SIZE // 1024} KB)"}).encode("utf-8"))
             return
 
-        # API Admin: Crear Código de Acceso
+        # API Admin: Crear Código de Acceso (rol pleno 'admin' únicamente)
         if clean_path == "/api/admin/create-code":
             body = self.rfile.read(content_length).decode("utf-8", errors="replace")
             try:
@@ -1194,8 +1273,8 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                 return
 
             admin_pin = req_data.get("pin") or self.headers.get("X-Admin-PIN", "")
-            if not verify_admin_pin(admin_pin):
-                self.send_json_response({"ok": False, "error": "Acceso de administrador no autorizado. Clave incorrecta."}, status_code=401)
+            role = self._require_admin_manage(admin_pin)
+            if role is None:
                 return
 
             code = req_data.get("code", "")
@@ -1236,7 +1315,7 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_json_response({"ok": False, "error": f"Error al crear código: {str(e)}"}, status_code=500)
             return
 
-        # API Admin: Revocar Código de Acceso
+        # API Admin: Revocar Código de Acceso (rol pleno 'admin' únicamente)
         if clean_path == "/api/admin/revoke-code":
             body = self.rfile.read(content_length).decode("utf-8", errors="replace")
             try:
@@ -1246,8 +1325,8 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                 return
 
             admin_pin = req_data.get("pin") or self.headers.get("X-Admin-PIN", "")
-            if not verify_admin_pin(admin_pin):
-                self.send_json_response({"ok": False, "error": "Acceso de administrador no autorizado."}, status_code=401)
+            role = self._require_admin_manage(admin_pin)
+            if role is None:
                 return
 
             code = req_data.get("code", "")

@@ -6,54 +6,84 @@
 const LicenseService = {
   // Hash criptográfico SHA-256 de la clave de administración (previene exposición de credenciales en GitHub)
   ADMIN_PIN_HASH: "75cfc5343b1e254fc0e4f909e980e14cda4d24dc223718749855ba3ec28457d8",
+  // Hash SHA-256 de la clave de PRESENTACIÓN DOCENTE (v7.16, PROMPT 013): misma experiencia
+  // visual de administrador, pero SIN permisos de gestión (no genera/revoca códigos ni
+  // gestiona/sube/importa/descarga archivos). Nunca en texto plano en el repo.
+  DOCENTE_PIN_HASH: "28f5e0c2764fecec65663fe4d72aff9330340a18e02232362c92a07736b808ba",
   STORAGE_LICENSE_KEY: "estudio_grado_user_license",
   STORAGE_ALL_CODES_KEY: "estudio_grado_issued_licenses",
 
   STORAGE_ADMIN_KEY: "estudio_grado_admin_session",
   STORAGE_ADMIN_PIN_KEY: "estudio_grado_admin_pin",
+  STORAGE_ADMIN_ROLE_KEY: "estudio_grado_admin_role",
 
-  // Verificación criptográfica segura de la clave de administración
+  // Verificación criptográfica segura de la clave de administración.
+  // Retorna el rol ("admin" | "docente") si es válida, o null si no lo es.
   async verifyAdminPin(enteredPin) {
-    if (!enteredPin || typeof enteredPin !== "string") return false;
+    if (!enteredPin || typeof enteredPin !== "string") return null;
     try {
       if (typeof crypto !== "undefined" && crypto.subtle) {
         const msgBuffer = new TextEncoder().encode(enteredPin.trim());
         const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-        const isValid = hashHex === this.ADMIN_PIN_HASH;
-        if (isValid) {
-          sessionStorage.setItem(this.STORAGE_ADMIN_PIN_KEY, enteredPin.trim());
+        let role = null;
+        if (hashHex === this.ADMIN_PIN_HASH) {
+          role = "admin";
+        } else if (hashHex === this.DOCENTE_PIN_HASH) {
+          role = "docente";
         }
-        return isValid;
+        if (role) {
+          sessionStorage.setItem(this.STORAGE_ADMIN_PIN_KEY, enteredPin.trim());
+          sessionStorage.setItem(this.STORAGE_ADMIN_ROLE_KEY, role);
+        }
+        return role;
       }
     } catch (e) {
       console.warn("Crypto API no disponible para verificación de PIN:", e);
     }
-    return false;
+    return null;
   },
 
   getAdminPin() {
     return sessionStorage.getItem(this.STORAGE_ADMIN_PIN_KEY) || "";
   },
 
-  // Modo Administrador
+  // Rol de la sesión de administración activa: "admin" | "docente" | ""
+  getAdminRole() {
+    return sessionStorage.getItem(this.STORAGE_ADMIN_ROLE_KEY) || "";
+  },
+
+  // Rol pleno de gestión (generar/revocar/listar códigos, subir/importar/exportar archivos)
+  isFullAdmin() {
+    return this.getAdminRole() === "admin";
+  },
+
+  // Cuenta de presentación docente: visualización y prueba de herramientas, sin gestión
+  isDocente() {
+    return this.getAdminRole() === "docente";
+  },
+
+  // Modo Administrador (rol pleno 'admin' o cuenta de presentación 'docente'):
+  // ambos desbloquean todo el contenido y ven el panel; difieren solo en permisos de gestión.
   isAdminMode() {
     return sessionStorage.getItem(this.STORAGE_ADMIN_KEY) === "true";
   },
 
-  setAdminMode(val) {
+  setAdminMode(val, role) {
     if (val) {
       sessionStorage.setItem(this.STORAGE_ADMIN_KEY, "true");
+      sessionStorage.setItem(this.STORAGE_ADMIN_ROLE_KEY, role || "admin");
     } else {
       sessionStorage.removeItem(this.STORAGE_ADMIN_KEY);
       sessionStorage.removeItem(this.STORAGE_ADMIN_PIN_KEY);
+      sessionStorage.removeItem(this.STORAGE_ADMIN_ROLE_KEY);
     }
   },
 
-  // Permiso para agregar, editar e importar notas (Admin o cuenta con rol gestor)
+  // Permiso para agregar, editar e importar notas (rol pleno admin o cuenta con rol gestor)
   canManageNotes() {
-    if (this.isAdminMode()) return true;
+    if (this.isFullAdmin()) return true;
     const lic = this.getCurrentLicense();
     if (lic && !lic.expired && (lic.role === 'admin' || lic.role === 'manager' || lic.canManageNotes === true)) {
       return true;
@@ -186,6 +216,10 @@ const LicenseService = {
 
   // 4. Panel de Admin: Generar nuevo código de licencia
   async generateCode(options = {}) {
+    // Modo Presentación Docente (v7.16): nunca generar códigos; defensa en profundidad sin fetch.
+    if (this.isDocente()) {
+      return { success: false, error: "Modo Presentación Docente: sin permisos de gestión." };
+    }
     const scope = options.scope || "all"; // 'all', 'civil', 'procesal', 'constitucional'
     const days = options.days !== undefined ? options.days : 180; // 180 días (semestre de grado) o 0 (perpetua)
     const studentName = options.studentName || "Alumno";
@@ -266,6 +300,8 @@ const LicenseService = {
 
   // 5. Obtener todos los códigos emitidos (sincronizado con el servidor SQLite si está disponible)
   async fetchAdminCodes() {
+    // Modo Presentación Docente (v7.16): sin acceso al listado de códigos; sin fetch.
+    if (this.isDocente()) return [];
     const adminPin = this.getAdminPin();
     if (adminPin) {
       try {
@@ -354,6 +390,8 @@ const LicenseService = {
   },
 
   async revokeCode(code) {
+    // Modo Presentación Docente (v7.16): nunca revocar códigos; sin fetch.
+    if (this.isDocente()) return false;
     const adminPin = this.getAdminPin();
     if (adminPin) {
       try {
