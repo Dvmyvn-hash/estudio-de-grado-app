@@ -1,7 +1,7 @@
 # PROMPT 015 — Visibilidad Restringida a Administrador para las Preguntas de Verificación de Cédula (Modo Perfeccionamiento)
 
 > **Versión:** v2.0 (Edición de Ingeniería Avanzada) · **Fecha:** 2026-09-23 · **Autor:** puente (dpint)
-> **Estado:** 📝 Listo para ejecutar · **Depende de:** 010 (contrato estructural 4×5 del `QuestionDeveloper`), 013 (roles admin/docente en `LicenseService`) y 014 (preguntas simples de combinación I–IV y modelos estructurales)
+> **Estado:** ✅ Implementado (v7.18) · **Depende de:** 010 (contrato estructural 4×5 del `QuestionDeveloper`), 013 (roles admin/docente en `LicenseService`) y 014 (preguntas simples de combinación I–IV y modelos estructurales)
 
 ---
 

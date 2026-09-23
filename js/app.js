@@ -939,9 +939,12 @@ const App = {
       ? topic.officialBreakdown.map(b => `<li class="official-bullet-item"><i data-lucide="check" class="bullet-icon"></i><span>${b}</span></li>`).join('')
       : `<li class="official-bullet-item"><span>Programa oficial DUN 11/2022 - Periodo 2026</span></li>`;
 
-    // Desarrollador de Preguntas de Grado (v7.11)
+    // Desarrollador de Preguntas de Grado — Modo Perfeccionamiento Admin (v7.18, PROMPT 015)
+    // El cuestionario está suprimido para el público general mientras se calibra la calidad dogmática.
+    // Solo visible para usuarios con sesión de administrador activa (LicenseService.isAdminMode()).
     let quizHtml = '';
-    if (isUnlocked && typeof QuestionDeveloper !== 'undefined') {
+    const canViewQuiz = isAdmin && isUnlocked && typeof QuestionDeveloper !== 'undefined';
+    if (canViewQuiz) {
       const questions = QuestionDeveloper.getSectionQuestions(topic);
       const quizState = StorageService.getTopicQuizState(topic.id) || {
         correctCount: 0,
@@ -1023,6 +1026,9 @@ const App = {
           <div class="quiz-dev-header">
             <div class="quiz-dev-title-wrap">
               <h2 class="quiz-dev-main-title">🎓 Verificación de Cédula — Desarrollador de Preguntas del Agente</h2>
+              <span class="quiz-admin-lab-badge" title="Cuestionario en desarrollo interno: visible exclusivamente para administradores">
+                <i data-lucide="flask-conical" style="width: 12px; height: 12px; vertical-align: middle;"></i> Modo Perfeccionamiento (Solo Admin)
+              </span>
               <span id="quiz-nature-badge" style="background: ${tax.color}22; color: ${tax.color}; border-color: ${tax.color}44;">
                 <i data-lucide="sparkles" style="width: 12px; height: 12px;"></i> ${tax.label} (${citesCount} cita${citesCount === 1 ? '' : 's'} real${citesCount === 1 ? '' : 'es'})
               </span>
@@ -1120,7 +1126,7 @@ const App = {
           <!-- CUERPO DE CONTENIDO REAL DEL APUNTE O PAYWALL -->
           ${isUnlocked ? `
             <div class="topic-markdown-body topic-rendered-content" id="topic-markdown-body">
-              ${MarkdownParser.render(topic.content)}
+              ${typeof MarkdownParser !== 'undefined' ? MarkdownParser.render(topic.content) : topic.content}
             </div>
 
             <!-- ACORDEÓN INLINE: INSTITUCIONES RELACIONADAS (DENTRO DEL APUNTE) -->
@@ -1334,7 +1340,7 @@ const App = {
       </div>
     `;
 
-    if (window.lucide) {
+    if (typeof window !== "undefined" && window.lucide) {
       window.lucide.createIcons();
     }
 
@@ -2518,6 +2524,12 @@ const App = {
 };
 
 // Arrancar cuando el DOM esté listo
-document.addEventListener("DOMContentLoaded", () => {
-  App.init();
-});
+if (typeof document !== "undefined") {
+  document.addEventListener("DOMContentLoaded", () => {
+    App.init();
+  });
+}
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = App;
+}
