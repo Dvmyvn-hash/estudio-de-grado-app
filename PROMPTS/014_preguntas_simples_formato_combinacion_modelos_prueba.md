@@ -1,7 +1,7 @@
 # PROMPT 014 — Preguntas de Verificación Simples y Claras (Formato Combinación I–IV, solo Dogmáticas) + Carpeta `MODELOS_DE_PRUEBA/`
 
 > **Versión:** v1.0 · **Fecha:** 2026-09-23 · **Autor:** puente (dpint)
-> **Estado:** 📝 Por ejecutar · **Depende de:** 010 (contrato estructural 4×5 del `QuestionDeveloper`) y 012 (motor contenido-conductor v7.15 que este prompt simplifica)
+> **Estado:** ✅ Implementado (v7.17) · **Depende de:** 010 (contrato estructural 4×5 del `QuestionDeveloper`) y 012 (motor contenido-conductor v7.15 que este prompt simplifica)
 
 ---
 

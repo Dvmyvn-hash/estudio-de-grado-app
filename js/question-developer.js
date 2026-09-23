@@ -1,11 +1,20 @@
 /**
- * DESARROLLADOR DE PREGUNTAS DEL AGENTE (QuestionDeveloper) - v7.15
- * Motor CONTENIDO-CONDUCTOR de perfil «Manejo»:
- * extrae definiciones, características, condiciones de procedencia, plazos y
- * tribunales del TEXTO REAL de cada cédula y construye arquetipos A-F anclados
- * al apunte (sin plantillas genéricas de relleno ni distractores absurdos).
+ * DESARROLLADOR DE PREGUNTAS DEL AGENTE (QuestionDeveloper) - v7.17
+ * Motor CONTENIDO-CONDUCTOR de perfil «Simple y Claro» (solo dogmáticas):
+ * - Requisitos, características y elementos del concepto en formato COMPARACIÓN
+ *   de combinación I-II-III-IV («a) I y II correctas», «Solo IV», «I, II y III»),
+ *   con 4 proposiciones cortas (3 verdaderas ancladas al apunte + 1 falsa por
+ *   mutación simple, nunca verbatim en la cédula).
+ * - Plazos como pregunta NUMÉRICA simple («¿de cuántos días/años es el plazo?»)
+ *   con distractores numéricos simples (sin cómputo aritmético de casos).
+ * - Definiciones cortas (correcta ≤ 155 chars) como relleno, con distractores
+ *   cortos: versión incompleta, institución afín, mezcla o negación evidente.
+ * - Los CASOS quedan APARTE: no se emiten preguntas de caso (la taxonomía y el
+ *   arquetipo _specCaso se conservan reservados para la próxima etapa).
  * Mantiene el contrato público v7.11 (detectNature, buildSectionQuestions,
- * validateSectionQuestions, getSectionQuestions, natureOf).
+ * validateSectionQuestions, getSectionQuestions, natureOf) y el contrato
+ * estructural 24.4 (4 preguntas x 5 opciones A-E, solucDogmática >= 150 chars
+ * con cierre «Conclusión:», citas subconjunto, determinismo sin Math.random).
  */
 
 (function(root) {
@@ -43,8 +52,17 @@
     return arr;
   }
 
+  // Gramática estructural compilada desde MODELOS_DE_PRUEBA/ (v7.17).
+  // Se consume de forma perezosa (en runtime el script js/exam-structure-grammar.js
+  // puede cargarse antes o después); si no existe, se usan los valores por defecto.
+  function grammarOrDefault(rootRef) {
+    const g = (typeof rootRef !== "undefined" && rootRef && rootRef.EXAM_STRUCTURE_GRAMMAR) || null;
+    return g && typeof g === "object" ? g : null;
+  }
+
   const QuestionDeveloper = {
-    // Taxonomía oficial de naturalezas de preguntas de examen de grado
+    // Taxonomía oficial de naturalezas de preguntas de examen de grado (metadatos;
+    // la generación v7.17 es SIEMPRE dogmática; case queda reservado para la etapa de casos).
     NATURE_TAXONOMY: {
       dogmatic: {
         id: "dogmatic",
@@ -103,6 +121,27 @@
       ]
     },
 
+    // Banco de ELEMENTOS AJENOS para las proposiciones FALSAS de las preguntas de
+    // combinación (mutación simple): son elementos verosímiles pero NO exigidos por
+    // la institución de cada materia. Nunca aparecen verbatim en el apunte (guardrail).
+    _FALSE_ELEMENTS: {
+      civil: [
+        "la inscripción en el Registro Conservatorio de Bienes Raíces",
+        "la solemnidad de escritura pública en todos los casos",
+        "la entrega material de la cosa con indemnización previa"
+      ],
+      procesal: [
+        "la comparecencia personal obligatoria de las partes ante el tribunal",
+        "la consignación previa de una caución para toda gestión",
+        "la inscripción del acto en el Registro Civil"
+      ],
+      constitucional: [
+        "la aprobación previa del Consejo de Estado para su validez",
+        "la declaración jurada ante notario del interesado",
+        "la inscripción en el Registro Civil para su perfeccionamiento"
+      ]
+    },
+
     /**
      * Helper defensivo de extracción de citas normativas chilenas.
      * Reutiliza CaseGeneratorAgent.extractCitations si está disponible en runtime.
@@ -125,9 +164,9 @@
     },
 
     /**
-     * Clasificador heurístico ponderado de la naturaleza de la cédula.
-     * Orden de precedencia estricto ante empates:
-     * procedencia > competencia > plazos > case > dogmatic (fallback)
+     * Clasificador heurístico ponderado de la naturaleza de la cédula (METADATO).
+     * Se conserva v7.11 para el badge del quiz y para la futura etapa de preguntas
+     * de caso; la generación v7.17 es siempre dogmática.
      */
     detectNature(topic) {
       if (!topic) return "dogmatic";
@@ -239,7 +278,7 @@
     /**
      * Limpia una oración/enunciado crudo del markdown del apunte.
      * - stripLabel=true  : elimina prefijos "Etiqueta:" (necesario en definiciones).
-     * - stripLabel=false : conserva la etiqueta (necesario en características).
+     * - stripLabel=false : conserva la etiqueta (auxiliar en características).
      */
     _cleanSentence(raw, stripLabel) {
       if (!raw || typeof raw !== "string") return "";
@@ -376,14 +415,6 @@
       return unique.slice(0, 6);
     },
 
-    _extractProcedenciaSentence(content) {
-      if (!content) return null;
-      const sentences = this._splitSentences(content)
-        .map(s => this._cleanSentence(s, true))
-        .filter(s => s.length >= 45 && s.length <= 300 && /\b(?:procede|no procede|se concede|es admisible|se deducir[aá]|se interpone|requiere)\b/i.test(s));
-      return sentences.sort((a, b) => b.length - a.length)[0] || null;
-    },
-
     _extractPlazo(content) {
       if (!content) return null;
       const re = /(?:plazo|t[ée]rmino|termino)[^.\n]{0,90}?(\d{1,3})\s*d[ií]as?(?:\s*(h[aá]biles|corridos))?/gi;
@@ -401,35 +432,22 @@
       return { days, unit };
     },
 
-    _extractTribunals(content) {
-      if (!content) return [];
-      const re = /\b(?:Juzgado de Letras del Trabajo|Juzgado de Letras|Juzgado de Garant[íi]a|Tribunal Oral en lo Penal|Tribunal de Juicio Oral|Corte de Apelaciones|Corte Suprema|Juzgado de Familia|Juzgado de Polic[íi]a Local|Tribunal de Letras)\b/gi;
-      const out = [];
-      const seen = new Set();
+    /** Plazo expresado en años o meses (p. ej. prescripción, plazos de fondo). */
+    _extractPlazoAnos(content) {
+      if (!content) return null;
+      const re = /(?:plazo|t[ée]rmino|prescripci[oó]n|duracion|duraci[oó]n)[^.\n]{0,80}?(\d{1,2})\s*(años?|meses?)/gi;
+      const matches = [];
       let m;
       while ((m = re.exec(content)) !== null) {
-        const t = m[0];
-        if (!seen.has(t.toLowerCase())) { seen.add(t.toLowerCase()); out.push(t); }
+        const value = parseInt(m[1], 10);
+        const unitRaw = m[2].toLowerCase();
+        if (Number.isInteger(value) && value > 0) {
+          matches.push({ value, unit: unitRaw.startsWith("a") ? "años" : "meses" });
+        }
       }
-      return out;
-    },
-
-    _sentenceContaining(content, phrase) {
-      if (!content || !phrase) return null;
-      const low = phrase.toLowerCase();
-      const found = this._splitSentences(content)
-        .map(x => this._cleanSentence(x, true))
-        .filter(x => x.length >= 60 && x.length <= 300 && x.toLowerCase().includes(low));
-      return found.sort((a, b) => b.length - a.length)[0] || null;
-    },
-
-    _otherTribunals(main) {
-      const bank = ["la Corte de Apelaciones", "la Corte Suprema", "el Juzgado de Letras", "el Juzgado de Familia", "el Tribunal Oral en lo Penal", "el Juzgado de Policía Local"];
-      const mainLow = (main || "").toLowerCase();
-      return bank.filter(b => {
-        const bCore = b.replace(/^(la|el) /, "").toLowerCase();
-        return !mainLow.includes(bCore) && !bCore.includes(mainLow);
-      }).slice(0, 3);
+      if (!matches.length) return null;
+      const pref = matches.find(x => x.unit === "años") || matches[0];
+      return { value: pref.value, unit: pref.unit };
     },
 
     _buildContext(topic) {
@@ -445,8 +463,26 @@
     },
 
     // ================================================================
-    // MANIPULACIÓN DE LONGITUD (homogeneidad ± banda, correcto = más largo)
+    // MANIPULACIÓN DE LONGITUD (recorte a cláusulas breves y claras)
     // ================================================================
+
+    _limitTo(s, max) {
+      if (!s || s.length <= max) return s || "";
+      let cut = s.slice(0, max);
+      const lastComma = cut.lastIndexOf(",");
+      const lastSpace = cut.lastIndexOf(" ");
+      const at = lastComma > max * 0.5 ? lastComma : lastSpace;
+      if (at > max * 0.45) cut = cut.slice(0, at);
+      return cut.replace(/[,;:\s]+$/, "").trim();
+    },
+
+    // Parámetro de formato desde EXAM_STRUCTURE_GRAMMAR (compilado desde
+    // MODELOS_DE_PRUEBA/); en ausencia de la gramática se usa el fallback.
+    _gparam(key, fallback) {
+      const g = grammarOrDefault(root);
+      const v = g && g[key];
+      return typeof v === "number" && isFinite(v) ? v : fallback;
+    },
 
     _truncateAtComma(s, k) {
       if (!s) return "";
@@ -465,60 +501,6 @@
       return s.slice(0, Math.max(20, Math.floor(s.length * frac))).replace(/[,;\s]+$/, "").trim();
     },
 
-    _limitTo(s, max) {
-      if (!s || s.length <= max) return s || "";
-      let cut = s.slice(0, max);
-      const lastComma = cut.lastIndexOf(",");
-      const lastSpace = cut.lastIndexOf(" ");
-      const at = lastComma > max * 0.5 ? lastComma : lastSpace;
-      if (at > max * 0.45) cut = cut.slice(0, at);
-      return cut.replace(/[,;:\s]+$/, "").trim();
-    },
-
-    _padTo(s, min) {
-      if (!s) s = "";
-      if (s.length >= min) return s.trim();
-      let out = s.replace(/[.;,]\s*$/, "").trim();
-      const pads = [
-        " en los términos que desarrolla el apunte.",
-        " conforme a las reglas generales expuestas en la cédula.",
-        " según el alcance que la doctrina y la ley le reconocen en la materia.",
-        " en el sentido que le atribuye el texto de la sección respectiva.",
-        " según el desarrollo dogmático que la cédula consigna."
-      ];
-      let i = 0;
-      while (out.length < min) {
-        out = `${out} ${pads[i % pads.length].trim()}`.trim();
-        i++;
-        if (i > 24) break;
-      }
-      return out.trim();
-    },
-
-    /**
-     * Ajusta las 4 opciones incorrectas hacia una longitud objetivo dentro de la
-     * banda [0.72·L, 0.98·L] respecto de la correcta (L). La correcta queda como
-     * la opción más desarrollada y las alternativas mantienen homogeneidad
-     * sólida (ratio máx/mín <= ~1.4).
-     */
-    _normalizeLengths(correct, distractors) {
-      const L = (correct || "").length;
-      const low = Math.max(46, Math.floor(L * 0.72));
-      const high = Math.max(low + 6, Math.floor(L * 0.98));
-      const target = Math.max(low, Math.min(high, Math.floor((low + high) / 2)));
-      const normC = this._normalize(correct);
-      return distractors.map(d => {
-        let s = (d || "").trim();
-        if (s.length > target) s = this._limitTo(s, target);
-        if (s.length < target) s = this._padTo(s, target);
-        if (s.length > high) s = this._limitTo(s, high);
-        if (s.length < low) s = this._padTo(s, low);
-        s = s.replace(/[.,;\s]+$/, "").trim();
-        if (this._normalize(s) === normC) s = `${s}, como lo desarrolla el apunte en su sección respectiva.`;
-        return s;
-      });
-    },
-
     _afinFor(subject) {
       const bank = this._AFIN_BANK[subject] || this._AFIN_BANK.civil;
       return bank[0] || "";
@@ -532,303 +514,429 @@
       return tail.replace(/\s*\.\s*$/, "").trim() || "sin perjuicio de las reglas particulares que la ley establece para cada caso";
     },
 
-    _ordinal(n) {
-      const map = { 1: "primera", 2: "segunda", 3: "tercera", 4: "cuarta", 5: "quinta", 6: "sexta", 7: "séptima", 8: "octava", 9: "novena", 10: "décima" };
-      return map[n] || `${n}ª`;
+    _plural(n, singular, plural) {
+      return n === 1 ? `${n} ${singular}` : `${n} ${plural}`;
     },
 
-    /**
-     * Cálculo aritmético determinista del vencimiento de un término.
-     * Notificación supuesta: un día lunes (día 0). Los días corren desde el
-     * día siguiente hábil (martes) excluyendo inhábiles, salvo el modo indicado.
-     */
-    _plazoOptions(days, unit) {
-      const WD = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"];
-      const comp = (mode) => {
-        if (mode === "corridos") {
-          return { name: WD[days % 7], week: Math.floor(days / 7) + 1 };
-        }
-        let n = 0;
-        let d = mode === "conNotif" ? 0 : 1;
-        let endWd = 0;
-        let endDay = 0;
-        while (n < days) {
-          const wd = d % 7;
-          const hab = (wd >= 0 && wd <= 4) || (mode === "sabado" && wd === 5);
-          if (hab) { n++; endWd = wd; endDay = d; }
-          d++;
-        }
-        return { name: WD[endWd], week: Math.floor(endDay / 7) + 1 };
-      };
-      const hab = comp("habiles");
-      const conNotif = comp("conNotif");
-      const sabado = comp("sabado");
-      const corridos = comp("corridos");
-      const ord = (w) => this._ordinal(w);
+    // ================================================================
+    // FORMATO DE COMBINACIÓN I-II-III-IV (v7.17)
+    // ================================================================
 
-      if (unit === "corridos") {
-        return {
-          correct: `vence el ${corridos.name} de la ${ord(corridos.week)} semana siguiente, computándose ${days} días corridos sin excepción desde la notificación.`,
-          d1: `vence el ${hab.name} de la ${ord(hab.week)} semana siguiente, contándose solo los días hábiles.`,
-          d2: `vence el ${conNotif.name} de la ${ord(conNotif.week)} semana siguiente, excluyéndose los días inhábiles.`,
-          d3: `vence el ${sabado.name} de la ${ord(sabado.week)} semana siguiente, contándose el sábado pero no el domingo.`,
-          d4: `se prorroga automáticamente mientras la gestión no se evacue, sin término cierto ni efecto preclusivo.`
-        };
+    /** Construye el texto canónico de una combinación de proposiciones. */
+    _romanCombo(positions) {
+      const labels = ["I", "II", "III", "IV"];
+      const names = positions.map(p => labels[p] || "").filter(Boolean);
+      if (!names.length) return "";
+      if (names.length === 1) return `Solo ${names[0]}`;
+      if (names.length === 2) return `${names[0]} y ${names[1]}`;
+      return `${names.slice(0, -1).join(", ")} y ${names[names.length - 1]}`;
+    },
+
+    /** Extrae los textos de las proposiciones I-IV del enunciado de una pregunta. */
+    _statementTexts(questionText) {
+      if (!questionText) return [];
+      const out = [];
+      const lines = String(questionText).split(/\r?\n/);
+      for (const line of lines) {
+        const m = line.match(/^([IVX]+)\.\s+(.+)$/);
+        if (m && m[2].trim()) out.push(m[2].trim());
       }
-      return {
-        correct: `vence el ${hab.name} de la ${ord(hab.week)} semana siguiente, computando ${days} días hábiles y descontando domingos y feriados, según la regla fatal del apunte.`,
-        d1: `vence un día hábil antes, esto es el ${conNotif.name} de la ${ord(conNotif.week)} semana, porque se contó indebidamente el día de la notificación como primero del término.`,
-        d2: `vence el ${corridos.name} de la ${ord(corridos.week)} semana siguiente, computando ${days} días corridos sin excluir sábados, domingos ni feriados.`,
-        d3: `vence el ${sabado.name} de la ${ord(sabado.week)} semana siguiente, pues solo se excluyeron los domingos y se contó el sábado como día hábil.`,
-        d4: `se prorroga automáticamente y sin término cierto mientras la gestión no se evacue, careciendo su vencimiento de efecto preclusivo alguno.`
-      };
+      return out;
     },
 
-    // ================================================================
-    // ARQUETIPOS DE PREGUNTA (contenido-conductores)
-    // ================================================================
+    /** Pautas mínimas de solución (contrato 24.4: >= 150 chars). */
+    _solutionMin(text, min) {
+      let s = (text || "").trim();
+      const pads = [
+        " La combinación correcta se desprende del desarrollo dogmático de la cédula, sin elementos ajenos a ella.",
+        " Esta conclusión se verifica confrontando cada proposición con el texto del apunte, descartando cualquier elemento que la cédula no exige."
+      ];
+      let i = 0;
+      while (s.length < min && i < pads.length) { s = s + pads[i]; i++; }
+      return s;
+    },
+
+    _extractClauseItems(content) {
+      if (!content) return [];
+      const items = [];
+      const lines = content.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      for (const line of lines) {
+        const m = line.match(/^[-*•]\s+(.+)$/) || line.match(/^\d+[.)]\s+(.+)$/) || line.match(/^\*{1,2}\d+\.\*{1,2}\s+(.+)$/);
+        if (!m) continue;
+        const raw = m[1];
+        // Las cabeceras «**Etiqueta:**» no son cláusulas sustantivas: se descartan
+        if (/:$/.test(raw.trim())) continue;
+        const clean = this._cleanSentence(raw, true);
+        if (clean.length >= 20 && clean.length <= 200) items.push({ raw, clean });
+      }
+      return items;
+    },
+
+    /** Título corto para el enunciado: omite los paréntesis explicativos. */
+    _stripParenthetical(s) {
+      return String(s || "").replace(/\s*\([^)]*\)/g, " ").replace(/\s+/g, " ").trim();
+    },
 
     /**
-     * A - Concepto mejor desarrollado: la correcta reproduce íntegramente la
-     * definición del apunte; los distractores omiten cláusulas, mutan la
-     * institución o le agregan un elemento ajeno.
+     * Requisitos: viñetas/cláusulas del apunte que enuncian requisitos, condiciones,
+     * presupuestos o exigencias. Retorna cláusulas cortas (>=3) o [].
      */
-    _specConcepto(ctx, cites, variant) {
-      const def = ctx.def;
-      if (!def) return null;
+    _extractRequisitos(content) {
+      if (!content) return [];
+      const marker = /\b(?:requisito|presupuesto|condici[oó]n(?:es)? de|se requiere|se exige|es necesario|es indispensable|para su validez|para su existencia|necesario para la (?:validez|existencia)|se debe satisfacer|debe satisfacer)\b/i;
+      const fromItems = this._extractClauseItems(content)
+        .filter(x => marker.test(x.raw) || marker.test(x.clean))
+        .map(x => x.clean)
+        .filter(s => s.length >= 20);
+      const out = [];
+      const seen = new Set();
+      for (const i of fromItems) {
+        const k = this._normalize(i);
+        if (!seen.has(k)) { seen.add(k); out.push(i); }
+      }
+      if (out.length >= 3) return out.slice(0, 6);
+      const fromSentences = this._splitSentences(content)
+        .map(s => this._cleanSentence(s, true))
+        .filter(s => s.length >= 40 && s.length <= 200 && /\b(?:requisitos|presupuestos|se requiere|se exige|es necesario|debe)\b/i.test(s));
+      for (const s of fromSentences) {
+        const k = this._normalize(s);
+        if (!seen.has(k)) { seen.add(k); out.push(s); }
+      }
+      return out.slice(0, 6);
+    },
+
+    /**
+     * Elementos del concepto: cláusulas/enumeraciones que integran el concepto
+     * (elementos, constitutivos, componentes, partes). Retorna >=3 o [].
+     */
+    _extractElementos(content) {
+      if (!content) return [];
+      const marker = /\b(?:elemento|elementos|constitutiv|componente|integran|se compone de|comprende|constituye|parte del concepto|se integra)\b/i;
+      const fromItems = this._extractClauseItems(content)
+        .filter(x => marker.test(x.raw) || marker.test(x.clean))
+        .map(x => x.clean)
+        .filter(s => s.length >= 20);
+      const out = [];
+      const seen = new Set();
+      for (const i of fromItems) {
+        const k = this._normalize(i);
+        if (!seen.has(k)) { seen.add(k); out.push(i); }
+      }
+      if (out.length >= 3) return out.slice(0, 6);
+      const fromSentences = this._splitSentences(content)
+        .map(s => this._cleanSentence(s, true))
+        .filter(s => s.length >= 40 && s.length <= 200 && /\b(?:elementos|constitutivos|componentes|integran|se compone de)\b/i.test(s));
+      for (const s of fromSentences) {
+        const k = this._normalize(s);
+        if (!seen.has(k)) { seen.add(k); out.push(s); }
+      }
+      return out.slice(0, 6);
+    },
+
+    /**
+     * Fabricación determinista de la proposición FALSA (mutación simple por medio
+     * del banco de elementos ajenos). Nunca verbatim en el apunte, nunca duplicada
+     * con las verdaderas, cero tokens absurdos. Retorna cláusula corta o null.
+     */
+    _componentFalsa(tres, ctx) {
+      const bank = this._FALSE_ELEMENTS[ctx.subject] || this._FALSE_ELEMENTS.civil;
+      const contentNorm = this._normalize(ctx.content || "");
+      const rng = mulberry32(fnv1a(`${ctx.content || ""}|falsa|${ctx.cleanTitle}`));
+      const shuffled = shuffleArray(bank.slice(), rng);
+      for (const f of shuffled) {
+        const short = this._limitTo(this._cleanSentence(String(f), true), 70);
+        if (!short || short.length < 20) continue;
+        const fNorm = this._normalize(short);
+        if (!fNorm) continue;
+        if (contentNorm.includes(fNorm)) continue;                       // anti-verbatim
+        if (this._BANNED_ABSURD.some(b => short.toLowerCase().includes(b))) continue;
+        if (tres.some(t => this._normalize(t) === fNorm)) continue;
+        return short;
+      }
+      return null;
+    },
+
+    /**
+     * Constructor único del arquetipo de COMBINACIÓN I-IV (requisitos,
+     * características o elementos del concepto). 3 proposiciones verdaderas + 1
+     * falsa; la correcta es la combinación que incluye todas las verdaderas y
+     * ninguna falsa; cada distractor incluye la falsa u omite al menos una verdadera.
+     */
+    _buildCombinacionSpec(ctx, cites, kind, kindFull, questionIntro, clauses, primary) {
+      if (!Array.isArray(clauses) || clauses.length < 3) return null;
+      const tres = clauses.slice(0, 3)
+        .map(c => this._limitTo(this._cleanSentence(String(c), true), 70))
+        .filter(s => s && s.length >= 20 && !/:$/.test(s));
+      if (tres.length < 3) return null;
+      const falsa = this._componentFalsa(tres, ctx);
+      if (!falsa) return null;
       const instituto = ctx.cleanTitle;
-      const t1 = this._truncateAtComma(def, 2) || def;
-      const t2 = this._truncateAtComma(def, 1) || def;
-      const afin = ctx.afines[0] || this._afinFor(ctx.subject);
-      const lastComma = def.lastIndexOf(",");
-      const d4 = (lastComma > 30 ? def.slice(0, lastComma) : def) + ", " + this._afinTailClause(afin);
-      const distractors = this._normalizeLengths(def, [t1, t2, afin, d4]);
-      const questionText = variant === 0
-        ? `Según lo desarrollado en el apunte, ¿cuál de las siguientes definiciones de ${instituto} es la más completa y fiel a lo expuesto?`
-        : `De acuerdo con la cédula, ¿cuál de las siguientes opciones reproduce correctamente el concepto de ${instituto} desarrollado en el apunte?`;
-      const solucionDogmatica = `La opción correcta reproduce la definición de ${instituto} del apunte conservando todos los elementos que la desarrollan (la versión íntegra). Los distractores omiten cláusulas esenciales presentando versiones truncadas, confunden la institución con una afín o le agregan un elemento ajeno al texto de la cédula. Conclusión: la definición más completa, desarrollada y fiel al apunte es la correcta.`;
+      const labels = ["I", "II", "III", "IV"];
+      const stmts = [tres[0], tres[1], tres[2], falsa];
+
+      // Orden determinista de presentación de las proposiciones (barajado sembrado)
+      const rng = mulberry32(fnv1a(`${ctx.content || ""}|${kind}|combo`));
+      const order = shuffleArray([0, 1, 2, 3], rng);
+      const presented = order.map((origIdx, pos) => ({
+        label: labels[pos],
+        text: stmts[origIdx],
+        isTrue: origIdx < 3
+      }));
+      const trueLblPos = presented.map((p, i) => (p.isTrue ? i : -1)).filter(i => i >= 0);
+      const falsePos = presented.findIndex(p => !p.isTrue);
+      const correctCombo = this._romanCombo(trueLblPos.slice().sort((a, b) => a - b));
+      const j = trueLblPos.slice(0, 2);
+
+      const combos = new Set([correctCombo]);
+      const cands = [
+        `Solo ${labels[falsePos]}`,
+        this._romanCombo([j[0], falsePos].sort((a, b) => a - b)),
+        this._romanCombo([j[1], falsePos].sort((a, b) => a - b)),
+        this._romanCombo([j[0], j[1]].sort((a, b) => a - b))
+      ];
+      const distractors = [];
+      for (const c of cands) {
+        if (!c || combos.has(c)) continue;
+        combos.add(c);
+        distractors.push(c);
+        if (distractors.length === 4) break;
+      }
+      while (distractors.length < 4) {
+        // Red de seguridad (no debería alcanzarse con 4 proposiciones)
+        const r = Math.floor(rng() * [1, 2, 3].length);
+        const size = [1, 2, 3][r];
+        const pool = [0, 1, 2, 3];
+        const picked = shuffleArray(pool, rng).slice(0, size).sort((a, b) => a - b);
+        const combo = this._romanCombo(picked);
+        if (!combos.has(combo) && combo) {
+          combos.add(combo);
+          distractors.push(combo);
+        }
+      }
+      // Asegurar que cada distractor incluya la falsa o omita al menos una verdadera
+      // (y respete el tope de longitud de opción que dicta la gramática estructural)
+      const maxComboOptChars = this._gparam("maxCombinacionOptionChars", 120);
+      const validDist = distractors.filter(d => {
+        if (d.length > maxComboOptChars) return false;
+        const set = this._comboToSet(d, labels.length);
+        return set.has(falsePos) || trueLblPos.some(p => !set.has(p));
+      });
+      if (validDist.length < 4) return null;
+
+      const statementLines = presented.map(p => `${p.label}. ${p.text}`);
+      const enunciado = `Según el apunte, ${questionIntro}`;
+      const questionText = `${enunciado}\n${statementLines.join("\n")}`;
+
+      const trueLabels = trueLblPos.map(i => labels[i]);
+      const falseLabel = labels[falsePos];
+      const falseText = presented[falsePos].text;
+      const listTrue = trueLabels.join(", ");
+      const solucionDogmatica = this._solutionMin(
+        `En ${instituto}, el apunte desarrolla los ${kindFull} señalando las proposiciones ${listTrue} como correctas: cada una de ellas se desprende literalmente del texto de la cédula (${tres.join("; ")}). En cambio, la proposición ${falseLabel} es falsa, pues introduce un elemento que la cédula no exige (${falseText}). Conclusión: la alternativa correcta es ${correctCombo}.`,
+        150
+      );
+
       return {
         nature: "dogmatic",
+        format: "combinacion",
         questionText,
-        correctText: def,
-        distractor1: distractors[0],
-        distractor2: distractors[1],
-        distractor3: distractors[2],
-        distractor4: distractors[3],
+        correctText: correctCombo,
+        distractor1: validDist[0],
+        distractor2: validDist[1],
+        distractor3: validDist[2],
+        distractor4: validDist[3],
         solucionDogmatica,
-        pauta: "El postulante debe reconocer la definición desarrollada del apunte y descartar versiones incompletas, mutadas o con elementos ajenos.",
-        sourceCitations: variant === 0 ? cites.primary : cites.secondary
+        pauta: `Identificación de los ${kindFull} de ${instituto} conforme a la cédula y descarte de elementos ajenos.`,
+        sourceCitations: primary ? cites.primary : cites.secondary
       };
     },
 
-    /**
-     * B - Características: la correcta enumera los rasgos reales del apunte;
-     * los distractores omiten, reemplazan, alteran el orden o inoculan rasgos ajenos.
-     */
-    _specCaracteristicas(ctx, cites, variant) {
-      const traits = (ctx.traits || []).slice(0, 3).map(t => this._limitTo(t, 120));
-      if (traits.length < 2) return null;
+    /** Convierte «Solo I», «I y II», «I, II y III» a conjunto de posiciones. */
+    _comboToSet(combo, maxLabels) {
+      const set = new Set();
+      if (!combo) return set;
+      const labels = ["I", "II", "III", "IV"];
+      const composite = combo.replace(/^Solo\s+/i, "");
+      const parts = composite.split(/[,y\s]+/).filter(Boolean);
+      for (const p of parts) {
+        const idx = labels.indexOf(p.toUpperCase());
+        if (idx >= 0 && idx < maxLabels) set.add(idx);
+      }
+      return set;
+    },
+
+    /** A - Requisitos en formato combinación I-IV. */
+    _specCombinacionRequisitos(ctx, cites, clauses) {
+      const ref = this._limitTo(this._stripParenthetical(ctx.cleanTitle), 64);
+      return this._buildCombinacionSpec(
+        ctx, cites, "requisitos", "requisitos",
+        `¿cuáles de los siguientes son requisitos de ${ref}?`,
+        clauses, true
+      );
+    },
+
+    /** B - Características en formato combinación I-IV. */
+    _specCombinacionCaracteristicas(ctx, cites, clauses) {
+      if (!Array.isArray(clauses) || clauses.length < 3) return null;
+      const ref = this._limitTo(this._stripParenthetical(ctx.cleanTitle), 64);
+      return this._buildCombinacionSpec(
+        ctx, cites, "caracteristicas", "características",
+        `¿cuáles de las siguientes son características de ${ref}?`,
+        clauses, true
+      );
+    },
+
+    /** C - Elementos del concepto en formato combinación I-IV. */
+    _specCombinacionElementos(ctx, cites, clauses) {
+      if (!Array.isArray(clauses) || clauses.length < 3) return null;
+      const ref = this._limitTo(this._stripParenthetical(ctx.cleanTitle), 64);
+      return this._buildCombinacionSpec(
+        ctx, cites, "elementos", "elementos",
+        `identifica los elementos que integran el concepto de ${ref}:`,
+        clauses, false
+      );
+    },
+
+    /** D - Plazo simple numérico: «¿De cuántos días/años es el plazo?». */
+    _specPlazoSimple(ctx, cites) {
+      const plaz = this._extractPlazo(ctx.content) || this._extractPlazoAnos(ctx.content);
+      if (!plaz) return null;
+      // Normalización: `_extractPlazo` expone {days, unit}; `_extractPlazoAnos` expone {value, unit}
+      const value = Number.isInteger(plaz.value) ? plaz.value : plaz.days;
+      if (!Number.isInteger(value) || value <= 0) return null;
       const instituto = ctx.cleanTitle;
-      const correct = traits.join("; ");
-      const foreign = ctx.afines[0] ? this._truncateAtComma(ctx.afines[0], 1) : this._afinFor(ctx.subject);
-      const gen = "cualquier otra manifestación que las partes estipulen en conformidad a la ley";
-      const build = (arr) => arr.join("; ");
-      const d1 = build(traits.map((t, i) => (i === 1 ? foreign : t)));
-      const d2 = build(traits.slice(0, traits.length - 1));
-      const d3ts = traits.slice();
-      d3ts[0] = gen;
-      const d3 = build(d3ts.slice(0, traits.length - 1));
-      const d4 = build(traits.slice().reverse());
-      const distractors = this._normalizeLengths(correct, [d1, d2, d3, d4]);
-      const questionText = variant === 0
-        ? `De acuerdo con el desarrollo del apunte, ${instituto} se caracteriza por:`
-        : `Conforme a la cédula, los elementos o características propios de ${instituto} son:`;
-      const solucionDogmatica = `La opción correcta reúne las características que el apunte atribuye expresamente a ${instituto}. Los distractores omiten alguna de ellas, la reemplazan por un rasgo ajeno o intrascendente, o alteran su contenido y orden. Conclusión: el conjunto de características fiel al texto de la cédula es la opción correcta.`;
+      const isAnual = plaz.unit === "años";
+      const isMensual = plaz.unit === "meses";
+      const isDiario = !isAnual && !isMensual; // hábiles | corridos
+      const unitSingular = { años: "año", meses: "mes" }[plaz.unit] || "día";
+      const unitPlural = isAnual ? "años" : (isMensual ? "meses" : "días");
+      const periodo = unitPlural; // palabra del enunciado: días | años | meses
+      const correct = isDiario
+        ? `${this._plural(value, "día", "días")} ${plaz.unit}`
+        : this._plural(value, unitSingular, unitPlural);
+      const unitLabel = isDiario ? `${unitPlural} ${plaz.unit}` : unitPlural;
+      const flip = isDiario
+        ? (plaz.unit === "hábiles" ? "corridos" : "hábiles")
+        : (isAnual ? "meses" : "años");
+
+      // Distractores numéricos simples y deterministas (número alterado y/o
+      // modalidad hábil<->corrida / años<->meses). Siempre != correct.
+      const cands = [];
+      const add = (num, word) => {
+        const text = isDiario
+          ? `${this._plural(num, "día", "días")} ${word}`
+          : this._plural(num, { años: "año", meses: "mes" }[word] || word, word);
+        if (text !== correct) cands.push(text);
+      };
+      if (isAnual) {
+        add(Math.max(1, value - 3), "años");
+        add(value, "meses");
+        add(value + 5, "años");
+        add(value + 1, "años");
+        add(Math.max(1, value + 9), "años");
+        add(Math.max(1, value + 2), "meses");
+      } else if (isMensual) {
+        add(Math.max(1, value - 2), "meses");
+        add(value, "años");
+        add(value + 6, "meses");
+        add(value + 1, "meses");
+        add(value + 9, "meses");
+        add(value + 2, "años");
+      } else {
+        add(Math.max(2, value - 8), plaz.unit);
+        add(value, flip);
+        add(value + 12, plaz.unit);
+        add(Math.max(2, value - 3), flip);
+        add(Math.max(2, value + 20), plaz.unit);
+        add(Math.max(2, value - 5), flip);
+        add(Math.max(2, value + 25), plaz.unit);
+      }
+
+      const seen = new Set([correct]);
+      const distractors = [];
+      for (const c of cands) {
+        if (!c || seen.has(c)) continue;
+        seen.add(c);
+        distractors.push(c);
+        if (distractors.length === 4) break;
+      }
+      // Red de seguridad OPERATIVA anti-cuelgue: valores crecientes distintos, con
+      // tope duro; jamás un bucle sin fin.
+      let extra = value + 40;
+      let guard = 0;
+      while (distractors.length < 4 && guard < 40) {
+        const cand = isDiario
+          ? `${this._plural(Math.max(2, extra), "día", "días")} ${flip}`
+          : this._plural(Math.max(1, extra), unitSingular, unitPlural);
+        if (!seen.has(cand)) { seen.add(cand); distractors.push(cand); }
+        extra += 7;
+        guard++;
+      }
+      if (distractors.length < 4) return null;
+
+      const solucionDogmatica = this._solutionMin(
+        `En materia de ${instituto}, el apunte establece un plazo de ${correct} y esa es la alternativa correcta. Los distractores modifican el número de ${periodo} o reemplazan la modalidad del cómputo (${flip} en lugar de ${unitLabel}), desvirtuando la regla de la cédula. Conclusión: el plazo fijado por el apunte es de ${correct}.`,
+        150
+      );
       return {
         nature: "dogmatic",
-        questionText,
+        format: "plazo",
+        questionText: `Según el apunte, ¿de cuántos ${periodo} es el plazo de ${instituto}?`,
         correctText: correct,
         distractor1: distractors[0],
         distractor2: distractors[1],
         distractor3: distractors[2],
         distractor4: distractors[3],
         solucionDogmatica,
-        pauta: "Dominio de las notas características desarrolladas en la cédula y descarte de rasgos ajenos.",
-        sourceCitations: cites.primary
-      };
-    },
-
-    /**
-     * C - Procedencia: la correcta reproduce la condición/hipótesis de procedencia
-     * del apunte; los distractores mutan la oportunidad, el agente o la fidelidad.
-     */
-    _specProcedencia(ctx, cites) {
-      const pRaw = this._extractProcedenciaSentence(ctx.content) || ctx.def;
-      if (!pRaw) return null;
-      const p = this._ensureSubstantive(pRaw, ctx.content) || pRaw;
-      const t1 = this._truncateAtComma(p, 2) || p;
-      const afin = ctx.afines[0] || this._afinFor(ctx.subject);
-      const dMix = (p.split(/[,.;]/)[0]) + ", " + this._afinTailClause(afin);
-      const d2 = "la vía resulta procedente de oficio por el tribunal en cualquier estado del juicio y aun sin petición de parte";
-      const d3 = "procede únicamente si las partes lo pactaron expresamente por escrito, careciendo de base legal en otro caso";
-      const distractors = this._normalizeLengths(p, [t1, dMix, d2, d3]);
-      const solucionDogmatica = `La opción correcta reproduce la condición de procedencia que la cédula fija para ${ctx.cleanTitle}, con sus presupuestos y oportunidad. Los distractores mutan la hipótesis (procedencia de oficio o pactada), la confunden con una institución afín o la presentan incompleta. Conclusión: la hipótesis de procedencia fiel al texto del apunte es la correcta.`;
-      return {
-        nature: "procedencia",
-        questionText: `Según el apunte, ${ctx.cleanTitle} procede:`,
-        correctText: p,
-        distractor1: distractors[0],
-        distractor2: distractors[1],
-        distractor3: distractors[2],
-        distractor4: distractors[3],
-        solucionDogmatica,
-        pauta: "Distinción entre admisibilidad formal y procedencia de fondo conforme a la cédula.",
-        sourceCitations: cites.primary
-      };
-    },
-
-    /**
-     * D - Cómputo de plazos: supuesto aritmético real (días del apunte) con
-     * alternativas de vencimiento calculadas determinísticamente.
-     */
-    _specPlazosCalculo(ctx, cites) {
-      const plaz = this._extractPlazo(ctx.content);
-      if (!plaz) return null;
-      const { days, unit } = plaz;
-      const opts = this._plazoOptions(days, unit);
-      const distractors = this._normalizeLengths(opts.correct, [opts.d1, opts.d2, opts.d3, opts.d4]);
-      const unitLabel = unit === "corridos" ? "corridos" : "hábiles";
-      const reglaLabel = unit === "corridos" ? "contados por días corridos" : "sábados, domingos y feriados no corren";
-      const solucionDogmatica = `El cómputo del término de ${days} días ${unitLabel} se rige por la regla del apunte: ${unit === "corridos" ? "se cuentan todos los días seguidos desde la notificación" : "no se cuenta el día de la notificación y corren solo los días hábiles, descontando domingos y feriados"}. Aplicando la regla al supuesto, el vencimiento recae en el día hábil y la semana indicados como correctos; los distractores alteran el punto de partida, el carácter hábil del cómputo o suponen prórrogas inexistentes. Conclusión: la alternativa correcta computa el plazo con la regla fatal del apunte.`;
-      return {
-        nature: "plazos",
-        questionText: `Supuesto práctico conforme al régimen del apunte: notificada una resolución un día lunes, con un término de ${days} días ${unitLabel} (${reglaLabel}), el plazo:`,
-        correctText: opts.correct,
-        distractor1: distractors[0],
-        distractor2: distractors[1],
-        distractor3: distractors[2],
-        distractor4: distractors[3],
-        solucionDogmatica,
-        pauta: "Destreza en el cómputo de plazos fatales con exclusión de días inhábiles.",
+        pauta: `Reconocimiento del plazo literal fijado en la cédula para ${instituto}.`,
         sourceCitations: cites.secondary
       };
     },
 
-    /**
-     * D-bis - Regla de cómputo: la correcta es la regla textual del apunte sobre
-     * cómo corre el término; los distractores la alteran o la niegan.
-     */
-    _specPlazosRegla(ctx, cites) {
-      const ruleRaw = this._plazosRuleSentence(ctx.content) || ctx.def;
-      if (!ruleRaw) return null;
-      const rule = this._ensureSubstantive(ruleRaw, ctx.content) || ruleRaw;
-      const t1 = this._truncateAtComma(rule, 2) || rule;
-      const d2 = "los términos procesales se computan siempre de momento a momento sin excluir ningún día inhábil";
-      const d3 = (rule.split(/[,.;]/)[0]) + " sin que medie plazo fatal alguno, pudiendo evacuarse la gestión en cualquier tiempo";
-      const d4 = "todo plazo de días puede prorrogarse a voluntad de una sola de las partes sin intervención del tribunal";
-      const distractors = this._normalizeLengths(rule, [t1, d2, d3, d4]);
-      const solucionDogmatica = `La opción correcta reproduce la regla de cómputo del apunte para ${ctx.cleanTitle}, incluyendo el punto de partida, los días que corren y su carácter fatal. Los distractores alteran el cómputo (días corridos o de momento a momento), niegan la fatalidad del término o admiten prórrogas unilaterales inexistentes. Conclusión: la regla de cómputo fiel al apunte es la correcta.`;
+    /** E - Definición corta y clara (relleno), correcta <= 155 chars. */
+    _specDefinicionSimple(ctx, cites, variant) {
+      const defRaw = ctx.def || this._fallbackAnchor(ctx.content, ctx.t0);
+      if (!defRaw) return null;
+      const maxDefOpt = this._gparam("maxDefinicionOptionChars", 160);
+      const def = defRaw.length > 155 ? this._limitTo(defRaw, 155) : defRaw;
+      if (!def || def.length < 30) return null;
+      const instituto = ctx.cleanTitle;
+      const t1 = this._truncateAtComma(def, 1) || def.slice(0, Math.max(30, Math.floor(def.length * 0.6))).replace(/[,;\s]+$/, "").trim();
+      const afin = this._limitTo(ctx.afines[0] || this._afinFor(ctx.subject), 130);
+      const d3 = this._limitTo(`${t1}, ${this._afinTailClause(afin)}`, maxDefOpt);
+      const d4set = [
+        `No se trata de ${instituto}: el apunte regula un instituto afín con presupuestos y efectos distintos.`,
+        `No constituye ${instituto} en los términos señalados: la cédula regula una figura distinta con régimen propio.`,
+        `Carece de toda regulación en el apunte y se rige exclusivamente por la costumbre del foro.`,
+        `Abarca una materia completamente ajena a ${instituto}, sin relación con lo desarrollado en la cédula.`
+      ];
+      const d4 = this._limitTo(d4set[variant % d4set.length], maxDefOpt);
+      const v = variant % 4;
+      const questionTexts = [
+        `¿Qué es ${instituto}?`,
+        `Según el apunte, ${instituto} es:`,
+        `¿Cuál de las siguientes proposiciones define correctamente ${instituto}?`,
+        `Conforme a la cédula, la definición de ${instituto} es:`
+      ];
+      const solucionDogmatica = `La opción correcta reproduce, de forma sintética pero fiel, la definición que el apunte desarrolla para ${instituto}. Las restantes alternativas omiten cláusulas esenciales, presentan la definición de una institución afín o niegan la regulación que la cédula establece. Conclusión: la proposición que refleja el contenido del apunte es la correcta.`;
       return {
-        nature: "plazos",
-        questionText: `Según la regla de cómputo desarrollada en el apunte, el término aplicable en ${ctx.cleanTitle}:`,
-        correctText: rule,
-        distractor1: distractors[0],
-        distractor2: distractors[1],
-        distractor3: distractors[2],
-        distractor4: distractors[3],
+        nature: "dogmatic",
+        format: "definicion",
+        questionText: questionTexts[v],
+        correctText: def,
+        distractor1: t1 !== def ? t1 : d3,
+        distractor2: afin !== def ? afin : d3,
+        distractor3: d3,
+        distractor4: d4,
         solucionDogmatica,
-        pauta: "Manejo del cómputo, la fatalidad y la exclusión de días inhábiles.",
-        sourceCitations: cites.primary
-      };
-    },
-
-    _plazosRuleSentence(content) {
-      if (!content) return null;
-      const cleaned = this._splitSentences(content)
-        .map(s => this._cleanSentence(s, true))
-        .filter(s => s.length >= 45 && s.length <= 300 && !/(?:secci[oó]n|cap[ií]tulo|t[ií]tulo)\b/i.test(s));
-      const long = (arr) => arr.sort((a, b) => b.length - a.length)[0];
-      const tier1 = cleaned.filter(s => /\b(?:c[oó]mputo de|se computa|computado)\b/i.test(s));
-      if (tier1.length) return long(tier1);
-      const tier2 = cleaned.filter(s => /\b(?:t[ée]rmino|plazo)\b/i.test(s) && /d[ií]as h[aá]biles|d[ií]as corridos/i.test(s));
-      if (tier2.length) return long(tier2);
-      const tier3 = cleaned.filter(s => /\bfatal\b/i.test(s));
-      if (tier3.length) return long(tier3);
-      const anyHits = cleaned.filter(s => /\b(?:plazo|t[ée]rmino|termino|c[oó]mputo|h[aá]biles?)\b/i.test(s));
-      return long(anyHits) || null;
-    },
-
-    /**
-     * F - Competencia: la correcta es la oración de la cédula que identifica al
-     * tribunal; los distractores atribuyen el conocimiento a tribunales diversos.
-     */
-    _specCompetencia(ctx, cites) {
-      const tribs = this._extractTribunals(ctx.content);
-      if (!tribs.length) return null;
-      const baseRaw = this._sentenceContaining(ctx.content, tribs[0]);
-      if (!baseRaw) return null;
-      const base = this._ensureSubstantive(baseRaw, ctx.content) || baseRaw;
-      const others = this._otherTribunals(tribs[0]);
-      const distractors = this._normalizeLengths(base, [
-        `el asunto se radica en ${others[0] || "un tribunal diverso"}, aun tratándose de la misma materia y cuantía`,
-        `${others[1] || "el tribunal de alzada"} conoce siempre del asunto con prescindencia del fuero y la jerarquía`,
-        `la elección del tribunal queda entregada a la voluntad exclusiva del demandante en su libelo`,
-        `el conocimiento se somete forzosamente a ${others[2] || "un tribunal arbitral"}, sin sujeción a las reglas de la cédula`
-      ]);
-      const solucionDogmatica = `La opción correcta reproduce la regla de competencia del apunte para ${ctx.cleanTitle}, identificando el tribunal investido de jurisdicción para el asunto. Los distractores atribuyen el conocimiento a tribunales diversos, dejan su elección a la voluntad de las partes o prescinden de las reglas de radicación y fuero. Conclusión: la alternativa que fija el tribunal natural conforme a la cédula es la correcta.`;
-      return {
-        nature: "competencia",
-        questionText: `En materia de ${ctx.cleanTitle}, el tribunal naturalmente competente señalado por la cédula es:`,
-        correctText: base,
-        distractor1: distractors[0],
-        distractor2: distractors[1],
-        distractor3: distractors[2],
-        distractor4: distractors[3],
-        solucionDogmatica,
-        pauta: "Identificación del tribunal natural y las reglas de competencia absoluta.",
-        sourceCitations: cites.primary
+        pauta: `Precisión conceptual sobre la definición que desarrolla la cédula para ${instituto}.`,
+        sourceCitations: v % 2 === 0 ? cites.primary : cites.secondary
       };
     },
 
     /**
-     * E2 - Reclamo de incompetencia (respaldado en una oración real del apunte).
-     */
-    _specCompetenciaAlt(ctx, cites) {
-      const sentRaw = this._extractCompetenciaSentence(ctx.content);
-      if (!sentRaw || sentRaw.length < 80) return null;
-      const sent = this._ensureSubstantive(sentRaw, ctx.content) || sentRaw;
-      const t1 = this._truncateAtComma(sent, 2) || sent;
-      const afin = ctx.afines[0] || this._afinFor(ctx.subject);
-      const dMix = (sent.split(/[,.;]/)[0]) + ", " + this._afinTailClause(afin);
-      const ines = "el litigante afectado debe abstenerse de comparecer, operando la incompetencia de pleno derecho sin pronunciamiento judicial";
-      const d4 = "la incompetencia solo puede alegarse una vez fallada la litis en segunda instancia";
-      const distractors = this._normalizeLengths(sent, [t1, dMix, ines, d4]);
-      const solucionDogmatica = `La opción correcta reproduce la vía que la cédula señala para reclamar la incompetencia en materia de ${ctx.cleanTitle}. Los distractores omiten el procedimiento (inhibitoria o declinatoria), mutan la institución o difieren la alegación a momentos procesales en que ya no cabe. Conclusión: la vía de reclamo de incompetencia fiel al apunte es la correcta.`;
-      return {
-        nature: "competencia",
-        questionText: `Para reclamar la incompetencia del tribunal en una controversia relativa a ${ctx.cleanTitle}, el litigante afectado, según la cédula:`,
-        correctText: sent,
-        distractor1: distractors[0],
-        distractor2: distractors[1],
-        distractor3: distractors[2],
-        distractor4: distractors[3],
-        solucionDogmatica,
-        pauta: "Conocimiento de las vías inhibitoria y declinatoria y su oportunidad procesal.",
-        sourceCitations: cites.secondary
-      };
-    },
-
-    _extractCompetenciaSentence(content) {
-      if (!content) return null;
-      const sentences = this._splitSentences(content)
-        .map(s => this._cleanSentence(s, true))
-        .filter(s => s.length >= 45 && s.length <= 300 && /\b(?:inhibitoria|declinatoria|incompetencia|pr[oó]rroga|radicaci[oó]n)\b/i.test(s));
-      return sentences.sort((a, b) => b.length - a.length)[0] || null;
-    },
-
-    /**
-     * Case - Subsunción práctica: la correcta aplica la regla del apunte al caso;
-     * los distractores contradicen o difieren la consecuencia sin base.
+     * (RESERVADO - Etapa de Casos, "los casos serán aparte").
+     * Subsunción práctica: NO se emite en v7.17; se conserva para la próxima etapa.
      */
     _specCaso(ctx, cites, variant) {
       const base = ctx.def || this._fallbackAnchor(ctx.content, ctx.t0);
@@ -845,6 +953,7 @@
       const solucionDogmatica = `El enunciado presenta un supuesto práctico de subsunción de ${ctx.cleanTitle}. La opción correcta aplica la regla de la cédula al caso y conserva sus elementos; los distractores introducen consecuencias ajenas al texto, contradicen el supuesto configurado o difieren la solución sin base en el apunte. Conclusión: la alternativa que subsume el supuesto conforme a la cédula es la correcta.`;
       return {
         nature: "case",
+        format: "case",
         questionText,
         correctText: base,
         distractor1: distractors[0],
@@ -858,58 +967,9 @@
     },
 
     /**
-     * E - Definición directa (respaldo robusto): correcta fiel al texto del apunte
-     * con distractores truncados, afines, adicionados o vagos.
-     */
-    _specDefinicionDirecta(ctx, cites, variant) {
-      const base = ctx.def || this._fallbackAnchor(ctx.content, ctx.t0);
-      if (!base) return null;
-      const v = variant % 2;
-      const t1 = this._truncateAtComma(base, 1) || base;
-      const afin = ctx.afines[0] || this._afinFor(ctx.subject);
-      const dAdd = `${base}, ${this._afinTailClause(afin)}`;
-      const distractors = this._normalizeLengths(base, [
-        t1,
-        afin,
-        dAdd,
-        "Es el instituto que regula la materia respectiva conforme al desarrollo de la cédula y las reglas generales del ordenamiento"
-      ]);
-      const questionText = v === 0
-        ? `Según el apunte, ${ctx.cleanTitle} es:`
-        : `Tratándose de ${ctx.cleanTitle}, ¿cuál de las siguientes proposiciones se ajusta a la cédula?`;
-      const solucionDogmatica = `La opción correcta reproduce la formulación del apunte acerca de ${ctx.cleanTitle}. Los distractores presentan versiones truncadas o vagas, instituciones afines o elementos agregados que no constan en la cédula. Conclusión: la proposición fiel al texto del apunte es la correcta.`;
-      return {
-        nature: "dogmatic",
-        questionText,
-        correctText: base,
-        distractor1: distractors[0],
-        distractor2: distractors[1],
-        distractor3: distractors[2],
-        distractor4: distractors[3],
-        solucionDogmatica,
-        pauta: "Precisión conceptual directa sobre el contenido de la cédula.",
-        sourceCitations: v === 0 ? cites.primary : cites.secondary
-      };
-    },
-
-    _archetypeQueue(nature) {
-      switch (nature) {
-        case "procedencia":
-          return ["_specProcedencia", "_specConcepto", "_specCaracteristicas", "_specDefinicionDirecta", "_specConceptoAlt"];
-        case "competencia":
-          return ["_specCompetencia", "_specConcepto", "_specCaracteristicas", "_specDefinicionDirecta", "_specCompetenciaAlt"];
-        case "plazos":
-          return ["_specPlazosCalculo", "_specPlazosRegla", "_specConcepto", "_specCaracteristicas", "_specDefinicionDirecta"];
-        case "case":
-          return ["_specCaso", "_specConcepto", "_specCasoAlt", "_specDefinicionDirecta", "_specCaracteristicas"];
-        default:
-          return ["_specConcepto", "_specCaracteristicas", "_specConceptoAlt", "_specDefinicionDirecta", "_specDefinicionDirectaAlt"];
-      }
-    },
-
-    /**
      * Construye exactamente 4 preguntas de grado para una cédula específica.
-     * Cumple con la Regla Maestra de mix según la naturaleza detectada.
+     * Perfil v7.17: mix dogmático simple (requisitos -> características ->
+     * elementos -> plazo simple -> definición corta como relleno).
      */
     buildSectionQuestions(topic) {
       if (!topic) return [];
@@ -942,7 +1002,7 @@
       // RNG determinista basado en el ID del tópico
       const seed = fnv1a(topicId);
 
-      // Generar 4 especificaciones de pregunta según el mix de la naturaleza
+      // Generar 4 especificaciones de pregunta (mix dogmático simple v7.17)
       const specs = this._getQuestionSpecsForNature(nature, cleanTitle, uniqueCitations, topic);
 
       const questions = specs.map((spec, idx) => {
@@ -970,12 +1030,13 @@
         });
 
         // Asegurar que las sourceCitations de la pregunta sean subconjunto de las citas reales
-        const relevantCitations = spec.sourceCitations.filter(c => uniqueCitations.includes(c));
+        const relevantCitations = (spec.sourceCitations || []).filter(c => uniqueCitations.includes(c));
 
         return {
           id: qId,
           topicId: topicId,
-          nature: spec.nature || nature,
+          nature: spec.nature || "dogmatic",
+          format: spec.format || "definicion",
           number: qNum,
           questionText: spec.questionText,
           options: options,
@@ -990,8 +1051,9 @@
     },
 
     /**
-     * Compone las 4 especificaciones de pregunta (arquetipos A-F) a partir del
-     * contenido real de la cédula, con rellenos deterministas de seguridad.
+     * Compone las 4 especificaciones de pregunta del perfil «Simple y Claro»
+     * (v7.17): requisitos -> características -> elementos -> plazo simple ->
+     * definición corta como relleno. Determinista, sin Math.random.
      */
     _getQuestionSpecsForNature(nature, cleanTitle, uniqueCitations, topic) {
       const ctx = this._buildContext(topic);
@@ -999,43 +1061,48 @@
       const secondaryCite = uniqueCitations.length > 1 ? [uniqueCitations[1]] : primaryCite;
       const cites = { primary: primaryCite, secondary: secondaryCite };
 
-      const queue = this._archetypeQueue(nature);
+      // Deduplicación: una cláusula real no se reutiliza en dos preguntas distintas
+      const used = new Set();
+      const pick = (extractor, max) => {
+        const out = [];
+        const list = extractor.call(this, ctx.content) || [];
+        for (const item of list) {
+          const short = this._limitTo(this._cleanSentence(String(item), true), 70);
+          if (!short || short.length < 20 || /:$/.test(short)) continue;
+          const k = this._normalize(short);
+          if (used.has(k)) continue;
+          used.add(k);
+          out.push(short);
+          if (out.length >= (max || 3)) break;
+        }
+        return out;
+      };
+
+      const reqs = pick(this._extractRequisitos, 3);
+      const traits = pick(this._extractTraits, 3);
+      const elems = pick(this._extractElementos, 3);
+
       const specs = [];
-      for (let i = 0; i < queue.length && specs.length < 4; i++) {
-        const name = queue[i];
-        let fn = this[name];
-        let variant = 0;
-        // Las variantes «Alt» se resuelven como el método base con variant=1,
-        // salvo que exista un método propio con ese nombre exacto.
-        if (typeof fn !== "function" && name.endsWith("Alt")) {
-          const base = name.slice(0, -3);
-          fn = this[base];
-          variant = 1;
-        }
-        if (typeof fn !== "function") continue;
-        let spec = null;
-        try {
-          spec = fn.call(this, ctx, cites, variant);
-        } catch (e) {
-          spec = null;
-        }
-        if (spec) {
-          spec.sourceCitations = (spec.sourceCitations || []).filter(c => uniqueCitations.includes(c));
-          specs.push(spec);
-        }
+      const add = (spec) => { if (spec) specs.push(spec); };
+
+      add(this._specCombinacionRequisitos(ctx, cites, reqs));
+      add(this._specCombinacionCaracteristicas(ctx, cites, traits));
+      add(this._specCombinacionElementos(ctx, cites, elems));
+      if (this._extractPlazo(ctx.content) || this._extractPlazoAnos(ctx.content)) {
+        add(this._specPlazoSimple(ctx, cites));
       }
 
-      // Relleno determinista de seguridad: definición directa (def o ancla real),
-      // alternando con la pregunta de concepto cuando existe definición.
+      // Relleno determinista: definición corta (variantes de enunciado/distractores)
+      const usedTexts = new Set(specs.map(s => s.questionText));
       let guard = 0;
-      while (specs.length < 4 && guard < 8) {
-        let fb = null;
-        if (specs.length % 2 === 1 && ctx.def) {
-          fb = this._specConcepto(ctx, cites, 1);
-        }
-        if (!fb) fb = this._specDefinicionDirecta(ctx, cites, specs.length % 2);
+      let v = 0;
+      while (specs.length < 4 && guard < 12) {
+        const fb = this._specDefinicionSimple(ctx, cites, v);
         if (!fb) break;
+        if (usedTexts.has(fb.questionText)) { v++; guard++; continue; }
+        usedTexts.add(fb.questionText);
         specs.push(fb);
+        v++;
         guard++;
       }
 
@@ -1044,7 +1111,8 @@
         const instituto = ctx.cleanTitle;
         specs.push({
           nature: "dogmatic",
-          questionText: `Según el apunte, la regulación de ${instituto} comprende la materia que la sección respectiva desarrolla.`,
+          format: "definicion",
+          questionText: `Según el apunte, ${instituto} es:`,
           correctText: `La sección de la cédula dedicada a ${instituto} desarrolla su concepto, elementos y régimen conforme a las reglas que en ella se exponen.`,
           distractor1: `La sección de la cédula dedicada a ${instituto} desarrolla una materia distinta y ajena a la institución.`,
           distractor2: `La cédula omite por completo el tratamiento de ${instituto}, derivando su regulación a la costumbre.`,
@@ -1061,9 +1129,8 @@
 
     /**
      * Valida la consistencia formal y dogmática de las 4 preguntas generadas.
-     * Retorna { valid, errors, warnings }.
-     * Las warnings del perfil «Manejo» (absurdos, anclaje y homogeneidad) no
-     * bloquean la renderización; solo los errores de contrato lo hacen.
+     * Retorna { valid, errors, warnings }. Los errores de contrato bloquean; las
+     * warnings del perfil (absurdos, anclaje y longitudes) no bloquean la renderización.
      */
     validateSectionQuestions(topic, questions) {
       const errors = [];
@@ -1102,7 +1169,7 @@
           });
         }
 
-        // ---- Perfil «Manejo»: warnings no bloqueantes ----
+        // ---- Perfil v7.17: warnings no bloqueantes ----
         if (q.questionText) {
           const lowEnunciado = q.questionText.toLowerCase();
           this._BANNED_ABSURD.forEach(b => {
@@ -1115,20 +1182,30 @@
             if (lowOpt.includes(b)) warnings.push(`Pregunta ${qNum}: la alternativa incluye el token prohibido de absurdos '${b}'.`);
           });
         });
-        const correctOpt = (q.options || []).find(o => o.id === q.correctAnswer);
+
+        // Anclaje: en combinación se verifica sobre las proposiciones del enunciado;
+        // en definición/plazo sobre la alternativa correcta.
         const contentBigrams = this._bigrams(content);
-        if (correctOpt && correctOpt.text && contentBigrams.size) {
-          const correctBigrams = this._bigrams(correctOpt.text);
-          const shared = [...correctBigrams].some(b => contentBigrams.has(b));
-          if (!shared) warnings.push(`Pregunta ${qNum}: la alternativa correcta no comparte bigramas con el contenido de la cédula (anclaje débil).`);
-        }
-        if (Array.isArray(q.options) && q.options.length) {
-          const lens = q.options.map(o => (o.text || "").length);
-          const lo = Math.min(...lens);
-          const hi = Math.max(...lens);
-          if (lo > 0 && hi / lo > 1.6) {
-            warnings.push(`Pregunta ${qNum}: opciones de longitud muy heterogénea (ratio ${(hi / lo).toFixed(2)}).`);
+        if (contentBigrams.size) {
+          if (q.format === "combinacion") {
+            const stmts = this._statementTexts(q.questionText);
+            const anchored = stmts.some(s => [...this._bigrams(s)].some(b => contentBigrams.has(b)));
+            if (!anchored) warnings.push(`Pregunta ${qNum}: las proposiciones no comparten bigramas con el contenido de la cédula (anclaje débil).`);
+          } else {
+            const correctOpt = (q.options || []).find(o => o.id === q.correctAnswer);
+            if (correctOpt && correctOpt.text) {
+              const shared = [...this._bigrams(correctOpt.text)].some(b => contentBigrams.has(b));
+              if (!shared) warnings.push(`Pregunta ${qNum}: la alternativa correcta no comparte bigramas con el contenido de la cédula (anclaje débil).`);
+            }
           }
+        }
+
+        // Longitud de opciones (perfil simple): combinación/plazo muy cortas,
+        // definición corta; se advierte si una alternativa excede el tope.
+        const maxOpt = q.format === "combinacion" || q.format === "plazo" ? 130 : 165;
+        if (Array.isArray(q.options) && q.options.length) {
+          const over = q.options.some(o => (o.text || "").length > maxOpt);
+          if (over) warnings.push(`Pregunta ${qNum}: alguna alternativa supera los ${maxOpt} caracteres del perfil simple.`);
         }
       });
 
