@@ -1,8 +1,11 @@
 /**
- * DESARROLLADOR DE PREGUNTAS DEL AGENTE (QuestionDeveloper) - v7.11
- * Genera 4 preguntas de verificación de grado al cierre de cada cédula (canónicas o dinámicas).
- * Clasifica la naturaleza de la sección (dogmatic, case, procedencia, competencia, plazos),
- * formula preguntas A-E con solución dogmática oficial revelable y audita citas corpus-driven.
+ * DESARROLLADOR DE PREGUNTAS DEL AGENTE (QuestionDeveloper) - v7.15
+ * Motor CONTENIDO-CONDUCTOR de perfil «Manejo»:
+ * extrae definiciones, características, condiciones de procedencia, plazos y
+ * tribunales del TEXTO REAL de cada cédula y construye arquetipos A-F anclados
+ * al apunte (sin plantillas genéricas de relleno ni distractores absurdos).
+ * Mantiene el contrato público v7.11 (detectNature, buildSectionQuestions,
+ * validateSectionQuestions, getSectionQuestions, natureOf).
  */
 
 (function(root) {
@@ -77,6 +80,28 @@
 
     // Caché en memoria para evitar re-computación innecesaria en re-renders
     _cache: new Map(),
+
+    // Token de absurdos que jamás deben aparecer en opciones/enunciados (perfil «Manejo»)
+    _BANNED_ABSURD: [
+      "sorteo público", "sorteo publico", "concejo municipal", "multa a beneficio municipal",
+      "fisco de chile", "presidio", "prórroga unilateral", "prorroga unilateral", "duplicar el plazo"
+    ],
+
+    // Banco de instituciones afines (distractores verosímiles por disciplina)
+    _AFIN_BANK: {
+      civil: [
+        "La propiedad es el derecho real que habilita a gozar y disponer arbitrariamente de la cosa, no siendo contra ley o derecho ajeno.",
+        "La posesión inscrita es la que consta en el registro conservatorio mediante la inscripción, otorgando al poseedor las acciones que la ley reconoce."
+      ],
+      procesal: [
+        "La jurisdicción es la facultad de los tribunales para conocer de los negocios civiles y criminales y hacer ejecutar lo juzgado.",
+        "La nulidad procesal es la sanción que priva de valor a los actos del procedimiento realizados con infracción de los requisitos legales."
+      ],
+      constitucional: [
+        "El recurso de protección es la acción constitucional que ampara el legítimo ejercicio de los derechos fundamentales frente a actos arbitrarios o ilegales.",
+        "El recurso de amparo es la garantía constitucional que resguarda la libertad personal y la seguridad individual."
+      ]
+    },
 
     /**
      * Helper defensivo de extracción de citas normativas chilenas.
@@ -186,6 +211,702 @@
       return winner;
     },
 
+    // ================================================================
+    // NORMALIZACIÓN Y BIGRAMAS (para anclaje al apunte y homogeneidad)
+    // ================================================================
+
+    _normalize(s) {
+      return (s || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9áéíóúñ\s]/gi, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    },
+
+    _bigrams(s) {
+      const words = this._normalize(s).split(" ").filter(w => w.length > 1);
+      const out = new Set();
+      for (let i = 0; i < words.length - 1; i++) out.add(`${words[i]} ${words[i + 1]}`);
+      return out;
+    },
+
+    // ================================================================
+    // EXTRACCIÓN DE CONTENIDO DESDE EL TEXTO REAL DEL APUNTE
+    // ================================================================
+
+    /**
+     * Limpia una oración/enunciado crudo del markdown del apunte.
+     * - stripLabel=true  : elimina prefijos "Etiqueta:" (necesario en definiciones).
+     * - stripLabel=false : conserva la etiqueta (necesario en características).
+     */
+    _cleanSentence(raw, stripLabel) {
+      if (!raw || typeof raw !== "string") return "";
+      let s = raw.trim();
+      s = s.replace(/^#+\s*/, "").trim();
+      s = s.replace(/^[-*•]\s+/, "").trim();
+      s = s.replace(/^\*{1,2}\s*/, "").replace(/\s*\*{1,2}$/, "").trim();
+      s = s.replace(/[*_]/g, "").trim();
+      s = s.replace(/^[„“”""'']+|[„“”""'']+$/g, "").trim();
+      s = s.replace(/^(\d+(?:\.\d+)*\.?)\s*/, "").trim();
+      if (stripLabel && /^.{1,60}:\s+/.test(s)) {
+        s = s.replace(/^.{1,60}?:\s+/, "").trim();
+      }
+      s = s.replace(/\s*\([^)]*\b(?:art|n[°ºo]|cc|cpc|cot|cpr|ley|inc)\b[^)]*\)/gi, "").trim();
+      // Autorra: si queda un cierre de paréntesis sin apertura (fragmento de cita),
+      // únicamente se elimina el cierre residual al final de la oración.
+      if ((s.match(/\(/g) || []).length < (s.match(/\)/g) || []).length) {
+        s = s.replace(/\)+$/, "").trim();
+      }
+      s = s.replace(/[„“”""']+/g, "").trim();
+      s = s.replace(/[.;]\s*$/, "").trim();
+      s = s.replace(/\s+/g, " ").trim();
+      return s.slice(0, 300);
+    },
+
+    _splitSentences(content) {
+      if (!content || typeof content !== "string") return [];
+      const out = [];
+      const lines = content.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      for (const line of lines) {
+        const tokens = line.split(/\s+/);
+        let buf = "";
+        for (let i = 0; i < tokens.length; i++) {
+          const tok = tokens[i];
+          buf = buf ? `${buf} ${tok}` : tok;
+          const next = tokens[i + 1];
+          const cleanTok = tok.replace(/^[\[(]/, "");
+          const isAbbrev = /^(?:Art\.?|Arts?\.?|N(?:°|º|\.)?\d*|inc\.?|(?:p\.)?ej\.?|etc\.?|S\.?S\.?)$/i.test(cleanTok);
+          if (!isAbbrev && /[.!?][)"»]?$/.test(tok) && next && /^[A-ZÁÉÍÓÚÑ"“(\d]/.test(next)) {
+            out.push(buf.trim());
+            buf = "";
+          }
+        }
+        if (buf.trim()) out.push(buf.trim());
+      }
+      return out.filter(s => s.length >= 24);
+    },
+
+    _extractDefinitions(content) {
+      if (!content) return [];
+      const marker = /\b(?:se define|consiste en|se entiende por|se caracteriza|se concibe|concibe|designa|constituye|es la tenencia de|es el derecho |es el acto |es la relaci[oó]n|es la manifestaci[oó]n|es el conjunto|es la instituci[oó]n|es el instituto|son las |son los |son un |son una |son defensas)\b/i;
+      const candidates = this._splitSentences(content)
+        .map(s => this._cleanSentence(s, true))
+        .filter(s => s.length >= 60 && s.length <= 300 && marker.test(s));
+      const unique = [];
+      const seen = new Set();
+      candidates.sort((a, b) => b.length - a.length);
+      candidates.forEach(d => {
+        const k = this._normalize(d);
+        if (!seen.has(k)) { seen.add(k); unique.push(d); }
+      });
+      return unique.slice(0, 3);
+    },
+
+    _titleRoot(title) {
+      const norm = this._normalize(title).replace(/[^\w\s]/g, " ").split(" ").filter(w =>
+        w.length >= 4 && !/^(sobre|segun|según|cual|parte|teoria|teoría|regla|reglas|aspecto|aspectos|concepto|definicion|definición)$/.test(w)
+      );
+      return norm[0] || "";
+    },
+
+    _fallbackAnchor(content, root) {
+      const sentences = this._splitSentences(content)
+        .map(s => this._cleanSentence(s, true))
+        .filter(s => s.length >= 80 && s.length <= 300 && !/secci[oó]n|cap[ií]tulo|t[ií]tulo\b/i.test(s));
+      if (root) {
+        const normRoot = this._normalize(root);
+        const withRoot = sentences.find(s => this._normalize(s).includes(normRoot));
+        if (withRoot) return withRoot;
+      }
+      if (sentences.length) return sentences.sort((a, b) => b.length - a.length)[0];
+      // Degradación controlada: solo si no existe oración sustantiva (mínimo 50)
+      const shorter = this._splitSentences(content)
+        .map(s => this._cleanSentence(s, true))
+        .filter(s => s.length >= 50 && s.length <= 300);
+      if (shorter.length) return shorter.sort((a, b) => b.length - a.length)[0];
+      const rough = this._cleanSentence((content || "").slice(0, 300), true);
+      return rough.length >= 40 ? rough : "";
+    },
+
+    /**
+     * Si el ancla/definición es demasiado breve (< 90 caracteres), la extiende
+     * con otra oración real del apunte para formar una proposición desarrollada.
+     */
+    _ensureSubstantive(base, content) {
+      if (!base) return base;
+      if (base.length >= 90) return base;
+      if (!content) return base;
+      const candidates = this._splitSentences(content)
+        .map(s => this._cleanSentence(s, true))
+        .filter(s => s.length >= 50 && s.length <= 300 && this._normalize(s) !== this._normalize(base));
+      const pick = candidates.sort((a, b) => b.length - a.length)[0];
+      if (pick) {
+        const joined = `${base}; ${pick}`;
+        if (joined.length > base.length + 30) return this._limitTo(joined, 300);
+      }
+      return base;
+    },
+
+    _extractTraits(content) {
+      if (!content) return [];
+      const items = [];
+      const lines = content.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      for (const line of lines) {
+        const m = line.match(/^[-*•]\s+(.+)$/) || line.match(/^\d+[.)]\s+(.+)$/) || line.match(/^\*{1,2}\d+\.\*{1,2}\s+(.+)$/) || line.match(/^[a-z][.)]\s+(.+)$/i);
+        if (m) {
+          const item = this._cleanSentence(m[1], false);
+          if (item.length >= 20 && item.length <= 170) items.push(item);
+        }
+      }
+      if (items.length < 3) {
+        const marker = /\b(?:se caracteriza|caracter[íi]stic|requisito|elemento|principio|comprende|constituye|postula)\b/i;
+        const sentences = this._splitSentences(content).map(s => this._cleanSentence(s, false));
+        for (const s of sentences) {
+          if (marker.test(s) && s.length >= 40 && s.length <= 170 && items.length < 6) items.push(s);
+        }
+      }
+      const unique = [];
+      const seen = new Set();
+      items.forEach(i => {
+        const k = this._normalize(i);
+        if (!seen.has(k)) { seen.add(k); unique.push(i); }
+      });
+      return unique.slice(0, 6);
+    },
+
+    _extractProcedenciaSentence(content) {
+      if (!content) return null;
+      const sentences = this._splitSentences(content)
+        .map(s => this._cleanSentence(s, true))
+        .filter(s => s.length >= 45 && s.length <= 300 && /\b(?:procede|no procede|se concede|es admisible|se deducir[aá]|se interpone|requiere)\b/i.test(s));
+      return sentences.sort((a, b) => b.length - a.length)[0] || null;
+    },
+
+    _extractPlazo(content) {
+      if (!content) return null;
+      const re = /(?:plazo|t[ée]rmino|termino)[^.\n]{0,90}?(\d{1,3})\s*d[ií]as?(?:\s*(h[aá]biles|corridos))?/gi;
+      const matches = [];
+      let m;
+      while ((m = re.exec(content)) !== null) {
+        matches.push({ days: parseInt(m[1], 10), unitRaw: m[2] || "" });
+      }
+      if (!matches.length) return null;
+      const hab = matches.filter(x => /h[aá]bil/i.test(x.unitRaw));
+      const chosen = hab[0] || matches[0];
+      const days = chosen.days;
+      if (!Number.isInteger(days) || days <= 0) return null;
+      const unit = /corrid/i.test(chosen.unitRaw) ? "corridos" : "hábiles";
+      return { days, unit };
+    },
+
+    _extractTribunals(content) {
+      if (!content) return [];
+      const re = /\b(?:Juzgado de Letras del Trabajo|Juzgado de Letras|Juzgado de Garant[íi]a|Tribunal Oral en lo Penal|Tribunal de Juicio Oral|Corte de Apelaciones|Corte Suprema|Juzgado de Familia|Juzgado de Polic[íi]a Local|Tribunal de Letras)\b/gi;
+      const out = [];
+      const seen = new Set();
+      let m;
+      while ((m = re.exec(content)) !== null) {
+        const t = m[0];
+        if (!seen.has(t.toLowerCase())) { seen.add(t.toLowerCase()); out.push(t); }
+      }
+      return out;
+    },
+
+    _sentenceContaining(content, phrase) {
+      if (!content || !phrase) return null;
+      const low = phrase.toLowerCase();
+      const found = this._splitSentences(content)
+        .map(x => this._cleanSentence(x, true))
+        .filter(x => x.length >= 60 && x.length <= 300 && x.toLowerCase().includes(low));
+      return found.sort((a, b) => b.length - a.length)[0] || null;
+    },
+
+    _otherTribunals(main) {
+      const bank = ["la Corte de Apelaciones", "la Corte Suprema", "el Juzgado de Letras", "el Juzgado de Familia", "el Tribunal Oral en lo Penal", "el Juzgado de Policía Local"];
+      const mainLow = (main || "").toLowerCase();
+      return bank.filter(b => {
+        const bCore = b.replace(/^(la|el) /, "").toLowerCase();
+        return !mainLow.includes(bCore) && !bCore.includes(mainLow);
+      }).slice(0, 3);
+    },
+
+    _buildContext(topic) {
+      const content = (topic && topic.content) ? String(topic.content) : "";
+      const cleanTitle = (topic && (topic.cleanTitle || topic.title)) || "la institución";
+      const subject = (topic && topic.subject) || "civil";
+      const defs = this._extractDefinitions(content);
+      const traits = this._extractTraits(content);
+      const t0 = this._titleRoot(cleanTitle);
+      const anchor = defs[0] || this._fallbackAnchor(content, t0) || "";
+      const def = anchor.length >= 90 ? anchor : (this._ensureSubstantive(anchor, content) || anchor);
+      return { content, cleanTitle, subject, def, defs, traits, t0, afines: defs.slice(1) };
+    },
+
+    // ================================================================
+    // MANIPULACIÓN DE LONGITUD (homogeneidad ± banda, correcto = más largo)
+    // ================================================================
+
+    _truncateAtComma(s, k) {
+      if (!s) return "";
+      const positions = [];
+      for (let i = 0; i < s.length; i++) if (s[i] === "," || s[i] === ";") positions.push(i);
+      if (positions.length) {
+        const targetIdx = Math.min(positions.length, k);
+        let idx = positions[targetIdx - 1];
+        // Evita cláusulas mutiladas: exige un mínimo sustancial antes del corte
+        const minSeg = Math.max(25, Math.floor(s.length * 0.24));
+        let guard = targetIdx;
+        while (idx < minSeg && guard < positions.length) { idx = positions[guard]; guard++; }
+        if (idx >= minSeg) return s.slice(0, idx).replace(/[,;\s]+$/, "").trim();
+      }
+      const frac = k === 1 ? 0.5 : 0.7;
+      return s.slice(0, Math.max(20, Math.floor(s.length * frac))).replace(/[,;\s]+$/, "").trim();
+    },
+
+    _limitTo(s, max) {
+      if (!s || s.length <= max) return s || "";
+      let cut = s.slice(0, max);
+      const lastComma = cut.lastIndexOf(",");
+      const lastSpace = cut.lastIndexOf(" ");
+      const at = lastComma > max * 0.5 ? lastComma : lastSpace;
+      if (at > max * 0.45) cut = cut.slice(0, at);
+      return cut.replace(/[,;:\s]+$/, "").trim();
+    },
+
+    _padTo(s, min) {
+      if (!s) s = "";
+      if (s.length >= min) return s.trim();
+      let out = s.replace(/[.;,]\s*$/, "").trim();
+      const pads = [
+        " en los términos que desarrolla el apunte.",
+        " conforme a las reglas generales expuestas en la cédula.",
+        " según el alcance que la doctrina y la ley le reconocen en la materia.",
+        " en el sentido que le atribuye el texto de la sección respectiva.",
+        " según el desarrollo dogmático que la cédula consigna."
+      ];
+      let i = 0;
+      while (out.length < min) {
+        out = `${out} ${pads[i % pads.length].trim()}`.trim();
+        i++;
+        if (i > 24) break;
+      }
+      return out.trim();
+    },
+
+    /**
+     * Ajusta las 4 opciones incorrectas hacia una longitud objetivo dentro de la
+     * banda [0.72·L, 0.98·L] respecto de la correcta (L). La correcta queda como
+     * la opción más desarrollada y las alternativas mantienen homogeneidad
+     * sólida (ratio máx/mín <= ~1.4).
+     */
+    _normalizeLengths(correct, distractors) {
+      const L = (correct || "").length;
+      const low = Math.max(46, Math.floor(L * 0.72));
+      const high = Math.max(low + 6, Math.floor(L * 0.98));
+      const target = Math.max(low, Math.min(high, Math.floor((low + high) / 2)));
+      const normC = this._normalize(correct);
+      return distractors.map(d => {
+        let s = (d || "").trim();
+        if (s.length > target) s = this._limitTo(s, target);
+        if (s.length < target) s = this._padTo(s, target);
+        if (s.length > high) s = this._limitTo(s, high);
+        if (s.length < low) s = this._padTo(s, low);
+        s = s.replace(/[.,;\s]+$/, "").trim();
+        if (this._normalize(s) === normC) s = `${s}, como lo desarrolla el apunte en su sección respectiva.`;
+        return s;
+      });
+    },
+
+    _afinFor(subject) {
+      const bank = this._AFIN_BANK[subject] || this._AFIN_BANK.civil;
+      return bank[0] || "";
+    },
+
+    _afinTailClause(afin) {
+      if (!afin) return "sin perjuicio de las reglas particulares que la ley establece para cada caso";
+      const main = afin.split(";").map(p => p.trim()).filter(Boolean).pop();
+      const pieces = (main || "").split(",").map(p => p.trim()).filter(Boolean);
+      const tail = pieces.length >= 2 ? pieces[pieces.length - 1] : (main || "");
+      return tail.replace(/\s*\.\s*$/, "").trim() || "sin perjuicio de las reglas particulares que la ley establece para cada caso";
+    },
+
+    _ordinal(n) {
+      const map = { 1: "primera", 2: "segunda", 3: "tercera", 4: "cuarta", 5: "quinta", 6: "sexta", 7: "séptima", 8: "octava", 9: "novena", 10: "décima" };
+      return map[n] || `${n}ª`;
+    },
+
+    /**
+     * Cálculo aritmético determinista del vencimiento de un término.
+     * Notificación supuesta: un día lunes (día 0). Los días corren desde el
+     * día siguiente hábil (martes) excluyendo inhábiles, salvo el modo indicado.
+     */
+    _plazoOptions(days, unit) {
+      const WD = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"];
+      const comp = (mode) => {
+        if (mode === "corridos") {
+          return { name: WD[days % 7], week: Math.floor(days / 7) + 1 };
+        }
+        let n = 0;
+        let d = mode === "conNotif" ? 0 : 1;
+        let endWd = 0;
+        let endDay = 0;
+        while (n < days) {
+          const wd = d % 7;
+          const hab = (wd >= 0 && wd <= 4) || (mode === "sabado" && wd === 5);
+          if (hab) { n++; endWd = wd; endDay = d; }
+          d++;
+        }
+        return { name: WD[endWd], week: Math.floor(endDay / 7) + 1 };
+      };
+      const hab = comp("habiles");
+      const conNotif = comp("conNotif");
+      const sabado = comp("sabado");
+      const corridos = comp("corridos");
+      const ord = (w) => this._ordinal(w);
+
+      if (unit === "corridos") {
+        return {
+          correct: `vence el ${corridos.name} de la ${ord(corridos.week)} semana siguiente, computándose ${days} días corridos sin excepción desde la notificación.`,
+          d1: `vence el ${hab.name} de la ${ord(hab.week)} semana siguiente, contándose solo los días hábiles.`,
+          d2: `vence el ${conNotif.name} de la ${ord(conNotif.week)} semana siguiente, excluyéndose los días inhábiles.`,
+          d3: `vence el ${sabado.name} de la ${ord(sabado.week)} semana siguiente, contándose el sábado pero no el domingo.`,
+          d4: `se prorroga automáticamente mientras la gestión no se evacue, sin término cierto ni efecto preclusivo.`
+        };
+      }
+      return {
+        correct: `vence el ${hab.name} de la ${ord(hab.week)} semana siguiente, computando ${days} días hábiles y descontando domingos y feriados, según la regla fatal del apunte.`,
+        d1: `vence un día hábil antes, esto es el ${conNotif.name} de la ${ord(conNotif.week)} semana, porque se contó indebidamente el día de la notificación como primero del término.`,
+        d2: `vence el ${corridos.name} de la ${ord(corridos.week)} semana siguiente, computando ${days} días corridos sin excluir sábados, domingos ni feriados.`,
+        d3: `vence el ${sabado.name} de la ${ord(sabado.week)} semana siguiente, pues solo se excluyeron los domingos y se contó el sábado como día hábil.`,
+        d4: `se prorroga automáticamente y sin término cierto mientras la gestión no se evacue, careciendo su vencimiento de efecto preclusivo alguno.`
+      };
+    },
+
+    // ================================================================
+    // ARQUETIPOS DE PREGUNTA (contenido-conductores)
+    // ================================================================
+
+    /**
+     * A - Concepto mejor desarrollado: la correcta reproduce íntegramente la
+     * definición del apunte; los distractores omiten cláusulas, mutan la
+     * institución o le agregan un elemento ajeno.
+     */
+    _specConcepto(ctx, cites, variant) {
+      const def = ctx.def;
+      if (!def) return null;
+      const instituto = ctx.cleanTitle;
+      const t1 = this._truncateAtComma(def, 2) || def;
+      const t2 = this._truncateAtComma(def, 1) || def;
+      const afin = ctx.afines[0] || this._afinFor(ctx.subject);
+      const lastComma = def.lastIndexOf(",");
+      const d4 = (lastComma > 30 ? def.slice(0, lastComma) : def) + ", " + this._afinTailClause(afin);
+      const distractors = this._normalizeLengths(def, [t1, t2, afin, d4]);
+      const questionText = variant === 0
+        ? `Según lo desarrollado en el apunte, ¿cuál de las siguientes definiciones de ${instituto} es la más completa y fiel a lo expuesto?`
+        : `De acuerdo con la cédula, ¿cuál de las siguientes opciones reproduce correctamente el concepto de ${instituto} desarrollado en el apunte?`;
+      const solucionDogmatica = `La opción correcta reproduce la definición de ${instituto} del apunte conservando todos los elementos que la desarrollan (la versión íntegra). Los distractores omiten cláusulas esenciales presentando versiones truncadas, confunden la institución con una afín o le agregan un elemento ajeno al texto de la cédula. Conclusión: la definición más completa, desarrollada y fiel al apunte es la correcta.`;
+      return {
+        nature: "dogmatic",
+        questionText,
+        correctText: def,
+        distractor1: distractors[0],
+        distractor2: distractors[1],
+        distractor3: distractors[2],
+        distractor4: distractors[3],
+        solucionDogmatica,
+        pauta: "El postulante debe reconocer la definición desarrollada del apunte y descartar versiones incompletas, mutadas o con elementos ajenos.",
+        sourceCitations: variant === 0 ? cites.primary : cites.secondary
+      };
+    },
+
+    /**
+     * B - Características: la correcta enumera los rasgos reales del apunte;
+     * los distractores omiten, reemplazan, alteran el orden o inoculan rasgos ajenos.
+     */
+    _specCaracteristicas(ctx, cites, variant) {
+      const traits = (ctx.traits || []).slice(0, 3).map(t => this._limitTo(t, 120));
+      if (traits.length < 2) return null;
+      const instituto = ctx.cleanTitle;
+      const correct = traits.join("; ");
+      const foreign = ctx.afines[0] ? this._truncateAtComma(ctx.afines[0], 1) : this._afinFor(ctx.subject);
+      const gen = "cualquier otra manifestación que las partes estipulen en conformidad a la ley";
+      const build = (arr) => arr.join("; ");
+      const d1 = build(traits.map((t, i) => (i === 1 ? foreign : t)));
+      const d2 = build(traits.slice(0, traits.length - 1));
+      const d3ts = traits.slice();
+      d3ts[0] = gen;
+      const d3 = build(d3ts.slice(0, traits.length - 1));
+      const d4 = build(traits.slice().reverse());
+      const distractors = this._normalizeLengths(correct, [d1, d2, d3, d4]);
+      const questionText = variant === 0
+        ? `De acuerdo con el desarrollo del apunte, ${instituto} se caracteriza por:`
+        : `Conforme a la cédula, los elementos o características propios de ${instituto} son:`;
+      const solucionDogmatica = `La opción correcta reúne las características que el apunte atribuye expresamente a ${instituto}. Los distractores omiten alguna de ellas, la reemplazan por un rasgo ajeno o intrascendente, o alteran su contenido y orden. Conclusión: el conjunto de características fiel al texto de la cédula es la opción correcta.`;
+      return {
+        nature: "dogmatic",
+        questionText,
+        correctText: correct,
+        distractor1: distractors[0],
+        distractor2: distractors[1],
+        distractor3: distractors[2],
+        distractor4: distractors[3],
+        solucionDogmatica,
+        pauta: "Dominio de las notas características desarrolladas en la cédula y descarte de rasgos ajenos.",
+        sourceCitations: cites.primary
+      };
+    },
+
+    /**
+     * C - Procedencia: la correcta reproduce la condición/hipótesis de procedencia
+     * del apunte; los distractores mutan la oportunidad, el agente o la fidelidad.
+     */
+    _specProcedencia(ctx, cites) {
+      const pRaw = this._extractProcedenciaSentence(ctx.content) || ctx.def;
+      if (!pRaw) return null;
+      const p = this._ensureSubstantive(pRaw, ctx.content) || pRaw;
+      const t1 = this._truncateAtComma(p, 2) || p;
+      const afin = ctx.afines[0] || this._afinFor(ctx.subject);
+      const dMix = (p.split(/[,.;]/)[0]) + ", " + this._afinTailClause(afin);
+      const d2 = "la vía resulta procedente de oficio por el tribunal en cualquier estado del juicio y aun sin petición de parte";
+      const d3 = "procede únicamente si las partes lo pactaron expresamente por escrito, careciendo de base legal en otro caso";
+      const distractors = this._normalizeLengths(p, [t1, dMix, d2, d3]);
+      const solucionDogmatica = `La opción correcta reproduce la condición de procedencia que la cédula fija para ${ctx.cleanTitle}, con sus presupuestos y oportunidad. Los distractores mutan la hipótesis (procedencia de oficio o pactada), la confunden con una institución afín o la presentan incompleta. Conclusión: la hipótesis de procedencia fiel al texto del apunte es la correcta.`;
+      return {
+        nature: "procedencia",
+        questionText: `Según el apunte, ${ctx.cleanTitle} procede:`,
+        correctText: p,
+        distractor1: distractors[0],
+        distractor2: distractors[1],
+        distractor3: distractors[2],
+        distractor4: distractors[3],
+        solucionDogmatica,
+        pauta: "Distinción entre admisibilidad formal y procedencia de fondo conforme a la cédula.",
+        sourceCitations: cites.primary
+      };
+    },
+
+    /**
+     * D - Cómputo de plazos: supuesto aritmético real (días del apunte) con
+     * alternativas de vencimiento calculadas determinísticamente.
+     */
+    _specPlazosCalculo(ctx, cites) {
+      const plaz = this._extractPlazo(ctx.content);
+      if (!plaz) return null;
+      const { days, unit } = plaz;
+      const opts = this._plazoOptions(days, unit);
+      const distractors = this._normalizeLengths(opts.correct, [opts.d1, opts.d2, opts.d3, opts.d4]);
+      const unitLabel = unit === "corridos" ? "corridos" : "hábiles";
+      const reglaLabel = unit === "corridos" ? "contados por días corridos" : "sábados, domingos y feriados no corren";
+      const solucionDogmatica = `El cómputo del término de ${days} días ${unitLabel} se rige por la regla del apunte: ${unit === "corridos" ? "se cuentan todos los días seguidos desde la notificación" : "no se cuenta el día de la notificación y corren solo los días hábiles, descontando domingos y feriados"}. Aplicando la regla al supuesto, el vencimiento recae en el día hábil y la semana indicados como correctos; los distractores alteran el punto de partida, el carácter hábil del cómputo o suponen prórrogas inexistentes. Conclusión: la alternativa correcta computa el plazo con la regla fatal del apunte.`;
+      return {
+        nature: "plazos",
+        questionText: `Supuesto práctico conforme al régimen del apunte: notificada una resolución un día lunes, con un término de ${days} días ${unitLabel} (${reglaLabel}), el plazo:`,
+        correctText: opts.correct,
+        distractor1: distractors[0],
+        distractor2: distractors[1],
+        distractor3: distractors[2],
+        distractor4: distractors[3],
+        solucionDogmatica,
+        pauta: "Destreza en el cómputo de plazos fatales con exclusión de días inhábiles.",
+        sourceCitations: cites.secondary
+      };
+    },
+
+    /**
+     * D-bis - Regla de cómputo: la correcta es la regla textual del apunte sobre
+     * cómo corre el término; los distractores la alteran o la niegan.
+     */
+    _specPlazosRegla(ctx, cites) {
+      const ruleRaw = this._plazosRuleSentence(ctx.content) || ctx.def;
+      if (!ruleRaw) return null;
+      const rule = this._ensureSubstantive(ruleRaw, ctx.content) || ruleRaw;
+      const t1 = this._truncateAtComma(rule, 2) || rule;
+      const d2 = "los términos procesales se computan siempre de momento a momento sin excluir ningún día inhábil";
+      const d3 = (rule.split(/[,.;]/)[0]) + " sin que medie plazo fatal alguno, pudiendo evacuarse la gestión en cualquier tiempo";
+      const d4 = "todo plazo de días puede prorrogarse a voluntad de una sola de las partes sin intervención del tribunal";
+      const distractors = this._normalizeLengths(rule, [t1, d2, d3, d4]);
+      const solucionDogmatica = `La opción correcta reproduce la regla de cómputo del apunte para ${ctx.cleanTitle}, incluyendo el punto de partida, los días que corren y su carácter fatal. Los distractores alteran el cómputo (días corridos o de momento a momento), niegan la fatalidad del término o admiten prórrogas unilaterales inexistentes. Conclusión: la regla de cómputo fiel al apunte es la correcta.`;
+      return {
+        nature: "plazos",
+        questionText: `Según la regla de cómputo desarrollada en el apunte, el término aplicable en ${ctx.cleanTitle}:`,
+        correctText: rule,
+        distractor1: distractors[0],
+        distractor2: distractors[1],
+        distractor3: distractors[2],
+        distractor4: distractors[3],
+        solucionDogmatica,
+        pauta: "Manejo del cómputo, la fatalidad y la exclusión de días inhábiles.",
+        sourceCitations: cites.primary
+      };
+    },
+
+    _plazosRuleSentence(content) {
+      if (!content) return null;
+      const cleaned = this._splitSentences(content)
+        .map(s => this._cleanSentence(s, true))
+        .filter(s => s.length >= 45 && s.length <= 300 && !/(?:secci[oó]n|cap[ií]tulo|t[ií]tulo)\b/i.test(s));
+      const long = (arr) => arr.sort((a, b) => b.length - a.length)[0];
+      const tier1 = cleaned.filter(s => /\b(?:c[oó]mputo de|se computa|computado)\b/i.test(s));
+      if (tier1.length) return long(tier1);
+      const tier2 = cleaned.filter(s => /\b(?:t[ée]rmino|plazo)\b/i.test(s) && /d[ií]as h[aá]biles|d[ií]as corridos/i.test(s));
+      if (tier2.length) return long(tier2);
+      const tier3 = cleaned.filter(s => /\bfatal\b/i.test(s));
+      if (tier3.length) return long(tier3);
+      const anyHits = cleaned.filter(s => /\b(?:plazo|t[ée]rmino|termino|c[oó]mputo|h[aá]biles?)\b/i.test(s));
+      return long(anyHits) || null;
+    },
+
+    /**
+     * F - Competencia: la correcta es la oración de la cédula que identifica al
+     * tribunal; los distractores atribuyen el conocimiento a tribunales diversos.
+     */
+    _specCompetencia(ctx, cites) {
+      const tribs = this._extractTribunals(ctx.content);
+      if (!tribs.length) return null;
+      const baseRaw = this._sentenceContaining(ctx.content, tribs[0]);
+      if (!baseRaw) return null;
+      const base = this._ensureSubstantive(baseRaw, ctx.content) || baseRaw;
+      const others = this._otherTribunals(tribs[0]);
+      const distractors = this._normalizeLengths(base, [
+        `el asunto se radica en ${others[0] || "un tribunal diverso"}, aun tratándose de la misma materia y cuantía`,
+        `${others[1] || "el tribunal de alzada"} conoce siempre del asunto con prescindencia del fuero y la jerarquía`,
+        `la elección del tribunal queda entregada a la voluntad exclusiva del demandante en su libelo`,
+        `el conocimiento se somete forzosamente a ${others[2] || "un tribunal arbitral"}, sin sujeción a las reglas de la cédula`
+      ]);
+      const solucionDogmatica = `La opción correcta reproduce la regla de competencia del apunte para ${ctx.cleanTitle}, identificando el tribunal investido de jurisdicción para el asunto. Los distractores atribuyen el conocimiento a tribunales diversos, dejan su elección a la voluntad de las partes o prescinden de las reglas de radicación y fuero. Conclusión: la alternativa que fija el tribunal natural conforme a la cédula es la correcta.`;
+      return {
+        nature: "competencia",
+        questionText: `En materia de ${ctx.cleanTitle}, el tribunal naturalmente competente señalado por la cédula es:`,
+        correctText: base,
+        distractor1: distractors[0],
+        distractor2: distractors[1],
+        distractor3: distractors[2],
+        distractor4: distractors[3],
+        solucionDogmatica,
+        pauta: "Identificación del tribunal natural y las reglas de competencia absoluta.",
+        sourceCitations: cites.primary
+      };
+    },
+
+    /**
+     * E2 - Reclamo de incompetencia (respaldado en una oración real del apunte).
+     */
+    _specCompetenciaAlt(ctx, cites) {
+      const sentRaw = this._extractCompetenciaSentence(ctx.content);
+      if (!sentRaw || sentRaw.length < 80) return null;
+      const sent = this._ensureSubstantive(sentRaw, ctx.content) || sentRaw;
+      const t1 = this._truncateAtComma(sent, 2) || sent;
+      const afin = ctx.afines[0] || this._afinFor(ctx.subject);
+      const dMix = (sent.split(/[,.;]/)[0]) + ", " + this._afinTailClause(afin);
+      const ines = "el litigante afectado debe abstenerse de comparecer, operando la incompetencia de pleno derecho sin pronunciamiento judicial";
+      const d4 = "la incompetencia solo puede alegarse una vez fallada la litis en segunda instancia";
+      const distractors = this._normalizeLengths(sent, [t1, dMix, ines, d4]);
+      const solucionDogmatica = `La opción correcta reproduce la vía que la cédula señala para reclamar la incompetencia en materia de ${ctx.cleanTitle}. Los distractores omiten el procedimiento (inhibitoria o declinatoria), mutan la institución o difieren la alegación a momentos procesales en que ya no cabe. Conclusión: la vía de reclamo de incompetencia fiel al apunte es la correcta.`;
+      return {
+        nature: "competencia",
+        questionText: `Para reclamar la incompetencia del tribunal en una controversia relativa a ${ctx.cleanTitle}, el litigante afectado, según la cédula:`,
+        correctText: sent,
+        distractor1: distractors[0],
+        distractor2: distractors[1],
+        distractor3: distractors[2],
+        distractor4: distractors[3],
+        solucionDogmatica,
+        pauta: "Conocimiento de las vías inhibitoria y declinatoria y su oportunidad procesal.",
+        sourceCitations: cites.secondary
+      };
+    },
+
+    _extractCompetenciaSentence(content) {
+      if (!content) return null;
+      const sentences = this._splitSentences(content)
+        .map(s => this._cleanSentence(s, true))
+        .filter(s => s.length >= 45 && s.length <= 300 && /\b(?:inhibitoria|declinatoria|incompetencia|pr[oó]rroga|radicaci[oó]n)\b/i.test(s));
+      return sentences.sort((a, b) => b.length - a.length)[0] || null;
+    },
+
+    /**
+     * Case - Subsunción práctica: la correcta aplica la regla del apunte al caso;
+     * los distractores contradicen o difieren la consecuencia sin base.
+     */
+    _specCaso(ctx, cites, variant) {
+      const base = ctx.def || this._fallbackAnchor(ctx.content, ctx.t0);
+      if (!base) return null;
+      const t1 = this._truncateAtComma(base, 2) || base;
+      const afin = ctx.afines[0] || this._afinFor(ctx.subject);
+      const dMix = (base.split(/[,.;]/)[0]) + ", " + this._afinTailClause(afin);
+      const d2 = "el tribunal debe desestimar la pretensión por no configurarse el supuesto descrito en la cédula";
+      const d3 = "la consecuencia jurídica queda diferida indefinidamente hasta el acuerdo posterior de las partes";
+      const distractors = this._normalizeLengths(base, [t1, dMix, d2, d3]);
+      const questionText = variant === 0
+        ? `Caso práctico: en un litigio en que se discute ${ctx.cleanTitle}, conforme a lo desarrollado en el apunte la solución jurídicamente correcta es:`
+        : `Supuesto práctico variado: acreditada la configuración de ${ctx.cleanTitle} según la cédula, el efecto jurídico que corresponde reconocer es:`;
+      const solucionDogmatica = `El enunciado presenta un supuesto práctico de subsunción de ${ctx.cleanTitle}. La opción correcta aplica la regla de la cédula al caso y conserva sus elementos; los distractores introducen consecuencias ajenas al texto, contradicen el supuesto configurado o difieren la solución sin base en el apunte. Conclusión: la alternativa que subsume el supuesto conforme a la cédula es la correcta.`;
+      return {
+        nature: "case",
+        questionText,
+        correctText: base,
+        distractor1: distractors[0],
+        distractor2: distractors[1],
+        distractor3: distractors[2],
+        distractor4: distractors[3],
+        solucionDogmatica,
+        pauta: "Capacidad de subsunción dogmática y descarte de soluciones sin respaldo en el apunte.",
+        sourceCitations: variant === 0 ? cites.primary : cites.secondary
+      };
+    },
+
+    /**
+     * E - Definición directa (respaldo robusto): correcta fiel al texto del apunte
+     * con distractores truncados, afines, adicionados o vagos.
+     */
+    _specDefinicionDirecta(ctx, cites, variant) {
+      const base = ctx.def || this._fallbackAnchor(ctx.content, ctx.t0);
+      if (!base) return null;
+      const v = variant % 2;
+      const t1 = this._truncateAtComma(base, 1) || base;
+      const afin = ctx.afines[0] || this._afinFor(ctx.subject);
+      const dAdd = `${base}, ${this._afinTailClause(afin)}`;
+      const distractors = this._normalizeLengths(base, [
+        t1,
+        afin,
+        dAdd,
+        "Es el instituto que regula la materia respectiva conforme al desarrollo de la cédula y las reglas generales del ordenamiento"
+      ]);
+      const questionText = v === 0
+        ? `Según el apunte, ${ctx.cleanTitle} es:`
+        : `Tratándose de ${ctx.cleanTitle}, ¿cuál de las siguientes proposiciones se ajusta a la cédula?`;
+      const solucionDogmatica = `La opción correcta reproduce la formulación del apunte acerca de ${ctx.cleanTitle}. Los distractores presentan versiones truncadas o vagas, instituciones afines o elementos agregados que no constan en la cédula. Conclusión: la proposición fiel al texto del apunte es la correcta.`;
+      return {
+        nature: "dogmatic",
+        questionText,
+        correctText: base,
+        distractor1: distractors[0],
+        distractor2: distractors[1],
+        distractor3: distractors[2],
+        distractor4: distractors[3],
+        solucionDogmatica,
+        pauta: "Precisión conceptual directa sobre el contenido de la cédula.",
+        sourceCitations: v === 0 ? cites.primary : cites.secondary
+      };
+    },
+
+    _archetypeQueue(nature) {
+      switch (nature) {
+        case "procedencia":
+          return ["_specProcedencia", "_specConcepto", "_specCaracteristicas", "_specDefinicionDirecta", "_specConceptoAlt"];
+        case "competencia":
+          return ["_specCompetencia", "_specConcepto", "_specCaracteristicas", "_specDefinicionDirecta", "_specCompetenciaAlt"];
+        case "plazos":
+          return ["_specPlazosCalculo", "_specPlazosRegla", "_specConcepto", "_specCaracteristicas", "_specDefinicionDirecta"];
+        case "case":
+          return ["_specCaso", "_specConcepto", "_specCasoAlt", "_specDefinicionDirecta", "_specCaracteristicas"];
+        default:
+          return ["_specConcepto", "_specCaracteristicas", "_specConceptoAlt", "_specDefinicionDirecta", "_specDefinicionDirectaAlt"];
+      }
+    },
+
     /**
      * Construye exactamente 4 preguntas de grado para una cédula específica.
      * Cumple con la Regla Maestra de mix según la naturaleza detectada.
@@ -269,287 +990,87 @@
     },
 
     /**
-     * Plantillas de generación de preguntas por naturaleza respetando la Regla Maestra.
+     * Compone las 4 especificaciones de pregunta (arquetipos A-F) a partir del
+     * contenido real de la cédula, con rellenos deterministas de seguridad.
      */
     _getQuestionSpecsForNature(nature, cleanTitle, uniqueCitations, topic) {
-      const citeStr = uniqueCitations.length > 0 ? ` (conforme a ${uniqueCitations[0]})` : "";
+      const ctx = this._buildContext(topic);
       const primaryCite = uniqueCitations.length > 0 ? [uniqueCitations[0]] : [];
       const secondaryCite = uniqueCitations.length > 1 ? [uniqueCitations[1]] : primaryCite;
+      const cites = { primary: primaryCite, secondary: secondaryCite };
 
-      if (nature === "procedencia") {
-        return [
-          {
-            nature: "procedencia",
-            questionText: `Respecto a la procedencia y naturaleza jurídica de ${cleanTitle}, ¿en qué hipótesis es jurídicamente procedente su interposición o alegación?`,
-            correctText: `Procede únicamente concurriendo agravio manifiesto o vulneración procesal tipificada, dentro de la oportunidad legal y ante el tribunal investido de potestad resolutiva${citeStr}.`,
-            distractor1: `Es procedente en cualquier estado de la causa, incluso de oficio por el tribunal arbitral sin mediar petición de parte ni perjuicio reparable.`,
-            distractor2: `Procede exclusivamente como recurso extraordinario de derecho estricto ante el tribunal de casación, prescindiendo del principio de trascendencia.`,
-            distractor3: `Basta la simple disconformidad de hecho del litigante, operando con efecto suspensivo automático e inderogable en toda instancia.`,
-            distractor4: `Procede únicamente si las partes han celebrado un pacto de arbitraje previo que renuncie expresamente a las instancias ordinarias.`,
-            solucionDogmatica: `La procedencia procesal de ${cleanTitle} exige la concurrencia copulativa de legitimación activa, oportunidad procesal y agravio sustancial. Los distractores confunden la vía con potestades de oficio inexistentes o con la renuncia a recursos ordinarios. Conclusión: La procedencia queda subordinada a la afectación jurídica tipificada y deducida tempestivamente ante el órgano con jurisdicción.`,
-            pauta: `Comisión evalúa distinción nítida entre admisibilidad formal y procedencia de fondo, con apego a la regla adjetiva.`,
-            sourceCitations: primaryCite
-          },
-          {
-            nature: "procedencia",
-            questionText: `En cuanto a los requisitos de admisibilidad formal para impetrar ${cleanTitle}, la doctrina y la ley exigen:`,
-            correctText: `Interposición fundada por escrito dentro de plazo legal fatal, patrocinio habilitado y mención clara de las peticiones concretas sometidas a fallo.`,
-            distractor1: `Consignación pecuniaria previa equivalente al 20% de la cuantía controvertida bajo sanción de tenerlo por no interpuesto de plano.`,
-            distractor2: `Audiencia previa y verbal ante el pleno del tribunal superior antes de resolver sobre el examen de admisibilidad formal.`,
-            distractor3: `Comparecencia personalísima de la parte material, prohibiéndose de manera absoluta la representación por mandato judicial.`,
-            distractor4: `Ratificación por escritura pública suscrita ante notario público titular con asiento en la comuna de asiento de la Corte.`,
-            solucionDogmatica: `El examen de admisibilidad de ${cleanTitle} verifica presupuestos formales: plazo fatal, legitimación, patrocinio y peticiones concretas. Se descartan de plano exigencias arcaicas como consignaciones sin texto expreso o ratificaciones notariales solemnes. Conclusión: La admisibilidad formal depende del cumplimiento estricto del plazo fatal y la postulación procesal técnica.`,
-            pauta: `Precisión en los presupuestos de admisibilidad del examen de cuenta del tribunal adjetivo.`,
-            sourceCitations: secondaryCite
-          },
-          {
-            nature: "procedencia",
-            questionText: `Respecto a los efectos y alcance procesal una vez acogida o declarada admisible la vía de ${cleanTitle}:`,
-            correctText: `Genera efectos vinculantes limitados a la cuestión controvertida, rigiendo la regla general de que los incidentes y recursos no suspenden el curso del litigio salvo orden de no innovar o causal legal expresa.`,
-            distractor1: `Produce de pleno derecho la nulidad refleja e inmediata de todo lo obrado en el juicio principal desde la notificación de la demanda.`,
-            distractor2: `Extingue retroactivamente la acción sustantiva deducida, impidiendo su renovación aun cuando se subsanen los defectos formales.`,
-            distractor3: `Convierte el procedimiento ordinario en un juicio de hacienda sumario tramitado ante el Consejo de Defensa del Estado.`,
-            distractor4: `Obliga al tribunal a suspender indefinidamente todas las causas en tabla del tribunal superior hasta que el fallo quede ejecutoriado.`,
-            solucionDogmatica: `El principio de continuidad procesal prescribe que la admisión de ${cleanTitle} no paraliza el negocio principal a menos que la ley prevea efecto suspensivo o se decrete ONI. Los distractores incurren en exageraciones de nulidad refleja o mutación injustificada de procedimientos. Conclusión: El alcance procesal se circumscribe al objeto del debate y su efecto suspensivo requiere mandato legal o concesión judicial expresa.`,
-            pauta: `Dominio del efecto suspensivo vs. devolutivo y el alcance de las órdenes de no innovar.`,
-            sourceCitations: primaryCite
-          },
-          {
-            nature: "dogmatic",
-            questionText: `Doctrinalmente, ¿cuál es la naturaleza jurídica y el fundamento sustancial de ${cleanTitle}?`,
-            correctText: `Constituye un instrumento de tutela efectiva del debido proceso destinado a restablecer el imperio del derecho o la correcta aplicación de la ley procesal.`,
-            distractor1: `Es un contrato procesal bilateral de carácter innominado regulado exclusivamente por el principio de la autonomía de la voluntad.`,
-            distractor2: `Constituye una sanción civil punitiva que transfiere la titularidad del crédito litigioso a favor del Fisco de Chile.`,
-            distractor3: `Es una mera formalidad optativa cuya omisión no genera preclusión ni afectación alguna a la validez de los actos judiciales.`,
-            distractor4: `Es un acto administrativo reglamentario regido supletoriamente por la Ley N° 19.880 de bases de los procedimientos administrativos.`,
-            solucionDogmatica: `La dogmática califica a ${cleanTitle} como una manifestación del derecho al debido proceso y tutela judicial efectiva. Desvirtuarlo como contrato procesal o acto administrativo desconoce la función pública de la jurisdicción. Conclusión: La naturaleza dogmática de la institución reside en la garantía del debido proceso y la regularidad del ejercicio de la función judicial.`,
-            pauta: `Explicación conceptual de nivel de grado sobre la ratio iuris de la vía procesal.`,
-            sourceCitations: []
-          }
-        ];
-      }
-
-      if (nature === "competencia") {
-        return [
-          {
-            nature: "competencia",
-            questionText: `En relación con las reglas de competencia aplicables a ${cleanTitle}, ¿qué tribunal resulta naturalmente competente para conocer del asunto?`,
-            correctText: `El tribunal señalado expresamente por las reglas de competencia absoluta (fuero, materia y cuantía), sin perjuicio de la radicación de la causa una vez fijada la relación procesal.`,
-            distractor1: `El tribunal que el demandante designe unilateralmente en su libelo, con prescindencia del fuero y la jerarquía de los juzgados.`,
-            distractor2: `Siempre y en todo caso la Corte Suprema en única instancia en virtud de sus facultades conservadoras y de superintendencia.`,
-            distractor3: `El tribunal arbitral arbitrador de la jurisdicción, operando un arbitraje forzoso de pleno derecho sin excepción.`,
-            distractor4: `Cualquier juzgado de policía local de la comuna donde se haya suscrito el contrato o ejecutado el hecho.`,
-            solucionDogmatica: `Las reglas de orden público procesal que informan la competencia absoluta (materia, fuero y cuantía) son irrenunciables e inderogables por las partes. Concurriendo un asunto sobre ${cleanTitle}, la ley orgánica determina inexcusablemente el tribunal del grado. Conclusión: La determinación del tribunal competente emana de las normas de orden público de competencia absoluta y las reglas de radicación.`,
-            pauta: `Identificación certera de los factores de competencia absoluta y su carácter irrenunciable.`,
-            sourceCitations: primaryCite
-          },
-          {
-            nature: "competencia",
-            questionText: `Respecto a la prórroga de la competencia en el marco de ${cleanTitle}, ¿cuál de las siguientes afirmaciones es correcta?`,
-            correctText: `Solo es jurídicamente admisible en materias contenciosas civiles, en primera o única instancia, entre tribunales ordinarios de igual jerarquía y exclusivamente respecto del factor territorio.`,
-            distractor1: `Las partes pueden prorrogar válidamente el factor fuero y materia siempre que conste por instrumento público firmado ante notario.`,
-            distractor2: `La prórroga opera de pleno derecho en los tribunales penales y en los juicios de menores sin requerir voluntad de las partes.`,
-            distractor3: `La prórroga tácita se perfecciona por el hecho de interponer una excepción de incompetencia por vía inhibitoria.`,
-            distractor4: `Puede prorrogarse la competencia de un tribunal ordinario a favor de un órgano administrativo del Poder Ejecutivo.`,
-            solucionDogmatica: `La prórroga de competencia es de derecho estricto: procede solo respecto del factor territorio, en asuntos contenciosos civiles de primera o única instancia. Jamás puede prorrogarse la materia, el fuero o la jerarquía. Conclusión: La prórroga de competencia se restringe indefectiblemente al elemento territorial en sede civil contenciosa.`,
-            pauta: `Distinción categórica entre factores disponibles (territorio) e indisponibles (fuero, materia, cuantía).`,
-            sourceCitations: secondaryCite
-          },
-          {
-            nature: "competencia",
-            questionText: `En virtud del principio de radicación y las reglas generales de la competencia, una vez trabada válidamente la litis sobre ${cleanTitle}:`,
-            correctText: `El tribunal queda fijado de modo irrevocable para conocer del negocio hasta su total conclusión, sin que las alteraciones sobrevinientes modifiquen su potestad.`,
-            distractor1: `Cualquiera de las partes puede exigir que la causa sea transferida a otro tribunal de similar cuantía mediante simple solicitud verbal.`,
-            distractor2: `Si el demandado cambia de domicilio durante el juicio, la causa se remite automáticamente al juzgado del nuevo domicilio.`,
-            distractor3: `El tribunal pierde competencia de pleno derecho si transcurren más de 30 días sin que se dicte una resolución de mera sustanciación.`,
-            distractor4: `La radicación se extingue si fallece una de las partes, debiendo iniciarse un juicio completamente nuevo ante el tribunal sucesorio.`,
-            solucionDogmatica: `La regla de la radicación (fijeza) consagra que fijada con arreglo a la ley la competencia de un juez, no se alterará por causa sobreviniente alguna. Ni la mutación de domicilio ni la muerte extinguen la radicación radicada en el tribunal original. Conclusión: La radicación asegura la invariabilidad del tribunal legalmente investido hasta la total ejecución del fallo.`,
-            pauta: `Manejo preciso de las reglas generales de la competencia del Código Orgánico de Tribunales.`,
-            sourceCitations: []
-          },
-          {
-            nature: "procedencia",
-            questionText: `Para reclamar la incompetencia del tribunal en una controversia relativa a ${cleanTitle}, el litigante afectado debe:`,
-            correctText: `Deducir la excepción de incompetencia en tiempo y forma, sea por vía inhibitoria (ante el que cree competente) o declinatoria (ante el que estima incompetente), sin emplear ambas conjuntamente.`,
-            distractor1: `Interponer directamente un recurso de queja disciplinario prescindiendo de toda alegación previa ante el juez de la causa.`,
-            distractor2: `Promover un juicio sumario de jactancia procesal en contra del juez titular para suspender sus atribuciones judiciales.`,
-            distractor3: `Negarse a comparecer en el juicio, operando la incompetencia de pleno derecho sin necesidad de pronunciamiento judicial.`,
-            distractor4: `Acudir a la Contraloría General de la República para que dirima la contienda de jurisdicción entre tribunales.`,
-            solucionDogmatica: `Las vías adjetivas idóneas para reclamar la incompetencia son la declinatoria y la inhibitoria. El litigante debe optar por una de ellas, quedando vedado el ejercicio simultáneo o sucesivo de ambas. Conclusión: El control de la competencia se ejerce privativamente por vía declinatoria o inhibitoria dentro del término de emplazamiento.`,
-            pauta: `Conocimiento de los incidentes de incompetencia y la prohibición de uso coetáneo de vías adjetivas.`,
-            sourceCitations: []
-          }
-        ];
-      }
-
-      if (nature === "plazos") {
-        return [
-          {
-            nature: "plazos",
-            questionText: `En el cómputo y régimen de plazos aplicable a ${cleanTitle}, si la ley o el tribunal fija un término de días, ¿cómo opera su decurso temporal?`,
-            correctText: `Se suspende durante los días feriados si se trata de un plazo de días previsto en el Código de Procedimiento Civil, siendo fatal para ejercer el derecho respectivo${citeStr}.`,
-            distractor1: `Se computa invariablemente de momento a momento, sin admitir prórroga ni exclusión de días inhábiles en ninguna circunstancia.`,
-            distractor2: `Los plazos de días procesales son siempre continuos y no se suspenden jamás por la concurrencia de feriados legales.`,
-            distractor3: `El término corre únicamente en horario matutino de 09:00 a 12:00 horas, feneciendo automáticamente en los meses de receso estival.`,
-            distractor4: `Todo plazo de días puede extenderse unilateralmente por voluntad del notificador judicial sin autorización del juez.`,
-            solucionDogmatica: `En materia procesal civil (art. 66 CPC), los términos de días son discontinuos, suspendiéndose durante los feriados, y revisten carácter fatal de pleno derecho. En el Código Civil, la regla general son los días corridos (art. 50 CC). Conclusión: La naturaleza procesal del plazo impone el cómputo de días hábiles y su extinción por el solo ministerio de la ley.`,
-            pauta: `Examen de grado evalúa la antinomia fundamental entre días corridos del CC vs. días hábiles del CPC.`,
-            sourceCitations: primaryCite
-          },
-          {
-            nature: "case",
-            questionText: `Supuesto práctico de cómputo en ${cleanTitle}: Notificada una resolución que confiere un plazo fatal de 5 días hábiles un día martes (siendo inhábil el sábado y feriado el jueves):`,
-            correctText: `El plazo comienza a correr el miércoles, se suspende el jueves (feriado) y el sábado/domingo (inhábiles), venciendo a la medianoche del miércoles de la semana siguiente.`,
-            distractor1: `El plazo vence el día domingo inmediatamente posterior a la notificación por aplicación del cómputo natural del Código Civil.`,
-            distractor2: `El plazo vence el viernes de la misma semana porque los feriados no inciden en los plazos judiciales breves.`,
-            distractor3: `El término no empieza a correr hasta que la contraparte confirme verbalmente su recepción en el tribunal.`,
-            distractor4: `El plazo se prorroga indefinidamente hasta el primer día hábil del mes calendario siguiente.`,
-            solucionDogmatica: `Notificado el martes, el primer día es el miércoles (día 1). Jueves inhábil por feriado (no corre). Viernes (día 2). Sábado y domingo inhábiles (no corren). Lunes (día 3). Martes (día 4). Miércoles (día 5). El cómputo correcto excluye feriados e inhábiles rigiendo la preclusión al término de la jornada. Conclusión: El cómputo en días hábiles procesales excluye feriados y fines de semana hasta el fenecimiento del último día útil.`,
-            pauta: `Destreza práctica en el cómputo de plazos con interposición de días feriados legales.`,
-            sourceCitations: []
-          },
-          {
-            nature: "dogmatic",
-            questionText: `Respecto a la fatalidad y caducidad de los plazos en relación con ${cleanTitle}:`,
-            correctText: `El derecho o facultad procesal se extingue por el solo ministerio de la ley al vencimiento del plazo, sin necesidad de acusar rebeldía previa ni dictar resolución declarativa.`,
-            distractor1: `El derecho permanece vigente de manera indefinida hasta que la contraparte presente una fianza de resultas en el expediente.`,
-            distractor2: `La fatalidad solo opera si el juez certifica por resolución notificada personalmente la desidia del litigante.`,
-            distractor3: `Todo plazo fatal puede revivirse pagando una multa a beneficio municipal en la cuenta corriente del juzgado.`,
-            distractor4: `La caducidad del plazo requiere siempre la prueba fehaciente del dolo o culpa levísima del requirente.`,
-            solucionDogmatica: `La regla del art. 64 del CPC consagra que los plazos fatales extinguen la facultad respectiva ipso iure una vez fenecidos. La perención o pérdida del trámite opera de pleno derecho sin requerir evacuación de rebeldía formal. Conclusión: La fatalidad legal acarrea la caducidad objetiva y automática de la facultad procesal.`,
-            pauta: `Identificación de la evolución histórica desde las rebeldías acusadas a la fatalidad de pleno derecho.`,
-            sourceCitations: secondaryCite
-          },
-          {
-            nature: "case",
-            questionText: `En una situación de fuerza mayor o caso fortuito sobreviniente que impide evacuar una gestión en el término de ${cleanTitle}:`,
-            correctText: `El afectado puede impetrar la rescisión o entorpecimiento dentro del término fatal legalmente fijado desde que cesó el impedimento, justificando el hecho impeditivo.`,
-            distractor1: `El procedimiento queda nulo de pleno derecho sin necesidad de justificar el entorpecimiento alegado.`,
-            distractor2: `La parte perjudicada puede unilateralmente duplicar el plazo sin solicitar pronunciamiento del tribunal.`,
-            distractor3: `La fuerza mayor no produce efecto alguno en el derecho chileno, rigiendo una responsabilidad procesal objetiva e inexcusable.`,
-            distractor4: `El secretario del tribunal está obligado a dictar sentencia favorable a la parte impedida como indemnización de perjuicios.`,
-            solucionDogmatica: `El entorpecimiento procesal (art. 79 CPC) ampara al litigante ante eventos de fuerza mayor imprevistos e insuperables, otorgándole el plazo residual siempre que se reclame inmediatamente tras el cese del óbice. Conclusión: El entorpecimiento por fuerza mayor permite rescatar la oportunidad procesal mediante justificación oportuna ante el juez.`,
-            pauta: `Aplicación armónica del caso fortuito procesal y el incidente de entorpecimiento.`,
-            sourceCitations: []
-          }
-        ];
-      }
-
-      if (nature === "case") {
-        return [
-          {
-            nature: "case",
-            questionText: `Caso práctico de subsunción sobre ${cleanTitle}: En un supuesto de hecho donde concurren los presupuestos base de la institución y una de las partes alega falta de eficacia jurídica:`,
-            correctText: `El tribunal debe acoger la pretensión amparada en ${cleanTitle}, toda vez que se configuran copulativamente el título legítimo, la capacidad y los requisitos de oponibilidad frente a terceros${citeStr}.`,
-            distractor1: `El tribunal debe desestimar la acción de plano aplicando una presunción de mala fe procesal que no admite prueba en contrario.`,
-            distractor2: `La pretensión se extingue si no se acompañan simultáneamente tres testimonios notariales de testigos domiciliados en el lugar.`,
-            distractor3: `Debe declararse la nulidad de todo lo actuado por falta de comparecencia del Ministerio Público en sede civil patrimonial.`,
-            distractor4: `El caso debe ser derivado a arbitraje obligatorio de seguros comerciales con prescindencia del estatuto común.`,
-            solucionDogmatica: `En el análisis de casos sobre ${cleanTitle}, la configuración de los elementos constitutivos impone otorgar el amparo sustantivo peticionado. Los distractores introducen formalidades procesales impertinentes o presunciones de mala fe contrarias al principio rector del derecho civil. Conclusión: La concurrencia de los requisitos constitutivos legitima la pretensión de fondo deducida.`,
-            pauta: `Capacidad de subsunción dogmática y descarte de excepciones puramente dilatorias.`,
-            sourceCitations: primaryCite
-          },
-          {
-            nature: "case",
-            questionText: `Alteración del supuesto fáctico en ${cleanTitle}: ¿Qué efecto sustantivo sobreviene si se comprueba que el requirente incurrió en dolo o actuó a sabiendas de un vicio invalidante?`,
-            correctText: `Carece de legitimación para solicitar la nulidad fundada en dicho vicio y no puede repetir lo dado o pagado en virtud de causa ilícita a sabiendas.`,
-            distractor1: `Mantiene incólume la facultad de invocar su propio dolo para obtener la restitución íntegra del patrimonio transferido.`,
-            distractor2: `El vicio queda saneado de pleno derecho por el simple transcurso de 24 horas contadas desde el acto doloso.`,
-            distractor3: `El juez debe imponerle una condena penal de presidio sin necesidad de juicio penal previo ante el tribunal oral.`,
-            distractor4: `Se produce una novación automática del negocio, transformándose en una donación irrevocable a favor del demandado.`,
-            solucionDogmatica: `El principio que prohíbe aprovecharse del propio dolo (nemo auditur propriam turpitudinem allegans) y la regla del art. 1468 del Código Civil impiden alegar la nulidad a quien conocía o debía conocer el vicio. Conclusión: El dolo o ciencia del vicio inhabilita la legitimación anulatoria y enerva la acción de repetición.`,
-            pauta: `Manejo del principio de buena fe y las sanciones sustantivas a la conducta contraria a derecho.`,
-            sourceCitations: secondaryCite
-          },
-          {
-            nature: "case",
-            questionText: `En un conflicto práctico donde colisionan los derechos emanados de ${cleanTitle} frente a un tercero adquirente de buena fe a título oneroso:`,
-            correctText: `El ordenamiento tutela la seguridad del tráfico jurídico y protege al tercero amparado en la apariencia registral o posesoria legítima.`,
-            distractor1: `El tercero sucumbe en toda hipótesis, rigiendo un principio absoluto de reivindicación sin indemnización alguna.`,
-            distractor2: `El negocio se anula retroactivamente sin permitir al tercero oponer excepciones reales ni prescripción adquisitiva.`,
-            distractor3: `El tercero queda obligado a pagar las costas del juicio primitivo en calidad de fiador solidario judicial.`,
-            distractor4: `La disputa debe ser resuelta exclusivamente por sorteo público efectuado ante el secretario del tribunal de alzada.`,
-            solucionDogmatica: `La colisión entre el titular originario y el tercero de buena fe se resuelve ponderando la función social del dominio y la protección de la confianza legítima en el tráfico registral/posesorio. Conclusión: La buena fe registral y la onerosidad consolidan la posición del adquirente frente a nulidades inoponibles.`,
-            pauta: `Ponderación de derechos concurrentes y protección del tráfico jurídico en el examen de grado.`,
-            sourceCitations: []
-          },
-          {
-            nature: "dogmatic",
-            questionText: `Síntesis doctrinal de clausura: La ratio iuris fundamental que inspira la regulación de ${cleanTitle} en el derecho sustantivo chileno es:`,
-            correctText: `Garantizar la certidumbre jurídica, el equilibrio patrimonial entre las partes y la estabilidad de las relaciones jurídicas constituidas.`,
-            distractor1: `Impedir el ejercicio de la actividad económica privada mediante un intervencionismo absoluto del Estado.`,
-            distractor2: `Fomentar la litigiosidad recurrente como mecanismo de financiamiento de los tribunales de justicia.`,
-            distractor3: `Subordinar la validez de los acuerdos privados a la aprobación previa del concejo municipal respectivo.`,
-            distractor4: `Crear privilegios crediticios hereditarios e imprescriptibles a favor de determinadas corporaciones gremiales.`,
-            solucionDogmatica: `El ordenamiento civil y procesal se asienta sobre la certeza del derecho y la salvaguarda de la buena fe objetiva en el tráfico. ${cleanTitle} materializa este principio rector tutelando el equilibrio negocial. Conclusión: La institución procura la seguridad jurídica y la preservación del orden público patrimonial.`,
-            pauta: `Articulación de los principios generales del derecho privado chileno.`,
-            sourceCitations: []
-          }
-        ];
-      }
-
-      // Default: DOGMATIC
-      return [
-        {
-          nature: "dogmatic",
-          questionText: `En relación con el concepto, naturaleza jurídica y elementos esenciales de ${cleanTitle}, ¿cuál de las siguientes proposiciones es dogmáticamente correcta?`,
-          correctText: `Requiere para su perfeccionamiento la concurrencia copulativa de los requisitos de existencia y validez instituidos por el ordenamiento sustantivo${citeStr}.`,
-          distractor1: `Basta el mero consentimiento verbal aun cuando la ley imponga expresamente una solemnidad por vía de existencia o ad probationem.`,
-          distractor2: `Se configura de pleno derecho por la sola voluntad de un tercero ajeno a la relación jurídica sin requerir manifestación de voluntad alguna.`,
-          distractor3: `Es una figura derogada tácitamente que subsiste únicamente como norma consuetudinaria sin eficacia ante los tribunales de justicia.`,
-          distractor4: `Constituye una ficción procesal que solo produce consecuencias jurídicas cuando es autorizada por un tribunal colegiado en acuerdo pleno.`,
-          solucionDogmatica: `La dogmática de ${cleanTitle} exige la concurrencia armónica de los presupuestos de validez y eficacia. Desconocer la exigencia de solemnidades o asumir efectos sin voluntad contraría los axiomas fundamentales de los actos jurídicos. Conclusión: La institución exige la concurrencia copulativa de sus elementos esenciales de existencia y validez.`,
-          pauta: `Criterio de grado evalúa la precisión conceptual y la distinción entre requisitos de existencia y de validez.`,
-          sourceCitations: primaryCite
-        },
-        {
-          nature: "dogmatic",
-          questionText: `En cuanto a la clasificación, modalidades y elementos constitutivos que estructuran ${cleanTitle}:`,
-          correctText: `Se distingue entre elementos de la esencia (generales y específicos), de la naturaleza y accidentales, incorporándose estos últimos por estipulación expresa.`,
-          distractor1: `Todos sus elementos son invariablemente de orden público, estando vedado a las partes introducir cualquier modalidad, plazo o condición.`,
-          distractor2: `Carece de elementos accidentales, rigiéndose únicamente por cláusulas de estilo estandarizadas e inmodificables.`,
-          distractor3: `La condición resolutoria tácita y la representación constituyen elementos de la esencia específicos que no admiten renuncia.`,
-          distractor4: `Los elementos de la naturaleza requieren mención expresa por escritura pública para entenderse incorporados al acto.`,
-          solucionDogmatica: `El tripartito dogmático (art. 1444 Código Civil) clasifica las cosas de los actos en esenciales, de la naturaleza (que la ley suple en silencio) y accidentales (agregados por voluntad de las partes). Conclusión: La estructura de ${cleanTitle} integra elementos esenciales inderogables y cláusulas accidentales nacidas de la autonomía negocial.`,
-          pauta: `Aplicación impecable de la teoría de los elementos del acto jurídico consagrada en el art. 1444 CC.`,
-          sourceCitations: secondaryCite
-        },
-        {
-          nature: "dogmatic",
-          questionText: `Respecto a los efectos y consecuencias jurídicas fundamentales que genera ${cleanTitle} válidamente constituido:`,
-          correctText: `Engendra derechos y obligaciones correlativos entre las partes, produciendo el efecto relativo que limita su oponibilidad directa frente a terceros extraños.`,
-          distractor1: `Genera una obligación universal indivisible que vincula de manera forzosa a todas las personas naturales de la República.`,
-          distractor2: `Produce la inoponibilidad absoluta del acto frente a las propias partes que concurrieron a su celebración con conocimiento de causa.`,
-          distractor3: `Extingue retroactivamente todas las deudas tributarias y previsionales contraídas por el sujeto activo con anterioridad a su nacimiento.`,
-          distractor4: `Impide de manera perpetua el ejercicio de cualquier acción judicial resolutoria, rescisoria o de cumplimiento forzado.`,
-          solucionDogmatica: `El principio del efecto relativo de los actos y contratos circunscribe sus efectos jurídicos a los otorgantes o partes contratantes, sin perjuicio de la oponibilidad como hecho objetivo frente a terceros. Conclusión: La eficacia jurídica vincula directamente a las partes en virtud de la ley del contrato y el efecto relativo negocial.`,
-          pauta: `Comprensión de la ley del contrato y el alcance exacto del efecto relativo de los actos jurídicos.`,
-          sourceCitations: []
-        },
-        {
-          nature: "dogmatic",
-          questionText: `Al contrastar ${cleanTitle} con instituciones dogmáticas afines y analizar sus causales de ineficacia o extinción:`,
-          correctText: `La ineficacia puede sobrevenir por vicios coetáneos a su celebración (nulidad) o por hechos sobrevinientes (resolución, revocación o resciliación).`,
-          distractor1: `La nulidad y la resolución son figuras idénticas que operan siempre por causales originarias previas a la formación del vínculo.`,
-          distractor2: `Una vez nacido el acto, este se vuelve indestructible, no admitiendo resciliación mutua por acuerdo de voluntades.`,
-          distractor3: `La rescisión por lesión enorme opera de manera uniforme en todos los contratos bilaterales y unilaterales del derecho privado.`,
-          distractor4: `Toda causal de ineficacia sobreviniente debe ser declarada exclusivamente por sentencia dictada en juicio sumarial penal.`,
-          solucionDogmatica: `Es cardinal distinguir las causales de ineficacia intrínsecas u originarias (nulidad absoluta y relativa) de aquellas sobrevinientes o extrínsecas (resolución por incumplimiento, resciliación, caducidad o revocación). Conclusión: La ineficacia reconoce dos grandes categorías: vicios de origen sancionados con nulidad e ineficacias sobrevinientes emanadas de la inejecución o mutuo disenso.`,
-          pauta: `Claridad dogmática en el cuadro comparativo de ineficacias del acto jurídico en el Examen de Grado.`,
-          sourceCitations: []
+      const queue = this._archetypeQueue(nature);
+      const specs = [];
+      for (let i = 0; i < queue.length && specs.length < 4; i++) {
+        const name = queue[i];
+        let fn = this[name];
+        let variant = 0;
+        // Las variantes «Alt» se resuelven como el método base con variant=1,
+        // salvo que exista un método propio con ese nombre exacto.
+        if (typeof fn !== "function" && name.endsWith("Alt")) {
+          const base = name.slice(0, -3);
+          fn = this[base];
+          variant = 1;
         }
-      ];
+        if (typeof fn !== "function") continue;
+        let spec = null;
+        try {
+          spec = fn.call(this, ctx, cites, variant);
+        } catch (e) {
+          spec = null;
+        }
+        if (spec) {
+          spec.sourceCitations = (spec.sourceCitations || []).filter(c => uniqueCitations.includes(c));
+          specs.push(spec);
+        }
+      }
+
+      // Relleno determinista de seguridad: definición directa (def o ancla real),
+      // alternando con la pregunta de concepto cuando existe definición.
+      let guard = 0;
+      while (specs.length < 4 && guard < 8) {
+        let fb = null;
+        if (specs.length % 2 === 1 && ctx.def) {
+          fb = this._specConcepto(ctx, cites, 1);
+        }
+        if (!fb) fb = this._specDefinicionDirecta(ctx, cites, specs.length % 2);
+        if (!fb) break;
+        specs.push(fb);
+        guard++;
+      }
+
+      // Último recurso incondicional (nunca debería alcanzarse con contenido real)
+      while (specs.length < 4) {
+        const instituto = ctx.cleanTitle;
+        specs.push({
+          nature: "dogmatic",
+          questionText: `Según el apunte, la regulación de ${instituto} comprende la materia que la sección respectiva desarrolla.`,
+          correctText: `La sección de la cédula dedicada a ${instituto} desarrolla su concepto, elementos y régimen conforme a las reglas que en ella se exponen.`,
+          distractor1: `La sección de la cédula dedicada a ${instituto} desarrolla una materia distinta y ajena a la institución.`,
+          distractor2: `La cédula omite por completo el tratamiento de ${instituto}, derivando su regulación a la costumbre.`,
+          distractor3: `El régimen de ${instituto} se agota en una única regla aislada sin elementos ni supuestos.`,
+          distractor4: `La cédula regula ${instituto} por el solo arbitrio de los jueces, sin reglas objetivas.`,
+          solucionDogmatica: `El contenido de la cédula estructura el tratamiento de ${instituto} en sus elementos, requisitos y efectos. Las demás alternativas niegan esa estructura o la desvirtúan. Conclusión: la proposición que refleja el desarrollo de la sección es la correcta.`,
+          pauta: "Dominio del contenido desarrollado en la sección respectiva.",
+          sourceCitations: []
+        });
+      }
+
+      return specs;
     },
 
     /**
      * Valida la consistencia formal y dogmática de las 4 preguntas generadas.
-     * Retorna { valid: boolean, errors: string[] }.
+     * Retorna { valid, errors, warnings }.
+     * Las warnings del perfil «Manejo» (absurdos, anclaje y homogeneidad) no
+     * bloquean la renderización; solo los errores de contrato lo hacen.
      */
     validateSectionQuestions(topic, questions) {
       const errors = [];
+      const warnings = [];
       if (!Array.isArray(questions) || questions.length !== 4) {
         errors.push(`Se esperaban exactamente 4 preguntas de grado, pero se obtuvieron ${questions ? questions.length : 0}.`);
-        return { valid: false, errors };
+        return { valid: false, errors, warnings };
       }
 
       const content = (topic && topic.content) || "";
@@ -580,11 +1101,41 @@
             }
           });
         }
+
+        // ---- Perfil «Manejo»: warnings no bloqueantes ----
+        if (q.questionText) {
+          const lowEnunciado = q.questionText.toLowerCase();
+          this._BANNED_ABSURD.forEach(b => {
+            if (lowEnunciado.includes(b)) warnings.push(`Pregunta ${qNum}: el enunciado incluye el token prohibido de absurdos '${b}'.`);
+          });
+        }
+        (q.options || []).forEach(o => {
+          const lowOpt = (o.text || "").toLowerCase();
+          this._BANNED_ABSURD.forEach(b => {
+            if (lowOpt.includes(b)) warnings.push(`Pregunta ${qNum}: la alternativa incluye el token prohibido de absurdos '${b}'.`);
+          });
+        });
+        const correctOpt = (q.options || []).find(o => o.id === q.correctAnswer);
+        const contentBigrams = this._bigrams(content);
+        if (correctOpt && correctOpt.text && contentBigrams.size) {
+          const correctBigrams = this._bigrams(correctOpt.text);
+          const shared = [...correctBigrams].some(b => contentBigrams.has(b));
+          if (!shared) warnings.push(`Pregunta ${qNum}: la alternativa correcta no comparte bigramas con el contenido de la cédula (anclaje débil).`);
+        }
+        if (Array.isArray(q.options) && q.options.length) {
+          const lens = q.options.map(o => (o.text || "").length);
+          const lo = Math.min(...lens);
+          const hi = Math.max(...lens);
+          if (lo > 0 && hi / lo > 1.6) {
+            warnings.push(`Pregunta ${qNum}: opciones de longitud muy heterogénea (ratio ${(hi / lo).toFixed(2)}).`);
+          }
+        }
       });
 
       return {
         valid: errors.length === 0,
-        errors: errors
+        errors: errors,
+        warnings: warnings
       };
     },
 
@@ -605,7 +1156,10 @@
       const questions = this.buildSectionQuestions(topic);
       const val = this.validateSectionQuestions(topic, questions);
       if (!val.valid) {
-        console.warn(`[QuestionDeveloper] Advertencias de validación en cédula ${topicId}:`, val.errors);
+        console.warn(`[QuestionDeveloper] Errores de validación en cédula ${topicId}:`, val.errors);
+      }
+      if (val.warnings && val.warnings.length) {
+        console.warn(`[QuestionDeveloper] Warning «Manejo» en cédula ${topicId}:`, val.warnings.slice(0, 3));
       }
 
       this._cache.set(cacheKey, questions);
