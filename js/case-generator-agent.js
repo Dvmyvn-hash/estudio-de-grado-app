@@ -19,7 +19,7 @@ var CaseGeneratorAgent = {
   selectedPresetId: null,
   isGenerating: false,
 
-  // 0. CORPUS DOGMÁTICO DE FUENTES OFICIALES (fuentes/*.md) Y APUNTES (68 CÉDULAS)
+  // 0. CORPUS DOGMÁTICO DE FUENTES OFICIALES (fuentes/*.md) Y APUNTES (103 CÉDULAS)
   FUENTES_CORPUS: {
     "ACTO JURIDICO.md": {
       title: "Derecho Civil - Teoría del Acto Jurídico (Apunte Canónico)",
@@ -1457,7 +1457,7 @@ var CaseGeneratorAgent = {
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin: 12px 24px 0 24px; padding: 8px 14px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: var(--radius-sm); font-size: 0.8rem; color: var(--text-secondary);">
           <div style="display: flex; align-items: center; gap: 8px;">
             <i data-lucide="shield-check" style="width: 15px; height: 15px; color: #60a5fa;"></i>
-            <span>Agente nutrido con la carpeta <strong>FUENTES</strong> y los <strong>Apuntes Oficiales (68 Cédulas)</strong></span>
+            <span>Agente nutrido con la carpeta <strong>FUENTES</strong> y los <strong>Apuntes Oficiales (103 Cédulas)</strong></span>
           </div>
           <span style="color: #60a5fa; font-weight: 600; font-size: 0.75rem;">Protocolo AFG 2026-20</span>
         </div>

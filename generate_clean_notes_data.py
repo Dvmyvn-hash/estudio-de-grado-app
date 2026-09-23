@@ -130,12 +130,49 @@ FILES_CONFIG = [
         }
     },
     {
-        "file": "PROCE ORDINARIO DE MAYOR CUANTIA.md",
+        "file": "PROCEMAYORCUANTIA-pulido.md",
         "subject": "procesal",
         "discipline": "II. Derecho Procesal",
-        "defaultCategory": "Procedimiento Ordinario de Mayor Cuantía",
+        "defaultCategory": "Procedimiento Ordinario de Mayor Cuantía (Etapa de Discusión)",
         "defaultChapterNum": 6,
-        "categoryMap": {}
+        "categoryMap": {
+            "1.1": ("Las Medidas Prejudiciales", 6),
+            "1.2": ("Las Medidas Prejudiciales", 6),
+            "1.3": ("Las Medidas Prejudiciales", 6),
+            "1.4": ("Las Medidas Prejudiciales", 6),
+            "1.5": ("Las Medidas Prejudiciales", 6),
+            "1.6": ("Las Medidas Prejudiciales", 6),
+            "2.1": ("La Demanda", 7),
+            "2.2": ("La Demanda", 7),
+            "2.3": ("La Demanda", 7),
+            "2.4": ("La Demanda", 7),
+            "3.1": ("Control de Admisibilidad (Examen de Oficio)", 8),
+            "3.2": ("Control de Admisibilidad (Examen de Oficio)", 8),
+            "3.3": ("Control de Admisibilidad (Examen de Oficio)", 8),
+            "3.4": ("Control de Admisibilidad (Examen de Oficio)", 8),
+            "3.5": ("Control de Admisibilidad (Examen de Oficio)", 8),
+            "3.6": ("Control de Admisibilidad (Examen de Oficio)", 8),
+            "4.1": ("Retiro, Desistimiento y Modificación de la Demanda", 9),
+            "4.2": ("Retiro, Desistimiento y Modificación de la Demanda", 9),
+            "4.3": ("Retiro, Desistimiento y Modificación de la Demanda", 9),
+            "4.4": ("Retiro, Desistimiento y Modificación de la Demanda", 9),
+            "4.5": ("Retiro, Desistimiento y Modificación de la Demanda", 9),
+            "4.6": ("Retiro, Desistimiento y Modificación de la Demanda", 9),
+            "5.1": ("El Emplazamiento", 10),
+            "5.2": ("El Emplazamiento", 10),
+            "5.3": ("El Emplazamiento", 10),
+            "5.4": ("El Emplazamiento", 10),
+            "6.1": ("Actitudes del Demandado frente a la Demanda", 11),
+            "6.2": ("Actitudes del Demandado frente a la Demanda", 11),
+            "6.3": ("Actitudes del Demandado frente a la Demanda", 11),
+            "6.4": ("Actitudes del Demandado frente a la Demanda", 11),
+            "7.1": ("Réplica y Dúplica", 12),
+            "7.2": ("Réplica y Dúplica", 12),
+            "8.1": ("Etapa de Sentencia y Modos Anormales de Término", 13),
+            "8.2": ("Etapa de Sentencia y Modos Anormales de Término", 13),
+            "8.3": ("Etapa de Sentencia y Modos Anormales de Término", 13),
+            "8.4": ("Etapa de Sentencia y Modos Anormales de Término", 13)
+        }
     }
 ]
 
