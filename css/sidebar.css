@@ -699,6 +699,143 @@
   background: var(--bg-surface-hover);
 }
 
+/* Filtros del Vault (v7.25, Prompt 020) */
+.vault-search-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.vault-filter-pills {
+  display: flex;
+  gap: 4px;
+}
+
+.vault-filter-pill {
+  flex: 1;
+  padding: 3px 4px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-align: center;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.vault-filter-pill:hover {
+  color: var(--text-main);
+  border-color: var(--border-medium);
+  background: var(--bg-surface-hover);
+}
+
+.vault-filter-pill.active {
+  color: var(--gold-primary);
+  background: rgba(217, 119, 6, 0.15);
+  border-color: var(--gold-primary);
+}
+
+.vault-filter-chapter-wrapper {
+  width: 100%;
+}
+
+.vault-filter-chapter {
+  width: 100%;
+  padding: 4px 8px;
+  font-size: 0.72rem;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.vault-filter-chapter:focus {
+  border-color: var(--gold-primary);
+}
+
+/* Historial de búsquedas recientes (v7.25, Prompt 020) */
+.vault-search-history {
+  margin-top: 6px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 8px 10px;
+}
+
+.vault-search-history.hidden {
+  display: none !important;
+}
+
+.vault-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.vault-history-title {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.vault-history-icon {
+  width: 12px;
+  height: 12px;
+}
+
+.vault-history-clear-btn {
+  background: transparent;
+  border: none;
+  font-size: 0.68rem;
+  color: var(--gold-primary);
+  cursor: pointer;
+  padding: 0 4px;
+  border-radius: var(--radius-sm);
+  transition: opacity var(--transition-fast);
+}
+
+.vault-history-clear-btn:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.vault-history-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.vault-history-chip {
+  font-size: 0.7rem;
+  padding: 2px 7px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vault-history-chip:hover {
+  color: var(--gold-primary);
+  border-color: var(--gold-primary);
+  background: rgba(217, 119, 6, 0.08);
+}
+
 .vault-search-results {
   max-height: 320px;
   overflow-y: auto;

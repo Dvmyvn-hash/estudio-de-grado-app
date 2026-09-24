@@ -1666,25 +1666,144 @@ const App = {
     }
   },
 
-  // 5.1 VAULT DE CONOCIMIENTO — BÚSQUEDA SEMÁNTICA ESTÁTICA (v7.22, Prompt 017)
+  // 5.1 VAULT DE CONOCIMIENTO — BÚSQUEDA SEMÁNTICA ESTÁTICA + FILTROS E HISTORIAL (v7.22 / v7.25, Prompts 017 y 020)
   setupVaultSearch() {
     const input = document.getElementById("vault-search-input");
     const resultsContainer = document.getElementById("vault-search-results");
     const clearBtn = document.getElementById("vault-search-clear");
+    const pillsContainer = document.getElementById("vault-filter-pills");
+    const chapterSelect = document.getElementById("vault-filter-chapter");
+    const historyContainer = document.getElementById("vault-search-history");
+    const historyItems = document.getElementById("vault-history-items");
+    const clearHistoryBtn = document.getElementById("vault-history-clear");
+
     if (!input || !resultsContainer) return;
 
     let debounceTimer = null;
+    let selectedSubject = "all";
+    let selectedChapter = "all";
 
+    const escapeFn = (typeof SecurityShield !== "undefined" && SecurityShield.escapeHtml)
+      ? SecurityShield.escapeHtml
+      : (s) => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+    // Gestión del Historial Reciente (localStorage 100% local, no exportable)
+    const RECENT_KEY = "vault_recent_searches";
+    const getRecentSearches = () => {
+      try {
+        const raw = localStorage.getItem(RECENT_KEY);
+        const parsed = JSON.parse(raw || "[]");
+        return Array.isArray(parsed) ? parsed.filter(x => typeof x === "string" && x.trim().length > 0).slice(0, 10) : [];
+      } catch (e) {
+        return [];
+      }
+    };
+
+    const saveRecentSearch = (query) => {
+      const q = (query || "").trim();
+      if (q.length < 3) return;
+      let list = getRecentSearches();
+      list = list.filter(item => item.toLowerCase() !== q.toLowerCase());
+      list.unshift(q);
+      if (list.length > 10) list = list.slice(0, 10);
+      try {
+        localStorage.setItem(RECENT_KEY, JSON.stringify(list));
+      } catch (e) {}
+    };
+
+    const clearRecentSearches = () => {
+      try {
+        localStorage.removeItem(RECENT_KEY);
+      } catch (e) {}
+      if (historyContainer) historyContainer.classList.add("hidden");
+    };
+
+    const renderRecentSearches = () => {
+      if (!historyContainer || !historyItems) return;
+      if (input.value.trim().length >= 3) {
+        historyContainer.classList.add("hidden");
+        return;
+      }
+      const list = getRecentSearches();
+      if (list.length === 0) {
+        historyContainer.classList.add("hidden");
+        return;
+      }
+
+      historyItems.innerHTML = list.map(item => `
+        <button type="button" class="vault-history-chip" data-search="${escapeFn(item)}" title="Buscar: ${escapeFn(item)}">
+          ${escapeFn(item)}
+        </button>
+      `).join("");
+
+      historyItems.querySelectorAll(".vault-history-chip").forEach(chip => {
+        chip.addEventListener("click", () => {
+          const s = chip.getAttribute("data-search");
+          if (s) {
+            input.value = s;
+            if (clearBtn) clearBtn.classList.remove("hidden");
+            historyContainer.classList.add("hidden");
+            performSearch(s);
+          }
+        });
+      });
+
+      historyContainer.classList.remove("hidden");
+      resultsContainer.classList.add("hidden");
+    };
+
+    // Población dinámica de bloques/capítulos ordenados por min indexCode (v7.19.1)
+    const updateChapterOptions = () => {
+      if (!chapterSelect) return;
+      const allTopics = (StorageService && StorageService.getData && StorageService.getData().topics) ||
+                        (typeof INITIAL_DATA !== "undefined" && INITIAL_DATA.topics) || [];
+      
+      const filtered = selectedSubject === "all" ? allTopics : allTopics.filter(t => t.subject === selectedSubject);
+      
+      const chapterMap = new Map();
+      filtered.forEach(t => {
+        const chapNum = t.chapterNumber || 1;
+        const chapTitle = t.chapterTitle || `${chapNum}. Capítulo`;
+        if (!chapterMap.has(chapTitle)) {
+          chapterMap.set(chapTitle, { num: chapNum, topics: [] });
+        }
+        chapterMap.get(chapTitle).topics.push(t);
+      });
+
+      const parseIdx = (c) => {
+        const parts = (c || "").split(".").map(p => parseInt(p, 10) || 0);
+        return (parts[0] || 0) * 1000 + (parts[1] || 0);
+      };
+
+      const sortedChapters = Array.from(chapterMap.entries()).sort((a, b) => {
+        const minA = Math.min(...a[1].topics.map(t => parseIdx(t.indexCode || t.code)));
+        const minB = Math.min(...b[1].topics.map(t => parseIdx(t.indexCode || t.code)));
+        if (minA !== minB) return minA - minB;
+        return (a[1].num || 0) - (b[1].num || 0);
+      });
+
+      let optionsHtml = `<option value="all">Todos los bloques</option>`;
+      sortedChapters.forEach(([chapTitle, data]) => {
+        optionsHtml += `<option value="${data.num}">Capítulo ${data.num}: ${escapeFn(chapTitle)}</option>`;
+      });
+      chapterSelect.innerHTML = optionsHtml;
+      chapterSelect.value = "all";
+      selectedChapter = "all";
+    };
+
+    // Ejecución de la búsqueda con filtros
     const performSearch = (query) => {
       const q = (query || "").trim();
       if (q.length < 3) {
         resultsContainer.classList.add("hidden");
         resultsContainer.innerHTML = "";
         if (clearBtn) clearBtn.classList.add("hidden");
+        if (historyContainer && input === document.activeElement) renderRecentSearches();
         return;
       }
 
       if (clearBtn) clearBtn.classList.remove("hidden");
+      if (historyContainer) historyContainer.classList.add("hidden");
 
       if (typeof searchVault !== "function") {
         resultsContainer.innerHTML = `<div class="vault-search-empty">Motor de búsqueda no disponible</div>`;
@@ -1692,9 +1811,17 @@ const App = {
         return;
       }
 
-      const results = searchVault(q, {
+      const searchOpts = {
         limit: 8
-      });
+      };
+      if (selectedSubject !== "all") {
+        searchOpts.subject = selectedSubject;
+      }
+      if (selectedChapter !== "all") {
+        searchOpts.chapterNumber = selectedChapter;
+      }
+
+      const results = searchVault(q, searchOpts);
 
       if (!results || results.length === 0) {
         resultsContainer.innerHTML = `<div class="vault-search-empty">Sin coincidencias en apuntes</div>`;
@@ -1702,9 +1829,8 @@ const App = {
         return;
       }
 
-      const escapeFn = (typeof SecurityShield !== "undefined" && SecurityShield.escapeHtml)
-        ? SecurityShield.escapeHtml
-        : (s) => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+      // Guardar en búsquedas recientes
+      saveRecentSearch(q);
 
       resultsContainer.innerHTML = results.map(res => `
         <div class="vault-search-result-item" data-topic-id="${escapeFn(res.id)}" tabindex="0" role="button" aria-label="Abrir cédula ${escapeFn(res.indexCode)} ${escapeFn(res.title)}">
@@ -1745,6 +1871,7 @@ const App = {
       });
     };
 
+    // Eventos de entrada en el input con debounce
     input.addEventListener("input", (e) => {
       clearTimeout(debounceTimer);
       const val = e.target.value;
@@ -1752,12 +1879,20 @@ const App = {
         resultsContainer.classList.add("hidden");
         resultsContainer.innerHTML = "";
         if (clearBtn) clearBtn.classList.add("hidden");
+        renderRecentSearches();
         return;
       }
       if (clearBtn) clearBtn.classList.remove("hidden");
+      if (historyContainer) historyContainer.classList.add("hidden");
       debounceTimer = setTimeout(() => {
         performSearch(val);
       }, 200);
+    });
+
+    input.addEventListener("focus", () => {
+      if (input.value.trim().length < 3) {
+        renderRecentSearches();
+      }
     });
 
     if (clearBtn) {
@@ -1766,9 +1901,45 @@ const App = {
         resultsContainer.classList.add("hidden");
         resultsContainer.innerHTML = "";
         clearBtn.classList.add("hidden");
+        renderRecentSearches();
         input.focus();
       });
     }
+
+    if (clearHistoryBtn) {
+      clearHistoryBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        clearRecentSearches();
+      });
+    }
+
+    // Interacción con pills de disciplina
+    if (pillsContainer) {
+      pillsContainer.querySelectorAll(".vault-filter-pill").forEach(pill => {
+        pill.addEventListener("click", () => {
+          pillsContainer.querySelectorAll(".vault-filter-pill").forEach(p => p.classList.remove("active"));
+          pill.classList.add("active");
+          selectedSubject = pill.dataset.subject || "all";
+          updateChapterOptions();
+          if (input.value.trim().length >= 3) {
+            performSearch(input.value);
+          }
+        });
+      });
+    }
+
+    // Interacción con selector de capítulo
+    if (chapterSelect) {
+      chapterSelect.addEventListener("change", () => {
+        selectedChapter = chapterSelect.value;
+        if (input.value.trim().length >= 3) {
+          performSearch(input.value);
+        }
+      });
+    }
+
+    // Inicializar opciones de bloques temáticos
+    updateChapterOptions();
   },
 
   // 6. MODAL DE IMPORTACIÓN / EXPORTACIÓN NOTEBOOKLM

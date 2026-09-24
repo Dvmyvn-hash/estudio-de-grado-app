@@ -21,6 +21,8 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TOPICS_PATH = os.path.join(BASE_DIR, "all_afg_topics.json")
 OUT_JSON_PATH = os.path.join(BASE_DIR, "vault_index.json")
 OUT_JS_PATH = os.path.join(BASE_DIR, "js", "vault-index.js")
+SINONIMOS_JSON_PATH = os.path.join(BASE_DIR, "sinonimos.json")
+SINONIMOS_JS_PATH = os.path.join(BASE_DIR, "js", "sinonimos.js")
 
 MAX_INDEX_BYTES = 600 * 1024  # 600 KB de presupuesto estricto
 MAX_CONTENT_CHARS = 4000      # Tope de caracteres como en populateApuntesIndex
@@ -33,15 +35,42 @@ a al algo algunas algunos ante antes aquel aquella aquellas aquellos aqui arriba
 
 
 def normalize_text(text):
-    """Minúsculas y eliminación estricta de acentos en español."""
+    """
+    Normalización contractada (v7.25, Prompt 020):
+    - Minúsculas
+    - Sustitución de ligaduras tipográficas / artefactos OCR (ﬁ/ﬂ/ﬀ/ﬃ/ﬄ/æ/œ)
+    - Remoción de guiones blandos (\\u00ad) y zero-width space (\\u200b)
+    - Normalización de comillas y guiones
+    - Eliminación de acentos en español (á,é,í,ó,ú,ü), preservando la letra ñ
+    - Colapso de espacios múltiples
+    """
     if not text:
         return ""
+    text = str(text)
+    ligatures = {
+        'ﬁ': 'fi', 'ﬂ': 'fl', 'ﬀ': 'ff', 'ﬃ': 'ffi', 'ﬄ': 'ffl',
+        'æ': 'ae', 'œ': 'oe', 'Æ': 'ae', 'Œ': 'oe'
+    }
+    for k, v in ligatures.items():
+        text = text.replace(k, v)
+    text = text.replace('\u00ad', '').replace('\u200b', '')
+    quotes = {'“': '"', '”': '"', '«': '"', '»': '"', '„': '"', '‟': '"', '‘': "'", '’': "'", '‚': "'", '‛': "'"}
+    for k, v in quotes.items():
+        text = text.replace(k, v)
+    dashes = {'–': '-', '—': '-', '−': '-'}
+    for k, v in dashes.items():
+        text = text.replace(k, v)
     text = text.lower()
     accents = {
-        'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u', 'ü': 'u'
+        'á': 'a', 'à': 'a', 'ä': 'a', 'â': 'a',
+        'é': 'e', 'è': 'e', 'ë': 'e', 'ê': 'e',
+        'í': 'i', 'ì': 'i', 'ï': 'i', 'î': 'i',
+        'ó': 'o', 'ò': 'o', 'ö': 'o', 'ô': 'o',
+        'ú': 'u', 'ù': 'u', 'ü': 'u', 'û': 'u'
     }
     for k, v in accents.items():
         text = text.replace(k, v)
+    text = re.sub(r'\s+', ' ', text).strip()
     return text
 
 
@@ -218,6 +247,25 @@ def build_vault_index():
     with open(OUT_JS_PATH, "w", encoding="utf-8", newline="\n") as f:
         f.write(js_content)
 
+    # Compilar js/sinonimos.js desde sinonimos.json si existe
+    if os.path.exists(SINONIMOS_JSON_PATH):
+        with open(SINONIMOS_JSON_PATH, "r", encoding="utf-8") as f:
+            sinonimos_data = json.load(f)
+        sinonimos_json = json.dumps(sinonimos_data, ensure_ascii=False, indent=2)
+        sinonimos_js = (
+            "/**\n"
+            " * DICCIONARIO DE SINÓNIMOS JURÍDICOS (v7.25, Prompt 020)\n"
+            " * Compilado automáticamente desde sinonimos.json. NO editar a mano.\n"
+            " */\n\n"
+            f"const VAULT_SINONIMOS = {sinonimos_json};\n\n"
+            "if (typeof module !== 'undefined' && module.exports) module.exports = VAULT_SINONIMOS;\n"
+            "if (typeof window !== 'undefined') window.VAULT_SINONIMOS = VAULT_SINONIMOS;\n"
+            "if (typeof globalThis !== 'undefined') globalThis.VAULT_SINONIMOS = VAULT_SINONIMOS;\n"
+        )
+        with open(SINONIMOS_JS_PATH, "w", encoding="utf-8", newline="\n") as f:
+            f.write(sinonimos_js)
+        print(f"  -> {SINONIMOS_JS_PATH} ({len(sinonimos_data)} grupos)")
+
     print(f"[build_vault_index] Archivos generados exitosamente:")
     print(f"  -> {OUT_JSON_PATH}")
     print(f"  -> {OUT_JS_PATH}")
@@ -225,3 +273,4 @@ def build_vault_index():
 
 if __name__ == "__main__":
     build_vault_index()
+

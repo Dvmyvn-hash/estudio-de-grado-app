@@ -82,17 +82,129 @@
   const STOPWORDS = new Set(RAW_STOPWORDS);
 
   /**
-   * Normaliza texto a minúsculas y sustituye acentos en español.
+   * Normalización contractada (v7.25, Prompt 020):
+   * - Minúsculas
+   * - Sustitución de ligaduras tipográficas / artefactos OCR (ﬁ/ﬂ/ﬀ/ﬃ/ﬄ/æ/œ)
+   * - Remoción de guiones blandos (\u00ad) y zero-width space (\u200b)
+   * - Normalización de comillas y guiones
+   * - Eliminación de acentos en español (á,é,í,ó,ú,ü), preservando la letra ñ
+   * - Colapso de espacios múltiples
    */
   function normalizeText(text) {
     if (!text) return '';
-    return text.toLowerCase()
-      .replace(/á/g, 'a')
-      .replace(/é/g, 'e')
-      .replace(/í/g, 'i')
-      .replace(/ó/g, 'o')
-      .replace(/ú/g, 'u')
-      .replace(/ü/g, 'u');
+    let t = String(text);
+    t = t.replace(/ﬁ/g, 'fi')
+         .replace(/ﬂ/g, 'fl')
+         .replace(/ﬀ/g, 'ff')
+         .replace(/ﬃ/g, 'ffi')
+         .replace(/ﬄ/g, 'ffl')
+         .replace(/æ/gi, 'ae')
+         .replace(/œ/gi, 'oe');
+    t = t.replace(/\u00ad/g, '').replace(/\u200b/g, '');
+    t = t.replace(/[“”«»„‟]/g, '"')
+         .replace(/[‘’‚‛]/g, "'")
+         .replace(/[–—−]/g, '-');
+    t = t.toLowerCase();
+    t = t.replace(/[áàäâ]/g, 'a')
+         .replace(/[éèëê]/g, 'e')
+         .replace(/[íìïî]/g, 'i')
+         .replace(/[óòöô]/g, 'o')
+         .replace(/[úùüû]/g, 'u');
+    return t.replace(/\s+/g, ' ').trim();
+  }
+
+  /**
+   * Obtiene la lista de sinónimos jurídicos curados (sinonimos.json / js/sinonimos.js).
+   */
+  function getSinonimos(options) {
+    if (options && Array.isArray(options.sinonimos)) {
+      return options.sinonimos;
+    }
+    if (typeof window !== 'undefined' && Array.isArray(window.VAULT_SINONIMOS)) {
+      return window.VAULT_SINONIMOS;
+    }
+    if (typeof globalThis !== 'undefined' && Array.isArray(globalThis.VAULT_SINONIMOS)) {
+      return globalThis.VAULT_SINONIMOS;
+    }
+    if (typeof VAULT_SINONIMOS !== 'undefined' && Array.isArray(VAULT_SINONIMOS)) {
+      return VAULT_SINONIMOS;
+    }
+    if (typeof require !== 'undefined') {
+      try {
+        return require('./sinonimos.js');
+      } catch (e1) {
+        try {
+          return require('../sinonimos.json');
+        } catch (e2) {}
+      }
+    }
+    return [];
+  }
+
+  /**
+   * Expande la consulta con sinónimos jurídicos curados asignando peso x0.8 a términos expandidos.
+   */
+  function expandQueryWithSinonimos(query, subjectFilter, sinonimosList) {
+    const { tokens: literalTokens, rawTerms: literalRawTerms } = tokenizeQuery(query);
+    const tokenWeights = {};
+    const allTokens = [];
+    const allRawTerms = [...literalRawTerms];
+
+    for (const t of literalTokens) {
+      tokenWeights[t] = 1.0;
+      allTokens.push(t);
+    }
+
+    if (!Array.isArray(sinonimosList) || sinonimosList.length === 0) {
+      return { tokens: allTokens, rawTerms: allRawTerms, tokenWeights };
+    }
+
+    const normQuery = normalizeText(query);
+    const queryTokenSet = new Set(literalTokens);
+
+    for (const group of sinonimosList) {
+      if (!group || !Array.isArray(group.terminos)) continue;
+      // Respetar scope por disciplina si fue provisto
+      if (group.subject && subjectFilter && group.subject !== subjectFilter) {
+        continue;
+      }
+
+      let groupMatches = false;
+      for (const term of group.terminos) {
+        const normTerm = normalizeText(term);
+        if (!normTerm) continue;
+
+        if (normQuery === normTerm || normQuery.includes(normTerm) || (normTerm.length >= 5 && normTerm.includes(normQuery))) {
+          groupMatches = true;
+          break;
+        }
+
+        const termTokens = tokenizeQuery(normTerm).tokens;
+        if (termTokens.length > 0 && termTokens.every(tk => queryTokenSet.has(tk))) {
+          groupMatches = true;
+          break;
+        }
+      }
+
+      if (groupMatches) {
+        for (const term of group.terminos) {
+          const { tokens: synTokens, rawTerms: synRawTerms } = tokenizeQuery(term);
+          for (const st of synTokens) {
+            if (!(st in tokenWeights)) {
+              tokenWeights[st] = 0.8; // Expansión de sinónimo con peso x0.8
+              allTokens.push(st);
+            }
+          }
+          for (const srt of synRawTerms) {
+            if (!allRawTerms.includes(srt)) {
+              allRawTerms.push(srt);
+            }
+          }
+        }
+      }
+    }
+
+    return { tokens: allTokens, rawTerms: allRawTerms, tokenWeights };
   }
 
   /**
@@ -238,13 +350,14 @@
       return [];
     }
 
-    const { tokens, rawTerms } = tokenizeQuery(query);
+    const subjectFilter = options.subject && options.subject !== 'all' ? options.subject : null;
+    const limit = typeof options.limit === 'number' && options.limit > 0 ? options.limit : 8;
+
+    const sinonimosList = getSinonimos(options);
+    const { tokens, rawTerms, tokenWeights } = expandQueryWithSinonimos(query, subjectFilter, sinonimosList);
     if (tokens.length === 0) {
       return [];
     }
-
-    const subjectFilter = options.subject && options.subject !== 'all' ? options.subject : null;
-    const limit = typeof options.limit === 'number' && options.limit > 0 ? options.limit : 8;
 
     const N = index.totalDocs || 103;
     const avgLen = index.avgLen || 400;
@@ -259,6 +372,22 @@
 
       if (subjectFilter && m.subject !== subjectFilter) {
         continue;
+      }
+
+      // Filtro opcional por capítulo / bloque temático (v7.25, Prompt 020)
+      if (options.chapterNumber && options.chapterNumber !== 'all') {
+        const chapNum = parseInt(options.chapterNumber, 10);
+        if (!isNaN(chapNum) && m.chapterNumber !== chapNum) {
+          continue;
+        }
+      } else if (options.chapter && options.chapter !== 'all') {
+        const chapVal = String(options.chapter);
+        const chapNum = parseInt(chapVal, 10);
+        if (!isNaN(chapNum)) {
+          if (m.chapterNumber !== chapNum) continue;
+        } else if (m.chapterTitle && !normalizeText(m.chapterTitle).includes(normalizeText(chapVal))) {
+          continue;
+        }
       }
 
       const docTerms = index.docs[tid];
@@ -310,7 +439,9 @@
           boost *= 1.2;
         }
 
-        score += idf * tfComp * boost;
+        // Ponderador del término: 1.0 para literales, 0.8 para sinónimos
+        const weightFactor = tokenWeights[q] || 1.0;
+        score += idf * tfComp * boost * weightFactor;
       }
 
       // Descartar si no hubo matches o score insignificante
@@ -398,6 +529,8 @@
     searchVault: searchVault,
     normalizeText: normalizeText,
     stemWord: stemWord,
-    tokenizeQuery: tokenizeQuery
+    tokenizeQuery: tokenizeQuery,
+    getSinonimos: getSinonimos,
+    expandQueryWithSinonimos: expandQueryWithSinonimos
   };
 });

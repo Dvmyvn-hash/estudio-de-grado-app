@@ -175,12 +175,34 @@
           <input type="file" id="input-import-progress" accept="application/json" hidden>
         </div>
 
-        <!-- Vault de Conocimiento: Buscador Semántico Estático (v7.22, Prompt 017) -->
+        <!-- Vault de Conocimiento: Buscador Semántico Estático (v7.22 / v7.25, Prompts 017 y 020) -->
         <div class="vault-search-box" id="vault-search-box">
           <div class="vault-search-input-wrapper">
             <i data-lucide="search" class="vault-search-icon"></i>
             <input type="text" id="vault-search-input" class="vault-search-input" placeholder="Buscar en 103 apuntes (ej. emplazamiento)..." autocomplete="off" spellcheck="false" aria-label="Búsqueda semántica en el Vault de Apuntes">
             <button id="vault-search-clear" class="vault-search-clear hidden" type="button" aria-label="Limpiar búsqueda">&times;</button>
+          </div>
+          <!-- Filtros por disciplina y bloque temático (v7.25, Prompt 020) -->
+          <div class="vault-search-filters" id="vault-search-filters">
+            <div class="vault-filter-pills" id="vault-filter-pills" role="radiogroup" aria-label="Filtrar por disciplina">
+              <button type="button" class="vault-filter-pill active" data-subject="all">Todas</button>
+              <button type="button" class="vault-filter-pill" data-subject="civil">Civil</button>
+              <button type="button" class="vault-filter-pill" data-subject="procesal">Procesal</button>
+              <button type="button" class="vault-filter-pill" data-subject="constitucional">Const.</button>
+            </div>
+            <div class="vault-filter-chapter-wrapper">
+              <select id="vault-filter-chapter" class="vault-filter-chapter" aria-label="Filtrar por bloque temático">
+                <option value="all">Todos los bloques</option>
+              </select>
+            </div>
+          </div>
+          <!-- Historial de búsquedas recientes (v7.25, Prompt 020) -->
+          <div class="vault-search-history hidden" id="vault-search-history" role="region" aria-label="Búsquedas recientes">
+            <div class="vault-history-header">
+              <span class="vault-history-title"><i data-lucide="clock" class="vault-history-icon"></i> Recientes</span>
+              <button type="button" id="vault-history-clear" class="vault-history-clear-btn" aria-label="Borrar historial reciente">Limpiar</button>
+            </div>
+            <div class="vault-history-items" id="vault-history-items"></div>
           </div>
           <div id="vault-search-results" class="vault-search-results hidden" role="region" aria-label="Resultados de búsqueda"></div>
         </div>
@@ -735,7 +757,8 @@
 
   <!-- SCRIPTS -->
   <script src="js/data.js"></script>
-  <!-- Vault de Conocimiento: índice estático y motor de búsqueda (v7.22, Prompt 017) -->
+  <!-- Vault de Conocimiento: índice estático, sinónimos y motor de búsqueda (v7.22 / v7.25, Prompts 017 y 020) -->
+  <script src="js/sinonimos.js"></script>
   <script src="js/vault-index.js"></script>
   <script src="js/vault-search.js"></script>
   <script src="js/storage.js"></script>
