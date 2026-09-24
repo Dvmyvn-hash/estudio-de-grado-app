@@ -43,6 +43,13 @@ optimizados y los ejecutas hasta dejarlos verificados.
 4. Reporte final corto: qué cambió, archivos tocados, tests con números y
    qué queda para futuro.
 
+## Vocabulario abreviado del humano (vale para futuras instrucciones)
+
+- **Vault** = índice estático + buscador semántico (017/020). Ej: *"mete X al Vault"* = indexar y hacer encontrable.
+- **QA** = Q&A extractivo pregunta→citas (021). Ej: *"ajusta el QA"* = composer, modos, gaps.
+- **GB** = buscador global del header (023, futuro). Ej: *"lleva X al GB"*.
+- **Canon** = 103 cédulas; **temario** = orden Discusión→Prueba→Sentencia.
+
 ## Prohibido
 
 - Ejecutar sin DoD verificable por fase.
