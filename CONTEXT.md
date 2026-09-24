@@ -953,9 +953,10 @@ stateDiagram-v2
     - **11/11 pruebas aprobadas en `test_deduplication_flow.cjs`**.
     - **20/20 pruebas aprobadas en `test_mobile_header_theme.cjs`**.
   - **Cumplimiento de Reglas:** Actualización correlativa de `CONTEXT.md` (Sección 1.2, 7.3, 8 y 9) y `PROMPTS/README.md` (fila 020 ✅ Implementado v7.25).
+  - **Verificación independiente de Nexo (orquestador, post-020):** bench real contra `searchVault` (20 queries, max 8 ms < 50 ms; `emplazamiento` top-1 cap 10; `reivindicatoria` → `civil-losbienes-1-6`; snippets verbatim; paridad `normalizeText` Python↔JS) + suites vigentes: e2e 881/881, unlock 132/132, dedup 11/11, mobile 20/20, mocks 11/11.
 
 * **v7.23 (Fábrica de mocks solo-tests — PROMPT 018):**
-  - **Alcance:** `scripts/make_mocks.py` (11 fixtures + `--benchmark N`, determinista por seed, rehúsa escribir en el repo) + `test_mocks_factory.cjs` 11/11 (determinismo, ignorados, monolítico N.1, colisión que no muta el canon, lint sobre fixtures, aislamiento cero-`mock` en índices reales, gigante 60 secciones, bench 500 docs en ~4 s, bench Vault condicional al 020).
+  - **Alcance:** `scripts/make_mocks.py` (11 fixtures + `--benchmark N`, determinista por seed, rehúsa escribir en el repo) + `test_mocks_factory.cjs` 11/11 (determinismo, ignorados, monolítico N.1, colisión que no muta el canon, lint sobre fixtures, aislamiento cero-`mock` en índices reales, gigante 60 secciones, bench 500 docs en ~4 s, bench Vault real contra `searchVault` del 020: 20 queries max 8 ms, recall y verbatim verdes).
   - **Sin cambios al canon ni a contratos; cero interferencia con el 020** (archivos nuevos + suite local gitignorada + docs).
   - **Tests:** `test_mocks_factory.cjs` 11/11, `test_deduplication_flow.cjs` 11/11 vigentes.
 

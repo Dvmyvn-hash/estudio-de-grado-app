@@ -1,7 +1,7 @@
 # PROMPT 020 — Búsqueda que Encuentra: Normalización + Sinónimos + Filtros e Historial
 
 > **Versión:** v1.1 · **Fecha:** 2026-09-24 · **Autor:** puente (dpint) + orquestador
-> **Estado:** 📝 Por ejecutar (ejecución: Antigravity) · **Depende de:** 017 VERDE (Fase 0 de conformancia obligatoria primero; no asumir el esquema del 017, leerlo)
+> **Estado:** ✅ Implementado (v7.25, verificado por Nexo con bench real) · **Depende de:** 017 VERDE (Fase 0 de conformancia obligatoria primero; no asumir el esquema del 017, leerlo)
 
 ---
 
