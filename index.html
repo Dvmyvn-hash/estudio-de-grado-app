@@ -77,12 +77,24 @@
 
       <!-- Acciones de Cabecera -->
       <div class="header-actions">
-        <!-- Buscador Global Rápido -->
-        <div class="search-bar">
-          <i data-lucide="search" class="search-icon"></i>
-          <input type="text" id="global-search-input" placeholder="Buscar..." autocomplete="off">
-          <kbd class="shortcut-key">Ctrl+K</kbd>
-          <div id="search-results-dropdown" class="search-dropdown hidden"></div>
+        <!-- Buscador Global Rápido con Modos Semántico y Q&A (v7.29, Prompt 023) -->
+        <div class="search-bar" id="global-search-container" data-mode="semantic">
+          <div class="search-mode-selector" id="search-mode-selector" role="radiogroup" aria-label="Modo de búsqueda">
+            <button type="button" id="search-mode-semantic" class="search-mode-pill active" role="radio" aria-checked="true" data-mode="semantic" title="Modo Semántico: Buscar cédulas por relevancia conceptual" aria-label="Modo Semántico">
+              <i data-lucide="search"></i>
+              <span class="search-mode-label">Semántico</span>
+            </button>
+            <button type="button" id="search-mode-qa" class="search-mode-pill" role="radio" aria-checked="false" data-mode="qa" title="Modo Q&A: Componer respuestas extractivas y citas exactas" aria-label="Modo Q&A">
+              <i data-lucide="help-circle"></i>
+              <span class="search-mode-label">Q&A</span>
+            </button>
+          </div>
+          <div class="search-input-wrapper">
+            <i data-lucide="search" class="search-icon" id="search-active-icon"></i>
+            <input type="text" id="global-search-input" placeholder="Buscar en cédulas..." autocomplete="off" maxlength="200" aria-label="Buscador global: Modo Semántico (Cédulas)">
+            <kbd class="shortcut-key">Ctrl+K</kbd>
+          </div>
+          <div id="search-results-dropdown" class="search-dropdown hidden" aria-live="polite"></div>
         </div>
 
         <!-- Indicador de Sincronización en Tiempo Real (Icono/Dot Compacto) -->

@@ -1699,101 +1699,408 @@ const App = {
     }, 200);
   },
 
-  // 5. BÚSQUEDA GLOBAL (Ctrl + K)
+  // 5. BÚSQUEDA GLOBAL DEL HEADER CON MODOS SEMÁNTICO Y Q&A (v7.29, PROMPT 023)
+  globalSearchMode: "semantic",
+  globalSearchDebounceTimer: null,
+  globalSearchLastExecutionTime: 0,
+
+  initGlobalSearchMode() {
+    try {
+      const saved = localStorage.getItem("global_search_mode");
+      if (saved === "semantic" || saved === "qa") {
+        this.globalSearchMode = saved;
+      } else {
+        this.globalSearchMode = "semantic";
+      }
+    } catch (e) {
+      this.globalSearchMode = "semantic";
+    }
+    this.updateGlobalSearchModeUI();
+  },
+
+  setGlobalSearchMode(mode) {
+    if (mode !== "semantic" && mode !== "qa") return;
+    this.globalSearchMode = mode;
+    try {
+      localStorage.setItem("global_search_mode", mode);
+    } catch (e) {}
+    this.updateGlobalSearchModeUI();
+
+    const input = document.getElementById("global-search-input");
+    if (input && input.value.trim().length >= 3) {
+      this.executeGlobalSearch(input.value);
+    }
+  },
+
+  updateGlobalSearchModeUI() {
+    if (typeof document === "undefined" || !document) return;
+    const getEl = typeof document.getElementById === "function" ? (id) => document.getElementById(id) : () => null;
+    const queryEl = typeof document.querySelector === "function" ? (sel) => document.querySelector(sel) : () => null;
+
+    const container = getEl("global-search-container") || queryEl(".search-bar");
+    const pillSemantic = getEl("search-mode-semantic");
+    const pillQA = getEl("search-mode-qa");
+    const input = getEl("global-search-input");
+    const activeIcon = getEl("search-active-icon");
+
+    if (container && typeof container.setAttribute === "function") {
+      container.setAttribute("data-mode", this.globalSearchMode);
+      if (container.classList && typeof container.classList.remove === "function") {
+        container.classList.remove("mode-semantic", "mode-qa");
+        container.classList.add(`mode-${this.globalSearchMode}`);
+      }
+    }
+
+    if (pillSemantic) {
+      const isSem = this.globalSearchMode === "semantic";
+      if (pillSemantic.classList && typeof pillSemantic.classList.toggle === "function") {
+        pillSemantic.classList.toggle("active", isSem);
+      }
+      if (typeof pillSemantic.setAttribute === "function") {
+        pillSemantic.setAttribute("aria-checked", isSem ? "true" : "false");
+      }
+    }
+
+    if (pillQA) {
+      const isQA = this.globalSearchMode === "qa";
+      if (pillQA.classList && typeof pillQA.classList.toggle === "function") {
+        pillQA.classList.toggle("active", isQA);
+      }
+      if (typeof pillQA.setAttribute === "function") {
+        pillQA.setAttribute("aria-checked", isQA ? "true" : "false");
+      }
+    }
+
+    if (input) {
+      if (this.globalSearchMode === "semantic") {
+        input.placeholder = "Buscar en cédulas...";
+        if (typeof input.setAttribute === "function") {
+          input.setAttribute("aria-label", "Buscador global: Modo Semántico (Cédulas)");
+        }
+      } else {
+        input.placeholder = "Preguntar a tus apuntes...";
+        if (typeof input.setAttribute === "function") {
+          input.setAttribute("aria-label", "Buscador global: Modo Q&A (Respuestas extractivas)");
+        }
+      }
+    }
+
+    if (activeIcon) {
+      if (typeof activeIcon.setAttribute === "function") {
+        activeIcon.setAttribute("data-lucide", this.globalSearchMode === "semantic" ? "search" : "help-circle");
+      }
+      if (window.lucide && typeof window.lucide.createIcons === "function") {
+        window.lucide.createIcons();
+      }
+    }
+  },
+
+  sanitizeSearchQuery(raw) {
+    if (typeof raw !== "string") return { clean: "", truncated: false };
+    // Purga de caracteres de control, nulos y zero-width characters
+    let s = raw.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F\u200B-\u200D\uFEFF\u2028\u2029]/g, "");
+    // Unificar saltos de línea a espacio y trim
+    s = s.replace(/[\r\n]+/g, " ").trim();
+    let truncated = false;
+    if (s.length > 200) {
+      s = s.slice(0, 200);
+      truncated = true;
+    }
+    return { clean: s, truncated };
+  },
+
   setupGlobalSearch() {
     const input = document.getElementById("global-search-input");
     const dropdown = document.getElementById("search-results-dropdown");
+    const pillSemantic = document.getElementById("search-mode-semantic");
+    const pillQA = document.getElementById("search-mode-qa");
+
     if (!input || !dropdown) return;
 
-    input.addEventListener("input", () => {
-      const q = input.value.trim().toLowerCase();
-      if (q.length < 2) {
-        dropdown.classList.add("hidden");
-        return;
-      }
+    this.initGlobalSearchMode();
 
-      const data = StorageService.getData();
-      const matchedTopics = data.topics.filter(t => 
-        t.title.toLowerCase().includes(q) ||
-        t.category.toLowerCase().includes(q) ||
-        t.content.toLowerCase().includes(q) ||
-        (t.tags && t.tags.some(tag => tag.toLowerCase().includes(q)))
-      ).slice(0, 5);
-
-      const matchedCases = (data.cases || []).filter(c =>
-        c.title.toLowerCase().includes(q) ||
-        c.facts.toLowerCase().includes(q) ||
-        (c.methodology && c.methodology.legalBasis && c.methodology.legalBasis.some(b => b.toLowerCase().includes(q)))
-      ).slice(0, 3);
-
-      if (matchedTopics.length === 0 && matchedCases.length === 0) {
-        dropdown.innerHTML = `<div style="padding: 12px; font-size: 0.8rem; color: var(--text-muted); text-align: center;">No se encontraron resultados para "${escapeHTML(q)}"</div>`;
-        dropdown.classList.remove("hidden");
-        return;
-      }
-
-      dropdown.innerHTML = `
-        ${matchedTopics.length > 0 ? `
-          <div style="font-size: 0.7rem; font-weight: 700; color: var(--gold-primary); padding: 4px 8px; text-transform: uppercase;">Temas del Temario</div>
-          ${matchedTopics.map(t => `
-            <div class="search-result-item" data-search-type="topic" data-id="${t.id}">
-              <div class="search-result-title">${t.title}</div>
-              <div class="search-result-meta">
-                <span>Derecho ${t.subject}</span> · <span>${t.category}</span>
-              </div>
-            </div>
-          `).join('')}
-        ` : ''}
-
-        ${matchedCases.length > 0 ? `
-          <div style="font-size: 0.7rem; font-weight: 700; color: var(--gold-primary); padding: 8px 8px 4px 8px; text-transform: uppercase; border-top: 1px solid var(--border-subtle); margin-top: 4px;">Casos Prácticos</div>
-          ${matchedCases.map(c => `
-            <div class="search-result-item" data-search-type="case" data-id="${c.id}">
-              <div class="search-result-title">${c.title}</div>
-              <div class="search-result-meta">
-                <span>${(c.subjects || []).join(', ')}</span> · <span>${c.difficulty || 'Grado'}</span>
-              </div>
-            </div>
-          `).join('')}
-        ` : ''}
-      `;
-
-      dropdown.classList.remove("hidden");
-
-      // Clic en resultados de búsqueda
-      dropdown.querySelectorAll('.search-result-item').forEach(item => {
-        item.addEventListener('click', () => {
-          const type = item.dataset.searchType;
-          const id = item.dataset.id;
-          dropdown.classList.add("hidden");
-          input.value = "";
-
-          if (type === "topic") {
-            this.currentTopicId = id;
-            this.switchView("topics");
-            this.renderSidebar();
-            this.renderTopicViewer();
-          } else if (type === "case") {
-            this.switchView("cases");
-            CaseSolver.selectCase(id);
-          }
-        });
+    if (pillSemantic) {
+      pillSemantic.addEventListener("click", () => {
+        this.setGlobalSearchMode("semantic");
+        input.focus();
       });
+    }
+
+    if (pillQA) {
+      pillQA.addEventListener("click", () => {
+        this.setGlobalSearchMode("qa");
+        input.focus();
+      });
+    }
+
+    input.addEventListener("input", () => {
+      clearTimeout(this.globalSearchDebounceTimer);
+      const { clean } = this.sanitizeSearchQuery(input.value);
+
+      if (clean.length < 3) {
+        dropdown.classList.add("hidden");
+        dropdown.innerHTML = "";
+        return;
+      }
+
+      this.globalSearchDebounceTimer = setTimeout(() => {
+        this.executeGlobalSearch(clean);
+      }, 150);
+    });
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const { clean } = this.sanitizeSearchQuery(input.value);
+        if (clean.length >= 3) {
+          if (dropdown.classList.contains("hidden")) {
+            this.executeGlobalSearch(clean);
+          } else {
+            this.openFirstGlobalSearchResult();
+          }
+        }
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        dropdown.classList.add("hidden");
+        dropdown.innerHTML = "";
+        input.blur();
+      }
     });
 
     // Cerrar dropdown al hacer clic fuera
     document.addEventListener("click", (e) => {
-      if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+      const container = document.getElementById("global-search-container") || document.querySelector(".search-bar");
+      if (container && !container.contains(e.target) && !dropdown.contains(e.target)) {
         dropdown.classList.add("hidden");
       }
     });
+  },
+
+  openFirstGlobalSearchResult() {
+    if (typeof document === "undefined" || !document) return;
+    const getEl = typeof document.getElementById === "function" ? (id) => document.getElementById(id) : () => null;
+    const dropdown = getEl("search-results-dropdown");
+    const input = getEl("global-search-input");
+    if (!dropdown) return;
+    if (dropdown.classList && typeof dropdown.classList.contains === "function" && dropdown.classList.contains("hidden")) return;
+    if (typeof dropdown.querySelector !== "function") return;
+
+    if (this.globalSearchMode === "semantic") {
+      const firstItem = dropdown.querySelector(".search-result-item[data-search-type='topic']");
+      if (firstItem) {
+        const topicId = firstItem.dataset ? (firstItem.dataset.id || firstItem.dataset.topicId) : null;
+        const highlight = firstItem.dataset ? (firstItem.dataset.highlight || "") : "";
+        if (dropdown.classList && typeof dropdown.classList.add === "function") {
+          dropdown.classList.add("hidden");
+        }
+        if (input) input.value = "";
+        this.openTopic(topicId, { highlight });
+      }
+    } else {
+      const firstJumpBtn = dropdown.querySelector(".qa-action-jump-btn");
+      if (firstJumpBtn) {
+        const topicId = firstJumpBtn.dataset ? firstJumpBtn.dataset.jumpTopic : null;
+        const snippet = firstJumpBtn.dataset ? (firstJumpBtn.dataset.snippet || "") : "";
+        if (dropdown.classList && typeof dropdown.classList.add === "function") {
+          dropdown.classList.add("hidden");
+        }
+        if (input) input.value = "";
+        this.openTopic(topicId, { highlight: snippet });
+      }
+    }
+  },
+
+  executeGlobalSearch(rawQuery) {
+    if (typeof document === "undefined" || !document) return;
+    const getEl = typeof document.getElementById === "function" ? (id) => document.getElementById(id) : () => null;
+    const dropdown = getEl("search-results-dropdown");
+    const input = getEl("global-search-input");
+    if (!dropdown) return;
+
+    // Rate limiting: máximo 1 ejecución por 150ms
+    const now = Date.now();
+    if (now - this.globalSearchLastExecutionTime < 150) {
+      clearTimeout(this.globalSearchDebounceTimer);
+      this.globalSearchDebounceTimer = setTimeout(() => {
+        this.executeGlobalSearch(rawQuery);
+      }, 150);
+      return;
+    }
+    this.globalSearchLastExecutionTime = now;
+
+    const { clean, truncated } = this.sanitizeSearchQuery(rawQuery);
+    if (clean.length < 3) {
+      dropdown.classList.add("hidden");
+      dropdown.innerHTML = "";
+      return;
+    }
+
+    // Gateo de vista v7.2: si está fuera de vista topics, navegar a topics antes de renderizar
+    if (this.currentView !== "topics") {
+      this.switchView("topics");
+    }
+
+    const safeEsc = typeof SecurityShield !== "undefined" && typeof SecurityShield.escapeHtml === "function"
+      ? SecurityShield.escapeHtml
+      : escapeHTML;
+
+    if (this.globalSearchMode === "semantic") {
+      // MODO SEMÁNTICO: delega en searchVault() (v7.22/v7.25)
+      let results = [];
+      if (typeof searchVault === "function") {
+        results = searchVault(clean, { limit: 8 });
+      }
+
+      // Casos prácticos complementarios (no-regresión del buscador previo)
+      const data = typeof StorageService !== "undefined" && StorageService.getData ? StorageService.getData() : {};
+      const qLower = clean.toLowerCase();
+      const matchedCases = (data.cases || []).filter(c =>
+        (c.title && c.title.toLowerCase().includes(qLower)) ||
+        (c.facts && c.facts.toLowerCase().includes(qLower)) ||
+        (c.methodology && c.methodology.legalBasis && c.methodology.legalBasis.some(b => b.toLowerCase().includes(qLower)))
+      ).slice(0, 3);
+
+      if ((!results || results.length === 0) && matchedCases.length === 0) {
+        dropdown.innerHTML = `
+          <div class="search-dropdown-header">
+            <span class="search-mode-badge mode-semantic"><i data-lucide="search"></i> Modo Semántico</span>
+          </div>
+          <div class="search-empty-state">Sin coincidencias en apuntes para "${safeEsc(clean)}"</div>
+        `;
+        dropdown.classList.remove("hidden");
+        if (window.lucide && typeof window.lucide.createIcons === "function") {
+          window.lucide.createIcons();
+        }
+        return;
+      }
+
+      let html = `
+        <div class="search-dropdown-header">
+          <span class="search-mode-badge mode-semantic"><i data-lucide="search"></i> Semántico · ${results ? results.length : 0} Cédulas</span>
+          <span style="font-size:0.65rem; color:var(--text-muted); text-transform:none;">Enter abre primero</span>
+        </div>
+      `;
+
+      if (results && results.length > 0) {
+        html += results.map(res => `
+          <div class="search-result-item" data-search-type="topic" data-id="${safeEsc(res.id)}" data-topic-id="${safeEsc(res.id)}" data-highlight="${safeEsc(res.snippet || '')}" tabindex="0" role="button" aria-label="Abrir cédula ${safeEsc(res.indexCode)} ${safeEsc(res.title)}">
+            <div class="search-result-header-row">
+              <span class="vault-result-code">§ ${safeEsc(res.indexCode || '')}</span>
+              <span class="search-result-title">${safeEsc(res.title || '')}</span>
+              <span class="search-mode-badge mode-semantic" style="margin-left:auto; font-size:0.6rem;"><i data-lucide="search"></i> Cédula</span>
+            </div>
+            <div class="search-result-meta">
+              <span>Derecho ${safeEsc(res.subject || '')}</span> · <span>${safeEsc(res.sourceFile || '')}</span>
+            </div>
+            <div class="search-result-snippet">
+              ${res.hasPrefixEllipsis ? "…" : ""}${res.highlightedSnippet || safeEsc(res.snippet || "")}${res.hasSuffixEllipsis ? "…" : ""}
+            </div>
+          </div>
+        `).join('');
+      }
+
+      if (matchedCases.length > 0) {
+        html += `
+          <div class="search-dropdown-header" style="margin-top: 8px; border-top: 1px solid var(--border-subtle); padding-top: 6px;">
+            <span style="font-size:0.68rem; font-weight:700; color:var(--gold-primary); text-transform:uppercase;">Casos Prácticos</span>
+          </div>
+          ${matchedCases.map(c => `
+            <div class="search-result-item" data-search-type="case" data-id="${safeEsc(c.id)}" tabindex="0" role="button">
+              <div class="search-result-title">${safeEsc(c.title)}</div>
+              <div class="search-result-meta">
+                <span>${(c.subjects || []).map(safeEsc).join(', ')}</span> · <span>${safeEsc(c.difficulty || 'Grado')}</span>
+              </div>
+            </div>
+          `).join('')}
+        `;
+      }
+
+      dropdown.innerHTML = html;
+      dropdown.classList.remove("hidden");
+
+      dropdown.querySelectorAll('.search-result-item').forEach(item => {
+        const handleClick = () => {
+          const type = item.dataset.searchType;
+          const id = item.dataset.id;
+          const highlight = item.dataset.highlight || "";
+          dropdown.classList.add("hidden");
+          if (input) input.value = "";
+
+          if (type === "topic") {
+            this.openTopic(id, { highlight });
+          } else if (type === "case") {
+            this.switchView("cases");
+            if (typeof CaseSolver !== "undefined" && typeof CaseSolver.selectCase === "function") {
+              CaseSolver.selectCase(id);
+            }
+          }
+        };
+
+        item.addEventListener('click', handleClick);
+        item.addEventListener('keydown', (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleClick();
+          }
+        });
+      });
+
+    } else {
+      // MODO Q&A: delega en QAComposer.composeAnswer() (v7.27)
+      if (typeof QAComposer === "undefined" || typeof QAComposer.composeAnswer !== "function") {
+        dropdown.innerHTML = `
+          <div class="search-dropdown-header">
+            <span class="search-mode-badge mode-qa"><i data-lucide="help-circle"></i> Modo Q&A</span>
+          </div>
+          <div class="search-empty-state">Motor Q&A no disponible</div>
+        `;
+        dropdown.classList.remove("hidden");
+        return;
+      }
+
+      const answer = QAComposer.composeAnswer(clean, { mode: 'definicion' });
+
+      let html = `
+        <div class="search-dropdown-header">
+          <span class="search-mode-badge mode-qa"><i data-lucide="help-circle"></i> Q&A Extractivo · Citas Verbatim</span>
+          <span style="font-size:0.65rem; color:var(--text-muted); text-transform:none;">Enter salta a la cita</span>
+        </div>
+        <div class="search-qa-wrapper">
+          ${answer.html}
+        </div>
+      `;
+
+      dropdown.innerHTML = html;
+      dropdown.classList.remove("hidden");
+
+      if (answer.empty && answer.reason === 'no_coverage') {
+        QAComposer.recordUncoveredGap(clean, answer.suggestedSubject);
+      }
+
+      dropdown.querySelectorAll(".qa-action-jump-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const topicId = btn.dataset.jumpTopic;
+          const snippet = btn.dataset.snippet || "";
+          if (topicId) {
+            dropdown.classList.add("hidden");
+            if (input) input.value = "";
+            this.openTopic(topicId, { highlight: snippet });
+          }
+        });
+      });
+    }
+
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+      window.lucide.createIcons();
+    }
   },
 
   searchGlobal(query) {
     const input = document.getElementById("global-search-input");
     if (input) {
       input.value = query;
-      input.dispatchEvent(new Event("input"));
+      this.executeGlobalSearch(query);
       input.focus();
     }
   },
