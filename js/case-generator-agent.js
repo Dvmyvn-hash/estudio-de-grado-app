@@ -591,6 +591,148 @@ var CaseGeneratorAgent = {
   },
 
   /**
+   * LOTE DE REPASO (v7.33): genera hasta 10 casos con cobertura guiada + reporte.
+   * Selección determinista por semilla (fnv1a+mulberry32 locales, mismo algoritmo
+   * que QuestionDeveloper): greedy max-coverage que prefiere pares novedosos
+   * (fuera de presets), cruzados civil↔procesal e instituciones raras.
+   * Durante la síntesis Math.random se sustituye por el PRNG semillado para
+   * reproducibilidad total (restaurado en finally). Tope 10 = FIFO de la plataforma.
+   */
+  REVIEW_LOT_SIZE: 10,
+
+  lotFnv1a(str) {
+    let h = 0x811c9dc5;
+    const s = String(str == null ? "" : str);
+    for (let i = 0; i < s.length; i++) {
+      h ^= s.charCodeAt(i);
+      h = Math.imul(h, 0x01000193);
+    }
+    return h >>> 0;
+  },
+
+  lotMulberry32(seed) {
+    let a = seed >>> 0;
+    return function() {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  },
+
+  listLotCandidates() {
+    const list = Array.isArray(this.INSTITUTIONS) ? this.INSTITUTIONS : [];
+    const usable = list.filter(i => i && i.id && !i.isDoctrinalOnly);
+    const byId = new Map(usable.map(i => [i.id, i]));
+    const presetPairs = new Set();
+    const uses = {};
+    (Array.isArray(this.TOPIC_PRESETS) ? this.TOPIC_PRESETS : []).forEach(p => {
+      const inst = ((p && p.institutions) || []).filter(id => byId.has(id)).slice().sort();
+      inst.forEach(id => { uses[id] = (uses[id] || 0) + 1; });
+      for (let a = 0; a < inst.length; a++) for (let b = a + 1; b < inst.length; b++) {
+        presetPairs.add(inst[a] + "||" + inst[b]);
+      }
+    });
+    const ids = usable.map(i => i.id);
+    const out = [];
+    for (let a = 0; a < ids.length; a++) for (let b = a + 1; b < ids.length; b++) {
+      const A = byId.get(ids[a]), B = byId.get(ids[b]);
+      if ((A.incompatibleWith || []).includes(B.id) || (B.incompatibleWith || []).includes(A.id)) continue;
+      const sa = A.subject || "civil", sb = B.subject || "civil";
+      const key = [A.id, B.id].sort().join("||");
+      out.push({
+        pair: [A.id, B.id],
+        cross: sa !== sb,
+        novel: !presetPairs.has(key),
+        rarity: (1 / (1 + (uses[A.id] || 0))) + (1 / (1 + (uses[B.id] || 0)))
+      });
+    }
+    return { candidates: out, byId: byId };
+  },
+
+  pickLotPairs(seed, count) {
+    const built = this.listLotCandidates();
+    const rng = this.lotMulberry32(this.lotFnv1a("lote:" + String(seed)));
+    const covered = new Set();
+    const picked = [];
+    const pool = built.candidates.slice();
+    const want = Math.max(1, Math.min(count || this.REVIEW_LOT_SIZE, this.REVIEW_LOT_SIZE));
+    for (let n = 0; n < want && pool.length > 0; n++) {
+      let bestIdx = 0, bestScore = -1;
+      for (let i = 0; i < pool.length; i++) {
+        const c = pool[i];
+        const fresh = (covered.has(c.pair[0]) ? 0 : 1) + (covered.has(c.pair[1]) ? 0 : 1);
+        const score = fresh * 100 + (c.cross ? 10 : 0) + (c.novel ? 5 : 0) + c.rarity + rng() * 0.001;
+        if (score > bestScore) { bestScore = score; bestIdx = i; }
+      }
+      const chosen = pool.splice(bestIdx, 1)[0];
+      covered.add(chosen.pair[0]); covered.add(chosen.pair[1]);
+      picked.push(chosen.pair);
+    }
+    return { pairs: picked, byId: built.byId };
+  },
+
+  summarizeCaseReasoning(caseObj) {
+    const m = caseObj.methodology || {};
+    const fb = caseObj.factsBreakdown || {};
+    return {
+      id: caseObj.id,
+      title: caseObj.title,
+      institutions: Array.isArray(fb.instituciones) ? fb.instituciones.slice(0, 6) : [],
+      linkedIndexCodes: (caseObj.linkedApuntes || []).map(a => a.indexCode).filter(Boolean),
+      conflicto: m.conflict || "",
+      baseLegal: Array.isArray(m.legalBasis) ? m.legalBasis.slice(0, 6) : [],
+      subsuncion: m.applicationReasoning || "",
+      marco: m.dogmaticFramework || "",
+      preguntas: (caseObj.questions || []).map((q, i) => ({
+        n: i + 1,
+        texto: (q.questionText || "").slice(0, 140),
+        correcta: q.correctAnswer || null,
+        necesitaRevision: q.needsReview === true
+      }))
+    };
+  },
+
+  generateReviewLot(seed, count) {
+    const want = Math.max(1, Math.min(count || this.REVIEW_LOT_SIZE, this.REVIEW_LOT_SIZE));
+    const picked = this.pickLotPairs(seed, want);
+    const rng = this.lotMulberry32(this.lotFnv1a("sintesis:" + String(seed)));
+    const origRandom = Math.random;
+    const cases = [];
+    try {
+      Math.random = rng;
+      for (const pair of picked.pairs) {
+        cases.push(this.synthesizeCase(pair));
+      }
+    } finally {
+      Math.random = origRandom;
+    }
+    const coveredIds = [];
+    picked.pairs.forEach(pr => pr.forEach(id => { if (!coveredIds.includes(id)) coveredIds.push(id); }));
+    const bySubject = {};
+    coveredIds.forEach(id => {
+      const s = (picked.byId.get(id) || {}).subject || "civil";
+      bySubject[s] = (bySubject[s] || 0) + 1;
+    });
+    const report = cases.map(c => {
+      const v = this.validateGeneratedCase(c);
+      const ci = this.assertCitationIntegrity(c);
+      const s = this.summarizeCaseReasoning(c);
+      s.valido = !!(v && v.valid);
+      s.citasVerificadas = !!(ci && ci.valid);
+      return s;
+    });
+    return {
+      seed: String(seed),
+      count: cases.length,
+      pairs: picked.pairs,
+      coverage: { institutions: coveredIds.sort(), bySubject: bySubject },
+      report: report,
+      cases: cases
+    };
+  },
+
+  /**
    * Validación corpus-driven de citas en 3 capas con resolución O(1) vía validCitationsIndex.
    */
   assertCitationIntegrity(caseObj) {
