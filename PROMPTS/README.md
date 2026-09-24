@@ -37,6 +37,7 @@
 | 022 | `022_persistencia_sesion_sin_cuenta_nueva.md` | **Persistencia de sesión:** cookie dual-mode (`Secure` solo en HTTPS, `None` solo cross-site allowlisted), CORS con credenciales + preflight, `credentials: include` en 10 fetch, fin de la cuenta fantasma en `checkSession`, re-link idempotente verificado + elimina UI Exportar/Importar (capa servicio intacta con guard anti-prototype-pollution). Sin tocar archivos del 021 (notas anti-interferencia). | ✅ Implementado (v7.28) |
 | 023 | `023_buscador_global_header_semantico_qa.md` | **Buscador global del header con modos:** extiende `#global-search-input` (Ctrl+K) con pills [Semántico azul/lupa | Q&A dorado/help-circle], un solo controlador que delega en `searchVault()` / `composeAnswer()` sin duplicar lógica. Depende de 017/020 verdes, sin pisar el 021. | 📝 Por ejecutar (Antigravity) |
 | 024 | `024_protocolo_crecimiento_canon.md` | **Protocolo de crecimiento del canon:** conteos derivados en suites (fin del `103` hardcodeado), invariantes duros intactos, registro de choques solo vía `FILES_CONFIG`, cierre documental por apunte (rangos §2.5 + bitácora patch). Ortogonal a 022/023. | 📝 Por ejecutar (Antigravity) |
+| 025 | `025_ciclo_mejora_banco_ledger.md` | **Ciclo de mejora nocturno:** barrido de pares de instituciones compatibles (fuera de los 13 presets), validación contra Vault y ledger de calidad + top huecos. Time-box 4 h con parada por saturación; solo lectura + TEMP. | ✅ Ejecutado (Nexo: 655 pares en 0.7 s, 596 válidos) |
 
 ## Reglas transversales para cualquier prompt (las heredan todos)
 

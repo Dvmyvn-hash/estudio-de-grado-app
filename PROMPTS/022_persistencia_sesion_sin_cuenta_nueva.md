@@ -1,7 +1,7 @@
 # PROMPT 022 — Persistencia de Sesión: Sin Cuenta Ni Código Nuevos por Refresh
 
 > **Versión:** v1.0 · **Fecha:** 2026-09-24 · **Autor:** puente (dpint) + orquestador (Nexo)
-> **Estado:** 📝 Por ejecutar (ejecución: Antigravity) · **Depende de:** ninguno (no tocar archivos del 021 en curso)
+> **Estado:** ✅ Implementado (v7.28, Antigravity; verificado por Nexo: Sección 18 en verde en suite local)
 
 ---
 
