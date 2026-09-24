@@ -191,6 +191,7 @@ const App = {
     this.setupSidebar();
     this.setupGlobalSearch();
     this.setupVaultSearch();
+    this.setupQAExtractor();
     this.setupImportModal();
     this.setupProgressBackup();
     this.setupKeyboardShortcuts();
@@ -568,7 +569,7 @@ const App = {
     this.renderCurrentView();
   },
 
-  openTopic(topicId) {
+  openTopic(topicId, options = {}) {
     if (!topicId) return;
     this.currentTopicId = topicId;
     this.renderSidebar();
@@ -577,7 +578,139 @@ const App = {
     } else {
       this.renderTopicViewer();
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (options && options.highlight) {
+      this.highlightInTopicViewer(options.highlight);
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  },
+
+  highlightInTopicViewer(snippet) {
+    if (!snippet || typeof snippet !== 'string') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return false;
+    }
+
+    const container = document.getElementById("topic-markdown-body");
+    if (!container) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return false;
+    }
+
+    // 1. Deshacer cualquier resaltado previo de vault-highlight en el visor
+    const existingMarks = container.querySelectorAll("mark.vault-highlight");
+    existingMarks.forEach(m => {
+      const parent = m.parentNode;
+      if (parent) {
+        while (m.firstChild) {
+          parent.insertBefore(m.firstChild, m);
+        }
+        parent.removeChild(m);
+        parent.normalize();
+      }
+    });
+
+    // 2. Limpieza del snippet: eliminar puntos suspensivos iniciales/finales y espacios
+    let cleanSnippet = snippet.replace(/^[.…\s]+|[.…\s]+$/g, '').trim();
+    if (!cleanSnippet) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return false;
+    }
+
+    // Generar frases candidatas ordenadas de mayor a menor especificidad
+    const candidates = [];
+    if (cleanSnippet.length >= 10) {
+      candidates.push(cleanSnippet);
+    }
+    const lines = cleanSnippet.split(/\n+/).map(l => l.trim()).filter(l => l.length >= 15);
+    for (const line of lines) {
+      if (!candidates.includes(line)) candidates.push(line);
+    }
+    const sentences = cleanSnippet.split(/[.;:]+/).map(s => s.trim()).filter(s => s.length >= 15);
+    for (const sent of sentences) {
+      if (!candidates.includes(sent)) candidates.push(sent);
+    }
+    if (cleanSnippet.length > 40) {
+      const sub = cleanSnippet.slice(0, 40).trim();
+      if (!candidates.includes(sub)) candidates.push(sub);
+    }
+
+    // 3. Buscar en los nodos de texto de container usando TreeWalker
+    let matchedMark = null;
+
+    const findAndWrap = (searchText) => {
+      if (!searchText || searchText.length < 8) return false;
+      const lowerSearch = searchText.toLowerCase();
+      const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
+      let currentNode = walker.nextNode();
+
+      while (currentNode) {
+        const val = currentNode.nodeValue || "";
+        const lowerVal = val.toLowerCase();
+        const foundIdx = lowerVal.indexOf(lowerSearch);
+
+        if (foundIdx !== -1) {
+          const parent = currentNode.parentNode;
+          if (parent && parent.nodeName.toLowerCase() !== 'mark') {
+            const beforeText = val.slice(0, foundIdx);
+            const matchText = val.slice(foundIdx, foundIdx + searchText.length);
+            const afterText = val.slice(foundIdx + searchText.length);
+
+            const markEl = document.createElement("mark");
+            markEl.className = "vault-highlight";
+            markEl.textContent = matchText;
+
+            const frag = document.createDocumentFragment();
+            if (beforeText) frag.appendChild(document.createTextNode(beforeText));
+            frag.appendChild(markEl);
+            if (afterText) frag.appendChild(document.createTextNode(afterText));
+
+            parent.replaceChild(frag, currentNode);
+            matchedMark = markEl;
+            return true;
+          }
+        }
+        currentNode = walker.nextNode();
+      }
+      return false;
+    };
+
+    for (const cand of candidates) {
+      if (findAndWrap(cand)) {
+        break;
+      }
+    }
+
+    // Si no se encontró en un único nodo de texto, buscar en los bloques principales
+    if (!matchedMark) {
+      const blocks = container.querySelectorAll("p, li, blockquote, h1, h2, h3, h4, td, div");
+      for (const block of blocks) {
+        const blockText = (block.textContent || "").toLowerCase();
+        for (const cand of candidates) {
+          const lowerCand = cand.toLowerCase();
+          if (blockText.includes(lowerCand) && block.children.length > 0) {
+            const words = cand.split(/\s+/).filter(w => w.length >= 4);
+            for (const word of words) {
+              if (findAndWrap(word)) break;
+            }
+            if (matchedMark) break;
+          }
+        }
+        if (matchedMark) break;
+      }
+    }
+
+    if (matchedMark) {
+      try {
+        matchedMark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } catch (e) {
+        matchedMark.scrollIntoView();
+      }
+      return true;
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return false;
+    }
   },
 
   renderCurrentView() {
@@ -1940,6 +2073,144 @@ const App = {
 
     // Inicializar opciones de bloques temáticos
     updateChapterOptions();
+  },
+
+  // 5.1 Q&A EXTRACTIVO PURO: PREGUNTA -> CITAS VERBATIM (v7.27, PROMPT 021)
+  setupQAExtractor() {
+    const qaContainer = document.getElementById("qa-container");
+    if (!qaContainer) return;
+
+    const qaInput = document.getElementById("qa-ask-input");
+    const qaButton = document.getElementById("qa-ask-button");
+    const qaAnswer = document.getElementById("qa-answer");
+    const modePills = document.querySelectorAll("#qa-mode-pills .qa-mode-pill");
+    const gapsPanel = document.getElementById("qa-gaps-panel");
+    const gapsList = document.getElementById("qa-gaps-list");
+    const gapsClearBtn = document.getElementById("qa-gaps-clear");
+
+    this.currentQAMode = 'definicion';
+
+    const escapeFn = (str) => {
+      if (typeof SecurityShield !== "undefined" && typeof SecurityShield.escapeHtml === "function") {
+        return SecurityShield.escapeHtml(str);
+      }
+      if (typeof QAComposer !== "undefined" && typeof QAComposer.escapeHtml === "function") {
+        return QAComposer.escapeHtml(str);
+      }
+      return String(str || "").replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+    };
+
+    // Renderizar panel de temas pendientes (huecos sin cobertura en apuntes)
+    const renderGaps = () => {
+      if (!gapsPanel || !gapsList || typeof QAComposer === "undefined") return;
+      const gaps = QAComposer.getUncoveredGaps();
+      if (!gaps || gaps.length === 0) {
+        gapsPanel.classList.add("hidden");
+        gapsList.innerHTML = "";
+        return;
+      }
+      gapsPanel.classList.remove("hidden");
+      gapsList.innerHTML = gaps.map(g => `
+        <button type="button" class="qa-gap-chip" data-gap-query="${escapeFn(g.query)}" title="Volver a consultar o planificar incorporación de apunte">
+          <span class="qa-gap-text">${escapeFn(g.query)}</span>
+          ${g.count > 1 ? `<span class="qa-gap-count">&times;${g.count}</span>` : ''}
+          <span class="qa-gap-badge">${escapeFn(g.suggestedSubject || 'Civil')}</span>
+        </button>
+      `).join("");
+
+      gapsList.querySelectorAll(".qa-gap-chip").forEach(chip => {
+        chip.addEventListener("click", () => {
+          const q = chip.dataset.gapQuery;
+          if (q && qaInput) {
+            qaInput.value = q;
+            executeQA();
+          }
+        });
+      });
+    };
+
+    // Limpiar ranking de huecos
+    if (gapsClearBtn) {
+      gapsClearBtn.addEventListener("click", () => {
+        if (typeof QAComposer !== "undefined") {
+          QAComposer.clearUncoveredGaps();
+        }
+        renderGaps();
+      });
+    }
+
+    // Ejecutar composición extractiva
+    const executeQA = () => {
+      if (!qaInput || !qaAnswer || typeof QAComposer === "undefined") return;
+      const q = (qaInput.value || "").trim();
+      if (q.length < 2) {
+        qaAnswer.classList.add("hidden");
+        qaAnswer.innerHTML = "";
+        return;
+      }
+
+      const answer = QAComposer.composeAnswer(q, {
+        mode: this.currentQAMode || 'definicion'
+      });
+
+      qaAnswer.innerHTML = answer.html;
+      qaAnswer.classList.remove("hidden");
+
+      if (window.lucide && typeof window.lucide.createIcons === "function") {
+        window.lucide.createIcons();
+      }
+
+      // Si no hubo cobertura, registrar la consulta en el ranking de huecos
+      if (answer.empty && answer.reason === 'no_coverage') {
+        QAComposer.recordUncoveredGap(q, answer.suggestedSubject);
+        renderGaps();
+      }
+
+      // Conectar botones de salto al apunte con highlight
+      qaAnswer.querySelectorAll(".qa-action-jump-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const topicId = btn.dataset.jumpTopic;
+          const snippet = btn.dataset.snippet;
+          if (topicId) {
+            this.openTopic(topicId, { highlight: snippet });
+            if (window.innerWidth <= 1024) {
+              const sidebar = document.getElementById("app-sidebar");
+              if (sidebar && !sidebar.classList.contains("collapsed")) {
+                this.toggleSidebar();
+              }
+            }
+          }
+        });
+      });
+    };
+
+    // Selección de modo
+    modePills.forEach(pill => {
+      pill.addEventListener("click", () => {
+        modePills.forEach(p => p.classList.remove("active"));
+        pill.classList.add("active");
+        this.currentQAMode = pill.dataset.mode || 'definicion';
+        if (qaInput && qaInput.value.trim().length >= 2) {
+          executeQA();
+        }
+      });
+    });
+
+    // Eventos del input y botón
+    if (qaButton) {
+      qaButton.addEventListener("click", executeQA);
+    }
+    if (qaInput) {
+      qaInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          executeQA();
+        }
+      });
+    }
+
+    // Inicializar visualización de huecos existentes
+    renderGaps();
   },
 
   // 6. MODAL DE IMPORTACIÓN / EXPORTACIÓN NOTEBOOKLM

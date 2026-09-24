@@ -205,6 +205,34 @@
             <div class="vault-history-items" id="vault-history-items"></div>
           </div>
           <div id="vault-search-results" class="vault-search-results hidden" role="region" aria-label="Resultados de búsqueda"></div>
+
+          <!-- Q&A Extractivo Puro: Pregunta -> Citas Verbatim (v7.27, Prompt 021) -->
+          <div class="qa-container" id="qa-container">
+            <div class="qa-header">
+              <span class="qa-title"><i data-lucide="help-circle" class="qa-icon"></i> Pregunta al Vault</span>
+              <div class="qa-mode-pills" id="qa-mode-pills" role="radiogroup" aria-label="Modo de respuesta extractiva">
+                <button type="button" class="qa-mode-pill active" data-mode="definicion" title="Mejor cita directa (definición puntual)">Definición</button>
+                <button type="button" class="qa-mode-pill" data-mode="panorama" title="Citas representativas por disciplina">Panorama</button>
+                <button type="button" class="qa-mode-pill" data-mode="comparativa" title="Cotejo de instituciones (dos perspectivas)">Comparativa</button>
+              </div>
+            </div>
+            <div class="qa-input-wrapper">
+              <input type="text" id="qa-ask-input" class="qa-ask-input" placeholder="Haz una pregunta a tus apuntes..." autocomplete="off" spellcheck="false" aria-label="Pregunta en lenguaje natural a las cédulas">
+              <button id="qa-ask-button" class="qa-ask-button" type="button" aria-label="Consultar apuntes">
+                <i data-lucide="corner-down-left"></i>
+                <span>Preguntar</span>
+              </button>
+            </div>
+            <div id="qa-answer" class="qa-answer hidden" role="region" aria-label="Respuesta extractiva" aria-live="polite"></div>
+            <!-- Ranking local de huecos (uncovered queries) -->
+            <div class="qa-gaps-panel hidden" id="qa-gaps-panel" role="region" aria-label="Temas sin cobertura">
+              <div class="qa-gaps-header">
+                <span class="qa-gaps-title"><i data-lucide="alert-circle" class="qa-gaps-icon"></i> Temas pendientes en apuntes</span>
+                <button type="button" id="qa-gaps-clear" class="qa-gaps-clear-btn" aria-label="Limpiar ranking de temas pendientes">Limpiar</button>
+              </div>
+              <div class="qa-gaps-list" id="qa-gaps-list"></div>
+            </div>
+          </div>
         </div>
 
         <!-- Lista Jerárquica de Temas -->
@@ -761,6 +789,8 @@
   <script src="js/sinonimos.js"></script>
   <script src="js/vault-index.js"></script>
   <script src="js/vault-search.js"></script>
+  <!-- Q&A Extractivo Puro: Pregunta -> Citas Verbatim (v7.27, Prompt 021) -->
+  <script src="js/qa-composer.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/security-shield.js"></script>
   <script src="js/auth-config.js"></script>
