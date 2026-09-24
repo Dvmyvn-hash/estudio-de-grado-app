@@ -1,7 +1,7 @@
 # PROMPT 016 — Temario Canónico: Ordenamiento Automático del Índice según Examen de Grado
 
 > **Versión:** v1.0 · **Fecha:** 2026-09-23 · **Autor:** puente (dpint)
-> **Estado:** ✅ Implementado (v7.19) · **Depende de:** 008, 007
+> **Estado:** ✅ Implementado (v7.19; corrección dogmática Discusión→Prueba→Sentencia + sidebar por min indexCode v7.19.1) · **Depende de:** 008, 007
 
 ---
 

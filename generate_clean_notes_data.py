@@ -202,10 +202,10 @@ TEMARIO_CANONICO = {
         (11, 11, ["garantias", "hipoteca", "prenda", "fianza", "caucion", "reales de garantia"], "Derechos Reales de Garantía"),
     ],
     "procesal": [
-        # Orden oficial: Orgánico → Normas Comunes → Mayor Cuantía (6-13) → La Prueba (3-5) → Ejecutivo → Cautelares → Recursos → Especiales
+        # Orden oficial dogmático Juicio Ordinario: Orgánico → Normas Comunes → Discusión (6-12) → Conciliación (3.3, slot 18) → Prueba (3-5) → Sentencia (13) → Otros
         (1,  1, ["accion", "pretension", "proceso", "jurisdiccion", "competencia", "organico", "derecho de accion", "teoria dualista", "teoria monista"], "Parte General (Derecho Procesal Orgánico)"),
         (2,  2, ["partes", "terceros", "comparecencia", "patrocinio", "mandato judicial", "actos procesales", "plazos", "notificaciones", "nulidad procesal", "incidentes", "capacidad procesal", "ius postulandi"], "Normas Comunes a Todo Procedimiento"),
-        # MAYOR CUANTÍA — capítulos 6-13 en PROCEMAYORCUANTIA-pulido.md
+        # DISCUSIÓN — capítulos 6-12 en PROCEMAYORCUANTIA-pulido.md (Medidas Prejudiciales → Réplica y Dúplica)
         (3,  6, ["medidas prejudiciales", "prejudicial", "preparatoria", "probatoria", "precautoria", "declaracion jurada", "exhibicion", "reconocimiento firma"], "Las Medidas Prejudiciales"),
         (4,  7, ["demanda", "libelo", "requisitos demanda", "254 cpc", "individualizacion", "hechos", "fundamentos", "peticiones"], "La Demanda"),
         (5,  8, ["control admisibilidad", "examen oficio", "256 cpc", "ineptitud libelo", "patrocinio legal", "saneamiento"], "Control de Admisibilidad (Examen de Oficio)"),
@@ -213,16 +213,19 @@ TEMARIO_CANONICO = {
         (7, 10, ["emplazamiento", "notificacion demanda", "258 cpc", "259 cpc"], "El Emplazamiento"),
         (8, 11, ["rebeldia", "allanamiento", "excepciones dilatorias", "contestacion demanda", "ficcion negativa", "311 cpc", "313 cpc"], "Actitudes del Demandado frente a la Demanda"),
         (9, 12, ["replica", "duplica", "311 cpc", "312 cpc", "nuevos hechos", "excepciones perentorias"], "Réplica y Dúplica"),
-        (10, 13, ["sentencia", "cita oir sentencia", "observaciones prueba", "430 cpc", "desasimiento", "modos anormales termino", "432 cpc", "433 cpc", "162 cpc", "cosajuicio"], "Etapa de Sentencia y Modos Anormales de Término"),
-        # LA PRUEBA — capítulos 3-5 en DERECHO_PROCESAL_LA_PRUEBA.md
+        # CONCILIACIÓN — etapa 3.3 del temario oficial AIME (slot reservado; sin cédulas desarrolladas aún)
+        (10, 18, ["conciliacion", "llamado conciliacion", "avenimiento", "bases arreglo", "audiencia conciliacion", "tramite conciliacion", "320 cpc", "324 cpc"], "Etapa de Conciliación (Trámite Previo a la Prueba)"),
+        # LA PRUEBA — capítulos 3-5 en DERECHO_PROCESAL_LA_PRUEBA.md (Teoría General → Medios)
         (11, 3, ["teoria general prueba", "objeto prueba", "carga prueba", "valoracion prueba", "sana critica", "318 cpc", "hechos sustanciales", "pertinentes", "controvertidos"], "Teoría General de la Prueba Procesal Civil"),
         (12, 4, ["recepcion causa prueba", "auto prueba", "ampliacion prueba", "321 cpc", "322 cpc", "periodo observaciones", "430 cpc", "hechos nuevos", "conocimiento superveniente"], "Etapa Probatoria en el Juicio Ordinario de Mayor Cuantía"),
         (13, 5, ["medios prueba", "documental", "testimonial", "confesional", "absolucion posiciones", "inspeccion personal", "pericial", "presunciones", "341 cpc", "426 cpc", "427 cpc", "1712 cc"], "Los Medios de Prueba en Particular (Art. 341 CPC)"),
+        # SENTENCIA — capítulo 13 en PROCEMAYORCUANTIA-pulido.md (después de la Prueba)
+        (14, 13, ["sentencia", "cita oir sentencia", "observaciones prueba", "430 cpc", "desasimiento", "modos anormales termino", "432 cpc", "433 cpc", "162 cpc", "cosajuicio"], "Etapa de Sentencia y Modos Anormales de Término"),
         # OTROS PROCEDIMIENTOS
-        (14, 14, ["ejecutivo", "titulo ejecutivo", "excepcion ejecutiva", "embargo", "pago", "mandamiento", "oposicion"], "Juicio Ejecutivo"),
-        (15, 15, ["cautelar", "medida precautoria", "medidas especificas", "innominadas", "fumus boni iuris", "periculum in mora"], "Medidas Precautorias"),
-        (16, 16, ["recurso", "apelacion", "casacion", "queja", "reposicion", "768 cpc", "772 cpc"], "Sistema de Recursos"),
-        (17, 17, ["menor cuantia", "sumario", "arriendo", "familia", "laboral", "especial", "monitorio"], "Procedimientos Especiales"),
+        (15, 14, ["ejecutivo", "titulo ejecutivo", "excepcion ejecutiva", "embargo", "pago", "mandamiento", "oposicion"], "Juicio Ejecutivo"),
+        (16, 15, ["cautelar", "medida precautoria", "medidas especificas", "innominadas", "fumus boni iuris", "periculum in mora"], "Medidas Precautorias"),
+        (17, 16, ["recurso", "apelacion", "casacion", "queja", "reposicion", "768 cpc", "772 cpc"], "Sistema de Recursos"),
+        (18, 17, ["menor cuantia", "sumario", "arriendo", "familia", "laboral", "especial", "monitorio"], "Procedimientos Especiales"),
     ],
     "constitucional": [
         (1,  1, ["accion", "garantias", "amparo", "proteccion", "inconstitucionalidad", "tribunal constitucional", "requisitos", "procedencia"], "Acciones y Garantías Constitucionales"),

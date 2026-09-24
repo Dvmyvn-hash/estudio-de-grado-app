@@ -750,8 +750,19 @@ const App = {
         chapterMap.get(chapTitle).topics.push(t);
       });
 
-      // Ordenar capítulos numéricamente
-      const sortedChapters = Array.from(chapterMap.entries()).sort((a, b) => a[1].num - b[1].num);
+      // Ordenar capítulos por temario canónico (min indexCode del bloque), no por chapterNumber.
+      // Fundamento v7.19.1: el orden dogmático exige Discusión (cap 6-12) → Prueba (cap 3-5) → Sentencia (cap 13).
+      // Ordenar por chapterNumber numérico rompería ese orden y mostraría La Prueba antes que Mayor Cuantía.
+      const sortedChapters = Array.from(chapterMap.entries()).sort((a, b) => {
+        const parseIdx = (c) => {
+          const parts = (c || "").split(".").map(p => parseInt(p, 10) || 0);
+          return (parts[0] || 0) * 1000 + (parts[1] || 0);
+        };
+        const minA = Math.min(...a[1].topics.map(t => parseIdx(t.indexCode || t.code)));
+        const minB = Math.min(...b[1].topics.map(t => parseIdx(t.indexCode || t.code)));
+        if (minA !== minB) return minA - minB;
+        return (a[1].num || 0) - (b[1].num || 0);
+      });
 
       sortedChapters.forEach(([chapTitle, chapData]) => {
         const chapterTopics = chapData.topics;
