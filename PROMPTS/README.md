@@ -40,6 +40,7 @@
 | 025 | `025_ciclo_mejora_banco_ledger.md` | **Ciclo de mejora nocturno:** barrido de pares de instituciones compatibles (fuera de los 13 presets), validación contra Vault y ledger de calidad + top huecos. Time-box 4 h con parada por saturación; solo lectura + TEMP. | ✅ Ejecutado (Nexo: 655 pares en 0.7 s, 596 válidos) |
 | 026 | `026_mejora_generador_anclaje_trios.md` | **Mejora del generador:** gate de anclaje ≥3 bigramas + `linkedApuntes` por overlap real + `needsReview` visible; barrido de tríos mixtos civil/procesal con ledger. Sin tocar 021/023. | ✅ Implementado (v7.32, Nexo) |
 | 027 | `027_buscador_unico_header.md` | **Buscador único:** las 3 cajas (header + Vault + Q&A del sidebar) colapsan en 1 dropdown del header con todas las funciones; sidebar solo índice; cero lógica duplicada; verificación visual obligatoria. | 📝 Por ejecutar (Antigravity) |
+| 028 | `028_venta_manual_agil_lotes.md` | **Venta manual ágil (sin pasarela):** lote atómico de hasta 50 códigos, pre-asignación email anti-préstamo, estados pendiente/entregado con filtro (convención `label`, cero migración). Plantillas DM en `VENTAS/`. | 📝 Por ejecutar (Antigravity) |
 
 ## Reglas transversales para cualquier prompt (las heredan todos)
 
