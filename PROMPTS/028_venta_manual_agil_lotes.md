@@ -1,7 +1,7 @@
 # PROMPT 028 — Venta Manual Ágil: Lotes, Pre-asignación y Estados (sin pasarela)
 
 > **Versión:** v1.0 · **Fecha:** 2026-09-24 · **Autor:** puente (dpint) + orquestador (Nexo)
-> **Estado:** 📝 Por ejecutar (ejecución: Antigravity) · **Depende de:** ninguno (Fase 0 primero)
+> **Estado:** ✅ Implementado (v7.35, Antigravity; verificado por Nexo: unlock 207/207) · **Depende de:** ninguno (Fase 0 primero)
 
 ---
 

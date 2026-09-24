@@ -77,7 +77,7 @@
 
       <!-- Acciones de Cabecera -->
       <div class="header-actions">
-        <!-- Buscador Global Rápido con Modos Semántico y Q&A (v7.29, Prompt 023) -->
+        <!-- Buscador Global Único con Modos Semántico y Q&A (v7.29 / v7.34, Prompts 023 y 027) -->
         <div class="search-bar" id="global-search-container" data-mode="semantic">
           <div class="search-mode-selector" id="search-mode-selector" role="radiogroup" aria-label="Modo de búsqueda">
             <button type="button" id="search-mode-semantic" class="search-mode-pill active" role="radio" aria-checked="true" data-mode="semantic" title="Modo Semántico: Buscar cédulas por relevancia conceptual" aria-label="Modo Semántico">
@@ -92,9 +92,56 @@
           <div class="search-input-wrapper">
             <i data-lucide="search" class="search-icon" id="search-active-icon"></i>
             <input type="text" id="global-search-input" placeholder="Buscar en cédulas..." autocomplete="off" maxlength="200" aria-label="Buscador global: Modo Semántico (Cédulas)">
+            <button id="vault-search-clear" class="search-clear-btn hidden" type="button" aria-label="Limpiar búsqueda">&times;</button>
             <kbd class="shortcut-key">Ctrl+K</kbd>
           </div>
-          <div id="search-results-dropdown" class="search-dropdown hidden" aria-live="polite"></div>
+          <div id="search-results-dropdown" class="search-dropdown hidden" aria-live="polite">
+            <!-- Sección Modo Semántico: Filtros, Bloques e Historial (absorbidos del sidebar) -->
+            <div id="global-semantic-controls" class="global-mode-section">
+              <div class="vault-search-filters" id="vault-search-filters">
+                <div class="vault-filter-pills" id="vault-filter-pills" role="radiogroup" aria-label="Filtrar por disciplina">
+                  <button type="button" class="vault-filter-pill active" data-subject="all">Todas</button>
+                  <button type="button" class="vault-filter-pill" data-subject="civil">Civil</button>
+                  <button type="button" class="vault-filter-pill" data-subject="procesal">Procesal</button>
+                  <button type="button" class="vault-filter-pill" data-subject="constitucional">Const.</button>
+                </div>
+                <div class="vault-filter-chapter-wrapper">
+                  <select id="vault-filter-chapter" class="vault-filter-chapter" aria-label="Filtrar por bloque temático">
+                    <option value="all">Todos los bloques</option>
+                  </select>
+                </div>
+              </div>
+              <div class="vault-search-history hidden" id="vault-search-history" role="region" aria-label="Búsquedas recientes">
+                <div class="vault-history-header">
+                  <span class="vault-history-title"><i data-lucide="clock" class="vault-history-icon"></i> Recientes</span>
+                  <button type="button" id="vault-history-clear" class="vault-history-clear-btn" aria-label="Borrar historial reciente">Limpiar</button>
+                </div>
+                <div class="vault-history-items" id="vault-history-items"></div>
+              </div>
+            </div>
+
+            <!-- Sección Modo Q&A: Sub-modos, Citas Extractivas y Panel de Huecos (absorbidos del sidebar) -->
+            <div id="global-qa-controls" class="global-mode-section hidden">
+              <div class="qa-mode-pills-wrapper">
+                <div class="qa-mode-pills" id="qa-mode-pills" role="radiogroup" aria-label="Modo de respuesta extractiva">
+                  <button type="button" class="qa-mode-pill active" data-mode="definicion" title="Mejor cita directa (definición puntual)">Definición</button>
+                  <button type="button" class="qa-mode-pill" data-mode="panorama" title="Citas representativas por disciplina">Panorama</button>
+                  <button type="button" class="qa-mode-pill" data-mode="comparativa" title="Cotejo de instituciones (dos perspectivas)">Comparativa</button>
+                </div>
+              </div>
+              <div id="qa-answer" class="qa-answer hidden" role="region" aria-label="Respuesta extractiva" aria-live="polite"></div>
+              <div class="qa-gaps-panel hidden" id="qa-gaps-panel" role="region" aria-label="Temas sin cobertura">
+                <div class="qa-gaps-header">
+                  <span class="qa-gaps-title"><i data-lucide="alert-circle" class="qa-gaps-icon"></i> Temas pendientes en apuntes</span>
+                  <button type="button" id="qa-gaps-clear" class="qa-gaps-clear-btn" aria-label="Limpiar ranking de temas pendientes">Limpiar</button>
+                </div>
+                <div class="qa-gaps-list" id="qa-gaps-list"></div>
+              </div>
+            </div>
+
+            <!-- Resultados Semánticos y Casos Prácticos -->
+            <div id="vault-search-results" class="vault-search-results hidden" role="region" aria-label="Resultados de búsqueda"></div>
+          </div>
         </div>
 
         <!-- Indicador de Sincronización en Tiempo Real (Icono/Dot Compacto) -->
@@ -174,66 +221,6 @@
           </div>
         </div>
 
-
-        <!-- Vault de Conocimiento: Buscador Semántico Estático (v7.22 / v7.25, Prompts 017 y 020) -->
-        <div class="vault-search-box" id="vault-search-box">
-          <div class="vault-search-input-wrapper">
-            <i data-lucide="search" class="vault-search-icon"></i>
-            <input type="text" id="vault-search-input" class="vault-search-input" placeholder="Buscar en 103 apuntes (ej. emplazamiento)..." autocomplete="off" spellcheck="false" aria-label="Búsqueda semántica en el Vault de Apuntes">
-            <button id="vault-search-clear" class="vault-search-clear hidden" type="button" aria-label="Limpiar búsqueda">&times;</button>
-          </div>
-          <!-- Filtros por disciplina y bloque temático (v7.25, Prompt 020) -->
-          <div class="vault-search-filters" id="vault-search-filters">
-            <div class="vault-filter-pills" id="vault-filter-pills" role="radiogroup" aria-label="Filtrar por disciplina">
-              <button type="button" class="vault-filter-pill active" data-subject="all">Todas</button>
-              <button type="button" class="vault-filter-pill" data-subject="civil">Civil</button>
-              <button type="button" class="vault-filter-pill" data-subject="procesal">Procesal</button>
-              <button type="button" class="vault-filter-pill" data-subject="constitucional">Const.</button>
-            </div>
-            <div class="vault-filter-chapter-wrapper">
-              <select id="vault-filter-chapter" class="vault-filter-chapter" aria-label="Filtrar por bloque temático">
-                <option value="all">Todos los bloques</option>
-              </select>
-            </div>
-          </div>
-          <!-- Historial de búsquedas recientes (v7.25, Prompt 020) -->
-          <div class="vault-search-history hidden" id="vault-search-history" role="region" aria-label="Búsquedas recientes">
-            <div class="vault-history-header">
-              <span class="vault-history-title"><i data-lucide="clock" class="vault-history-icon"></i> Recientes</span>
-              <button type="button" id="vault-history-clear" class="vault-history-clear-btn" aria-label="Borrar historial reciente">Limpiar</button>
-            </div>
-            <div class="vault-history-items" id="vault-history-items"></div>
-          </div>
-          <div id="vault-search-results" class="vault-search-results hidden" role="region" aria-label="Resultados de búsqueda"></div>
-
-          <!-- Q&A Extractivo Puro: Pregunta -> Citas Verbatim (v7.27, Prompt 021) -->
-          <div class="qa-container" id="qa-container">
-            <div class="qa-header">
-              <span class="qa-title"><i data-lucide="help-circle" class="qa-icon"></i> Pregunta al Vault</span>
-              <div class="qa-mode-pills" id="qa-mode-pills" role="radiogroup" aria-label="Modo de respuesta extractiva">
-                <button type="button" class="qa-mode-pill active" data-mode="definicion" title="Mejor cita directa (definición puntual)">Definición</button>
-                <button type="button" class="qa-mode-pill" data-mode="panorama" title="Citas representativas por disciplina">Panorama</button>
-                <button type="button" class="qa-mode-pill" data-mode="comparativa" title="Cotejo de instituciones (dos perspectivas)">Comparativa</button>
-              </div>
-            </div>
-            <div class="qa-input-wrapper">
-              <input type="text" id="qa-ask-input" class="qa-ask-input" placeholder="Haz una pregunta a tus apuntes..." autocomplete="off" spellcheck="false" aria-label="Pregunta en lenguaje natural a las cédulas">
-              <button id="qa-ask-button" class="qa-ask-button" type="button" aria-label="Consultar apuntes">
-                <i data-lucide="corner-down-left"></i>
-                <span>Preguntar</span>
-              </button>
-            </div>
-            <div id="qa-answer" class="qa-answer hidden" role="region" aria-label="Respuesta extractiva" aria-live="polite"></div>
-            <!-- Ranking local de huecos (uncovered queries) -->
-            <div class="qa-gaps-panel hidden" id="qa-gaps-panel" role="region" aria-label="Temas sin cobertura">
-              <div class="qa-gaps-header">
-                <span class="qa-gaps-title"><i data-lucide="alert-circle" class="qa-gaps-icon"></i> Temas pendientes en apuntes</span>
-                <button type="button" id="qa-gaps-clear" class="qa-gaps-clear-btn" aria-label="Limpiar ranking de temas pendientes">Limpiar</button>
-              </div>
-              <div class="qa-gaps-list" id="qa-gaps-list"></div>
-            </div>
-          </div>
-        </div>
 
         <!-- Lista Jerárquica de Temas -->
         <div class="sidebar-tree" id="topics-tree-container">
@@ -687,11 +674,15 @@
                 <option value="0">Pase Perpetuo (Sin límite de tiempo)</option>
               </select>
             </div>
+            <div class="form-group">
+              <label for="admin-batch-count">Cantidad a Generar (1–50):</label>
+              <input type="number" id="admin-batch-count" class="form-control" min="1" max="50" value="1" placeholder="1" title="Generar entre 1 y 50 códigos en lote de forma atómica">
+            </div>
           </div>
           <div style="display: flex; justify-content: flex-end; margin-top: 8px; margin-bottom: 12px;">
             <button id="btn-generate-code" class="btn btn-primary" style="height: 42px;">
               <i data-lucide="plus-circle"></i>
-              <span>Generar Código de Licencia</span>
+              <span id="btn-generate-code-label">Generar Código de Licencia</span>
             </button>
           </div>
 
@@ -708,16 +699,32 @@
           <!-- Historial de Códigos Emitidos (oculto en Modo Presentación Docente) -->
           <div id="admin-codes-panel">
           <div style="margin-top: 24px;">
-            <h4 style="font-size: 0.9rem; color: var(--gold-primary); text-transform: uppercase; margin-bottom: 8px;">
-              Códigos Emitidos Activos
-            </h4>
-            <div style="max-height: 260px; overflow-y: auto; border: 1px solid var(--border-subtle); border-radius: var(--radius-md);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+              <h4 style="font-size: 0.9rem; color: var(--gold-primary); text-transform: uppercase; margin: 0;">
+                Códigos Emitidos Activos
+              </h4>
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <label for="admin-codes-filter-status" style="font-size: 0.75rem; color: var(--text-muted); margin: 0;">Filtro:</label>
+                <select id="admin-codes-filter-status" class="form-control" style="font-size: 0.78rem; padding: 4px 8px; height: 32px; width: auto; min-width: 150px;">
+                  <option value="all">Todos los códigos</option>
+                  <option value="pending">⏳ Solo Pendientes [PENDIENTE]</option>
+                  <option value="delivered">✓ Solo Entregados [ENTREGADO]</option>
+                  <option value="unused">📦 Stock Sin Usar (0 usos)</option>
+                </select>
+                <button id="btn-admin-purge-codes" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; height: 32px; color: var(--danger); border-color: rgba(239, 68, 68, 0.3);" title="Purgar stock ocioso (códigos con 0 usos, no preasignados ni vinculados)">
+                  <i data-lucide="trash-2"></i>
+                  <span>Purgar Stock Ocioso</span>
+                </button>
+              </div>
+            </div>
+            <div style="max-height: 280px; overflow-y: auto; border: 1px solid var(--border-subtle); border-radius: var(--radius-md);">
               <table class="admin-codes-table">
                 <thead>
                   <tr>
                     <th>Código</th>
                     <th>Alumno / Referencia</th>
                     <th>Gmail Vinculado</th>
+                    <th>Estado</th>
                     <th>Alcance</th>
                     <th>Vigencia</th>
                     <th>Usos</th>

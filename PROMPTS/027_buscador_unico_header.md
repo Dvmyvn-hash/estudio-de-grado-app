@@ -1,7 +1,7 @@
 # PROMPT 027 — Buscador Único: Todo al Header, Cero Duplicados en Sidebar
 
 > **Versión:** v1.0 · **Fecha:** 2026-09-24 · **Autor:** puente (dpint) + orquestador (Nexo)
-> **Estado:** 📝 Por ejecutar (ejecución: Antigravity, con verificación visual) · **Depende de:** 017, 020, 021 y 023 VERDES (Fase 0 primero)
+> **Estado:** ✅ Implementado (v7.34, Antigravity; verificado por Nexo: e2e 1144/1144) · **Depende de:** 017, 020, 021 y 023 VERDES (Fase 0 primero)
 
 ---
 

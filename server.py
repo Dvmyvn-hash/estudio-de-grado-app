@@ -1469,6 +1469,139 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_json_response({"ok": False, "error": f"No se encontró el código '{clean_code}' o ya estaba inactivo."}, status_code=404)
             return
 
+        # API Admin: Crear Lote de Códigos de Acceso (rol pleno 'admin' únicamente)
+        if clean_path == "/api/admin/create-code-batch":
+            body = self.rfile.read(content_length).decode("utf-8", errors="replace")
+            try:
+                req_data = json.loads(body)
+            except Exception:
+                self.send_json_response({"ok": False, "error": "Cuerpo JSON inválido"}, status_code=400)
+                return
+
+            admin_pin = req_data.get("pin") or self.headers.get("X-Admin-PIN", "")
+            role = self._require_admin_manage(admin_pin)
+            if role is None:
+                return
+
+            count = req_data.get("count", 1)
+            try:
+                count_int = int(count)
+            except (ValueError, TypeError):
+                self.send_json_response({"ok": False, "error": "La cantidad 'count' debe ser un número entero válido."}, status_code=400)
+                return
+
+            if count_int < 1 or count_int > 50:
+                self.send_json_response({"ok": False, "error": "El lote debe contener entre 1 y 50 códigos."}, status_code=400)
+                return
+
+            prefix = req_data.get("prefix", "GRADO-FULL")
+            label = req_data.get("label", "Lote-General")
+            assigned_email = req_data.get("assigned_email")
+            clean_assigned = str(assigned_email).strip().lower() if assigned_email and str(assigned_email).strip() else None
+
+            max_uses = req_data.get("max_uses", 1)
+            try:
+                max_uses_int = max(1, int(max_uses))
+            except (ValueError, TypeError):
+                max_uses_int = 1
+
+            expires_at = req_data.get("expires_at")
+            if expires_at is not None:
+                try:
+                    expires_at = int(expires_at)
+                except (ValueError, TypeError):
+                    expires_at = None
+
+            try:
+                batch_items = db.create_access_code_batch(
+                    count=count_int,
+                    prefix=prefix,
+                    label=label,
+                    max_uses=max_uses_int,
+                    expires_at=expires_at,
+                    assigned_email=clean_assigned
+                )
+                self.send_json_response({
+                    "ok": True,
+                    "count": len(batch_items),
+                    "codes": [item["code"] for item in batch_items],
+                    "items": batch_items
+                }, status_code=201)
+            except ValueError as ve:
+                self.send_json_response({"ok": False, "error": str(ve)}, status_code=400)
+            except Exception as e:
+                self.send_json_response({"ok": False, "error": f"Error al generar lote de códigos: {str(e)}"}, status_code=500)
+            return
+
+        # API Admin: Purgar Stock de Códigos Ociosos (rol pleno 'admin' únicamente)
+        if clean_path == "/api/admin/purge-codes":
+            body = self.rfile.read(content_length).decode("utf-8", errors="replace")
+            try:
+                req_data = json.loads(body)
+            except Exception:
+                self.send_json_response({"ok": False, "error": "Cuerpo JSON inválido"}, status_code=400)
+                return
+
+            admin_pin = req_data.get("pin") or self.headers.get("X-Admin-PIN", "")
+            role = self._require_admin_manage(admin_pin)
+            if role is None:
+                return
+
+            # dry_run es True por defecto
+            dry_run = req_data.get("dry_run", True)
+            if isinstance(dry_run, str):
+                dry_run = dry_run.strip().lower() not in ("0", "false", "no")
+            else:
+                dry_run = bool(dry_run)
+
+            older_than_days = req_data.get("older_than_days")
+            prefix = req_data.get("prefix")
+
+            try:
+                count, purged_codes = db.purge_unused_codes(
+                    older_than_days=older_than_days,
+                    prefix=prefix,
+                    dry_run=dry_run
+                )
+                self.send_json_response({
+                    "ok": True,
+                    "dry_run": dry_run,
+                    "count": count,
+                    "codes": purged_codes,
+                    "purged": purged_codes
+                }, status_code=200)
+            except Exception as e:
+                self.send_json_response({"ok": False, "error": f"Error al purgar códigos: {str(e)}"}, status_code=500)
+            return
+
+        # API Admin: Actualizar Etiqueta / Estado de Código (rol pleno 'admin' únicamente)
+        if clean_path == "/api/admin/update-code-label":
+            body = self.rfile.read(content_length).decode("utf-8", errors="replace")
+            try:
+                req_data = json.loads(body)
+            except Exception:
+                self.send_json_response({"ok": False, "error": "Cuerpo JSON inválido"}, status_code=400)
+                return
+
+            admin_pin = req_data.get("pin") or self.headers.get("X-Admin-PIN", "")
+            role = self._require_admin_manage(admin_pin)
+            if role is None:
+                return
+
+            code = req_data.get("code", "")
+            clean_code = db.normalize_access_code(code)
+            if not clean_code:
+                self.send_json_response({"ok": False, "error": "El código es requerido."}, status_code=400)
+                return
+
+            label = req_data.get("label", "")
+            ok = db.update_access_code_label(clean_code, label)
+            if ok:
+                self.send_json_response({"ok": True, "code": clean_code, "label": label.strip()})
+            else:
+                self.send_json_response({"ok": False, "error": f"No se encontró el código '{clean_code}'."}, status_code=404)
+            return
+
         # API Admin: (ELIMINADO en v7.8) Subir Apuntes y Eliminar Apuntes — la subida admin de apuntes
         # se retiró por riesgo de corrupción del índice. La carpeta fuentes/ del repo es la única
         # fuente canónica: se edita el .md, se hace git push y la regeneración ocurre en CI/arranque.

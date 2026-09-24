@@ -1809,15 +1809,40 @@ const App = {
     return { clean: s, truncated };
   },
 
+  // =========================================================================
+  // 5. BUSCADOR GLOBAL ÚNICO DEL HEADER (v7.29 / v7.34, Prompts 023 y 027)
+  // Cero duplicados en sidebar: Modos Semántico y Q&A + Filtros + Historial + Respuestas + Huecos
+  // =========================================================================
   setupGlobalSearch() {
     const input = document.getElementById("global-search-input");
     const dropdown = document.getElementById("search-results-dropdown");
+    const container = document.getElementById("global-search-container") || document.querySelector(".search-bar");
     const pillSemantic = document.getElementById("search-mode-semantic");
     const pillQA = document.getElementById("search-mode-qa");
+    const clearBtn = document.getElementById("vault-search-clear");
+    const pillsContainer = document.getElementById("vault-filter-pills");
+    const chapterSelect = document.getElementById("vault-filter-chapter");
+    const historyContainer = document.getElementById("vault-search-history");
+    const historyItems = document.getElementById("vault-history-items");
+    const clearHistoryBtn = document.getElementById("vault-history-clear");
+    const resultsContainer = document.getElementById("vault-search-results");
+    const qaPills = document.querySelectorAll("#qa-mode-pills .qa-mode-pill");
+    const qaAnswer = document.getElementById("qa-answer");
+    const gapsPanel = document.getElementById("qa-gaps-panel");
+    const gapsList = document.getElementById("qa-gaps-list");
+    const gapsClearBtn = document.getElementById("qa-gaps-clear");
 
     if (!input || !dropdown) return;
 
+    this.selectedSubject = "all";
+    this.selectedChapter = "all";
+    this.currentQAMode = "definicion";
+    this.globalSearchDebounceTimer = null;
+    this.globalSearchLastExecutionTime = 0;
+
     this.initGlobalSearchMode();
+    this.updateChapterOptions();
+    this.renderQAGaps();
 
     if (pillSemantic) {
       pillSemantic.addEventListener("click", () => {
@@ -1833,13 +1858,61 @@ const App = {
       });
     }
 
+    // Foco en input: despliega dropdown y contenido correspondiente al modo
+    input.addEventListener("focus", () => {
+      dropdown.classList.remove("hidden");
+      const val = (input.value || "").trim();
+      if (this.globalSearchMode === "semantic") {
+        if (val.length < 3) {
+          if (resultsContainer) {
+            resultsContainer.classList.add("hidden");
+            resultsContainer.innerHTML = "";
+          }
+          this.renderRecentSearches();
+        } else {
+          this.executeGlobalSearch(val);
+        }
+      } else {
+        this.renderQAGaps();
+        if (val.length >= 2) {
+          this.executeGlobalSearch(val);
+        } else {
+          if (qaAnswer) {
+            qaAnswer.classList.add("hidden");
+            qaAnswer.innerHTML = "";
+          }
+        }
+      }
+    });
+
+    // Entrada de texto con debounce
     input.addEventListener("input", () => {
       clearTimeout(this.globalSearchDebounceTimer);
       const { clean } = this.sanitizeSearchQuery(input.value);
 
-      if (clean.length < 3) {
-        dropdown.classList.add("hidden");
-        dropdown.innerHTML = "";
+      if (clearBtn) {
+        if (input.value.length > 0) {
+          clearBtn.classList.remove("hidden");
+        } else {
+          clearBtn.classList.add("hidden");
+        }
+      }
+
+      const minLen = this.globalSearchMode === "semantic" ? 3 : 2;
+      if (clean.length < minLen) {
+        if (this.globalSearchMode === "semantic") {
+          if (resultsContainer) {
+            resultsContainer.classList.add("hidden");
+            resultsContainer.innerHTML = "";
+          }
+          this.renderRecentSearches();
+        } else {
+          if (qaAnswer) {
+            qaAnswer.classList.add("hidden");
+            qaAnswer.innerHTML = "";
+          }
+          this.renderQAGaps();
+        }
         return;
       }
 
@@ -1848,11 +1921,13 @@ const App = {
       }, 150);
     });
 
+    // Tecla Enter y Escape
     input.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         e.preventDefault();
         const { clean } = this.sanitizeSearchQuery(input.value);
-        if (clean.length >= 3) {
+        const minLen = this.globalSearchMode === "semantic" ? 3 : 2;
+        if (clean.length >= minLen) {
           if (dropdown.classList.contains("hidden")) {
             this.executeGlobalSearch(clean);
           } else {
@@ -1862,20 +1937,412 @@ const App = {
       } else if (e.key === "Escape") {
         e.preventDefault();
         dropdown.classList.add("hidden");
-        dropdown.innerHTML = "";
         input.blur();
       }
     });
 
+    // Botón de limpiar input
+    if (clearBtn) {
+      clearBtn.addEventListener("click", () => {
+        input.value = "";
+        clearBtn.classList.add("hidden");
+        if (this.globalSearchMode === "semantic") {
+          if (resultsContainer) {
+            resultsContainer.classList.add("hidden");
+            resultsContainer.innerHTML = "";
+          }
+          this.renderRecentSearches();
+        } else {
+          if (qaAnswer) {
+            qaAnswer.classList.add("hidden");
+            qaAnswer.innerHTML = "";
+          }
+          this.renderQAGaps();
+        }
+        input.focus();
+      });
+    }
+
+    // Filtros de disciplina en modo semántico
+    if (pillsContainer) {
+      pillsContainer.querySelectorAll(".vault-filter-pill").forEach(pill => {
+        pill.addEventListener("click", () => {
+          pillsContainer.querySelectorAll(".vault-filter-pill").forEach(p => p.classList.remove("active"));
+          pill.classList.add("active");
+          this.selectedSubject = pill.dataset.subject || "all";
+          this.updateChapterOptions();
+          if (input.value.trim().length >= 3) {
+            this.executeGlobalSearch(input.value);
+          }
+        });
+      });
+    }
+
+    // Selector de capítulo en modo semántico
+    if (chapterSelect) {
+      chapterSelect.addEventListener("change", () => {
+        this.selectedChapter = chapterSelect.value;
+        if (input.value.trim().length >= 3) {
+          this.executeGlobalSearch(input.value);
+        }
+      });
+    }
+
+    // Limpiar historial reciente
+    if (clearHistoryBtn) {
+      clearHistoryBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.clearRecentSearches();
+      });
+    }
+
+    // Sub-modos Q&A
+    qaPills.forEach(pill => {
+      pill.addEventListener("click", () => {
+        qaPills.forEach(p => p.classList.remove("active"));
+        pill.classList.add("active");
+        this.currentQAMode = pill.dataset.mode || 'definicion';
+        if (input.value.trim().length >= 2) {
+          this.executeGlobalSearch(input.value);
+        }
+      });
+    });
+
+    // Limpiar huecos Q&A
+    if (gapsClearBtn) {
+      gapsClearBtn.addEventListener("click", () => {
+        if (typeof QAComposer !== "undefined" && typeof QAComposer.clearUncoveredGaps === "function") {
+          QAComposer.clearUncoveredGaps();
+        }
+        this.renderQAGaps();
+      });
+    }
+
     // Cerrar dropdown al hacer clic fuera
     document.addEventListener("click", (e) => {
-      const container = document.getElementById("global-search-container") || document.querySelector(".search-bar");
-      if (container && !container.contains(e.target) && !dropdown.contains(e.target)) {
+      const cont = document.getElementById("global-search-container") || document.querySelector(".search-bar");
+      if (cont && !cont.contains(e.target) && !dropdown.contains(e.target)) {
         dropdown.classList.add("hidden");
       }
     });
   },
 
+  // Gestión de Modo Persistente (Semántico / Q&A)
+  initGlobalSearchMode() {
+    let mode = "semantic";
+    try {
+      mode = localStorage.getItem("global_search_mode") || "semantic";
+    } catch (e) {
+      mode = "semantic";
+    }
+    this.setGlobalSearchMode(mode, false);
+  },
+
+  setGlobalSearchMode(mode, triggerSearch = true) {
+    const validMode = mode === "qa" ? "qa" : "semantic";
+    this.globalSearchMode = validMode;
+    try {
+      localStorage.setItem("global_search_mode", validMode);
+    } catch (e) {}
+
+    if (typeof document === "undefined" || !document) return;
+    const getEl = typeof document.getElementById === "function" ? (id) => document.getElementById(id) : () => null;
+
+    const container = getEl("global-search-container") || (typeof document.querySelector === "function" ? document.querySelector(".search-bar") : null);
+    const pillSemantic = getEl("search-mode-semantic");
+    const pillQA = getEl("search-mode-qa");
+    const input = getEl("global-search-input");
+    const icon = getEl("search-active-icon");
+    const semanticControls = getEl("global-semantic-controls");
+    const qaControls = getEl("global-qa-controls");
+    const resultsContainer = getEl("vault-search-results");
+    const qaAnswer = getEl("qa-answer");
+    const dropdown = getEl("search-results-dropdown");
+
+    if (container) {
+      if (!container.dataset) container.dataset = {};
+      container.dataset.mode = validMode;
+      if (typeof container.setAttribute === "function") {
+        container.setAttribute("data-mode", validMode);
+      }
+      if (container.classList) {
+        if (validMode === "semantic") {
+          container.classList.add("mode-semantic");
+          container.classList.remove("mode-qa");
+        } else {
+          container.classList.add("mode-qa");
+          container.classList.remove("mode-semantic");
+        }
+      }
+    }
+
+    if (pillSemantic) {
+      if (typeof pillSemantic.classList?.toggle === "function") {
+        pillSemantic.classList.toggle("active", validMode === "semantic");
+      } else if (validMode === "semantic") {
+        pillSemantic.classList.add("active");
+      } else {
+        pillSemantic.classList.remove("active");
+      }
+      if (typeof pillSemantic.setAttribute === "function") {
+        pillSemantic.setAttribute("aria-checked", validMode === "semantic" ? "true" : "false");
+      }
+    }
+
+    if (pillQA) {
+      if (typeof pillQA.classList?.toggle === "function") {
+        pillQA.classList.toggle("active", validMode === "qa");
+      } else if (validMode === "qa") {
+        pillQA.classList.add("active");
+      } else {
+        pillQA.classList.remove("active");
+      }
+      if (typeof pillQA.setAttribute === "function") {
+        pillQA.setAttribute("aria-checked", validMode === "qa" ? "true" : "false");
+      }
+    }
+
+    if (input) {
+      if (validMode === "semantic") {
+        input.placeholder = "Buscar en cédulas...";
+        input.setAttribute("aria-label", "Buscador global: Modo Semántico (Cédulas)");
+      } else {
+        input.placeholder = "Haz una pregunta a tus apuntes...";
+        input.setAttribute("aria-label", "Buscador global: Modo Q&A (Preguntas y Citas)");
+      }
+    }
+
+    if (icon) {
+      icon.setAttribute("data-lucide", validMode === "semantic" ? "search" : "help-circle");
+    }
+
+    if (semanticControls) {
+      if (validMode === "semantic") {
+        semanticControls.classList.remove("hidden");
+      } else {
+        semanticControls.classList.add("hidden");
+      }
+    }
+
+    if (qaControls) {
+      if (validMode === "qa") {
+        qaControls.classList.remove("hidden");
+      } else {
+        qaControls.classList.add("hidden");
+      }
+    }
+
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+      window.lucide.createIcons();
+    }
+
+    if (triggerSearch && input) {
+      const q = (input.value || "").trim();
+      const minLen = validMode === "semantic" ? 3 : 2;
+      if (q.length >= minLen) {
+        this.executeGlobalSearch(q);
+      } else if (dropdown && !dropdown.classList.contains("hidden")) {
+        if (validMode === "semantic") {
+          if (resultsContainer) {
+            resultsContainer.classList.add("hidden");
+            resultsContainer.innerHTML = "";
+          }
+          this.renderRecentSearches();
+        } else {
+          if (qaAnswer) {
+            qaAnswer.classList.add("hidden");
+            qaAnswer.innerHTML = "";
+          }
+          this.renderQAGaps();
+        }
+      }
+    }
+  },
+
+  // Sanitización de Query (Blindaje Prompt 023 / 027: Input Inerte)
+  sanitizeSearchQuery(rawQuery) {
+    if (typeof rawQuery !== "string") {
+      return { clean: "", truncated: false };
+    }
+
+    let truncated = false;
+    let text = rawQuery;
+    if (text.length > 200) {
+      text = text.slice(0, 200);
+      truncated = true;
+    }
+
+    // Purgar caracteres de control, nulos y zero-width
+    text = text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "");
+    text = text.replace(/[\u200B-\u200D\uFEFF\u2028\u2029]/g, "");
+
+    const clean = text.trim();
+    return { clean, truncated };
+  },
+
+  // Gestión de Historial de Búsquedas (localStorage local)
+  getRecentSearches() {
+    try {
+      const raw = localStorage.getItem("vault_recent_searches");
+      const parsed = JSON.parse(raw || "[]");
+      return Array.isArray(parsed) ? parsed.filter(x => typeof x === "string" && x.trim().length > 0).slice(0, 10) : [];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  saveRecentSearch(query) {
+    const q = (query || "").trim();
+    if (q.length < 3) return;
+    let list = this.getRecentSearches();
+    list = list.filter(item => item.toLowerCase() !== q.toLowerCase());
+    list.unshift(q);
+    if (list.length > 10) list = list.slice(0, 10);
+    try {
+      localStorage.setItem("vault_recent_searches", JSON.stringify(list));
+    } catch (e) {}
+  },
+
+  clearRecentSearches() {
+    try {
+      localStorage.removeItem("vault_recent_searches");
+    } catch (e) {}
+    const historyContainer = document.getElementById("vault-search-history");
+    if (historyContainer) historyContainer.classList.add("hidden");
+  },
+
+  renderRecentSearches() {
+    const historyContainer = document.getElementById("vault-search-history");
+    const historyItems = document.getElementById("vault-history-items");
+    const input = document.getElementById("global-search-input");
+    const resultsContainer = document.getElementById("vault-search-results");
+
+    if (!historyContainer || !historyItems) return;
+    if (input && input.value.trim().length >= 3) {
+      historyContainer.classList.add("hidden");
+      return;
+    }
+
+    const list = this.getRecentSearches();
+    if (list.length === 0) {
+      historyContainer.classList.add("hidden");
+      return;
+    }
+
+    const safeEsc = typeof SecurityShield !== "undefined" && typeof SecurityShield.escapeHtml === "function"
+      ? SecurityShield.escapeHtml
+      : (s) => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+    historyItems.innerHTML = list.map(item => `
+      <button type="button" class="vault-history-chip" data-search="${safeEsc(item)}" title="Buscar: ${safeEsc(item)}">
+        ${safeEsc(item)}
+      </button>
+    `).join("");
+
+    historyItems.querySelectorAll(".vault-history-chip").forEach(chip => {
+      chip.addEventListener("click", () => {
+        const s = chip.getAttribute("data-search");
+        if (s && input) {
+          input.value = s;
+          const clearBtn = document.getElementById("vault-search-clear");
+          if (clearBtn) clearBtn.classList.remove("hidden");
+          historyContainer.classList.add("hidden");
+          this.executeGlobalSearch(s);
+        }
+      });
+    });
+
+    historyContainer.classList.remove("hidden");
+    if (resultsContainer) resultsContainer.classList.add("hidden");
+  },
+
+  // Población dinámica de bloques/capítulos ordenados por min indexCode
+  updateChapterOptions() {
+    const chapterSelect = document.getElementById("vault-filter-chapter");
+    if (!chapterSelect) return;
+
+    const allTopics = (StorageService && StorageService.getData && StorageService.getData().topics) ||
+                      (typeof INITIAL_DATA !== "undefined" && INITIAL_DATA.topics) || [];
+    
+    const subject = this.selectedSubject || "all";
+    const filtered = subject === "all" ? allTopics : allTopics.filter(t => t.subject === subject);
+    
+    const chapterMap = new Map();
+    filtered.forEach(t => {
+      const chapNum = t.chapterNumber || 1;
+      const chapTitle = t.chapterTitle || `${chapNum}. Capítulo`;
+      if (!chapterMap.has(chapTitle)) {
+        chapterMap.set(chapTitle, { num: chapNum, topics: [] });
+      }
+      chapterMap.get(chapTitle).topics.push(t);
+    });
+
+    const parseIdx = (c) => {
+      const parts = (c || "").split(".").map(p => parseInt(p, 10) || 0);
+      return (parts[0] || 0) * 1000 + (parts[1] || 0);
+    };
+
+    const sortedChapters = Array.from(chapterMap.entries()).sort((a, b) => {
+      const minA = Math.min(...a[1].topics.map(t => parseIdx(t.indexCode || t.code)));
+      const minB = Math.min(...b[1].topics.map(t => parseIdx(t.indexCode || t.code)));
+      if (minA !== minB) return minA - minB;
+      return (a[1].num || 0) - (b[1].num || 0);
+    });
+
+    const safeEsc = typeof SecurityShield !== "undefined" && typeof SecurityShield.escapeHtml === "function"
+      ? SecurityShield.escapeHtml
+      : (s) => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+    let optionsHtml = `<option value="all">Todos los bloques</option>`;
+    sortedChapters.forEach(([chapTitle, data]) => {
+      optionsHtml += `<option value="${data.num}">Capítulo ${data.num}: ${safeEsc(chapTitle)}</option>`;
+    });
+    chapterSelect.innerHTML = optionsHtml;
+    chapterSelect.value = "all";
+    this.selectedChapter = "all";
+  },
+
+  // Renderizar panel de temas pendientes (huecos Q&A)
+  renderQAGaps() {
+    const gapsPanel = document.getElementById("qa-gaps-panel");
+    const gapsList = document.getElementById("qa-gaps-list");
+    const input = document.getElementById("global-search-input");
+    if (!gapsPanel || !gapsList || typeof QAComposer === "undefined" || typeof QAComposer.getUncoveredGaps !== "function") return;
+
+    const gaps = QAComposer.getUncoveredGaps();
+    if (!gaps || gaps.length === 0) {
+      gapsPanel.classList.add("hidden");
+      gapsList.innerHTML = "";
+      return;
+    }
+
+    const safeEsc = typeof SecurityShield !== "undefined" && typeof SecurityShield.escapeHtml === "function"
+      ? SecurityShield.escapeHtml
+      : (s) => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+    gapsPanel.classList.remove("hidden");
+    gapsList.innerHTML = gaps.map(g => `
+      <button type="button" class="qa-gap-chip" data-gap-query="${safeEsc(g.query)}" title="Volver a consultar tema pendiente">
+        <span class="qa-gap-text">${safeEsc(g.query)}</span>
+        ${g.count > 1 ? `<span class="qa-gap-count">&times;${g.count}</span>` : ""}
+        <span class="qa-gap-badge">${safeEsc(g.suggestedSubject || "Civil")}</span>
+      </button>
+    `).join("");
+
+    gapsList.querySelectorAll(".qa-gap-chip").forEach(chip => {
+      chip.addEventListener("click", () => {
+        const q = chip.dataset.gapQuery;
+        if (q && input) {
+          input.value = q;
+          const clearBtn = document.getElementById("vault-search-clear");
+          if (clearBtn) clearBtn.classList.remove("hidden");
+          this.executeGlobalSearch(q);
+        }
+      });
+    });
+  },
+
+  // Abrir primer resultado al pulsar Enter
   openFirstGlobalSearchResult() {
     if (typeof document === "undefined" || !document) return;
     const getEl = typeof document.getElementById === "function" ? (id) => document.getElementById(id) : () => null;
@@ -1910,11 +2377,15 @@ const App = {
     }
   },
 
+  // Ejecución unificada de búsqueda global (Semántico / Q&A)
   executeGlobalSearch(rawQuery) {
     if (typeof document === "undefined" || !document) return;
     const getEl = typeof document.getElementById === "function" ? (id) => document.getElementById(id) : () => null;
     const dropdown = getEl("search-results-dropdown");
     const input = getEl("global-search-input");
+    const historyContainer = getEl("vault-search-history");
+    const resultsContainer = getEl("vault-search-results");
+    const qaAnswer = getEl("qa-answer");
     if (!dropdown) return;
 
     // Rate limiting: máximo 1 ejecución por 150ms
@@ -1928,10 +2399,23 @@ const App = {
     }
     this.globalSearchLastExecutionTime = now;
 
-    const { clean, truncated } = this.sanitizeSearchQuery(rawQuery);
-    if (clean.length < 3) {
-      dropdown.classList.add("hidden");
-      dropdown.innerHTML = "";
+    const { clean } = this.sanitizeSearchQuery(rawQuery);
+    const minLen = this.globalSearchMode === "semantic" ? 3 : 2;
+
+    if (clean.length < minLen) {
+      if (this.globalSearchMode === "semantic") {
+        if (resultsContainer) {
+          resultsContainer.classList.add("hidden");
+          resultsContainer.innerHTML = "";
+        }
+        this.renderRecentSearches();
+      } else {
+        if (qaAnswer) {
+          qaAnswer.classList.add("hidden");
+          qaAnswer.innerHTML = "";
+        }
+        this.renderQAGaps();
+      }
       return;
     }
 
@@ -1942,16 +2426,26 @@ const App = {
 
     const safeEsc = typeof SecurityShield !== "undefined" && typeof SecurityShield.escapeHtml === "function"
       ? SecurityShield.escapeHtml
-      : escapeHTML;
+      : (typeof escapeHTML === "function" ? escapeHTML : (s) => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"));
 
     if (this.globalSearchMode === "semantic") {
-      // MODO SEMÁNTICO: delega en searchVault() (v7.22/v7.25)
-      let results = [];
-      if (typeof searchVault === "function") {
-        results = searchVault(clean, { limit: 8 });
+      if (historyContainer) historyContainer.classList.add("hidden");
+      this.saveRecentSearch(clean);
+
+      const searchOpts = { limit: 8 };
+      if (this.selectedSubject && this.selectedSubject !== "all") {
+        searchOpts.subject = this.selectedSubject;
+      }
+      if (this.selectedChapter && this.selectedChapter !== "all") {
+        searchOpts.chapterNumber = this.selectedChapter;
       }
 
-      // Casos prácticos complementarios (no-regresión del buscador previo)
+      let results = [];
+      if (typeof searchVault === "function") {
+        results = searchVault(clean, searchOpts);
+      }
+
+      // Casos prácticos complementarios
       const data = typeof StorageService !== "undefined" && StorageService.getData ? StorageService.getData() : {};
       const qLower = clean.toLowerCase();
       const matchedCases = (data.cases || []).filter(c =>
@@ -1960,13 +2454,16 @@ const App = {
         (c.methodology && c.methodology.legalBasis && c.methodology.legalBasis.some(b => b.toLowerCase().includes(qLower)))
       ).slice(0, 3);
 
+      if (!resultsContainer) return;
+
       if ((!results || results.length === 0) && matchedCases.length === 0) {
-        dropdown.innerHTML = `
+        resultsContainer.innerHTML = `
           <div class="search-dropdown-header">
             <span class="search-mode-badge mode-semantic"><i data-lucide="search"></i> Modo Semántico</span>
           </div>
           <div class="search-empty-state">Sin coincidencias en apuntes para "${safeEsc(clean)}"</div>
         `;
+        resultsContainer.classList.remove("hidden");
         dropdown.classList.remove("hidden");
         if (window.lucide && typeof window.lucide.createIcons === "function") {
           window.lucide.createIcons();
@@ -2015,10 +2512,11 @@ const App = {
         `;
       }
 
-      dropdown.innerHTML = html;
+      resultsContainer.innerHTML = html;
+      resultsContainer.classList.remove("hidden");
       dropdown.classList.remove("hidden");
 
-      dropdown.querySelectorAll('.search-result-item').forEach(item => {
+      resultsContainer.querySelectorAll('.search-result-item').forEach(item => {
         const handleClick = () => {
           const type = item.dataset.searchType;
           const id = item.dataset.id;
@@ -2046,49 +2544,59 @@ const App = {
       });
 
     } else {
-      // MODO Q&A: delega en QAComposer.composeAnswer() (v7.27)
+      // MODO Q&A: delega en QAComposer.composeAnswer()
       if (typeof QAComposer === "undefined" || typeof QAComposer.composeAnswer !== "function") {
-        dropdown.innerHTML = `
-          <div class="search-dropdown-header">
-            <span class="search-mode-badge mode-qa"><i data-lucide="help-circle"></i> Modo Q&A</span>
-          </div>
-          <div class="search-empty-state">Motor Q&A no disponible</div>
-        `;
+        if (qaAnswer) {
+          qaAnswer.innerHTML = `
+            <div class="search-dropdown-header">
+              <span class="search-mode-badge mode-qa"><i data-lucide="help-circle"></i> Modo Q&A</span>
+            </div>
+            <div class="search-empty-state">Motor Q&A no disponible</div>
+          `;
+          qaAnswer.classList.remove("hidden");
+        }
         dropdown.classList.remove("hidden");
         return;
       }
 
-      const answer = QAComposer.composeAnswer(clean, { mode: 'definicion' });
+      const answer = QAComposer.composeAnswer(clean, {
+        mode: this.currentQAMode || 'definicion'
+      });
 
-      let html = `
-        <div class="search-dropdown-header">
-          <span class="search-mode-badge mode-qa"><i data-lucide="help-circle"></i> Q&A Extractivo · Citas Verbatim</span>
-          <span style="font-size:0.65rem; color:var(--text-muted); text-transform:none;">Enter salta a la cita</span>
-        </div>
-        <div class="search-qa-wrapper">
-          ${answer.html}
-        </div>
-      `;
+      if (qaAnswer) {
+        qaAnswer.innerHTML = `
+          <div class="search-dropdown-header">
+            <span class="search-mode-badge mode-qa"><i data-lucide="help-circle"></i> Q&A Extractivo · Citas Verbatim</span>
+            <span style="font-size:0.65rem; color:var(--text-muted); text-transform:none;">Enter salta a la cita</span>
+          </div>
+          <div class="search-qa-wrapper">
+            ${answer.html}
+          </div>
+        `;
+        qaAnswer.classList.remove("hidden");
+      }
 
-      dropdown.innerHTML = html;
       dropdown.classList.remove("hidden");
 
       if (answer.empty && answer.reason === 'no_coverage') {
         QAComposer.recordUncoveredGap(clean, answer.suggestedSubject);
       }
+      this.renderQAGaps();
 
-      dropdown.querySelectorAll(".qa-action-jump-btn").forEach(btn => {
-        btn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          const topicId = btn.dataset.jumpTopic;
-          const snippet = btn.dataset.snippet || "";
-          if (topicId) {
-            dropdown.classList.add("hidden");
-            if (input) input.value = "";
-            this.openTopic(topicId, { highlight: snippet });
-          }
+      if (qaAnswer) {
+        qaAnswer.querySelectorAll(".qa-action-jump-btn").forEach(btn => {
+          btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const topicId = btn.dataset.jumpTopic;
+            const snippet = btn.dataset.snippet || "";
+            if (topicId) {
+              dropdown.classList.add("hidden");
+              if (input) input.value = "";
+              this.openTopic(topicId, { highlight: snippet });
+            }
+          });
         });
-      });
+      }
     }
 
     if (window.lucide && typeof window.lucide.createIcons === "function") {
@@ -2105,418 +2613,13 @@ const App = {
     }
   },
 
-  // 5.1 VAULT DE CONOCIMIENTO — BÚSQUEDA SEMÁNTICA ESTÁTICA + FILTROS E HISTORIAL (v7.22 / v7.25, Prompts 017 y 020)
+  // Stubs de compatibilidad hacia atrás
   setupVaultSearch() {
-    const input = document.getElementById("vault-search-input");
-    const resultsContainer = document.getElementById("vault-search-results");
-    const clearBtn = document.getElementById("vault-search-clear");
-    const pillsContainer = document.getElementById("vault-filter-pills");
-    const chapterSelect = document.getElementById("vault-filter-chapter");
-    const historyContainer = document.getElementById("vault-search-history");
-    const historyItems = document.getElementById("vault-history-items");
-    const clearHistoryBtn = document.getElementById("vault-history-clear");
-
-    if (!input || !resultsContainer) return;
-
-    let debounceTimer = null;
-    let selectedSubject = "all";
-    let selectedChapter = "all";
-
-    const escapeFn = (typeof SecurityShield !== "undefined" && SecurityShield.escapeHtml)
-      ? SecurityShield.escapeHtml
-      : (s) => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-
-    // Gestión del Historial Reciente (localStorage 100% local, no exportable)
-    const RECENT_KEY = "vault_recent_searches";
-    const getRecentSearches = () => {
-      try {
-        const raw = localStorage.getItem(RECENT_KEY);
-        const parsed = JSON.parse(raw || "[]");
-        return Array.isArray(parsed) ? parsed.filter(x => typeof x === "string" && x.trim().length > 0).slice(0, 10) : [];
-      } catch (e) {
-        return [];
-      }
-    };
-
-    const saveRecentSearch = (query) => {
-      const q = (query || "").trim();
-      if (q.length < 3) return;
-      let list = getRecentSearches();
-      list = list.filter(item => item.toLowerCase() !== q.toLowerCase());
-      list.unshift(q);
-      if (list.length > 10) list = list.slice(0, 10);
-      try {
-        localStorage.setItem(RECENT_KEY, JSON.stringify(list));
-      } catch (e) {}
-    };
-
-    const clearRecentSearches = () => {
-      try {
-        localStorage.removeItem(RECENT_KEY);
-      } catch (e) {}
-      if (historyContainer) historyContainer.classList.add("hidden");
-    };
-
-    const renderRecentSearches = () => {
-      if (!historyContainer || !historyItems) return;
-      if (input.value.trim().length >= 3) {
-        historyContainer.classList.add("hidden");
-        return;
-      }
-      const list = getRecentSearches();
-      if (list.length === 0) {
-        historyContainer.classList.add("hidden");
-        return;
-      }
-
-      historyItems.innerHTML = list.map(item => `
-        <button type="button" class="vault-history-chip" data-search="${escapeFn(item)}" title="Buscar: ${escapeFn(item)}">
-          ${escapeFn(item)}
-        </button>
-      `).join("");
-
-      historyItems.querySelectorAll(".vault-history-chip").forEach(chip => {
-        chip.addEventListener("click", () => {
-          const s = chip.getAttribute("data-search");
-          if (s) {
-            input.value = s;
-            if (clearBtn) clearBtn.classList.remove("hidden");
-            historyContainer.classList.add("hidden");
-            performSearch(s);
-          }
-        });
-      });
-
-      historyContainer.classList.remove("hidden");
-      resultsContainer.classList.add("hidden");
-    };
-
-    // Población dinámica de bloques/capítulos ordenados por min indexCode (v7.19.1)
-    const updateChapterOptions = () => {
-      if (!chapterSelect) return;
-      const allTopics = (StorageService && StorageService.getData && StorageService.getData().topics) ||
-                        (typeof INITIAL_DATA !== "undefined" && INITIAL_DATA.topics) || [];
-      
-      const filtered = selectedSubject === "all" ? allTopics : allTopics.filter(t => t.subject === selectedSubject);
-      
-      const chapterMap = new Map();
-      filtered.forEach(t => {
-        const chapNum = t.chapterNumber || 1;
-        const chapTitle = t.chapterTitle || `${chapNum}. Capítulo`;
-        if (!chapterMap.has(chapTitle)) {
-          chapterMap.set(chapTitle, { num: chapNum, topics: [] });
-        }
-        chapterMap.get(chapTitle).topics.push(t);
-      });
-
-      const parseIdx = (c) => {
-        const parts = (c || "").split(".").map(p => parseInt(p, 10) || 0);
-        return (parts[0] || 0) * 1000 + (parts[1] || 0);
-      };
-
-      const sortedChapters = Array.from(chapterMap.entries()).sort((a, b) => {
-        const minA = Math.min(...a[1].topics.map(t => parseIdx(t.indexCode || t.code)));
-        const minB = Math.min(...b[1].topics.map(t => parseIdx(t.indexCode || t.code)));
-        if (minA !== minB) return minA - minB;
-        return (a[1].num || 0) - (b[1].num || 0);
-      });
-
-      let optionsHtml = `<option value="all">Todos los bloques</option>`;
-      sortedChapters.forEach(([chapTitle, data]) => {
-        optionsHtml += `<option value="${data.num}">Capítulo ${data.num}: ${escapeFn(chapTitle)}</option>`;
-      });
-      chapterSelect.innerHTML = optionsHtml;
-      chapterSelect.value = "all";
-      selectedChapter = "all";
-    };
-
-    // Ejecución de la búsqueda con filtros
-    const performSearch = (query) => {
-      const q = (query || "").trim();
-      if (q.length < 3) {
-        resultsContainer.classList.add("hidden");
-        resultsContainer.innerHTML = "";
-        if (clearBtn) clearBtn.classList.add("hidden");
-        if (historyContainer && input === document.activeElement) renderRecentSearches();
-        return;
-      }
-
-      if (clearBtn) clearBtn.classList.remove("hidden");
-      if (historyContainer) historyContainer.classList.add("hidden");
-
-      if (typeof searchVault !== "function") {
-        resultsContainer.innerHTML = `<div class="vault-search-empty">Motor de búsqueda no disponible</div>`;
-        resultsContainer.classList.remove("hidden");
-        return;
-      }
-
-      const searchOpts = {
-        limit: 8
-      };
-      if (selectedSubject !== "all") {
-        searchOpts.subject = selectedSubject;
-      }
-      if (selectedChapter !== "all") {
-        searchOpts.chapterNumber = selectedChapter;
-      }
-
-      const results = searchVault(q, searchOpts);
-
-      if (!results || results.length === 0) {
-        resultsContainer.innerHTML = `<div class="vault-search-empty">Sin coincidencias en apuntes</div>`;
-        resultsContainer.classList.remove("hidden");
-        return;
-      }
-
-      // Guardar en búsquedas recientes
-      saveRecentSearch(q);
-
-      resultsContainer.innerHTML = results.map(res => `
-        <div class="vault-search-result-item" data-topic-id="${escapeFn(res.id)}" tabindex="0" role="button" aria-label="Abrir cédula ${escapeFn(res.indexCode)} ${escapeFn(res.title)}">
-          <div class="vault-result-header">
-            <span class="vault-result-code">§ ${escapeFn(res.indexCode || "")}</span>
-            <span class="vault-result-title">${escapeFn(res.title || "")}</span>
-          </div>
-          <div class="vault-result-source">${escapeFn(res.sourceFile || "")}</div>
-          <div class="vault-result-snippet">${res.hasPrefixEllipsis ? "…" : ""}${res.highlightedSnippet || escapeFn(res.snippet || "")}${res.hasSuffixEllipsis ? "…" : ""}</div>
-        </div>
-      `).join("");
-
-      resultsContainer.classList.remove("hidden");
-
-      // Clic y Enter en resultados del Vault
-      resultsContainer.querySelectorAll(".vault-search-result-item").forEach(item => {
-        const handleOpen = () => {
-          const tid = item.dataset.topicId;
-          if (tid) {
-            this.openTopic(tid);
-            // En móvil, si la barra lateral está abierta como drawer, cerrarla
-            if (window.innerWidth <= 1024) {
-              const sidebar = document.getElementById("app-sidebar");
-              if (sidebar && !sidebar.classList.contains("collapsed")) {
-                this.toggleSidebar();
-              }
-            }
-          }
-        };
-
-        item.addEventListener("click", handleOpen);
-        item.addEventListener("keydown", (e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            handleOpen();
-          }
-        });
-      });
-    };
-
-    // Eventos de entrada en el input con debounce
-    input.addEventListener("input", (e) => {
-      clearTimeout(debounceTimer);
-      const val = e.target.value;
-      if (val.trim().length < 3) {
-        resultsContainer.classList.add("hidden");
-        resultsContainer.innerHTML = "";
-        if (clearBtn) clearBtn.classList.add("hidden");
-        renderRecentSearches();
-        return;
-      }
-      if (clearBtn) clearBtn.classList.remove("hidden");
-      if (historyContainer) historyContainer.classList.add("hidden");
-      debounceTimer = setTimeout(() => {
-        performSearch(val);
-      }, 200);
-    });
-
-    input.addEventListener("focus", () => {
-      if (input.value.trim().length < 3) {
-        renderRecentSearches();
-      }
-    });
-
-    if (clearBtn) {
-      clearBtn.addEventListener("click", () => {
-        input.value = "";
-        resultsContainer.classList.add("hidden");
-        resultsContainer.innerHTML = "";
-        clearBtn.classList.add("hidden");
-        renderRecentSearches();
-        input.focus();
-      });
-    }
-
-    if (clearHistoryBtn) {
-      clearHistoryBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        clearRecentSearches();
-      });
-    }
-
-    // Interacción con pills de disciplina
-    if (pillsContainer) {
-      pillsContainer.querySelectorAll(".vault-filter-pill").forEach(pill => {
-        pill.addEventListener("click", () => {
-          pillsContainer.querySelectorAll(".vault-filter-pill").forEach(p => p.classList.remove("active"));
-          pill.classList.add("active");
-          selectedSubject = pill.dataset.subject || "all";
-          updateChapterOptions();
-          if (input.value.trim().length >= 3) {
-            performSearch(input.value);
-          }
-        });
-      });
-    }
-
-    // Interacción con selector de capítulo
-    if (chapterSelect) {
-      chapterSelect.addEventListener("change", () => {
-        selectedChapter = chapterSelect.value;
-        if (input.value.trim().length >= 3) {
-          performSearch(input.value);
-        }
-      });
-    }
-
-    // Inicializar opciones de bloques temáticos
-    updateChapterOptions();
+    // Absorvido por setupGlobalSearch()
   },
 
-  // 5.1 Q&A EXTRACTIVO PURO: PREGUNTA -> CITAS VERBATIM (v7.27, PROMPT 021)
   setupQAExtractor() {
-    const qaContainer = document.getElementById("qa-container");
-    if (!qaContainer) return;
-
-    const qaInput = document.getElementById("qa-ask-input");
-    const qaButton = document.getElementById("qa-ask-button");
-    const qaAnswer = document.getElementById("qa-answer");
-    const modePills = document.querySelectorAll("#qa-mode-pills .qa-mode-pill");
-    const gapsPanel = document.getElementById("qa-gaps-panel");
-    const gapsList = document.getElementById("qa-gaps-list");
-    const gapsClearBtn = document.getElementById("qa-gaps-clear");
-
-    this.currentQAMode = 'definicion';
-
-    const escapeFn = (str) => {
-      if (typeof SecurityShield !== "undefined" && typeof SecurityShield.escapeHtml === "function") {
-        return SecurityShield.escapeHtml(str);
-      }
-      if (typeof QAComposer !== "undefined" && typeof QAComposer.escapeHtml === "function") {
-        return QAComposer.escapeHtml(str);
-      }
-      return String(str || "").replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
-    };
-
-    // Renderizar panel de temas pendientes (huecos sin cobertura en apuntes)
-    const renderGaps = () => {
-      if (!gapsPanel || !gapsList || typeof QAComposer === "undefined") return;
-      const gaps = QAComposer.getUncoveredGaps();
-      if (!gaps || gaps.length === 0) {
-        gapsPanel.classList.add("hidden");
-        gapsList.innerHTML = "";
-        return;
-      }
-      gapsPanel.classList.remove("hidden");
-      gapsList.innerHTML = gaps.map(g => `
-        <button type="button" class="qa-gap-chip" data-gap-query="${escapeFn(g.query)}" title="Volver a consultar o planificar incorporación de apunte">
-          <span class="qa-gap-text">${escapeFn(g.query)}</span>
-          ${g.count > 1 ? `<span class="qa-gap-count">&times;${g.count}</span>` : ''}
-          <span class="qa-gap-badge">${escapeFn(g.suggestedSubject || 'Civil')}</span>
-        </button>
-      `).join("");
-
-      gapsList.querySelectorAll(".qa-gap-chip").forEach(chip => {
-        chip.addEventListener("click", () => {
-          const q = chip.dataset.gapQuery;
-          if (q && qaInput) {
-            qaInput.value = q;
-            executeQA();
-          }
-        });
-      });
-    };
-
-    // Limpiar ranking de huecos
-    if (gapsClearBtn) {
-      gapsClearBtn.addEventListener("click", () => {
-        if (typeof QAComposer !== "undefined") {
-          QAComposer.clearUncoveredGaps();
-        }
-        renderGaps();
-      });
-    }
-
-    // Ejecutar composición extractiva
-    const executeQA = () => {
-      if (!qaInput || !qaAnswer || typeof QAComposer === "undefined") return;
-      const q = (qaInput.value || "").trim();
-      if (q.length < 2) {
-        qaAnswer.classList.add("hidden");
-        qaAnswer.innerHTML = "";
-        return;
-      }
-
-      const answer = QAComposer.composeAnswer(q, {
-        mode: this.currentQAMode || 'definicion'
-      });
-
-      qaAnswer.innerHTML = answer.html;
-      qaAnswer.classList.remove("hidden");
-
-      if (window.lucide && typeof window.lucide.createIcons === "function") {
-        window.lucide.createIcons();
-      }
-
-      // Si no hubo cobertura, registrar la consulta en el ranking de huecos
-      if (answer.empty && answer.reason === 'no_coverage') {
-        QAComposer.recordUncoveredGap(q, answer.suggestedSubject);
-        renderGaps();
-      }
-
-      // Conectar botones de salto al apunte con highlight
-      qaAnswer.querySelectorAll(".qa-action-jump-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const topicId = btn.dataset.jumpTopic;
-          const snippet = btn.dataset.snippet;
-          if (topicId) {
-            this.openTopic(topicId, { highlight: snippet });
-            if (window.innerWidth <= 1024) {
-              const sidebar = document.getElementById("app-sidebar");
-              if (sidebar && !sidebar.classList.contains("collapsed")) {
-                this.toggleSidebar();
-              }
-            }
-          }
-        });
-      });
-    };
-
-    // Selección de modo
-    modePills.forEach(pill => {
-      pill.addEventListener("click", () => {
-        modePills.forEach(p => p.classList.remove("active"));
-        pill.classList.add("active");
-        this.currentQAMode = pill.dataset.mode || 'definicion';
-        if (qaInput && qaInput.value.trim().length >= 2) {
-          executeQA();
-        }
-      });
-    });
-
-    // Eventos del input y botón
-    if (qaButton) {
-      qaButton.addEventListener("click", executeQA);
-    }
-    if (qaInput) {
-      qaInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          executeQA();
-        }
-      });
-    }
-
-    // Inicializar visualización de huecos existentes
-    renderGaps();
+    // Absorvido por setupGlobalSearch()
   },
 
   // 6. MODAL DE IMPORTACIÓN / EXPORTACIÓN NOTEBOOKLM
@@ -3092,12 +3195,83 @@ const App = {
       this.openImportModal("paste");
     });
 
+    // Input de cantidad en lote (1 a 50)
+    const batchCountInput = document.getElementById("admin-batch-count");
+    const customCodeInput = document.getElementById("admin-custom-code");
+    const btnGenLabel = document.getElementById("btn-generate-code-label");
+
+    batchCountInput?.addEventListener("input", () => {
+      const val = parseInt(batchCountInput.value) || 1;
+      if (val > 1) {
+        if (btnGenLabel) btnGenLabel.textContent = `Generar Lote de ${val} Códigos`;
+        if (customCodeInput) {
+          customCodeInput.disabled = true;
+          customCodeInput.placeholder = "(Autogenerado para lotes)";
+        }
+      } else {
+        if (btnGenLabel) btnGenLabel.textContent = "Generar Código de Licencia";
+        if (customCodeInput) {
+          customCodeInput.disabled = false;
+          customCodeInput.placeholder = "Ej: TEST-GRADO-001 (o dejar vacío para autogenerar)";
+        }
+      }
+    });
+
+    // Filtro de tabla de códigos
+    const filterSelect = document.getElementById("admin-codes-filter-status");
+    filterSelect?.addEventListener("change", () => {
+      this.renderAdminCodesTable();
+    });
+
+    // Purgar stock ocioso con dry-run y confirmación
+    const btnPurge = document.getElementById("btn-admin-purge-codes");
+    btnPurge?.addEventListener("click", async () => {
+      if (LicenseService.isDocente()) {
+        this.showToast("Modo Presentación Docente: sin permisos de gestión.", "warning");
+        return;
+      }
+      this.showToast("Analizando códigos ociosos elegibles...", "info");
+      const preview = await LicenseService.purgeUnusedCodes({ dryRun: true });
+      if (!preview || !preview.success) {
+        this.showToast(preview?.error || "Error al consultar purga de códigos.", "error");
+        return;
+      }
+      if (preview.count === 0) {
+        this.showToast("No hay códigos ociosos para purgar (todos tienen usos, están preasignados o vinculados).", "info");
+        return;
+      }
+      const sample = preview.codes.slice(0, 5).join(", ");
+      const more = preview.count > 5 ? ` y ${preview.count - 5} más` : "";
+      const ok = confirm(`¿Purgar permanentemente ${preview.count} código(s) ociosos del stock?\n\nCandidatos: ${sample}${more}\n\nLos códigos pre-asignados a emails o vinculados a cuentas NO serán tocados.`);
+      if (!ok) return;
+
+      const res = await LicenseService.purgeUnusedCodes({ dryRun: false });
+      if (res && res.success) {
+        await this.renderAdminCodesTable();
+        this.showToast(`Se purgaron ${res.count} código(s) ociosos del stock.`, "success");
+      } else {
+        this.showToast(res?.error || "Error al purgar códigos.", "error");
+      }
+    });
+
     btnGenerate?.addEventListener("click", async () => {
       // Modo Presentación Docente (v7.16): la generación de códigos está deshabilitada.
       if (LicenseService.isDocente()) {
         this.showToast("Modo Presentación Docente: la generación de códigos está deshabilitada.", "warning");
         return;
       }
+
+      const rawCount = document.getElementById("admin-batch-count")?.value;
+      const count = parseInt(rawCount);
+      if (isNaN(count) || count < 1) {
+        this.showToast("La cantidad a generar debe ser de al menos 1 código.", "warning");
+        return;
+      }
+      if (count > 50) {
+        this.showToast("El tamaño máximo permitido para un lote es de 50 códigos.", "warning");
+        return;
+      }
+
       const studentName = document.getElementById("admin-student-name")?.value.trim() || "Alumno";
       const studentEmail = document.getElementById("admin-student-email")?.value.trim() || "";
       const customCode = document.getElementById("admin-custom-code")?.value.trim() || "";
@@ -3105,21 +3279,50 @@ const App = {
       const days = document.getElementById("admin-days-select")?.value;
       const canManageNotes = !!document.getElementById("admin-grant-notes-perm")?.checked;
 
-      const res = await LicenseService.generateCode({ studentName, studentEmail, scope, days, canManageNotes, customCode });
-      if (!res || !res.success) {
-        this.showToast(res?.error || "Error al generar código de licencia", "error");
-        return;
+      if (count > 1) {
+        const ok = confirm(`¿Deseas generar un lote de ${count} códigos de acceso de forma atómica?`);
+        if (!ok) return;
+
+        const res = await LicenseService.generateBatchCodes({
+          count,
+          studentName,
+          studentEmail,
+          scope,
+          days,
+          canManageNotes
+        });
+
+        if (!res || !res.success) {
+          this.showToast(res?.error || "Error al generar lote de códigos", "error");
+          return;
+        }
+
+        await this.renderAdminCodesTable();
+        this.showToast(`¡Lote de ${res.count} códigos generado exitosamente!`, "success");
+      } else {
+        const res = await LicenseService.generateCode({ studentName, studentEmail, scope, days, canManageNotes, customCode });
+        if (!res || !res.success) {
+          this.showToast(res?.error || "Error al generar código de licencia", "error");
+          return;
+        }
+        await this.renderAdminCodesTable();
+        const roleMsg = canManageNotes ? " (con permiso de gestor de apuntes)" : "";
+        this.showToast(`¡Código ${res.code} generado${roleMsg}! Cópialo para enviárselo a tu alumno.`, "success");
       }
-      await this.renderAdminCodesTable();
-      const roleMsg = canManageNotes ? " (con permiso de gestor de apuntes)" : "";
-      this.showToast(`¡Código ${res.code} generado${roleMsg}! Cópialo para enviárselo a tu alumno.`, "success");
+
       document.getElementById("admin-student-name").value = "";
       const emailInput = document.getElementById("admin-student-email");
       if (emailInput) emailInput.value = "";
       const customInput = document.getElementById("admin-custom-code");
-      if (customInput) customInput.value = "";
+      if (customInput) {
+        customInput.value = "";
+        customInput.disabled = false;
+      }
       const permCheck = document.getElementById("admin-grant-notes-perm");
       if (permCheck) permCheck.checked = false;
+      const batchInput = document.getElementById("admin-batch-count");
+      if (batchInput) batchInput.value = "1";
+      if (btnGenLabel) btnGenLabel.textContent = "Generar Código de Licencia";
     });
   },
 
@@ -3190,15 +3393,38 @@ const App = {
     const tbody = document.getElementById("admin-codes-tbody");
     if (!tbody) return;
 
-    const list = await LicenseService.fetchAdminCodes();
+    const filter = document.getElementById("admin-codes-filter-status")?.value || "all";
+    let list = await LicenseService.fetchAdminCodes();
+
+    if (filter === "pending") {
+      list = list.filter(c => (c.label || c.studentName || "").toUpperCase().includes("[PENDIENTE]"));
+    } else if (filter === "delivered") {
+      list = list.filter(c => (c.label || c.studentName || "").toUpperCase().includes("[ENTREGADO]"));
+    } else if (filter === "unused") {
+      list = list.filter(c => c.uses === 0 && !c.revoked);
+    }
+
     tbody.innerHTML = list.map(c => {
       const emailDisplay = c.linkedEmail || c.assignedEmail || '';
       const isConvalidated = (c.uses > 0 && c.linkedEmail);
+      const rawLabel = c.label || c.studentName || 'Sin asignar';
+      const upperLabel = rawLabel.toUpperCase();
+      let statusBadge = '';
+      if (upperLabel.includes("[PENDIENTE]")) {
+        statusBadge = `<button class="code-status-badge badge-pendiente" data-toggle-status="${escapeHTML(c.code)}" data-next="ENTREGADO" title="Click para marcar como [ENTREGADO]">⏳ Pendiente</button>`;
+      } else if (upperLabel.includes("[ENTREGADO]")) {
+        statusBadge = `<button class="code-status-badge badge-entregado" data-toggle-status="${escapeHTML(c.code)}" data-next="PENDIENTE" title="Click para marcar como [PENDIENTE]">✓ Entregado</button>`;
+      } else {
+        statusBadge = `<button class="code-status-badge badge-neutral" data-toggle-status="${escapeHTML(c.code)}" data-next="PENDIENTE" title="Click para marcar como [PENDIENTE]">+ Estado</button>`;
+      }
+
+      const cleanDisplayName = rawLabel.replace(/^\[(PENDIENTE|ENTREGADO)\]\s*/i, "");
+
       return `
       <tr style="${c.revoked ? 'opacity: 0.5; text-decoration: line-through;' : ''}">
         <td><span class="code-pill">${escapeHTML(c.code)}</span></td>
         <td>
-          ${escapeHTML(c.studentName || 'Sin asignar')}
+          ${escapeHTML(cleanDisplayName || 'Sin asignar')}
           ${c.canManageNotes ? '<span class="badge-count" style="font-size: 0.65rem; margin-left: 4px; background: rgba(16, 185, 129, 0.2); color: #10b981;">Gestor Apuntes</span>' : ''}
         </td>
         <td>
@@ -3218,6 +3444,7 @@ const App = {
             </span>
           `}
         </td>
+        <td>${statusBadge}</td>
         <td><span class="badge-count" style="font-size: 0.65rem;">${c.scope}</span></td>
         <td>${c.days === 0 ? 'Perpetua' : `${c.days} días`}</td>
         <td>
@@ -3247,6 +3474,28 @@ const App = {
         const code = btn.dataset.copyCode;
         navigator.clipboard.writeText(code);
         this.showToast(`Código ${code} copiado al portapapeles`, "info");
+      });
+    });
+
+    // Eventos de alternancia de estado ([PENDIENTE] <-> [ENTREGADO])
+    tbody.querySelectorAll('[data-toggle-status]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (LicenseService.isDocente()) {
+          this.showToast("Modo Presentación Docente: sin permisos de gestión.", "warning");
+          return;
+        }
+        const code = btn.dataset.toggleStatus;
+        const nextStatus = btn.dataset.next;
+        const currentItem = list.find(c => c.code === code);
+        const baseName = (currentItem?.label || currentItem?.studentName || "").replace(/^\[(PENDIENTE|ENTREGADO)\]\s*/i, "").trim();
+        const newLabel = `[${nextStatus}] ${baseName || "Alumno"}`.trim();
+        const res = await LicenseService.updateCodeLabel(code, newLabel);
+        if (res && res.success) {
+          await this.renderAdminCodesTable();
+          this.showToast(`Estado de ${code} actualizado a [${nextStatus}].`, "success");
+        } else {
+          this.showToast(res?.error || "Error al actualizar estado.", "error");
+        }
       });
     });
 

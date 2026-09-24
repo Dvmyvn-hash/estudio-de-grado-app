@@ -327,6 +327,156 @@ def create_access_code(
     }
 
 
+def generate_random_access_code(prefix: str = "GRADO-FULL") -> str:
+    """Genera una cadena alfanumérica aleatoria para un código de acceso (sin caracteres ambiguos)."""
+    clean_prefix = normalize_access_code(prefix) or "GRADO-FULL"
+    chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+    part1 = "".join(secrets.choice(chars) for _ in range(4))
+    part2 = "".join(secrets.choice(chars) for _ in range(4))
+    return f"{clean_prefix}-{part1}-{part2}"
+
+
+def create_access_code_batch(
+    count: int,
+    prefix: str = "GRADO-FULL",
+    label: Optional[str] = None,
+    max_uses: int = 1,
+    expires_at: Optional[int] = None,
+    assigned_email: Optional[str] = None,
+    db_path: Optional[Path] = None
+) -> List[Dict[str, Any]]:
+    """
+    Crea atómicamente un lote de códigos de acceso (1 <= count <= 50) en una sola transacción.
+    Todo o nada: si falla cualquier inserción, se revierte la transacción completa.
+    """
+    if not isinstance(count, int) or count < 1 or count > 50:
+        raise ValueError("El lote debe contener entre 1 y 50 códigos.")
+
+    init_db(db_path)
+    clean_prefix = normalize_access_code(prefix) or "GRADO-FULL"
+    clean_label = label or "Lote-General"
+    clean_email = str(assigned_email).strip().lower() if assigned_email and str(assigned_email).strip() else None
+    now_ms = int(time.time() * 1000)
+
+    results: List[Dict[str, Any]] = []
+
+    with get_db_connection(db_path) as conn:
+        cursor = conn.cursor()
+        for _ in range(count):
+            code = None
+            for _ in range(10):
+                candidate = generate_random_access_code(clean_prefix)
+                cursor.execute("SELECT 1 FROM access_codes WHERE code = ?", (candidate,))
+                if not cursor.fetchone():
+                    code = candidate
+                    break
+            if not code:
+                raise RuntimeError("No se pudo generar un código único tras múltiples reintentos.")
+
+            cursor.execute(
+                """
+                INSERT INTO access_codes (code, label, max_uses, times_used, active, expires_at, created_at, assigned_email)
+                VALUES (?, ?, ?, 0, 1, ?, ?, ?)
+                """,
+                (code, clean_label, max_uses, expires_at, now_ms, clean_email)
+            )
+            results.append({
+                "code": code,
+                "label": clean_label,
+                "max_uses": max_uses,
+                "times_used": 0,
+                "active": 1,
+                "expires_at": expires_at,
+                "created_at": now_ms,
+                "assigned_email": clean_email,
+                "associated_email": clean_email or ""
+            })
+        conn.commit()
+
+    return results
+
+
+def purge_unused_codes(
+    older_than_days: Optional[int] = None,
+    prefix: Optional[str] = None,
+    dry_run: bool = True,
+    db_path: Optional[Path] = None
+) -> Tuple[int, List[str]]:
+    """
+    Purga stock de códigos ociosos.
+    Criterios de elegibilidad estrictos (cumplir TODOS a la vez):
+    1. times_used == 0 (sin uso)
+    2. active == 1 (los códigos revocados active=0 quedan protegidos para auditoría)
+    3. assigned_email IS NULL OR assigned_email == '' (códigos pre-asignados quedan protegidos)
+    4. code NOT IN (SELECT access_code FROM users WHERE access_code IS NOT NULL) (sin usuario vinculado)
+    5. code NOT IN (SELECT code FROM access_code_usages) (sin registro en el libro mayor de usos)
+    Parámetros opcionales:
+    - older_than_days: solo códigos creados hace más de N días
+    - prefix: filtro por prefijo de código
+    - dry_run: si es True (por defecto), solo lista los candidatos sin eliminarlos.
+    Retorna (conteo, lista_de_codigos).
+    """
+    init_db(db_path)
+    now_ms = int(time.time() * 1000)
+
+    query = """
+        SELECT code FROM access_codes
+        WHERE times_used = 0
+          AND active = 1
+          AND (assigned_email IS NULL OR TRIM(assigned_email) = '')
+          AND code NOT IN (SELECT access_code FROM users WHERE access_code IS NOT NULL)
+          AND code NOT IN (SELECT code FROM access_code_usages)
+    """
+    params: List[Any] = []
+
+    if older_than_days is not None:
+        try:
+            days_int = int(older_than_days)
+            if days_int > 0:
+                threshold_ms = now_ms - (days_int * 86400 * 1000)
+                query += " AND created_at < ?"
+                params.append(threshold_ms)
+        except (ValueError, TypeError):
+            pass
+
+    if prefix and str(prefix).strip():
+        clean_p = normalize_access_code(prefix)
+        if clean_p:
+            query += " AND code LIKE ?"
+            params.append(f"{clean_p}%")
+
+    query += " ORDER BY created_at ASC"
+
+    with get_db_connection(db_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute(query, params)
+        rows = cursor.fetchall()
+        candidates = [r["code"] for r in rows]
+
+        if not dry_run and candidates:
+            chunk_size = 500
+            for i in range(0, len(candidates), chunk_size):
+                chunk = candidates[i:i + chunk_size]
+                placeholders = ",".join("?" for _ in chunk)
+                cursor.execute(f"DELETE FROM access_codes WHERE code IN ({placeholders})", chunk)
+            conn.commit()
+
+        return len(candidates), candidates
+
+
+def update_access_code_label(code: str, label: str, db_path: Optional[Path] = None) -> bool:
+    """Actualiza la etiqueta (label) de un código de acceso para alternar estados [PENDIENTE] / [ENTREGADO]."""
+    init_db(db_path)
+    clean_code = normalize_access_code(code)
+    if not clean_code:
+        return False
+    with get_db_connection(db_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE access_codes SET label = ? WHERE code = ?", (str(label or "").strip(), clean_code))
+        conn.commit()
+        return cursor.rowcount > 0
+
+
 def get_access_code(code: str, db_path: Optional[Path] = None) -> Optional[Dict[str, Any]]:
     """Obtiene información de un código de acceso."""
     init_db(db_path)
@@ -502,6 +652,13 @@ def create_user(
             if usage_row:
                 clean_code = usage_row["code"]
         else:
+            cursor.execute("SELECT assigned_email FROM access_codes WHERE code = ?", (clean_code,))
+            ac_reg_check = cursor.fetchone()
+            if ac_reg_check and ac_reg_check["assigned_email"] and str(ac_reg_check["assigned_email"]).strip():
+                clean_assigned_reg = str(ac_reg_check["assigned_email"]).strip().lower()
+                if clean_assigned_reg != clean_email:
+                    return False, f"Este código de acceso está asignado exclusivamente al correo {clean_assigned_reg}.", None
+
             cursor.execute("SELECT consumed_at FROM access_code_usages WHERE code = ? AND email = ?", (clean_code, clean_email))
             existing_usage = cursor.fetchone()
             if not existing_usage:
@@ -803,6 +960,17 @@ def link_user_code(user_id: int, code: str, db_path: Optional[Path] = None) -> T
             return False, "Usuario no encontrado.", None
 
         user_email = str(user["email"]).strip().lower()
+
+        # Verificar si el código existe y si está pre-asignado a otro correo
+        cursor.execute("SELECT assigned_email FROM access_codes WHERE code = ?", (clean_code,))
+        ac_info = cursor.fetchone()
+        if not ac_info:
+            return False, "El código de acceso no existe.", None
+        assigned = ac_info["assigned_email"]
+        if assigned and str(assigned).strip():
+            clean_assigned = str(assigned).strip().lower()
+            if clean_assigned != user_email:
+                return False, f"Este código de acceso está asignado exclusivamente al correo {clean_assigned}.", None
 
         # Verificar si este usuario ya consumió legítimamente este código
         cursor.execute(

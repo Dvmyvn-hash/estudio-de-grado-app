@@ -312,6 +312,7 @@ const LicenseService = {
         if (res.ok && data.ok && Array.isArray(data.codes)) {
           const serverCodes = data.codes.map(c => ({
             code: c.code,
+            label: c.label || "",
             studentName: c.label || "Sin asignar",
             scope: "all",
             days: c.expires_at ? Math.max(1, Math.round((c.expires_at - c.created_at) / 86400000)) : 0,
@@ -331,6 +332,187 @@ const LicenseService = {
       }
     }
     return this.getAllIssuedCodes();
+  },
+
+  // 5b. Generar lote de códigos (1 a 50) de forma atómica
+  async generateBatchCodes(options = {}) {
+    if (this.isDocente()) {
+      return { success: false, error: "Modo Presentación Docente: sin permisos de gestión." };
+    }
+    const count = Math.min(50, Math.max(1, parseInt(options.count) || 1));
+    const scope = options.scope || "all";
+    const canManageNotes = !!options.canManageNotes;
+    const defaultPrefix = canManageNotes
+      ? "GRADO-DOC"
+      : (scope === "all" ? "GRADO-FULL" : `GRADO-${scope.toUpperCase()}`);
+    const prefix = (options.prefix || defaultPrefix).trim().toUpperCase();
+    const label = (options.label || options.studentName || "Lote-General").trim();
+    const assignedEmail = (options.studentEmail || options.email || options.assignedEmail || "").trim().toLowerCase() || null;
+    const days = options.days !== undefined ? parseInt(options.days) : 180;
+    const expiresAt = days > 0 ? (Date.now() + days * 86400000) : null;
+
+    const adminPin = this.getAdminPin();
+    if (adminPin) {
+      try {
+        const res = await fetch("/api/admin/create-code-batch", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Admin-PIN": adminPin
+          },
+          body: JSON.stringify({
+            count,
+            prefix,
+            label,
+            assigned_email: assignedEmail,
+            max_uses: 1,
+            expires_at: expiresAt,
+            pin: adminPin
+          })
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          return { success: false, error: data.error || "Error al generar lote en servidor." };
+        }
+
+        if (data.ok && Array.isArray(data.items)) {
+          const newCodes = data.items.map(item => ({
+            code: item.code,
+            label: item.label,
+            studentName: item.label,
+            scope,
+            days,
+            uses: 0,
+            max_uses: item.max_uses || 1,
+            revoked: false,
+            expires_at: item.expires_at,
+            canManageNotes,
+            role: canManageNotes ? "manager" : "student",
+            createdAt: new Date(item.created_at || Date.now()).toISOString(),
+            assignedEmail: item.assigned_email || "",
+            linkedEmail: item.assigned_email || ""
+          }));
+
+          const list = this.getAllIssuedCodes();
+          list.unshift(...newCodes);
+          this.saveIssuedCodes(list);
+          return { success: true, count: data.count, codes: data.codes, items: newCodes };
+        }
+      } catch (e) {
+        console.warn("Servidor no disponible para lote, fallback local:", e);
+      }
+    }
+
+    // Fallback local si backend no responde
+    const localItems = [];
+    for (let i = 0; i < count; i++) {
+      const res = await this.generateCode({
+        ...options,
+        customCode: null,
+        studentName: label,
+        studentEmail: assignedEmail
+      });
+      if (res.success && res.license) {
+        localItems.push(res.license);
+      }
+    }
+    return {
+      success: localItems.length > 0,
+      count: localItems.length,
+      codes: localItems.map(c => c.code),
+      items: localItems
+    };
+  },
+
+  // 5c. Purgar códigos ociosos con soporte de simulacro (dry_run)
+  async purgeUnusedCodes(options = {}) {
+    if (this.isDocente()) {
+      return { success: false, error: "Modo Presentación Docente: sin permisos de gestión." };
+    }
+    const dryRun = options.dryRun !== false && options.dry_run !== false;
+    const adminPin = this.getAdminPin();
+    if (adminPin) {
+      try {
+        const res = await fetch("/api/admin/purge-codes", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Admin-PIN": adminPin
+          },
+          body: JSON.stringify({
+            dry_run: dryRun,
+            older_than_days: options.older_than_days || options.olderThanDays || null,
+            prefix: options.prefix || null,
+            pin: adminPin
+          })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          return { success: false, error: data.error || "Error al purgar códigos en el servidor." };
+        }
+
+        if (!dryRun && Array.isArray(data.purged) && data.purged.length > 0) {
+          const purgedSet = new Set(data.purged);
+          const list = this.getAllIssuedCodes().filter(c => !purgedSet.has(c.code));
+          this.saveIssuedCodes(list);
+        }
+
+        return {
+          success: true,
+          dryRun: data.dry_run,
+          count: data.count,
+          codes: data.codes || []
+        };
+      } catch (e) {
+        return { success: false, error: "Error de red al consultar purga de códigos: " + e.message };
+      }
+    }
+    return { success: false, error: "PIN de administrador no configurado." };
+  },
+
+  // 5d. Actualizar etiqueta de estado ([PENDIENTE] / [ENTREGADO])
+  async updateCodeLabel(code, label) {
+    if (this.isDocente()) {
+      return { success: false, error: "Modo Presentación Docente: sin permisos de gestión." };
+    }
+    const cleanCode = (code || "").trim().toUpperCase().replace(/[\s\u200b\u00a0]+/g, "");
+    if (!cleanCode) {
+      return { success: false, error: "Código requerido." };
+    }
+    const newLabel = (label || "").trim();
+    const adminPin = this.getAdminPin();
+    if (adminPin) {
+      try {
+        const res = await fetch("/api/admin/update-code-label", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Admin-PIN": adminPin
+          },
+          body: JSON.stringify({
+            code: cleanCode,
+            label: newLabel,
+            pin: adminPin
+          })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          return { success: false, error: data.error || "Error al actualizar etiqueta." };
+        }
+      } catch (e) {
+        console.warn("Error actualizando etiqueta en servidor:", e);
+      }
+    }
+
+    const list = this.getAllIssuedCodes();
+    const item = list.find(c => c.code === cleanCode);
+    if (item) {
+      item.label = newLabel;
+      item.studentName = newLabel || "Sin asignar";
+      this.saveIssuedCodes(list);
+    }
+    return { success: true, code: cleanCode, label: newLabel };
   },
 
   getAllIssuedCodes() {
