@@ -50,6 +50,15 @@ optimizados y los ejecutas hasta dejarlos verificados.
 - **GB** = buscador global del header (023, futuro). Ej: *"lleva X al GB"*.
 - **Canon** = 103 cédulas; **temario** = orden Discusión→Prueba→Sentencia.
 
+## Protocolo nocturno (frase gatillo del humano)
+
+Si dpint dice **"buenas noches nexo, proceda con el 026 mi buen socio"** (o variante
+clara), ejecuta sin más preguntas el ciclo de revisión: barrido de tríos mixtos
+con ledger + suites completas (dedup, mocks, mobile, unlock, e2e), todo a archivos
+con resúmenes mínimos al contexto. Al terminar (o en la mañana): reporte con
+números, hallazgos y pusheo solo de docs propios. El 026-código ya está
+implementado (v7.32); lo que corre cada noche es su *proceso de revisión*.
+
 ## Prohibido
 
 - Ejecutar sin DoD verificable por fase.
