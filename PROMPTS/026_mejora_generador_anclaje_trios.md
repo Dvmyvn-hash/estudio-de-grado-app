@@ -1,7 +1,7 @@
 # PROMPT 026 — Mejora del Generador: Anclaje Obligatorio + Barrido de Tríos Mixtos
 
 > **Versión:** v1.0 · **Fecha:** 2026-09-24 · **Autor:** puente (dpint) + orquestador (Nexo)
-> **Estado:** 📝 Por ejecutar (ejecución: Antigravity) · **Depende de:** ninguno (respeta 021 en curso: no tocar sus archivos)
+> **Estado:** ✅ Implementado (v7.32, Nexo: gate + barrido 4785 tríos) · **Depende de:** ninguno (respeta 021 en curso: no tocar sus archivos)
 
 ---
 

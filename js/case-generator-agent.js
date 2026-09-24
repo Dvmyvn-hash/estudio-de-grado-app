@@ -504,6 +504,93 @@ var CaseGeneratorAgent = {
   },
 
   /**
+   * GATE DE ANCLAJE DOGMÁTICO (v7.32, PROMPT 026).
+   * Mide si cada explicación comparte vocabulario real con su cédula vinculada
+   * (≥ ANCHOR_MIN_BIGRAMS bigramas, estándar 24.5.1 del QuestionDeveloper).
+   * Puro y determinista: sin Math.random, sin red. Si no hay contenido
+   * disponible en APUNTES_INDEX, el gate se abstiene (sin flags).
+   */
+  ANCHOR_MIN_BIGRAMS: 3,
+  ANCHOR_EXPLANATION_CHARS: 600,
+
+  // Normalización idéntica a QuestionDeveloper._normalize/_bigrams (24.5):
+  // una sola definición de "anclado" en toda la app. Paridad verificada en tests.
+  normalizeAnchorText(text) {
+    return (text || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9áéíóúñ\s]/gi, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  },
+
+  extractAnchorBigrams(text) {
+    const words = this.normalizeAnchorText(text).split(" ").filter(w => w.length > 1);
+    const out = new Set();
+    for (let i = 0; i < words.length - 1; i++) {
+      out.add(words[i] + " " + words[i + 1]);
+    }
+    return out;
+  },
+
+  countSharedAnchorBigrams(setA, setB) {
+    let n = 0;
+    for (const g of setA) if (setB.has(g)) n++;
+    return n;
+  },
+
+  assertExplanationAnchored(explanation, content, minBigrams) {
+    const umbral = (typeof minBigrams === "number") ? minBigrams : this.ANCHOR_MIN_BIGRAMS;
+    const qSet = this.extractAnchorBigrams((explanation || "").slice(0, this.ANCHOR_EXPLANATION_CHARS));
+    const cSet = this.extractAnchorBigrams(content || "");
+    const shared = this.countSharedAnchorBigrams(qSet, cSet);
+    return { anchored: shared >= umbral, shared: shared, threshold: umbral };
+  },
+
+  /**
+   * Reordena linkedApuntes por overlap máximo con las preguntas (estable:
+   * empate conserva orden de arquetipo) y anota cada pregunta con
+   * anchorShared + needsReview. No cambia el conjunto de IDs: contratos intactos.
+   */
+  applyAnchorGate(caseObj) {
+    const questions = Array.isArray(caseObj.questions) ? caseObj.questions : [];
+    const linked = Array.isArray(caseObj.linkedApuntes) ? caseObj.linkedApuntes.slice() : [];
+    const indexList = Array.isArray(this.APUNTES_INDEX) ? this.APUNTES_INDEX : [];
+    if (questions.length === 0 || linked.length === 0 || indexList.length === 0) {
+      return { linkedApuntes: linked, questions: questions, abstained: true };
+    }
+    const contentById = new Map(indexList.map(a => [a.id, a.content || ""]));
+    const scored = linked.map((entry, origIdx) => {
+      const content = contentById.get(entry.id) || "";
+      let best = 0;
+      for (const q of questions) {
+        const r = this.assertExplanationAnchored(q.explanation || "", content);
+        if (r.shared > best) best = r.shared;
+      }
+      return { entry, best, origIdx };
+    });
+    scored.sort((x, y) => (y.best - x.best) || (x.origIdx - y.origIdx));
+    const annotatedQuestions = questions.map(q => {
+      let best = 0;
+      for (const s of scored) {
+        const content = contentById.get(s.entry.id) || "";
+        const r = this.assertExplanationAnchored(q.explanation || "", content);
+        if (r.shared > best) best = r.shared;
+      }
+      return Object.assign({}, q, {
+        anchorShared: best,
+        needsReview: best < this.ANCHOR_MIN_BIGRAMS
+      });
+    });
+    return {
+      linkedApuntes: scored.map(s => s.entry),
+      questions: annotatedQuestions,
+      abstained: false
+    };
+  },
+
+  /**
    * Validación corpus-driven de citas en 3 capas con resolución O(1) vía validCitationsIndex.
    */
   assertCitationIntegrity(caseObj) {
@@ -3617,6 +3704,15 @@ var CaseGeneratorAgent = {
       },
       modelSolution: builtCase.modelSolution || "Revisar la justificación y desglose oficial en cada una de las preguntas de alternativas."
     };
+
+    // Gate de anclaje dogmático (v7.32, PROMPT 026): reordena vinculados por
+    // overlap real y anota needsReview donde la explicación deriva del apunte.
+    const gated = this.applyAnchorGate({
+      questions: newCase.questions,
+      linkedApuntes: newCase.linkedApuntes
+    });
+    newCase.linkedApuntes = gated.linkedApuntes;
+    newCase.questions = gated.questions;
 
     // Validar caso sintetizado e integridad de citas
     this.validateGeneratedCase(newCase);
