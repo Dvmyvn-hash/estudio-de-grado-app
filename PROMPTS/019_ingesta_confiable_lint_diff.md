@@ -1,7 +1,7 @@
 # PROMPT 019 — Ingesta Confiable: Lint Pre-ingesta + Diff Report de Regeneración
 
 > **Versión:** v1.0 · **Fecha:** 2026-09-24 · **Autor:** puente (dpint) + orquestador
-> **Estado:** 📝 Por ejecutar (ejecución: Antigravity) · **Depende de:** 008, 016
+> **Estado:** ✅ Implementado (v7.24, ejecución directa del orquestador en paralelo al 017) · **Depende de:** 008, 016
 
 ---
 

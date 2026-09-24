@@ -25,10 +25,27 @@ jobs:
       - name: Checkout del repositorio
         uses: actions/checkout@v4
 
+      # v7.24 (Prompt 019): Lint pre-ingesta — fail fast antes de regenerar.
+      - name: Validar apuntes en fuentes/ (lint_fuentes.py)
+        run: python3 scripts/lint_fuentes.py --fuentes fuentes
+
+      # v7.24 (Prompt 019): Snapshot previo para el diff report.
+      - name: Snapshot temario previo (regen_diff.py)
+        run: python3 scripts/regen_diff.py snapshot --current all_afg_topics.json --out ${{ runner.temp }}/temario_before.json
+
       # v7.8: Regenerar el índice temático (all_afg_topics.json + js/data.js) desde fuentes/.
       # Cualquier cambio en fuentes/*.md se refleja en la página tras el git push, sin pasos manuales.
       - name: Regenerar índice temático desde fuentes/ (generate_clean_notes_data.py)
         run: python3 generate_clean_notes_data.py
+
+      # v7.24 (Prompt 019): Diff report — INFO ante index_moved, ERROR ante pérdida real.
+      - name: Verificar diff del temario regenerado (regen_diff.py)
+        run: python3 scripts/regen_diff.py compare --before ${{ runner.temp }}/temario_before.json --current all_afg_topics.json
+
+      # v7.22 (Prompt 017): Compilar el Vault de Conocimiento estático (vault_index.json + js/vault-index.js)
+      - name: Compilar Vault de Conocimiento estático (build_vault_index.py)
+        run: python3 build_vault_index.py
+
 
       - name: Configurar GitHub Pages
         uses: actions/configure-pages@v5

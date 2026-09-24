@@ -27,6 +27,8 @@ sync_config.json
 
 # Scratch / Temporary debugging and test scripts
 scratch_*.py
+lint_report.json
+regen_diff.json
 test_*.cjs
 test_*.js
 test_*.py
