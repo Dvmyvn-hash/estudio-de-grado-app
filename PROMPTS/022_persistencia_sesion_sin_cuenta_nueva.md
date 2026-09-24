@@ -61,6 +61,15 @@ Que refrescar la página **no cierre sesión ni exija cuenta/código nuevos**: l
 
 - Probar re-link mismo-usuario-mismo-código vía endpoint: debe dar `ok:true` sin mover `times_used`. No cambiar `max_uses=1` por defecto ni la purga 48h.
 
+### PARTE C-bis — Eliminar superficie Exportar/Importar avance (a pedido del humano)
+
+El puente manual de respaldo (`.sidebar-progress-actions` con `#btn-export-progress`, `#btn-import-progress`, `#input-import-progress` file) se elimina por temor fundado a archivos dañinos, con estos matices verificados por el orquestador que el implementador debe respetar:
+
+- El puente es 100% local (FileReader + Blob, jamás toca el servidor): su blast radius real es el propio navegador, no la plataforma. Aun así se elimina la UI completa por decisión del dueño.
+- La capa de servicio (`exportUserProgressFile`, `mergeUserProgressFromJsonString`, usadas por Section 25 del E2E) se **conserva** (pura, testeada, sin DOM): quitarla rompería suites sin reducir riesgo. Solo se elimina UI + cableado (`setupProgressBackup()` y su llamada en `js/app.js:196`, bloque HTML, input file oculto).
+- Como cierre defense-in-depth (hallazgo real: sin guards `__proto__` en `storage.js`), `mergeUserProgressFromJsonString` debe rechazar keys `__proto__`/`constructor`/`prototype` en `masteredTopicIds` y `masteredTimestamps` con `ok:false`.
+- Costo declarado: el modo estático (Pages, sin sync de servidor) pierde su único puente entre dispositivos; el modo servidor sigue sincronizando por API. Dejar constancia en `CONTEXT.md`.
+
 ### PARTE D — SEGURIDAD
 
 - `SameSite=None` jamás para orígenes fuera de allowlist; limiters (`LINK_CODE_LIMITER`, `ADMIN_LIMITER`, lockout) intactos; sin nuevos secretos.
@@ -77,6 +86,8 @@ Que refrescar la página **no cierre sesión ni exija cuenta/código nuevos**: l
 - [ ] 401 limpia caché local; offline usa caché (modos verificados por separado)
 - [ ] Re-login restaura Pase sin código nuevo; re-link mismo código no descuenta
 - [ ] Origin maligno: sin ACAO y con `Lax` (sin CSRF regresivo)
+- [ ] Panel Exportar/Importar eliminado del DOM (sin `#btn-*-progress`, sin input file, sin wiring) con servicio intacto y testeado
+- [ ] Keys `__proto__`/`constructor`/`prototype` rechazadas en import con `ok:false` + tests
 - [ ] Suites 4/4 al 100% + `CONTEXT.md` actualizado + commit convencional
 
 ## NOTAS PARA EL EJECUTOR (anti-interferencia con 021 en curso)
