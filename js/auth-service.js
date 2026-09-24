@@ -88,9 +88,11 @@ var AuthService = {
 
   // Verificar sesión con cookie HttpOnly en /api/auth/me o fallback en localStorage
   async checkSession() {
+    let networkError = false;
     try {
       const res = await fetch("/api/auth/me", {
-        headers: { "Accept": "application/json" }
+        headers: { "Accept": "application/json" },
+        credentials: "include"
       });
       if (res.ok) {
         const data = await res.json();
@@ -126,23 +128,37 @@ var AuthService = {
           }
           return this.currentUser;
         }
+      } else if (res.status === 401) {
+        // El servidor rechazó la sesión explícitamente: erradicar cuenta fantasma local
+        try {
+          localStorage.removeItem("grado_auth_user");
+        } catch (e) {}
+        if (typeof LicenseService !== "undefined") {
+          LicenseService.removeCurrentLicense();
+        }
+        this.currentUser = null;
+        this.notifyAuthStateChanged();
+        return null;
       }
     } catch (e) {
-      // Backend no disponible (ej. GitHub Pages / modo estático)
+      // Backend no disponible (ej. GitHub Pages / modo estático / fallo de red)
+      networkError = true;
     }
 
-    // Modo estático / offline (GitHub Pages / localStorage)
-    try {
-      const storedUser = localStorage.getItem("grado_auth_user");
-      if (storedUser) {
-        const parsed = JSON.parse(storedUser);
-        if (parsed && parsed.email) {
-          this.currentUser = parsed;
-          this.notifyAuthStateChanged();
-          return this.currentUser;
+    // Modo estático / offline (GitHub Pages / localStorage) SOLO si hubo fallo de red o backend inalcanzable
+    if (networkError) {
+      try {
+        const storedUser = localStorage.getItem("grado_auth_user");
+        if (storedUser) {
+          const parsed = JSON.parse(storedUser);
+          if (parsed && parsed.email) {
+            this.currentUser = parsed;
+            this.notifyAuthStateChanged();
+            return this.currentUser;
+          }
         }
-      }
-    } catch (e) {}
+      } catch (e) {}
+    }
 
     this.currentUser = null;
     this.notifyAuthStateChanged();
@@ -279,6 +295,7 @@ var AuthService = {
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: cleanEmail,
@@ -374,6 +391,7 @@ var AuthService = {
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: cleanEmail,
@@ -501,6 +519,7 @@ var AuthService = {
     try {
       const res = await fetch("/api/auth/link-code", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code: cleanCode })
       });
@@ -626,7 +645,7 @@ var AuthService = {
   // Cerrar sesión
   async logout() {
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
+      await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
     } catch (e) {}
 
     try {

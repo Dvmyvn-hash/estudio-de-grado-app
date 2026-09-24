@@ -329,6 +329,7 @@ const StorageService = {
     try {
       await fetch("/api/user/progress", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           caseId: caseId,
@@ -345,6 +346,7 @@ const StorageService = {
     if (typeof AuthService === "undefined" || !AuthService.currentUser) return;
     try {
       const res = await fetch("/api/user/progress", {
+        credentials: "include",
         headers: { "Accept": "application/json" }
       });
       if (!res.ok) return;
@@ -411,6 +413,7 @@ const StorageService = {
     try {
       await fetch("/api/user/topic-mastery", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           topicId: String(topicId),
@@ -430,6 +433,7 @@ const StorageService = {
     }
     try {
       const res = await fetch("/api/user/topic-mastery", {
+        credentials: "include",
         headers: { "Accept": "application/json" }
       });
       if (!res.ok) {
@@ -496,6 +500,7 @@ const StorageService = {
           const batch = pendingPushes.slice(i, i + 500);
           fetch("/api/user/topic-mastery", {
             method: "POST",
+            credentials: "include",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ changes: batch })
           }).catch(() => {});
@@ -578,6 +583,29 @@ const StorageService = {
       if (!incomingIds || !incomingTimestamps) {
         return { ok: false, error: "La estructura del respaldo es inválida (faltan masteredTopicIds o masteredTimestamps)." };
       }
+
+      // Guard anti-prototype-pollution: rechazar __proto__, constructor y prototype en keys o valores
+      const DANGEROUS_KEYS = ["__proto__", "constructor", "prototype"];
+      const hasPrototypePollution = (obj) => {
+        if (!obj || typeof obj !== "object") return false;
+        for (const k of Object.getOwnPropertyNames(obj)) {
+          if (DANGEROUS_KEYS.includes(k)) return true;
+          if (obj[k] && typeof obj[k] === "object") {
+            if (hasPrototypePollution(obj[k])) return true;
+          }
+        }
+        return false;
+      };
+      if (hasPrototypePollution(parsed)) {
+        return { ok: false, error: "Estructura de respaldo sospechosa o no permitida (prototype pollution guard)." };
+      }
+      if (incomingIds.some(id => DANGEROUS_KEYS.includes(id))) {
+        return { ok: false, error: "Identificador de cédula inválido o no permitido (prototype pollution guard)." };
+      }
+      if (Object.keys(incomingTimestamps).some(k => DANGEROUS_KEYS.includes(k))) {
+        return { ok: false, error: "Clave de timestamp inválida o no permitida (prototype pollution guard)." };
+      }
+
       if (!incomingIds.every(id => typeof id === "string")) {
         return { ok: false, error: "masteredTopicIds debe contener solo identificadores de texto." };
       }

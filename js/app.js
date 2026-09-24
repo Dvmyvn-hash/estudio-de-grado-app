@@ -193,7 +193,6 @@ const App = {
     this.setupVaultSearch();
     this.setupQAExtractor();
     this.setupImportModal();
-    this.setupProgressBackup();
     this.setupKeyboardShortcuts();
 
     // Sincronizar fuentes doctrinales y apuntes oficiales en el agente generador de casos
@@ -2370,65 +2369,6 @@ const App = {
     this.renderSourcesList();
   },
 
-  // Respaldo manual del avance de cédulas dominadas (Exportar/Importar JSON) para
-  // el puente multi-dispositivo en Modo Estático / GitHub Pages (v7.12).
-  setupProgressBackup() {
-    const btnExport = document.getElementById("btn-export-progress");
-    const btnImport = document.getElementById("btn-import-progress");
-    const inputImport = document.getElementById("input-import-progress");
-
-    if (btnExport) {
-      btnExport.addEventListener("click", () => {
-        const ok = StorageService.exportUserProgressFile();
-        this.showToast(ok ? "✅ Avance exportado como JSON (impórtalo en tu otro dispositivo)" : "⚠️ No se pudo exportar el avance", ok ? "success" : "warning");
-      });
-    }
-
-    if (btnImport && inputImport) {
-      btnImport.addEventListener("click", () => {
-        inputImport.click();
-      });
-
-      inputImport.addEventListener("change", (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        // Límite de seguridad: 512 KB
-        if (file.size > 512 * 1024) {
-          this.showToast("⚠️ El archivo de respaldo supera 512 KB y fue rechazado.", "warning");
-          return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          try {
-            const result = StorageService.mergeUserProgressFromJsonString(String(event.target.result || ""));
-            if (result && result.ok) {
-              this.renderSidebar();
-              if (this.currentView === "topics") {
-                this.renderTopicViewer();
-              }
-              this.showToast(`✅ Avance importado y fusionado (${result.imported} cédulas actualizadas)`, "success");
-              // Reconciliar con el servidor si hay sesión activa
-              this.pullMasteryProgress();
-            } else {
-              this.showToast(`⚠️ ${(result && result.error) || "El archivo no es un respaldo de avance válido."}`, "warning");
-            }
-          } catch (err) {
-            this.showToast("⚠️ No se pudo procesar el archivo de respaldo.", "warning");
-          } finally {
-            e.target.value = "";
-          }
-        };
-        reader.onerror = () => {
-          this.showToast("⚠️ No se pudo leer el archivo de respaldo.", "warning");
-          e.target.value = "";
-        };
-        reader.readAsText(file);
-      });
-    }
-  },
-
   loadFileIntoForm(file) {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -2922,16 +2862,6 @@ const App = {
         sidebarFooter.classList.add("hidden");
         sidebarFooter.style.display = "none";
       }
-    }
-
-    // MODE-DOCENTE (v7.16, PROMPT 013): la cuenta de presentación docente no puede cargar ni
-    // descargar archivos, así que oculta el respaldo Exportar/Importar avance. Si se desea
-    // permitir al profesor respaldar su propio avance, eliminar este bloque.
-    const isDocente = LicenseService.isDocente();
-    const progressActions = document.getElementById("sidebar-progress-actions");
-    if (progressActions) {
-      progressActions.classList.toggle("hidden", isDocente);
-      progressActions.style.display = isDocente ? "none" : "";
     }
   },
 

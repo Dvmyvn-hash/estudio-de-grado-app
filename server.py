@@ -827,13 +827,57 @@ def verify_session_token(token: str) -> Optional[str]:
     except Exception:
         return None
 
-def make_session_cookie(token: str) -> str:
-    """Genera la cookie httpOnly; Secure; SameSite=Lax requerida por la arquitectura."""
-    return f"session_token={token}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age={30 * 86400}"
+def make_session_cookie(token: str, is_https: bool = False, is_cross_site: bool = False) -> str:
+    """Genera la cookie httpOnly para tests o compatibilidad modular."""
+    parts = [f"session_token={token}", "HttpOnly", "Path=/", f"Max-Age={30 * 86400}"]
+    if is_https:
+        parts.append("Secure")
+        if is_cross_site:
+            parts.append("SameSite=None")
+        else:
+            parts.append("SameSite=Lax")
+    else:
+        parts.append("SameSite=Lax")
+    return "; ".join(parts)
 
-def make_logout_cookie() -> str:
-    """Genera la cookie de invalidación inmediata."""
-    return "session_token=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT"
+def make_logout_cookie(is_https: bool = False, is_cross_site: bool = False) -> str:
+    """Genera la cookie de invalidación inmediata para tests o compatibilidad modular."""
+    parts = ["session_token=", "HttpOnly", "Path=/", "Max-Age=0", "Expires=Thu, 01 Jan 1970 00:00:00 GMT"]
+    if is_https:
+        parts.append("Secure")
+        if is_cross_site:
+            parts.append("SameSite=None")
+        else:
+            parts.append("SameSite=Lax")
+    else:
+        parts.append("SameSite=Lax")
+    return "; ".join(parts)
+
+def get_allowed_origins() -> set:
+    """Obtiene el conjunto de orígenes autorizados para CORS desde env o auth_config.json combinados con fallbacks canónicos."""
+    origins = {
+        "http://localhost:8080",
+        "http://127.0.0.1:8080",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+        "https://dvmyvn-hash.github.io",
+    }
+    origins_env = os.environ.get("ALLOWED_ORIGINS")
+    if origins_env:
+        origins.update(o.strip() for o in origins_env.split(",") if o.strip())
+    config_file = BASE_DIR / "auth_config.json"
+    if config_file.is_file():
+        try:
+            with open(config_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                origins.update(data.get("allowed_origins", []))
+        except Exception:
+            pass
+    return origins
 
 GOOGLE_TOKEN_REGEX = re.compile(r"^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$")
 
@@ -940,6 +984,92 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(BASE_DIR), **kwargs)
 
+    def _is_request_https(self) -> bool:
+        forwarded_proto = self.headers.get("X-Forwarded-Proto", "").lower().strip()
+        if forwarded_proto == "https":
+            return True
+        return False
+
+    def _get_request_origin(self) -> str:
+        return self.headers.get("Origin", "").strip()
+
+    def _is_origin_allowed(self, origin: str) -> bool:
+        if not origin:
+            return False
+        origin_clean = origin.strip().lower()
+        allowed = {o.lower() for o in get_allowed_origins()}
+        if origin_clean in allowed:
+            return True
+        if origin_clean.startswith("https://") and origin_clean.endswith(".github.io"):
+            return True
+        return False
+
+    def _is_cross_site(self, origin: str) -> bool:
+        if not origin:
+            return False
+        host = self.headers.get("Host", "").strip()
+        proto = "https" if self._is_request_https() else "http"
+        current_site = f"{proto}://{host}".lower()
+        return origin.lower() != current_site
+
+    def _session_cookie(self, token: str) -> str:
+        origin = self._get_request_origin()
+        is_https = self._is_request_https()
+        is_cross = self._is_cross_site(origin)
+        origin_ok = self._is_origin_allowed(origin)
+
+        parts = [f"session_token={token}", "HttpOnly", "Path=/", f"Max-Age={30 * 86400}"]
+        if is_https:
+            parts.append("Secure")
+            if is_cross and origin_ok:
+                parts.append("SameSite=None")
+            else:
+                parts.append("SameSite=Lax")
+        else:
+            parts.append("SameSite=Lax")
+        return "; ".join(parts)
+
+    def _logout_cookie(self) -> str:
+        origin = self._get_request_origin()
+        is_https = self._is_request_https()
+        is_cross = self._is_cross_site(origin)
+        origin_ok = self._is_origin_allowed(origin)
+
+        parts = ["session_token=", "HttpOnly", "Path=/", "Max-Age=0", "Expires=Thu, 01 Jan 1970 00:00:00 GMT"]
+        if is_https:
+            parts.append("Secure")
+            if is_cross and origin_ok:
+                parts.append("SameSite=None")
+            else:
+                parts.append("SameSite=Lax")
+        else:
+            parts.append("SameSite=Lax")
+        return "; ".join(parts)
+
+    def _apply_cors_headers(self, headers_dict: dict):
+        """Si la petición incluye Origin y este se encuentra en allowlist, añade encabezados CORS."""
+        origin = self._get_request_origin()
+        if origin and self._is_origin_allowed(origin):
+            headers_dict["Access-Control-Allow-Origin"] = origin
+            headers_dict["Vary"] = "Origin"
+            headers_dict["Access-Control-Allow-Credentials"] = "true"
+
+    def do_OPTIONS(self):
+        """Maneja solicitudes preflight CORS para endpoints de /api/*."""
+        clean_path = urllib.parse.unquote(self.path.split('?')[0].split('#')[0])
+        origin = self._get_request_origin()
+
+        self.send_response(204)
+        if clean_path.startswith("/api/") and origin and self._is_origin_allowed(origin):
+            self.send_header("Access-Control-Allow-Origin", origin)
+            self.send_header("Vary", "Origin")
+            self.send_header("Access-Control-Allow-Credentials", "true")
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Admin-PIN")
+            self.send_header("Access-Control-Max-Age", "86400")
+        self.send_header("Content-Length", "0")
+        self.end_headers()
+
     def end_headers(self):
         """Inyecta encabezados de seguridad HTTP estándar de defensa en profundidad."""
         self.send_header("X-Content-Type-Options", "nosniff")
@@ -949,15 +1079,22 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
         super().end_headers()
 
     def send_json_response(self, data, status_code=200, headers=None):
-        """Envía respuesta JSON con encabezados de seguridad y Content-Length exacto."""
+        """Envía respuesta JSON con encabezados de seguridad, CORS controlado y Content-Length exacto."""
         response_bytes = json.dumps(data, ensure_ascii=False).encode("utf-8")
         self.send_response(status_code)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(response_bytes)))
         self.send_header("Cache-Control", "no-cache")
+
+        merged_headers = {}
+        raw_path = getattr(self, "path", "")
+        if raw_path.startswith("/api/"):
+            self._apply_cors_headers(merged_headers)
+
         if headers:
-            for k, v in headers.items():
-                self.send_header(k, v)
+            merged_headers.update(headers)
+        for k, v in merged_headers.items():
+            self.send_header(k, v)
         self.end_headers()
         self.wfile.write(response_bytes)
 
@@ -1058,13 +1195,7 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
         # API 1: Comprobar cambios (Polling ligero para actualización automática)
         if clean_path == "/api/sync-check":
             version_hash = get_files_hash()
-            response_bytes = json.dumps({"version": version_hash, "timestamp": time.time()}).encode("utf-8")
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.send_header("Content-Length", str(len(response_bytes)))
-            self.send_header("Cache-Control", "no-cache")
-            self.end_headers()
-            self.wfile.write(response_bytes)
+            self.send_json_response({"version": version_hash, "timestamp": time.time()})
             return
 
         # API 2: Obtener todos los temas parseados y sincronizados en vivo desde APUNTES
@@ -1245,7 +1376,7 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
 
         # API: Cerrar Sesión (Invalidar Cookie, no requiere cuerpo)
         if clean_path == "/api/auth/logout":
-            cookie = make_logout_cookie()
+            cookie = self._logout_cookie()
             self.send_json_response({"ok": True, "message": "Sesión finalizada correctamente"}, headers={"Set-Cookie": cookie})
             return
 
@@ -1396,7 +1527,7 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
 
             # Emisión inmediata de sesión autenticada en Versión Demo (Paso 1 completado)
             token = create_session_token(str(user["id"]))
-            cookie = make_session_cookie(token)
+            cookie = self._session_cookie(token)
 
             is_demo = not bool(user.get("access_code"))
             resp_payload = {
@@ -1483,7 +1614,7 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                 if restored_code:
                     user["access_code"] = restored_code
             token = create_session_token(str(user["id"]))
-            cookie = make_session_cookie(token)
+            cookie = self._session_cookie(token)
             progress = db.get_all_user_progress(user["id"], db_path=DB_PATH)
             self.send_json_response({
                 "ok": True,
@@ -1539,7 +1670,7 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                         return
                     LINK_CODE_LIMITER.reset(client_ip)
                     token = create_session_token(str(user["id"]))
-                    cookie = make_session_cookie(token)
+                    cookie = self._session_cookie(token)
                     self.send_json_response({
                         "ok": True,
                         "user": {
@@ -1564,7 +1695,7 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
 
             LINK_CODE_LIMITER.reset(client_ip)
             token = create_session_token(str(updated_user["id"]))
-            cookie = make_session_cookie(token)
+            cookie = self._session_cookie(token)
             self.send_json_response({
                 "ok": True,
                 "user": {
@@ -1605,7 +1736,7 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
             if user and user.get("access_code"):
                 token = create_session_token(str(user["id"]))
                 progress = db.get_all_user_progress(user["id"])
-                cookie = make_session_cookie(token)
+                cookie = self._session_cookie(token)
                 self.send_json_response({
                     "ok": True,
                     "user": {
