@@ -1,7 +1,7 @@
 # PROMPT 018 — Fábrica de Mocks Solo-Tests con Aislamiento del Canon (sin inyección al Vault)
 
 > **Versión:** v1.0 · **Fecha:** 2026-09-24 · **Autor:** puente (dpint) + orquestador
-> **Estado:** 📝 Por ejecutar (ejecución: Antigravity) · **Depende de:** 008, 016, 017
+> **Estado:** ✅ Implementado (v7.23, ejecución directa del orquestador en paralelo al 020) · **Depende de:** 008, 016, 017
 
 ---
 
