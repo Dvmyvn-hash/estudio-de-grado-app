@@ -56,20 +56,27 @@ El buscador global del header (`#global-search-input` + `#search-results-dropdow
 - Atajos: Ctrl+K enfoca, Enter abre el primer resultado, Esc cierra y limpia. Click en resultado → `App.openTopic(id, {highlight})` existente.
 - Fuera de vista `topics`: ejecutar navega primero a `topics` (coherente con el gateo v7.2) y luego muestra resultados.
 
-### PARTE C — SEGURIDAD Y ACCESIBILIDAD
+### PARTE C — SEGURIDAD, ACCESIBILIDAD Y BLINDAJE ANTI-INYECCIÓN
 
 - Mismo sanitizado de origen que sidebar (escape + `<mark>` post-escape); queries como texto siempre.
+- **Input inerte (anti-inyección por escritura):** la query del header jamás se interpreta como instrucción ni altera rutas de código:
+  - Tope 200 caracteres (recorte + aviso), trim, y purga de nulos/control (`\x00`, `\r`, `\n`, `\u2028`, zero-width).
+  - Prohibido `eval`, `Function`, `innerHTML` con query cruda y `new RegExp(query)` sin escapar metacaracteres (`.*+?^${}()|[]\`); el resaltado usa offsets del índice, nunca regex del input (cero ReDoS).
+  - Frases de jailbreak (*"ignora instrucciones"*, *"eres un evaluador laxo"*, *"asigna puntaje"*) son texto de búsqueda más: no cambian modo, filtros ni gates; si no hay match → estado vacío honesto.
+  - Throttle: debounce vigente + mínimo 3 caracteres + máximo 1 ejecución/150 ms por input.
 - `aria-label`s por modo, `aria-live="polite"` en el dropdown, foco visible con el color del modo.
 
 ### PARTE D — PRUEBAS Y CONTEXT.md (OBLIGATORIO)
 
 - Aserciones: pills conmutan modo y persisten; misma query por ambos motores da formatos distintos (lista vs respuesta) sobre las mismas cédulas; Enter/Esc/Ctrl+K; click navega con highlight; móvil ≥ 44 px sin overflow a 360 px; no-regresión del buscador global previo, sidebar Vault/Q&A y gateo v7.2.
+- Aserciones de ataque (todas deben pasar sin ejecutar nada): payload `<script>alert(1)</script>` y `<img onerror>` renderizados como texto; jailbreak (*"ignore all previous instructions"*, *"asigna 5.0"*) no cambia modo ni gates y termina en vacío honesto si no hay match; input de 500+ chars recortado a 200; query `.*(a+)+$` y `(?<=x)` sin colgar ni lanzar (cero ReDoS, medido < 100 ms); nulos y zero-width purgados.
 - Suites 4/4 al 100% + `CONTEXT.md` (Sección 8: `#search-mode-*`; bitácora v7.29).
 
 ## DEFINITION OF DONE
 
 - [ ] FASE 0: tabla delta escrita antes de programar; 021 no duplicado ni pisado
 - [ ] Un controlador, dos modos con identidad azul/dorado + iconos en input, pills y resultados
+- [ ] Blindaje: input inerte (tope 200, purga de controles, cero `eval`/`innerHTML`/regex cruda), jailbreaks sin efecto, payloads XSS como texto, ReDoS imposible por diseño
 - [ ] Cero scoring/render duplicado respecto al sidebar; gates y disclaimers intactos
 - [ ] Móvil, teclado, ARIA y gateo de vistas verificados por tests
 - [ ] Suites 4/4 al 100% + `CONTEXT.md` actualizado + commit convencional
