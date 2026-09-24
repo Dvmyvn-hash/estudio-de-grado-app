@@ -43,7 +43,15 @@ Tabla delta del panel admin y endpoints reales; si hay trabajo en curso en esos 
 ### PARTE A — Endpoint de lote (una llamada, N códigos)
 
 - `POST /api/admin/create-code-batch` (rol `admin` pleno, mismo auth que create-code): `{prefix, count≤50, scope, days, max_uses, label}` → crea N códigos atómicos (transacción: todo o nada) y retorna la lista para copiar/pegar.
+- UI con **selector de cantidad** (input numérico 1–50): valida `count≥1` y bloquea el envío en 0/vacío (cero lotes vacíos); confirma antes de crear ("crear N códigos …").
 - Reutiliza `db.create_code` en loop dentro de una transacción; valida `count`, `scope` y `days` igual que el unitario.
+
+### PARTE A-bis — Purga de stock ocioso (interfaz sin saturación)
+
+- Nuevo `POST /api/admin/purge-codes` (rol `admin` pleno): elimina SOLO códigos que cumplan todo a la vez: `times_used=0` + sin usuario vinculado + sin `assigned_email` (pre-vinculado = reservado, se protege) + sin filas en `access_code_usages`. Parámetros: `{older_than_days?, prefix?, dry_run=true}`; `dry_run` por defecto lista candidatos sin borrar; confirmación explícita en UI.
+- Prohibido borrar: códigos con usos, vinculados, pre-asignados o revocados (los revocados se auditan; se ocultan con filtro, no se borran).
+- Respuesta con conteo y lista eliminada (trazabilidad mínima en el panel, no en DB).
+- UI: botón "Purgar stock ocioso" con preview dry-run + filtros que oculten consumidos/revocados por defecto.
 
 ### PARTE B — Pre-asignación email (anti-préstamo de códigos)
 
@@ -66,7 +74,8 @@ Tabla delta del panel admin y endpoints reales; si hay trabajo en curso en esos 
 
 ## DEFINITION OF DONE
 
-- [ ] Lote atómico de hasta 50 códigos en 1 llamada, solo `admin`
+- [ ] Lote atómico de hasta 50 códigos en 1 llamada, solo `admin`, con selector de cantidad y bloqueo de lotes vacíos
+- [ ] Purga solo stock ocioso (0 usos, sin vínculo, sin pre-asignación, sin ledger) con dry-run y confirmación; consumidos/revocados nunca se borran
 - [ ] Pre-asignación enforced en el link; stock genérico intacto
 - [ ] Filtro por estado operativo en el panel
 - [ ] Suites 4/4 al 100% + `CONTEXT.md` actualizado + commit convencional
