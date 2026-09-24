@@ -1,7 +1,7 @@
 # PROMPT 020 — Búsqueda que Encuentra: Normalización + Sinónimos + Filtros e Historial
 
-> **Versión:** v1.0 · **Fecha:** 2026-09-24 · **Autor:** puente (dpint) + orquestador
-> **Estado:** 📝 Por ejecutar (ejecución: Antigravity) · **Depende de:** 017
+> **Versión:** v1.1 · **Fecha:** 2026-09-24 · **Autor:** puente (dpint) + orquestador
+> **Estado:** 📝 Por ejecutar (ejecución: Antigravity) · **Depende de:** 017 VERDE (Fase 0 de conformancia obligatoria primero; no asumir el esquema del 017, leerlo)
 
 ---
 
@@ -34,6 +34,15 @@ Que la búsqueda del Vault **encuentre aunque el usuario no escriba el término 
 
 ## CAMBIOS A IMPLEMENTAR
 
+### FASE 0 — Conformancia con el 017 implementado (obligatoria, antes de todo)
+
+El 017 está en implementación paralela: **no asumas su esquema, léelo.**
+
+1. Verifica que el 017 esté verde (su DoD + suites). Si está a medias, DETENTE e informa qué falta en vez de inventar interfaces.
+2. Levanta del código real: esquema exacto de `VAULT_INDEX` (nombres de campos, postings, meta), firma real de `searchVault()` (parámetros, forma del retorno, umbral), IDs del DOM ya creados y dónde vive el presupuesto (tamaño/latencia).
+3. Escribe la tabla delta "asumido por este prompt vs real del 017" (en el reporte de ejecución y `CONTEXT.md`) y adapta las PARTES A-C a lo real antes de programar.
+4. Recién entonces ejecuta A→B→C→D→E en orden.
+
 ### PARTE A — Normalización contractada build ↔ query
 
 - `normalize(text)`: minúsculas, sin tildes, colapsa whitespace, repara artefactos de copiado/OCR (ligaduras `ﬁ/ﬂ`, guiones blandos, comillas raras). Se implementa **una vez en Python** (índice) y **una vez en JS** (query), con contrato documentado y test de paridad sobre pares fixture (`"demanda"` == `"demánda"`, `"posesión inscrita"` == `"posesion  inscrita"`).
@@ -62,6 +71,7 @@ Que la búsqueda del Vault **encuentre aunque el usuario no escriba el término 
 
 ## DEFINITION OF DONE
 
+- [ ] FASE 0: 017 verde + tabla delta asumido-vs-real escrita antes de programar
 - [ ] PROMPT 017 implementado y verde antes de empezar
 - [ ] Paridad de normalización Python↔JS verificada por tests
 - [ ] Glosario semilla ~30 grupos con recall top-5 y sin regresión de precisión

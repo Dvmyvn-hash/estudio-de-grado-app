@@ -50,7 +50,7 @@ Generadores por materia troncal con salidas **conocidas y asertables** (nº secc
 
 ### PARTE B — Cableado a suites (sin reescribir las existentes)
 
-- Nuevas aserciones que usan la fábrica: colisión deliberada no altera el canon (gana mayor `charCount`, el perdedor se descarta íntegro); archivo < 50 chars ignorado; monolítico → 1 sección `N.1`; benchmark: `searchVault()` sobre corpus sintético de 500 docs < 50 ms (valida el presupuesto del PROMPT 017).
+- Nuevas aserciones que usan la fábrica: colisión deliberada no altera el canon (gana mayor `charCount`, el perdedor se descarta íntegro); archivo < 50 chars ignorado; monolítico → 1 sección `N.1`; benchmark: `searchVault()` **real del 017 si ya está verde, si no la interfaz que el 017 especifica** sobre corpus sintético de 500 docs < 50 ms (valida el presupuesto del PROMPT 017).
 - No tocar las aserciones del invariante 103: deben seguir pasando idénticas.
 
 ### PARTE C — SEGURIDAD
