@@ -190,6 +190,7 @@ const App = {
     this.setupNavigation();
     this.setupSidebar();
     this.setupGlobalSearch();
+    this.setupVaultSearch();
     this.setupImportModal();
     this.setupProgressBackup();
     this.setupKeyboardShortcuts();
@@ -1662,6 +1663,111 @@ const App = {
       input.value = query;
       input.dispatchEvent(new Event("input"));
       input.focus();
+    }
+  },
+
+  // 5.1 VAULT DE CONOCIMIENTO — BÚSQUEDA SEMÁNTICA ESTÁTICA (v7.22, Prompt 017)
+  setupVaultSearch() {
+    const input = document.getElementById("vault-search-input");
+    const resultsContainer = document.getElementById("vault-search-results");
+    const clearBtn = document.getElementById("vault-search-clear");
+    if (!input || !resultsContainer) return;
+
+    let debounceTimer = null;
+
+    const performSearch = (query) => {
+      const q = (query || "").trim();
+      if (q.length < 3) {
+        resultsContainer.classList.add("hidden");
+        resultsContainer.innerHTML = "";
+        if (clearBtn) clearBtn.classList.add("hidden");
+        return;
+      }
+
+      if (clearBtn) clearBtn.classList.remove("hidden");
+
+      if (typeof searchVault !== "function") {
+        resultsContainer.innerHTML = `<div class="vault-search-empty">Motor de búsqueda no disponible</div>`;
+        resultsContainer.classList.remove("hidden");
+        return;
+      }
+
+      const results = searchVault(q, {
+        limit: 8
+      });
+
+      if (!results || results.length === 0) {
+        resultsContainer.innerHTML = `<div class="vault-search-empty">Sin coincidencias en apuntes</div>`;
+        resultsContainer.classList.remove("hidden");
+        return;
+      }
+
+      const escapeFn = (typeof SecurityShield !== "undefined" && SecurityShield.escapeHtml)
+        ? SecurityShield.escapeHtml
+        : (s) => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+      resultsContainer.innerHTML = results.map(res => `
+        <div class="vault-search-result-item" data-topic-id="${escapeFn(res.id)}" tabindex="0" role="button" aria-label="Abrir cédula ${escapeFn(res.indexCode)} ${escapeFn(res.title)}">
+          <div class="vault-result-header">
+            <span class="vault-result-code">§ ${escapeFn(res.indexCode || "")}</span>
+            <span class="vault-result-title">${escapeFn(res.title || "")}</span>
+          </div>
+          <div class="vault-result-source">${escapeFn(res.sourceFile || "")}</div>
+          <div class="vault-result-snippet">${res.hasPrefixEllipsis ? "…" : ""}${res.highlightedSnippet || escapeFn(res.snippet || "")}${res.hasSuffixEllipsis ? "…" : ""}</div>
+        </div>
+      `).join("");
+
+      resultsContainer.classList.remove("hidden");
+
+      // Clic y Enter en resultados del Vault
+      resultsContainer.querySelectorAll(".vault-search-result-item").forEach(item => {
+        const handleOpen = () => {
+          const tid = item.dataset.topicId;
+          if (tid) {
+            this.openTopic(tid);
+            // En móvil, si la barra lateral está abierta como drawer, cerrarla
+            if (window.innerWidth <= 1024) {
+              const sidebar = document.getElementById("app-sidebar");
+              if (sidebar && !sidebar.classList.contains("collapsed")) {
+                this.toggleSidebar();
+              }
+            }
+          }
+        };
+
+        item.addEventListener("click", handleOpen);
+        item.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleOpen();
+          }
+        });
+      });
+    };
+
+    input.addEventListener("input", (e) => {
+      clearTimeout(debounceTimer);
+      const val = e.target.value;
+      if (val.trim().length < 3) {
+        resultsContainer.classList.add("hidden");
+        resultsContainer.innerHTML = "";
+        if (clearBtn) clearBtn.classList.add("hidden");
+        return;
+      }
+      if (clearBtn) clearBtn.classList.remove("hidden");
+      debounceTimer = setTimeout(() => {
+        performSearch(val);
+      }, 200);
+    });
+
+    if (clearBtn) {
+      clearBtn.addEventListener("click", () => {
+        input.value = "";
+        resultsContainer.classList.add("hidden");
+        resultsContainer.innerHTML = "";
+        clearBtn.classList.add("hidden");
+        input.focus();
+      });
     }
   },
 
