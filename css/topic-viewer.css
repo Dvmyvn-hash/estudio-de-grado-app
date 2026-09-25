@@ -792,6 +792,144 @@
   height: 12px;
 }
 
+/* Meta información del destino en cabecera */
+.connection-target-meta {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-left: auto;
+}
+
+/* Caja de cita textual verbatim del apunte */
+.connection-quote-box {
+  margin-top: 4px;
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: var(--radius-sm);
+  border-left: 2px solid var(--gold-primary);
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: #e2e8f0;
+}
+
+.connection-quote-glyph {
+  color: var(--gold-primary);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.connection-quote-ref {
+  color: var(--text-muted);
+  font-size: 0.70rem;
+  font-weight: 500;
+}
+
+.connection-quote-box mark.vault-highlight {
+  background: rgba(212, 175, 55, 0.25);
+  color: var(--gold-primary);
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-weight: 600;
+}
+
+/* Botón interactivo de salto con snippet en el pie */
+.btn-jump-connection {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: var(--gold-primary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 4px;
+  min-height: 44px;
+  border-radius: var(--radius-sm);
+  transition: var(--transition-fast);
+}
+
+.btn-jump-connection:hover {
+  color: #fbbf24;
+  text-decoration: underline;
+}
+
+.btn-jump-connection:focus-visible {
+  outline: 2px solid var(--gold-primary);
+  outline-offset: 2px;
+}
+
+/* Estado vacío honesto para cruces dogmáticos */
+.connections-empty-state {
+  padding: 20px 14px;
+  text-align: center;
+  background: var(--bg-surface-elevated);
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-md);
+  margin-bottom: 12px;
+}
+
+.connections-empty-icon {
+  font-size: 1.25rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.connections-empty-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+.connections-empty-desc {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.connections-unvalidated-suggestions {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+.unvalidated-suggestion-card {
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 44px;
+  transition: var(--transition-fast);
+}
+
+.unvalidated-suggestion-card:hover {
+  border-color: var(--border-focus);
+  background: var(--bg-surface-hover);
+}
+
+.unvalidated-badge {
+  font-size: 0.62rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+}
+
+.unvalidated-suggestion-card .suggestion-title {
+  font-size: 0.78rem;
+  color: var(--text-main);
+  font-weight: 500;
+}
+
 /* Tarjeta Clásica (Compatibilidad) */
 .linked-topic-card {
   padding: 10px 14px;

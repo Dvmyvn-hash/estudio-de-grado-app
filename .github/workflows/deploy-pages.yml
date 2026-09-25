@@ -33,6 +33,10 @@ jobs:
       - name: Snapshot temario previo (regen_diff.py)
         run: python3 scripts/regen_diff.py snapshot --current all_afg_topics.json --out ${{ runner.temp }}/temario_before.json
 
+      # v7.38 (Prompt 031): Compilar cruces dogmáticos enriquecidos (build_cross_connections.py)
+      - name: Compilar cruces dogmáticos enriquecidos (build_cross_connections.py)
+        run: python3 scripts/build_cross_connections.py
+
       # v7.8: Regenerar el índice temático (all_afg_topics.json + js/data.js) desde fuentes/.
       # Cualquier cambio en fuentes/*.md se refleja en la página tras el git push, sin pasos manuales.
       - name: Regenerar índice temático desde fuentes/ (generate_clean_notes_data.py)

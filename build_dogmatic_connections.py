@@ -827,13 +827,16 @@ CONNECTIONS_MAP = {
 }
 
 def main():
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    out_file = os.path.join(base_dir, "dogmatic_connections.json")
-    
-    with open(out_file, "w", encoding="utf-8") as f:
-        json.dump(CONNECTIONS_MAP, f, ensure_ascii=False, indent=2)
-    
-    print(f"Generado exitosamente dogmatic_connections.json con {len(CONNECTIONS_MAP)} temas enriquecidos.")
+    try:
+        from scripts.build_cross_connections import build_cross_connections
+        build_cross_connections()
+    except Exception as e:
+        # Fallback de emergencia si scripts no estuviese disponible
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        out_file = os.path.join(base_dir, "dogmatic_connections.json")
+        with open(out_file, "w", encoding="utf-8") as f:
+            json.dump(CONNECTIONS_MAP, f, ensure_ascii=False, indent=2)
+        print(f"Generado exitosamente dogmatic_connections.json con {len(CONNECTIONS_MAP)} temas (fallback: {e}).")
 
 if __name__ == "__main__":
     main()

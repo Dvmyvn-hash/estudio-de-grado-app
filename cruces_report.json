@@ -1,0 +1,23 @@
+{
+  "timestamp": "2026-09-24T22:10:01.504568",
+  "total_canon_topics": 103,
+  "topics_with_connections": 103,
+  "coverage_percentage": 100.0,
+  "total_connections": 309,
+  "manual_overrides_applied": 80,
+  "derived_connections_added": 229,
+  "gate_discards_count": 0,
+  "orphan_discards_count": 0,
+  "all_targets_valid_in_canon": true,
+  "all_quotes_verbatim": true,
+  "all_shared_bigrams_ge_3": true,
+  "file_size_kb": 274.01,
+  "taxonomy_distribution": {
+    "Genero-Especie": 2,
+    "Sustantivo-Procesal": 38,
+    "Fundamento-Constitucional": 40,
+    "Excepcion-Procesal": 20,
+    "Efecto-Patrimonial": 21,
+    "Materia-Afin": 188
+  }
+}
