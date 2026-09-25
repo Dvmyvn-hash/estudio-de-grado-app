@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-lint_fuentes.py — Validador pre-ingesta de apuntes (v7.24, PROMPT 019)
+lint_fuentes.py — Validador pre-ingesta de apuntes (v7.24, PROMPT 019 / v7.41, PROMPT 032)
 =====================================================================
 Revisa cada .md de fuentes/ ANTES de regenerar el temario. No modifica nada:
 solo reporta y falla (exit 1) ante ERROR. WARN no bloquea.
@@ -8,7 +8,9 @@ solo reporta y falla (exit 1) ante ERROR. WARN no bloquea.
   ERROR: encoding no UTF-8, archivo > 512 KB, colisión de tupla natural
          (subject, chapterNumber, code) contra el canon sin registro fijo.
   WARN:  < 3 secciones detectables, headings ## duplicados, capítulo
-         inferido ambiguo (se auto-ubicará en otro capítulo canónico).
+         inferido ambiguo (se auto-ubicará en otro capítulo canónico),
+         descalce entre bullets del índice inicial y headings del cuerpo
+         (el cuerpo manda al publicar, el índice es declarativo/visual).
 
 Uso:
   python scripts/lint_fuentes.py [--fuentes DIR] [--json-out PATH]
@@ -58,6 +60,46 @@ def build_canon_keys():
     return keys
 
 
+def check_indice_descalce(fname, text):
+    """
+    Verifica congruencia entre el bloque de índice inicial y los headings del cuerpo (v7.41, PROMPT 032).
+    Regla: en archivos con bloque '**Índice**' inicial, cuenta bullets de Capítulo/Sección vs headings del cuerpo.
+    Ante descalce emite WARN con detalle (el cuerpo manda al publicar, el índice es declarativo/visual).
+    """
+    m = re.search(r'\*\*[IÍ]ndice\*\*', text, re.IGNORECASE)
+    if not m:
+        return []
+
+    start = m.end()
+    # Buscar el inicio del cuerpo tras el índice (primer heading #, ## o ###)
+    body_m = re.search(r'\n(#{1,3})\s+(.+)', text[start:])
+    if not body_m:
+        return []
+
+    idx_text = text[start:start + body_m.start()]
+    body_text = text[start + body_m.start():]
+
+    idx_caps = len(re.findall(r'^[ \t]*[-*]\s*(?:\*\*)?Cap[ií]tulo', idx_text, re.MULTILINE | re.IGNORECASE))
+    idx_secs = len(re.findall(r'^[ \t]*[-*]\s*(?:\*\*)?Secci[oó]n', idx_text, re.MULTILINE | re.IGNORECASE))
+    body_caps = len(re.findall(r'^#{1,3}\s+(?:\*\*)?Cap[ií]tulo', body_text, re.MULTILINE | re.IGNORECASE))
+    body_secs = len(re.findall(r'^#{1,3}\s+(?:\*\*)?Secci[oó]n', body_text, re.MULTILINE | re.IGNORECASE))
+
+    mismatches = []
+    if idx_caps > 0 and idx_caps != body_caps:
+        mismatches.append(f"capítulos (índice={idx_caps}, cuerpo={body_caps})")
+    if idx_secs > 0 and idx_secs != body_secs:
+        mismatches.append(f"secciones (índice={idx_secs}, cuerpo={body_secs})")
+
+    if mismatches:
+        diff_str = "; ".join(mismatches)
+        return [{
+            "file": fname,
+            "check": "indice-descalce",
+            "msg": f"Descalce entre índice inicial y cuerpo: {diff_str}. Regla: el cuerpo manda al publicar (el índice es declarativo/visual)."
+        }]
+    return []
+
+
 def lint_one_file(fname, fpath, canon_keys, is_canon):
     errors, warnings = [], []
 
@@ -102,6 +144,9 @@ def lint_one_file(fname, fpath, canon_keys, is_canon):
     for d in sorted(dups):
         warnings.append({"file": fname, "check": "headings-duplicados",
                          "msg": f"Heading repetido: '{d}'. Riesgo de secciones indistinguibles."})
+
+    # Chequeo de blindaje "el índice manda" (v7.41, PROMPT 032)
+    warnings.extend(check_indice_descalce(fname, text))
 
     if is_canon:
         return (errors, warnings)

@@ -773,6 +773,77 @@ const App = {
     }
   },
 
+  // Etiqueta jerárquica visual M.C.S solo-display (v7.41, PROMPT 032).
+  // Decisión documentada: S = posición ordinal dentro del capítulo (idx - minIdx + 1),
+  // NO el segundo componente de `code` tal cual. Los 5 contratos usan codes modulares
+  // (cap 13: 1.1-1.7, 2.1-2.7, 3.1-3.8, 4.1-4.5) que colisionarían (24 duplicados
+  // con S=code, ej. cuatro 1.13.1); con S posicional hay 205/205 únicos por capítulo.
+  // `indexCode` y `code` quedan intactos (cero regeneración de datos).
+  _subjectNumberMap: {
+    civil: 1,
+    procesal: 2,
+    constitucional: 3
+  },
+
+  // Cache en memoria para cálculo determinista de base de capítulo
+  _chapterMinIndexCache: null,
+
+  // Estado en memoria de capítulos colapsables (aislado de StorageService)
+  _openChapters: null,
+
+  _getChapterMinIndex(subject, chapterNumber) {
+    if (!this._chapterMinIndexCache) {
+      this._chapterMinIndexCache = new Map();
+      const allTopics = (typeof StorageService !== 'undefined' && StorageService.getData && StorageService.getData().topics)
+        || (typeof INITIAL_DATA !== 'undefined' && INITIAL_DATA.topics)
+        || [];
+      allTopics.forEach(t => {
+        if (!t.subject || !t.chapterNumber || !t.indexCode) return;
+        const k = `${t.subject}-${t.chapterNumber}`;
+        const parts = String(t.indexCode).split('.');
+        const num = parseInt(parts[1], 10);
+        if (!isNaN(num)) {
+          if (!this._chapterMinIndexCache.has(k) || num < this._chapterMinIndexCache.get(k)) {
+            this._chapterMinIndexCache.set(k, num);
+          }
+        }
+      });
+    }
+    return this._chapterMinIndexCache.get(`${subject}-${chapterNumber}`);
+  },
+
+  displayHierCode(topic) {
+    if (!topic) return '';
+    const subjectMap = this._subjectNumberMap || { civil: 1, procesal: 2, constitucional: 3 };
+    const m = subjectMap[topic.subject] || (topic.subject === 'civil' ? 1 : topic.subject === 'procesal' ? 2 : topic.subject === 'constitucional' ? 3 : null);
+    const c = topic.chapterNumber;
+    if (!m || !c) {
+      return topic.indexCode || topic.code || '';
+    }
+
+    // 1. Derivación mediante indexCode continuo si está disponible
+    if (topic.indexCode) {
+      const minIdx = typeof this._getChapterMinIndex === 'function'
+        ? this._getChapterMinIndex(topic.subject, c)
+        : (App && App._getChapterMinIndex ? App._getChapterMinIndex(topic.subject, c) : undefined);
+      const parts = String(topic.indexCode).split('.');
+      const idx = parseInt(parts[1], 10);
+      if (!isNaN(idx) && minIdx !== undefined) {
+        const s = idx - minIdx + 1;
+        return `${m}.${c}.${s}`;
+      }
+    }
+
+    // 2. Fallback mediante code (sección N.N tal cual, ej. 1.1 -> s = 1)
+    if (topic.code) {
+      const parts = String(topic.code).split('.');
+      const s = parts[1] || parts[0];
+      return `${m}.${c}.${s}`;
+    }
+
+    return topic.indexCode || '';
+  },
+
   _isRenderingSidebar: false,
 
   renderSidebar() {
@@ -862,6 +933,19 @@ const App = {
       return;
     }
 
+    // Inicializar conjunto de capítulos abiertos en memoria si aún no existe
+    if (!this._openChapters) {
+      this._openChapters = new Set();
+      // Identificar el capítulo de la cédula activa inicial para auto-expandirlo
+      const activeTopicId = this.currentTopicId || (topics[0] ? topics[0].id : null);
+      if (activeTopicId) {
+        const activeTopic = topics.find(t => t.id === activeTopicId);
+        if (activeTopic) {
+          this._openChapters.add(`${activeTopic.subject || 'civil'}-${activeTopic.chapterNumber || 1}`);
+        }
+      }
+    }
+
     // Agrupar por Disciplina Oficial (I, II, III) y luego por Capítulo Oficial (1, 2, 3...)
     const disciplineOrder = [
       { key: "civil", label: "I. Derecho Civil" },
@@ -912,6 +996,8 @@ const App = {
 
       sortedChapters.forEach(([chapTitle, chapData]) => {
         const chapterTopics = chapData.topics;
+        const chapNum = chapData.num;
+        const chapterKey = `${disc.key}-${chapNum}`;
         
         // Ordenar cédulas prioritariamente por indexCode (1.1, 1.2, etc.) y fallback a code
         chapterTopics.sort((a, b) => {
@@ -927,40 +1013,59 @@ const App = {
         const masteredInChap = chapterTopics.filter(t => StorageService.isTopicMasteredByUser(t.id)).length;
         const totalInChap = chapterTopics.length;
         const hasActiveTopic = chapterTopics.some(t => t.id === this.currentTopicId);
-        const isOpen = hasActiveTopic || this.activeSidebarFilter !== 'all' || this.coverageFilter !== 'all' || chapData.num === 1;
+
+        // Todo colapsado excepto el capítulo de la cédula activa al abrir
+        if (hasActiveTopic) {
+          this._openChapters.add(chapterKey);
+        }
+        const isOpen = this._openChapters.has(chapterKey);
+        const safeChapTitle = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(chapTitle) : chapTitle;
+        const countLabel = `${totalInChap} ${totalInChap === 1 ? 'cédula' : 'cédulas'}`;
 
         html += `
-          <div class="category-group ${isOpen ? 'open' : ''}">
-            <div class="category-header" title="${chapTitle}">
+          <div class="category-group ${isOpen ? 'open' : ''}" data-chapter-key="${chapterKey}">
+            <div class="category-header" 
+                 role="button" 
+                 tabindex="0" 
+                 aria-expanded="${isOpen ? 'true' : 'false'}" 
+                 aria-controls="category-list-${chapterKey}"
+                 title="Capítulo ${chapNum} · ${safeChapTitle} (${countLabel})">
               <div class="category-title-wrap">
                 <span class="category-badge-dot ${disc.key}"></span>
-                <span class="chapter-label">${chapTitle}</span>
+                <span class="chapter-label">Capítulo ${chapNum} · ${safeChapTitle} <span class="chapter-cedulas-count">(${countLabel})</span></span>
               </div>
               <div class="chapter-meta-right">
-                <span class="chapter-count-badge ${masteredInChap === totalInChap && totalInChap > 0 ? 'all-done' : ''}">
+                <span class="chapter-count-badge ${masteredInChap === totalInChap && totalInChap > 0 ? 'all-done' : ''}" title="${masteredInChap} de ${totalInChap} cédulas dominadas">
                   ${masteredInChap}/${totalInChap}
                 </span>
                 <i data-lucide="chevron-right" class="category-chevron"></i>
               </div>
             </div>
-            <ul class="category-topics-list">
+            <ul id="category-list-${chapterKey}" class="category-topics-list">
               ${chapterTopics.map(t => {
                 const isUnlocked = LicenseService.isContentUnlocked(t, 'topic');
                 const isMastered = StorageService.isTopicMasteredByUser(t.id);
+                const hierCode = this.displayHierCode(t);
+                const safeHierCode = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(hierCode || '') : (hierCode || '');
                 // Quitar prefijo repetido
                 const cleanTitle = t.cleanTitle || (t.title.replace(/^Secci[oó]n\s*\d+\.\d+\s*[:–\-—]\s*/i, '').trim());
-                const displayCode = t.indexCode || t.code;
-                const safeDisplayCode = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(displayCode || '') : (displayCode || '');
                 const safeCleanTitle = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(cleanTitle || '') : (cleanTitle || '');
                 const tooltipText = t.indexCode 
                   ? `Cédula ${t.indexCode} · Sección ${t.code || ''} (${t.sourceFile || ''})`
                   : (t.title || '');
                 const safeTooltip = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(tooltipText) : tooltipText;
+                const ariaLabel = `Cédula ${safeHierCode}: ${safeCleanTitle}. Trazabilidad: Cédula ${t.indexCode || ''}, Sección ${t.code || ''} (${t.sourceFile || ''})`;
+                const safeAriaLabel = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(ariaLabel) : ariaLabel;
 
                 return `
-                <li class="topic-tree-item ${this.currentTopicId === t.id ? 'active' : ''} ${!isUnlocked ? 'locked' : ''}" data-topic-id="${t.id}" title="${safeTooltip}" ${this.currentTopicId === t.id ? 'aria-current="true"' : ''}>
+                <li class="topic-tree-item ${this.currentTopicId === t.id ? 'active' : ''} ${!isUnlocked ? 'locked' : ''}" 
+                    data-topic-id="${t.id}" 
+                    data-hier-code="${safeHierCode}"
+                    title="${safeTooltip}" 
+                    aria-label="${safeAriaLabel}"
+                    ${this.currentTopicId === t.id ? 'aria-current="true"' : ''}>
                   <div class="topic-item-left">
-                    <span class="cedula-code-badge">${displayCode ? '§ ' + safeDisplayCode : '·'}</span>
+                    <span class="cedula-code-badge" data-hier-code="${safeHierCode}">${safeHierCode ? safeHierCode : '·'}</span>
                     <span class="topic-title-text">${safeCleanTitle}</span>
                   </div>
                   <div class="topic-item-right">
@@ -998,6 +1103,10 @@ const App = {
     container.querySelectorAll('.topic-tree-item').forEach(item => {
       item.addEventListener('click', () => {
         this.currentTopicId = item.dataset.topicId;
+        const group = item.closest('.category-group');
+        if (group && group.dataset.chapterKey) {
+          this._openChapters.add(group.dataset.chapterKey);
+        }
         this.renderSidebar();
         if (window.innerWidth <= 1024) {
           const sidebar = document.getElementById("app-sidebar");
@@ -1013,12 +1122,44 @@ const App = {
       });
     });
 
-    // Toggle acordeón
+    // Toggle acordeón accesible con sincronización de aria-expanded y estado en memoria
     container.querySelectorAll('.category-header').forEach(header => {
-      header.addEventListener('click', () => {
-        header.parentElement.classList.toggle('open');
+      const group = header.closest('.category-group');
+      const chapterKey = group ? group.dataset.chapterKey : null;
+
+      const toggleAccordion = () => {
+        if (!group) return;
+        const isCurrentlyOpen = group.classList.contains('open');
+        const willOpen = !isCurrentlyOpen;
+        group.classList.toggle('open', willOpen);
+        header.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+        if (chapterKey) {
+          if (willOpen) {
+            this._openChapters.add(chapterKey);
+          } else {
+            this._openChapters.delete(chapterKey);
+          }
+        }
+      };
+
+      header.addEventListener('click', toggleAccordion);
+      header.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggleAccordion();
+        }
       });
     });
+
+    // Auto-scroll al ítem activo dentro del sidebar-tree
+    const activeItem = container.querySelector('.topic-tree-item.active');
+    if (activeItem) {
+      try {
+        activeItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      } catch (_) {
+        activeItem.scrollIntoView();
+      }
+    }
     } finally {
       this._isRenderingSidebar = false;
     }

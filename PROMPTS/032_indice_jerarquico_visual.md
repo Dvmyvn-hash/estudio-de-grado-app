@@ -1,7 +1,8 @@
+
 # PROMPT 032 — Índice Jerárquico Visual: etiqueta materia.capítulo.sección + capítulos colapsables (sin tocar datos)
 
 > **Versión:** v1.0 · **Fecha:** 2026-09-25 · **Autor:** puente (dpint) + orquestador (Nexo)
-> **Estado:** 📝 Por ejecutar (ejecución: Antigravity) · **Depende de:** v7.40 verde (canon 205). No toca parser, Vault, QA, cruces ni auth.
+> **Estado:** ✅ Implementado (v7.41, 2026-09-25) · **Depende de:** v7.40 verde (canon 205). No toca parser, Vault, QA, cruces ni auth.
 
 ---
 
@@ -67,12 +68,12 @@ Que el sidebar se vea ordenado con 205 cédulas: cada ítem muestra etiqueta jer
 
 ## DEFINITION OF DONE
 
-- [ ] Auditoría Fase 0 con unicidad `M.C.S` verificada + lista ≤8 defectos
-- [ ] Sidebar con etiquetas jerárquicas, capítulos colapsables con conteo y capítulo activo expandido
-- [ ] `all_afg_topics.json`, `js/data.js`, `vault_index.json`, `dogmatic_connections.json` byte-idénticos (cero regeneración)
-- [ ] Vault/QA/cruces/mastery/tests sin regresión; suites 4/4 al 100%
-- [ ] Lint con WARN `indice-descalce` documentado
-- [ ] `CONTEXT.md` (§8+§9 v7.41) + commit convencional con paths explícitos
+- [x] Auditoría Fase 0 con unicidad `M.C.S` verificada + lista ≤8 defectos
+- [x] Sidebar con etiquetas jerárquicas, capítulos colapsables con conteo y capítulo activo expandido
+- [x] `all_afg_topics.json`, `js/data.js`, `vault_index.json`, `dogmatic_connections.json` byte-idénticos (cero regeneración)
+- [x] Vault/QA/cruces/mastery/tests sin regresión; suites 4/4 al 100%
+- [x] Lint con WARN `indice-descalce` documentado
+- [x] `CONTEXT.md` (§8+§9 v7.41) + commit convencional con paths explícitos
 
 ## NOTAS PARA EL EJECUTOR
 
