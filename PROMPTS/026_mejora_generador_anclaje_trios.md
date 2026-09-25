@@ -63,11 +63,11 @@ Tabla delta asumido-vs-real del generador y sus tests; si el 021/023 siguen en c
 
 ## DEFINITION OF DONE
 
-- [ ] Gate de anclaje con umbral configurable + `needsReview` visible
-- [ ] `linkedApuntes` por overlap real en todos los arquetipos
-- [ ] Barrido completo de tríos mixtos con ledger y top-20 débiles
-- [ ] Piloto del orquestador en verde total (anclaje 4/4 combinadas o needsReview justificado)
-- [ ] Suites 4/4 al 100% + `CONTEXT.md` actualizado + commit convencional
+- [x] Gate de anclaje con umbral configurable + `needsReview` visible
+- [x] `linkedApuntes` por overlap real en todos los arquetipos
+- [x] Barrido completo de tríos mixtos con ledger y top-20 débiles
+- [x] Piloto del orquestador en verde total (anclaje 4/4 combinadas o needsReview justificado)
+- [x] Suites 4/4 al 100% + `CONTEXT.md` actualizado + commit convencional
 
 ## NOTAS PARA EL EJECUTOR
 
