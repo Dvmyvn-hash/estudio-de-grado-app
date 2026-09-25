@@ -1,8 +1,8 @@
 {
-  "fecha": "2026-09-25T21:20:58.326Z",
+  "fecha": "2026-09-25T21:25:33.420Z",
   "total_trios": 4785,
-  "duracion_segundos": 62.76,
-  "ms_por_trio": 13.12,
+  "duracion_segundos": 63.99,
+  "ms_por_trio": 13.37,
   "metricas": {
     "validos_estructura": 4785,
     "validos_estructura_pct": 100,
