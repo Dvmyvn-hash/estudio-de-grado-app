@@ -5,7 +5,7 @@
  */
 
 const INITIAL_DATA = {
-  // 1. SECCIONES COMPLETAS Y DESARROLLADAS DEL APUNTE (103 SECCIONES EN TOTAL)
+  // 1. SECCIONES COMPLETAS Y DESARROLLADAS DEL APUNTE (205 SECCIONES EN TOTAL)
   topics: [
   {
     "id": "civil-actojuridi-1-1",
@@ -1536,14 +1536,14 @@ const INITIAL_DATA = {
         "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Tiene por objeto la utilidad recíproca de las partes, gravándose cada ...» en la resolución de casos de civil."
       },
       {
-        "targetTopicId": "civil-clase911-2-3",
-        "targetTitle": "Principios Rectores de la Contratación",
+        "targetTopicId": "civil-contratoar-1-1",
+        "targetTitle": "Definición dogmática, naturaleza jurídica y clasificaciones",
         "targetSubject": "civil",
-        "targetIndexCode": "1.27",
+        "targetIndexCode": "1.35",
         "crossoverType": "Materia-Afin",
-        "quote": "Debates Doctrinales, Discusiones y Puntos de Tesis para el Examen de Grado**",
-        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Debates Doctrinales, Discusiones y Puntos de Tesis para el Examen de Grado**» (§ 1.27).",
-        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Debates Doctrinales, Discusiones y Puntos de Tesis para el Examen de G...» en la resolución de casos de civil."
+        "quote": "En el examen de grado, nunca afirme que el arrendamiento se perfecciona con la entrega de la cosa",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «En el examen de grado, nunca afirme que el arrendamiento se perfecciona con la entrega de la cosa» (§ 1.35).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En el examen de grado, nunca afirme que el arrendamiento se perfeccion...» en la resolución de casos de civil."
       }
     ],
     "indexCode": "1.26"
@@ -1821,6 +1821,16 @@ const INITIAL_DATA = {
         "practicalApplication": "¿Se hace dueño el comprador al momento de firmar la escritura de compraventa? No; solo adquiere el derecho personal a exigir la entrega. Se requiere la inscripción en el Registro del Conservador para transferir el dominio de inmuebles."
       },
       {
+        "targetTopicId": "civil-contratoar-1-2",
+        "targetTitle": "Arrendamiento de cosas: requisitos, características y capacidad",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.36",
+        "crossoverType": "Materia-Afin",
+        "quote": "Se perfecciona por el mero acuerdo de voluntades sobre la cosa arrendada y el precio o renta (Art",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Se perfecciona por el mero acuerdo de voluntades sobre la cosa arrendada y el precio o renta (Art» (§ 1.36).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Se perfecciona por el mero acuerdo de voluntades sobre la cosa arrenda...» en la resolución de casos de civil."
+      },
+      {
         "targetTopicId": "civil-actojuridi-1-5",
         "targetTitle": "Requisitos de Validez (II) — Objeto Lícito y Causa Lícita",
         "targetSubject": "civil",
@@ -1829,16 +1839,6 @@ const INITIAL_DATA = {
         "quote": "Pueden venderse todas las cosas corporales o incorporales, cuya enajenación no esté prohibida por ley\"_",
         "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Pueden venderse todas las cosas corporales o incorporales, cuya enajenación no esté prohibida por ley\"_» (§ 1.5).",
         "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Pueden venderse todas las cosas corporales o incorporales, cuya enajen...» en la resolución de casos de civil."
-      },
-      {
-        "targetTopicId": "civil-clase911-2-2",
-        "targetTitle": "Clasificaciones Legales (Arts. 1439 a 1443 CC) y Doctrinales Contemporáneas",
-        "targetSubject": "civil",
-        "targetIndexCode": "1.26",
-        "crossoverType": "Materia-Afin",
-        "quote": "Tiene por objeto la utilidad de ambos contratantes, gravándose cada uno a beneficio del otro (ej",
-        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Tiene por objeto la utilidad de ambos contratantes, gravándose cada uno a beneficio del otro (ej» (§ 1.26).",
-        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Tiene por objeto la utilidad de ambos contratantes, gravándose cada un...» en la resolución de casos de civil."
       }
     ],
     "indexCode": "1.31"
@@ -1881,6 +1881,16 @@ const INITIAL_DATA = {
         "practicalApplication": "Plazos de prescripción de las acciones redhibitorias (rescisión o quanti minoris): 6 meses para muebles y 1 año para inmuebles (art. 1866 CC), plazos de caducidad que no se suspenden."
       },
       {
+        "targetTopicId": "civil-contratoar-1-3",
+        "targetTitle": "Efectos del arrendamiento de cosas: obligaciones del arrendador y del arrendatario",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.37",
+        "crossoverType": "Materia-Afin",
+        "quote": "En el examen de grado, jamás responda que el arrendatario queda en mora de restituir por la sola llegada del plazo convenido",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «En el examen de grado, jamás responda que el arrendatario queda en mora de restituir por la sola llegada del plazo convenido» (§ 1.37).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En el examen de grado, jamás responda que el arrendatario queda en mor...» en la resolución de casos de civil."
+      },
+      {
         "targetTopicId": "civil-lasobligac-1-3",
         "targetTitle": "Obligaciones Sujetas a Modalidad (Condición y Plazo) y Acción Resolutoria",
         "targetSubject": "civil",
@@ -1889,16 +1899,6 @@ const INITIAL_DATA = {
         "quote": "Prescribe según la regla general de las acciones ordinarias en **5 años** contados desde que la obligación se hizo exigible (Arts",
         "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Prescribe según la regla general de las acciones ordinarias en **5 años** contados desde que la obligación se hizo exigible (Arts» (§ 1.16).",
         "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Prescribe según la regla general de las acciones ordinarias en **5 año...» en la resolución de casos de civil."
-      },
-      {
-        "targetTopicId": "civil-lasobligac-1-5",
-        "targetTitle": "Modos de Extinguir las Obligaciones (II) — Pérdida de la Cosa Debida y Prescripción Extintiva",
-        "targetSubject": "civil",
-        "targetIndexCode": "1.18",
-        "crossoverType": "Materia-Afin",
-        "quote": "Se debe el precio de la cosa y la indemnización de la mora [8, 9]",
-        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Se debe el precio de la cosa y la indemnización de la mora [8, 9]» (§ 1.18).",
-        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Se debe el precio de la cosa y la indemnización de la mora [8, 9]...» en la resolución de casos de civil."
       }
     ],
     "indexCode": "1.32"
@@ -2019,6 +2019,5869 @@ const INITIAL_DATA = {
       }
     ],
     "indexCode": "1.34"
+  },
+  {
+    "id": "civil-contratoar-1-1",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 12,
+    "chapterTitle": "Contrato de Arrendamiento",
+    "category": "Contrato de Arrendamiento",
+    "code": "1.1",
+    "title": "Sección 1.1: Definición dogmática, naturaleza jurídica y clasificaciones",
+    "cleanTitle": "Definición dogmática, naturaleza jurídica y clasificaciones",
+    "sourceFile": "CONTRATOARRENDAMIENTO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOARRENDAMIENTO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Dominio",
+      "Posesión",
+      "Contrato",
+      "Obligación",
+      "Resolución"
+    ],
+    "isFree": false,
+    "content": "### Sección 1.1 — Definición dogmática, naturaleza jurídica y clasificaciones\n\n#### 1. Definición legal, etimología y denominación de las partes\n\n**Definición legal (Art. 1915 del Código Civil).**\n\nEl artículo 1915 del Código Civil define el contrato de arrendamiento en los siguientes términos:\n\n> “El arrendamiento es un contrato en que las dos partes se obligan recíprocamente, la una a conceder el goce de una cosa, o a ejecutar una obra o prestar un servicio, y la otra a pagar por este goce, obra o servicio un precio determinado.”\n\n**Etimología y equivalencia terminológica.**\n\n- **Etimología:** La expresión *arrendamiento* proviene del latín *a-renda*, que alude al acto de ceder un bien o prestar un servicio a cambio de una **renta** o pago periódico.\n- **Equivalencias:** En el Derecho Comparado y en la tradición jurídica romana se le conoce como **locación** (*locatio-conductio*) o **alquiler** (término derivado del árabe *al-kira*). En el sistema chileno, *arrendamiento*, *locación* y *alquiler* son técnicamente sinónimos, siendo la voz *arrendamiento* la acogida expresamente por el Código Civil.\n\n**Denominación de las partes (Art. 1919 del Código Civil).**\n\nIntervienen en la convención dos partes:\n1. **Arrendador (*locator*):** Es la parte que se obliga a conceder el uso o goce temporal de una cosa, a ejecutar una obra material o a prestar un servicio.\n2. **Arrendatario (*conductor*):** Es la parte que se obliga a pagar un precio determinado por dicho goce, obra o servicio.\n\n**Denominaciones Especiales en Subsidio dentro del Código Civil:**\n- **Inquilino:** Denominación legal del arrendatario cuando el contrato recae sobre casas, almacenes u otros edificios urbanos (Arts. 1970 y ss. CC).\n- **Colono:** Denominación legal del arrendatario cuando el contrato recae sobre predios rústicos (Arts. 1978 y ss. CC).\n\n#### 2. Naturaleza jurídica y elementos de la esencia particular\n\n**Naturaleza jurídica del arrendamiento de cosas.**\n\n- **Título de Mera Tenencia (Arts. 714 y 1916 del CC):** La entrega que efectúa el arrendador al arrendatario no constituye tradición de dominio ni de posesión, sino un traspaso de la **mera tenencia**. El arrendatario reconoce dominio ajeno sobre el bien.\n- **Fuente de un Derecho Personal o de Crédito:** El arrendamiento otorga al arrendatario un **derecho personal** (*ius ad rem*) frente al arrendador, que le permite exigir a este último la entrega y la mantención del goce tranquilo de la cosa. **No concede jamás un derecho real sobre el bien**.\n\n**Elementos de la esencia particulares (Arts. 1915 y 1917 del CC / Alessandri).**\n\nPara que el arrendamiento nazca a la vida del Derecho se requiere la concurrencia copulativa de tres elementos esenciales específicos:\n\n```\n                                  ┌── a) Concesión del goce temporal de una COSA,\n                                  │      o la ejecución de una OBRA o SERVICIO.\nELEMENTOS ESENCIALES PARTICULARES ┼── b) Pago de un PRECIO determinado (llamado RENTA\nDEL ARRENDAMIENTO (Art. 1915 CC)  │      cuando se paga periódicamente, Art. 647 CC).\n                                  └── c) CONSENTIMIENTO efectivo sobre la cosa/obra/servicio\n                                         y sobre el monto y forma de pago del precio.\n```\n\n- **Sanción por Falta de Elementos:** Si falta la concesión del goce o el servicio, no hay contrato; si falta el precio, la convención degenera en un contrato gratuito de **comodato** o en una convención atípica.\n\n#### 3. Clasificación legal y doctrinaria del contrato de arrendamiento\n\n**Clasificación tripartita del Art. 1915 del Código Civil.**\n\nAtendiendo a la naturaleza de la prestación debida por el arrendador, el Código Civil clasifica el arrendamiento en tres tipos:\n\n1. **Arrendamiento de Cosas:** Aquel por el cual una parte se obliga a conceder el uso y goce temporal de una cosa corporal o incorporal no consumible, y la otra a pagar un precio por dicho goce.\n2. **Arrendamiento para la Confección de una Obra Material:** Aquel en que una persona (artífice o contratista) se obliga a ejecutar una obra material determinada para otra, mediante un precio prefijado (sea bajo la modalidad de obra a precio alzado o por administración).\n   - **Criterio de Distinción con la Compraventa (Art. 1996 CC):** Si la materia principal para la confección de la obra es suministrada por el propio artífice, el contrato es de **compraventa** (sujeto a la condición suspensiva de aprobación del que la encargó); si la materia es suministrada por quien encarga la obra, el contrato es de **arrendamiento**.\n3. **Arrendamiento de Servicios Inmateriales / Prestación de Servicios:** Aquel en que una parte se obliga a prestar un servicio donde predomina el esfuerzo intelectual por sobre la mano de obra. Comprende las obras intelectuales aisladas (Art. 2006 CC), las series de actos continuados (Art. 2007 CC) y los servicios de profesionales liberales (Arts. 2012 y 2118 CC, regidos por las reglas del mandato y en su defecto del arrendamiento).\n\n**Características contractuales del arrendamiento.**\n\n- **Bilateral:** Ambas partes se obligan recíprocamente desde el momento de su perfeccionamiento (Art. 1439 CC).\n- **Oneroso:** Reporta utilidad económica para ambos contratantes, gravándose recíprocamente (Art. 1440 CC).\n- **Conmutativo:** Las prestaciones de las partes se miran como equivalentes (Art. 1441 CC).\n- **Principal:** Subsiste por sí mismo sin necesidad de otra convención (Art. 1442 CC).\n- **Consensual (Regla General):** Se perfecciona por el mero acuerdo de voluntades sobre cosa y precio (Art. 1443 CC).\n  - **Excepciones de Solemnidad Legal:** El arrendamiento de predios rústicos es solemne, requiriendo constar por escrito mediante escritura pública o privada ante dos testigos, incorporando además la declaración sobre el régimen tributario del arrendador (DL N.° 993, Arts. 5.° y 75 bis del Código Tributario).\n  - **Solemnidad Convencional:** Las partes pueden acordar que el contrato no se repute perfecto sino hasta la firma de una escritura (Art. 1921 CC), conservando el derecho de retractación hasta el cumplimiento de la solemnidad o la entrega.\n- **De Tracto Sucesivo y Duración Limitada:** Sus prestaciones no se agotan en un solo acto, sino que se van renovando o ejecutando continuamente en el tiempo.\n- **Contrato de Administración:** Por regla general, no constituye un acto de disposición patrimonial, bastando para su celebración las facultades ordinarias de administración del artículo 2132 del Código Civil.\n- **Contrato Dirigido (en Arrendamiento de Predios Urbanos — Ley N.° 18.101):** El legislador restringe la autonomía de la voluntad estableciendo la irrenunciabilidad de los derechos del arrendatario (Art. 19 de la Ley N.° 18.101) y plazos mínimos e imperativos de restitución.\n\n#### 4. Análisis comparativo con otros contratos\n\n**Comparación con la compraventa (Arts. 1793 y 1915 del CC).**\n\n| **Criterio de comparación** | **Arrendamiento de cosas** | **Compraventa** |\n| --- | --- | --- |\n| **Naturaleza del Título** | Es un **título de mera tenencia**. No transfiere el dominio. | Es un **título traslaticio de dominio** (Art. 675 CC). |\n| **Obligación Principal del Vendedor/Arrendador** | Conceder el **uso y goce temporal** de la cosa. | Proporcionar el goce tranquilo y **transferir el dominio** de la cosa. |\n| **Solemnidad Legal en Inmuebles** | Es **consensual** (tratándose de bienes raíces urbanos). | Es **solemne**; exige siempre escritura pública (Art. 1801 inc. 2.° CC). |\n| **Teoría de los Riesgos** | El riesgo de la pérdida fortuita es del **arrendador** (*res perit domino*, Art. 1932 CC). | El riesgo es del **comprador** desde que se perfecciona el contrato (Art. 1820 CC). |\n| **Moneda/Especie del Precio** | Puede pagarse en dinero o en **frutos naturales** de la cosa (Art. 1917 CC). | Debe fijarse imperativamente en **dinero** (Art. 1793 CC). |\n| **Lesión Enorme** | **No procede la lesión enorme** en el arrendamiento. | Procede en la venta de bienes raíces (Art. 1888 CC). |\n| **Pacto Comisorio Calificado** | Por no pago de rentas, la convención se extingue **ipso facto de pleno derecho** sin plazo de gracia. | Por no pago del precio, el comprador puede enervar la resolución pagando dentro de **24 horas** (Art. 1879 CC). |\n\n**Comparación con el usufructo (Arts. 764 y 1915 del CC).**\n\n| **Criterio de comparación** | **Arrendamiento de cosas** | **Usufructo** |\n| --- | --- | --- |\n| **Naturaleza del Derecho** | Confiere un **derecho personal o de crédito** frente al arrendador. | Confiere un **derecho real** sobre la cosa fructuaria (Art. 577 CC). |\n| **Fuente del Derecho** | Nace **exclusivamente del contrato**. | Nace del contrato, testamento, ley o prescripción. |\n| **Obligaciones del Constituyente** | El arrendador asume **obligaciones activas y continuas** durante todo el contrato. | El nudo propietario sólo tiene un deber de **abstención y tolerancia**. |\n| **Inventario y Caución** | El arrendatario **no rinde caución ni inventario solemne** por regla general. | El usufructuario debe **rendir caución e inventario solemne** antes de entrar en goce (Art. 775 CC). |\n| **Efecto de la Muerte** | Transmisible a los herederos del arrendatario (el contrato **no se extingue**). | **Intransmisible**; se extingue con la muerte del usufructuario (Art. 806 CC). |\n| **Aceptación de Gratuidad** | Es esencialmente **oneroso** (exige precio). | Puede ser a título **gratuito u oneroso**. |\n\n**Comparación con el comodato (Arts. 2174 y 1915 del CC).**\n\n| **Criterio de comparación** | **Arrendamiento de cosas** | **Comodato** |\n| --- | --- | --- |\n| **Estructura Obligacional** | Es un contrato **bilateral**. | Es un contrato **unilateral** (sólo se obliga el comodatario a restituir). |\n| **Sacrificio Patrimonial** | Es un contrato **oneroso**. | Es un contrato **gratuito por esencia** (si hay pago, degenera en arriendo). |\n| **Perfeccionamiento** | Es **consensual** por regla general. | Es un **contrato real**; se perfecciona con la entrega de la cosa (Art. 2174 CC). |\n| **Efecto de la Muerte del Usuario** | **No se extingue** por la muerte de las partes. | Por regla general **se extingue con la muerte del comodatario** por ser *intuitu personae*. |\n\n#### 5. Puntos críticos para el examen de grado\n\n1. **La Falsa Naturaleza Real:** En el examen de grado, nunca afirme que el arrendamiento se perfecciona con la entrega de la cosa. La entrega es el cumplimiento de la obligación principal del arrendador, pero el contrato se encuentra perfeccionado **desde que se produce el solo acuerdo sobre la cosa y el precio** (salvo predios rústicos).\n2. **Pacto Comisorio Calificado en Arriendo:** A diferencia de la compraventa (donde el Art. 1879 CC concede 24 horas para pagar), en el arrendamiento el pacto comisorio calificado por no pago de rentas opera **ipso facto**, extinguiéndose el contrato de pleno derecho por aplicación de la libertad contractual y las reglas generales de la condición resolutoria ordinaria.\n3. **Transmisibilidad del Arrendamiento:** Recuerde que a diferencia del usufructo o del comodato, la muerte del arrendador o del arrendatario **no pone término al contrato de arrendamiento**; los herederos pasan a ocupar la posición jurídica de su causante.",
+    "charCount": 11234,
+    "connections": [
+      {
+        "targetTopicId": "civil-contratoar-1-2",
+        "targetTitle": "Arrendamiento de cosas: requisitos, características y capacidad",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.36",
+        "crossoverType": "Materia-Afin",
+        "quote": "Las partes pueden pactar que el arrendamiento no se repute perfecto sino hasta la firma de una escritura",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Las partes pueden pactar que el arrendamiento no se repute perfecto sino hasta la firma de una escritura» (§ 1.36).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Las partes pueden pactar que el arrendamiento no se repute perfecto si...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "civil-clase911-2-2",
+        "targetTitle": "Clasificaciones Legales (Arts. 1439 a 1443 CC) y Doctrinales Contemporáneas",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.26",
+        "crossoverType": "Materia-Afin",
+        "quote": "Subsiste por sí mismo sin necesidad de otra convención (ej",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Subsiste por sí mismo sin necesidad de otra convención (ej» (§ 1.26).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Subsiste por sí mismo sin necesidad de otra convención (ej...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "civil-contratoar-1-3",
+        "targetTitle": "Efectos del arrendamiento de cosas: obligaciones del arrendador y del arrendatario",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.37",
+        "crossoverType": "Materia-Afin",
+        "quote": "La entrega no constituye tradición de dominio, sino el traspaso de la **mera tenencia**",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «La entrega no constituye tradición de dominio, sino el traspaso de la **mera tenencia**» (§ 1.37).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «La entrega no constituye tradición de dominio, sino el traspaso de la ...» en la resolución de casos de civil."
+      }
+    ],
+    "indexCode": "1.35"
+  },
+  {
+    "id": "civil-contratoar-1-2",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 12,
+    "chapterTitle": "Contrato de Arrendamiento",
+    "category": "Contrato de Arrendamiento",
+    "code": "1.2",
+    "title": "Sección 1.2: Arrendamiento de cosas: requisitos, características y capacidad",
+    "cleanTitle": "Arrendamiento de cosas: requisitos, características y capacidad",
+    "sourceFile": "CONTRATOARRENDAMIENTO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOARRENDAMIENTO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Dominio",
+      "Posesión",
+      "Nulidad",
+      "Contrato",
+      "Obligación"
+    ],
+    "isFree": false,
+    "content": "### Sección 1.2 — Arrendamiento de cosas: requisitos, características y capacidad\n\n#### 1. Elementos esenciales específicos del arrendamiento de cosas\n\nPara que el contrato de arrendamiento de cosas se perfeccione y produzca sus efectos propios, se requiere la concurrencia copulativa de tres elementos de la esencia particulares (Art. 1915 del CC):\n\n```\n                                     ┌── 1. EL CONSENTIMIENTO: Acuerdo de voluntades\n                                     │      sobre la cosa y el precio.\nELEMENTOS ESENCIALES PARTICULARES ───┼── 2. LA COSA ARRENDADA: Bien corporal o incorporal,\nDEL ARRENDAMIENTO DE COSAS           │      no consumible, cuya tenencia/goce se cede.\n(Art. 1915 y 1916 CC)                └── 3. EL PRECIO O RENTA: Prestación recíproca en\n                                            dinero o frutos por la concesión del goce.\n```\n\n**El consentimiento de las partes.**\n\n- **Regla General — Consensualismo:** Se perfecciona por el mero acuerdo de voluntades sobre la cosa arrendada y el precio o renta (Art. 1443 y 1915 del CC).\n- **Prueba del Contrato y Limitaciones a la Prueba Testimonial:** No obstante ser consensual por regla general, se le aplican las limitaciones a la prueba de testigos contenidas en los artículos 1708 y 1709 del Código Civil. Si la renta o el valor de la cosa arrendada excede de dos Unidades Tributarias Mensuales (UTM), la entrega o la promesa de arrendamiento debe constar por escrito para ser probada mediante testigos en juicio.\n- **Solemnidades Legales Especiales:**\n1. **Predios Rústicos:** Es solemne *ex lege*. Debe constar imperativamente por escrito mediante escritura pública o privada ante dos testigos (DL N.° 993, Art. 5.°). Además, la omisión de la declaración sobre el régimen tributario al que está sujeto el arrendador genera la inoponibilidad y priva de mérito ejecutivo al documento (Art. 75 bis del Código Tributario).\n2. **Inmuebles Urbanos en Procedimiento Monitorio (Ley N.° 18.101, Art. 20):** Para accionar a través del procedimiento monitorio de cobro de rentas, la Ley N.° 21.461 exige que las firmas del contrato privado estén autorizadas ante Notario Público, previa exhibición de los títulos que habilitan al arrendador para ceder el uso del inmueble.\n- **Solemnidad Convencional (Artículo 1921 del CC):** Las partes pueden pactar que el arrendamiento no se repute perfecto sino hasta la firma de una escritura. En tal evento, cualquiera de los contratantes puede retractarse unilateralmente mientras no se firme la escritura o se efectúe la entrega real de la cosa.\n\n**La cosa arrendada.**\n\n**Requisitos generales del objeto.**\n\nLa cosa arrendada debe ser **real** (existir o esperarse que exista), **comerciable**, **determinada o determinable** y **susceptible de darse en arrendamiento**.\n\n**Ámbito de aplicación.**\n\n- **Bienes Corporales e Incorporales:** Pueden darse en arriendo cosas muebles e inmuebles, corporales e incorporales (ej. se puede dar en arrendamiento el derecho real de usufructo o el derecho de llaves de un establecimiento comercial).\n- **Exigencia Esencial de No Consumibilidad (Art. 1916 del CC):** La cosa debe ser no consumible, puesto que el arrendatario contrae la obligación de restituir la misma especie al término del contrato (*restitución in natura*). Si se entrega una cosa consumible con la obligación de devolver otra equivalente, la convención degenera en un contrato de **mutuo** o préstamo de consumo.\n\n**Cosas que no pueden darse en arrendamiento.**\n\n1. **Los Derechos Personalísimos:** Por estar fuera del comercio contractual (ej. el derecho real de uso o de habitación, Art. 819 del CC).\n2. **Cosas Prohibidas por la Ley:** Por mandato de orden público (ej. viviendas sociales adquiridas a través del SERVIU antes de vencido el plazo legal de prohibición).\n3. **Cosas Consumibles:** Pues impiden la restitución de la misma cosa entregada.\n\n**Arrendamiento de cosa ajena (Art. 1916, inciso 2.°, del CC).**\n\n- **Validez de la Convención:** Al igual que en la compraventa (Art. 1815 CC), **el arrendamiento de cosa ajena es válido**. El arrendamiento otorga un derecho personal de goce y no transfiere el dominio.\n- **Efectos entre Arrendador y Arrendatario:** El arrendador queda obligado a proporcionar el goce tranquilo de la cosa. Si el arrendatario es privado de la cosa por el verdadero dueño (evicción), el arrendatario de buena fe tiene **acción de saneamiento e indemnización de perjuicios** en contra del arrendador (Art. 1916 inc. 2.° CC).\n- **Efectos respecto del Verdadero Dueño:** El contrato le es inoponible. El dueño conserva intactas sus acciones reales (acción reivindicatoria o de restitución) para recobrar la tenencia del bien.\n\n**El precio o renta.**\n\n**Naturaleza y formas que puede adoptar el precio (Art. 1917 del CC).**\n\n- **Libertad de Forma:** A diferencia de la compraventa (donde el precio debe fijarse imperativamente en dinero, Art. 1793 CC), en el arrendamiento el precio puede consistir:\n1. En **dinero**.\n2. En **frutos naturales** de la cosa arrendada (pudiendo fijarse en una cantidad determinada o en una cuota alícuota de la cosecha).\n- **Concepto de Renta:** Cuando el precio se paga en forma periódica y continuada durante la vigencia del contrato, toma la denominación legal de **renta** (Art. 1917 inc. 2.° CC). Las rentas de arrendamiento constituyen **frutos civiles** (Art. 647 del CC).\n\n**Determinación del precio (Art. 1918 del CC).**\n\n- Se aplican los mismos modos de determinación que en la compraventa (Arts. 1808 y 1809 CC):\n1. Por acuerdo directo de los contratantes.\n2. Por arbitrio de un tercero. Si se encomienda la fijación a un tercero, el contrato se celebra bajo la condición suspensiva de que este determine el monto.\n- **Requisito de Seriedad:** El precio debe ser real y serio. Si el precio es simulación absoluta, irrisorio o fingido, la convención degenera en un contrato gratuito de **comodato** o en una donación.\n\n**Regla especial de discrepancia sobre el monto de la renta (Art. 1943 del CC).**\n\nSi la cosa ya fue entregada al arrendatario y surge disputa posterior sobre el monto de la renta pactada o su efectividad:\n1. Se estará a la prueba legal presentada por las partes (conforme a las limitaciones ordinarias de la prueba testimonial).\n2. Si ninguna parte prueba su pretensión, **se estará al justiprecio de peritos**, dividiéndose los gastos del peritaje por partes iguales entre arrendador y arrendatario.\n\n#### 2. Características contractuales del arrendamiento de cosas\n\n```\n                                ┌── 1. BILATERAL (Art. 1439 CC): Obligaciones recíprocas.\n                                ├── 2. ONEROSO (Art. 1440 CC): Utilidad recíproca.\nCARACTERÍSTICAS CONTRACTUALES   ├── 3. CONMUTATIVO (Art. 1441 CC): Prestaciones equivalentes.\nDEL ARRENDAMIENTO DE COSAS ─────┼── 4. CONSENSUAL POR REGLA GENERAL (Art. 1443 CC).\n                                ├── 5. DE TRACTO SUCESIVO Y DURACIÓN LIMITADA.\n                                └── 6. TÍTULO DE MERA TENENCIA (Arts. 714 y 1916 CC).\n```\n\n1. **Bilateral (Art. 1439 del CC):** Arrendador y arrendatario se obligan recíprocamente desde el perfeccionamiento del contrato. El arrendador se obliga a conceder el goce tranquilo y el arrendatario a pagar el precio.\n2. **Oneroso (Art. 1440 del CC):** Reporta beneficio y gravamen recíproco para ambas partes.\n3. **Conmutativo (Art. 1441 del CC):** Las prestaciones de las partes se miran como equivalentes.\n   - **Inexistencia de Lesión Enorme:** No procede la rescisión por lesión enorme en la renta de arrendamiento. (Excepción: reducción de cláusula penal enorme ex Art. 1544 CC).\n4. **Consensual por Regla General (Art. 1443 del CC):** Se perfecciona por el solo acuerdo sobre cosa y precio. Excepcionalmente es solemne en predios rústicos (DL 993).\n5. **De Tracto Sucesivo y Duración Limitada:** Las obligaciones se van cumpliendo de forma continuada en el tiempo.\n   - **Inexistencia de Plazo Máximo General en Chile:** A diferencia del Derecho Comparado (ej. Argentina o Perú que fijan topes de 10, 20 o 50 años), la legislación chilena no establece un plazo máximo general de vigencia, aunque las partes pueden pactar la terminación o su renovación mediante la **tácita reconducción** (Art. 1956 del CC).\n6. **Título de Mera Tenencia (Arts. 714 y 1916 del CC):** El arrendatario reconoce dominio ajeno sobre la cosa. Jamás adquiere la posesión ni puede ganar el bien por prescripción adquisitiva ordinaria (salvo la excepción del Art. 2510 N.° 3 del CC).\n7. **Contrato de Administración:** Por regla general no constituye acto de disposición, bastando para su celebración las facultades ordinarias de administración (Art. 2132 del CC).\n\n#### 3. Capacidad y normas especiales de administración\n\nPara celebrar el contrato de arrendamiento se requiere capacidad de ejercicio ordinaria. Sin embargo, el legislador contempla **normas imperativas de protección y limitación de plazos** respecto de administradores de bienes ajenos:\n\n**El marido en la sociedad conyugal.**\n\n- **Bienes Muebles (Sociales o Propios de la Mujer):** Puede arrendarlos sin restricción de plazo.\n- **Bienes Inmuebles Sociales (Art. 1749 Inciso 4.° del CC):** Para arrendar o ceder la tenencia de predios urbanos por más de **5 años**, o rústicos por más de **8 años** (incluidas las prórrogas), **requiere la autorización específica de la mujer** (o del juez en subsidio si hay negativa sin justo motivo o impedimento).\n- **Bienes Inmuebles Propios de la Mujer (Art. 1756 del CC):** Para arrendar predios urbanos por más de **5 años** o rústicos por más de **8 años** (incluidas las prórrogas), **requiere la autorización de la mujer** (el juez no puede suplir la negativa dictada por la mujer sobre sus bienes propios).\n- **Sanción Procesal (Art. 1757 del CC):** El contrato no es nulo en su totalidad; la sanción es la **inoponibilidad o reducción del exceso de plazo**. El contrato regirá obligatoriamente sólo por el plazo máximo legal de 5 u 8 años, siendo inoponible a la mujer o a sus herederos en el tiempo excedente.\n\n**La mujer en la administración extraordinaria de la sociedad conyugal (Art. 1761 del CC).**\n\n- Si la mujer asume la curaduría del marido y la administración extraordinaria, para arrendar inmuebles sociales por más de **5 años** (urbanos) u **8 años** (rústicos), **requiere autorización judicial previa información de utilidad**.\n\n**Guardadores: tutores y curadores respecto de bienes del pupilo.**\n\n- **Límite Temporal (Art. 407 del CC):** No pueden dar en arriendo los predios rústicos del pupilo por más de **8 años**, ni los urbanos por más de **5 años**, ni en ningún caso por un plazo que exceda la mayoría de edad del pupilo.\n- **Sanción:** El exceso de plazo es **inoponible al pupilo** o a quien le suceda en el dominio.\n- **Prohibición Absoluta de Autocontratación (Art. 412 Inciso 2.° del CC):** El guardador **no puede bajo ninguna circunstancia tomar en arriendo bienes raíces del pupilo**, prohibición que se extiende a su cónyuge, ascendientes y descendientes.\n\n**Padre o madre en ejercicio de la patria potestad (Art. 255 del CC).**\n\n- Se aplican exactamente los mismos límites del artículo 407 del CC: los inmuebles del hijo no pueden arrendarse por más de **8 años** (rústicos), **5 años** (urbanos) ni más allá de su mayoría de edad. Sanción: **inoponibilidad del exceso** ante el hijo.\n\n**Bienes familiares (Art. 142 del CC).**\n\n- Requiere la autorización específica del cónyuge no propietario para dar en arrendamiento el bien raíz que sirve de residencia principal a la familia o los muebles que lo guarnecen.\n\n**Restricciones a extranjeros por seguridad nacional.**\n\n- **Terrenos Fiscales (DL N.° 1.939):** Inmuebles fiscales ubicados hasta 10 km de la frontera o 5 km de la costa sólo pueden ser arrendados a nacionales chilenos (salvo autorización especial del Ministerio de Defensa).\n- **Predios Rústicos Fronterizos (DL N.° 993, Art. 3.°):** Prohibición absoluta de celebrar contratos de arrendamiento sobre predios rústicos fronterizos con personas naturales o jurídicas extranjeras.\n\n#### 4. Puntos críticos para el examen de grado\n\n1. **Inoponibilidad por Exceso de plazo frente a nulidad relativa:** Ante la pregunta: “¿Qué ocurre si el marido o el guardador arrienda un predio urbano por 10 años sin autorización?”, responda que el contrato **no adolece de nulidad relativa por el plazo**, sino que es **inoponible en el exceso** (Art. 1757 y 407 CC). El contrato es válido y eficaz durante los primeros 5 u 8 años, perdiendo eficacia de pleno derecho al vencimiento del tope legal.\n2. **Prohibición del Art. 412 Inciso 2.° del CC:** El guardador no puede autocontratar arriendos sobre bienes raíces del pupilo ni con autorización judicial. Es un caso de prohibición legal absoluta.\n3. **El Precio en Frutos:** Recuerde que, a diferencia de la compraventa, en el arrendamiento es plenamente válido fijar el precio en **frutos naturales** o en una cuota de la cosecha (Art. 1917 CC).",
+    "charCount": 12939,
+    "connections": [
+      {
+        "targetTopicId": "civil-contratoar-1-1",
+        "targetTitle": "Definición dogmática, naturaleza jurídica y clasificaciones",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.35",
+        "crossoverType": "Materia-Afin",
+        "quote": "Las partes pueden acordar que el contrato no se repute perfecto sino hasta la firma de una escritura (Art",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Las partes pueden acordar que el contrato no se repute perfecto sino hasta la firma de una escritura (Art» (§ 1.35).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Las partes pueden acordar que el contrato no se repute perfecto sino h...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "civil-contratoar-1-3",
+        "targetTitle": "Efectos del arrendamiento de cosas: obligaciones del arrendador y del arrendatario",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.37",
+        "crossoverType": "Materia-Afin",
+        "quote": "En el examen de grado, jamás responda que el arrendatario queda en mora de restituir por la sola llegada del plazo convenido",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «En el examen de grado, jamás responda que el arrendatario queda en mora de restituir por la sola llegada del plazo convenido» (§ 1.37).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En el examen de grado, jamás responda que el arrendatario queda en mor...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "civil-clase911-4-1",
+        "targetTitle": "Concepto, Características y Elementos Esenciales (Consentimiento, Cosa Vendida y Precio)",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.31",
+        "crossoverType": "Materia-Afin",
+        "quote": "Se perfecciona por el solo acuerdo de voluntades sobre la cosa y el precio",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Se perfecciona por el solo acuerdo de voluntades sobre la cosa y el precio» (§ 1.31).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Se perfecciona por el solo acuerdo de voluntades sobre la cosa y el pr...» en la resolución de casos de civil."
+      }
+    ],
+    "indexCode": "1.36"
+  },
+  {
+    "id": "civil-contratoar-1-3",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 12,
+    "chapterTitle": "Contrato de Arrendamiento",
+    "category": "Contrato de Arrendamiento",
+    "code": "1.3",
+    "title": "Sección 1.3: Efectos del arrendamiento de cosas: obligaciones del arrendador y del arrendatario",
+    "cleanTitle": "Efectos del arrendamiento de cosas: obligaciones del arrendador y del arrendatario",
+    "sourceFile": "CONTRATOARRENDAMIENTO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOARRENDAMIENTO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Dominio",
+      "Responsabilidad",
+      "Contrato",
+      "Obligación",
+      "Prueba"
+    ],
+    "isFree": false,
+    "content": "### Sección 1.3 — Efectos del arrendamiento de cosas: obligaciones del arrendador y del arrendatario\n\n#### 1. Obligaciones del arrendador\n\nDogmáticamente, la doctrina (encabezada por Arturo Alessandri) señala que el arrendador contrae una **única obligación genérica**: proporcionar al arrendatario el goce tranquilo y pacífico de la cosa durante toda la vigencia del contrato. Esta obligación matriz es desplegada por el artículo 1924 del Código Civil en tres obligaciones principales, a las que se suman diversas obligaciones accesorias o secundarias.\n\n```\n                                  ┌── 1. Entregar la cosa arrendada (Art. 1924 N.° 1 CC).\n                                  ├── 2. Mantener la cosa en estado de servir para el fin\nOBLIGACIONES PRINCIPALES          │      pactado (Art. 1924 N.° 2 CC).\nDEL ARRENDADOR (Art. 1924 CC) ────┼── 3. Librar al arrendatario de toda turbación o\n                                  │      embarazo en el goce (Art. 1924 N.° 3 CC).\n                                  └── 4. Sanear los vicios redhibitorios u ocultos\n                                         de la cosa (Arts. 1932 y ss. CC).\n```\n\n**Obligación de entregar la cosa arrendada (Art. 1924 N.° 1 del CC).**\n\n- **Naturaleza de la Entrega:** La entrega no constituye tradición de dominio, sino el traspaso de la **mera tenencia**.\n- **Momento y Lugar de la Entrega:**\n  - **Momento:** En la fecha estipulada o, en su defecto, inmediatamente después de perfeccionado el contrato.\n  - **Lugar:** En el acordado por las partes; a falta de estipulación, se aplican las reglas generales del pago (Arts. 1587 a 1589 CC): si es cuerpo cierto, donde existía al tiempo de contratar; si es genérica, en el domicilio del arrendador.\n- **Estado en que debe Entregarse la Cosa:** Debe entregarse completa y en **buen estado de servir para el destino pactado**, correspondiendo al arrendador costear las reparaciones previas a la entrega.\n- **Forma de Efectuar la Entrega (Artículo 1920 del CC):**\n  - Para bienes muebles, se realiza por cualquiera de las formas de tradición del artículo 684 del CC.\n  - Para bienes inmuebles, el artículo 1920 remite simbólicamente a las formas de tradición; sin embargo, la doctrina precisa que **no requiere inscripción en el Conservador de Bienes Raíces**, bastando la puesta a disposición material de la propiedad (ej. entrega de llaves).\n- **Imposibilidad de Entrega y Mora del Arrendador:**\n1. *Imposibilidad por hecho o culpa del arrendador:* El arrendatario tiene derecho a pedir la **resolución o terminación del contrato con indemnización de perjuicios** (Art. 1925 inc. 1.° CC). Procede la indemnización aun cuando el arrendador creyere de buena fe que podía arrendarla (*culpa in contrahendo*), salvo fuerza mayor o conocimiento del arrendatario.\n2. *Imposibilidad por caso fortuito:* Faculta la terminación, pero sin derecho a indemnización.\n3. *Mora en la entrega (Art. 1926 CC):* Da derecho a indemnización moratoria; si el retardo disminuye notablemente la utilidad del contrato, el arrendatario puede pedir la terminación.\n\n**Obligación de mantener la cosa en estado de servir (Arts. 1924 N.° 2 y 1927 del CC).**\n\nEl arrendador debe ejecutar las obras y reparaciones necesarias durante toda la secuela del contrato.\n\n**Régimen de reparaciones e inversiones.**\n\n- **Reparaciones Necesarias:** Son aquellas indispensables para la subsistencia y conservación material del bien. Corresponden **siempre al arrendador**. Si las ejecuta el arrendatario, el arrendador debe reembolsarlas si no provinieron de culpa del primero y se le dio noticia oportuna (Art. 1935 CC).\n- **Reparaciones Locativas (Art. 1940 CC):** Son aquellas que por costumbre del país o uso normal corresponden al arrendatario (subsanar deterioros derivados del goce ordinario).\n  - **Excepciones (Pasan a ser de cargo del arrendador):** Si los deterioros provinieren de **caso fortuito o fuerza mayor** o de la **mala calidad o vetustez de la cosa** (Art. 1927 inc. 2.° CC).\n- **Reparaciones Útiles:** Son de cargo del arrendatario. Este sólo puede exigir reembolso si el arrendador las **autorizó expresamente con la condición de abonarlas** (Art. 1936 CC). A falta de pacto, el arrendatario puede retirar los materiales sin detrimento del bien (derecho de separación).\n- **Reparaciones Voluptuarias:** Son de cargo exclusivo del arrendatario sin derecho a reembolso.\n\n**Obligación de librar al arrendatario de toda turbación o embarazo (Arts. 1928 a 1931 del CC).**\n\n**Prohibición de mudanza y obras (Art. 1928 del CC).**\n\n- El arrendador no puede mudar la forma de la cosa ni realizar trabajos que turben el goce.\n- **Excepción (Reparaciones urgentes e impostergables):** El arrendatario está obligado a sufrirlas. Si le privan parcialmente del goce, tiene derecho a **rebaja proporcional de la renta**; si recaen sobre una parte tan sustancial que el resto no basta para el objeto del arriendo, puede pedir la **terminación del contrato**.\n\n**Turbaciones de hecho (Arts. 1929 y 1930 del CC).**\n\n- **Incurridas por el arrendador o personas bajo su dependencia:** Generan la obligación de indemnizar perjuicios al arrendatario (Art. 1929 CC).\n- **Incurridas por terceros ajenos:** El arrendatario debe **defenderse por sí mismo a su propio nombre** ejercitando las acciones posesorias o de protección (Art. 1930 inc. 1.° CC).\n\n**Turbaciones de derecho y saneamiento de la evicción (Arts. 1930 y 1931 del CC).**\n\nOcurren cuando un tercero pretende y justifica derechos reales o personales sobre la cosa derivados de una causa anterior al arriendo:\n- **Privación Parcial Leve:** Otorga derecho a rebaja proporcional de la renta.\n- **Privación Total o Grave:** Permite pedir la **terminación del contrato**.\n- **Indemnización de Perjuicios:**\n  - Si la causa era conocida o debía ser conocida por el arrendador, se indemniza **daño emergente y lucro cesante**.\n  - Si la causa no era ni debía ser conocida por el arrendador, responderá únicamente del **daño emergente**.\n- **Legítimo Contradictor:** Las demandas de terceros deben dirigirse contra el arrendador. El arrendatario debe noticiarle la turbación; de omitirlo culpablemente, responderá de los perjuicios que se le sigan al arrendador.\n\n**Obligación de sanear los vicios redhibitorios u ocultos (Arts. 1932 a 1934 del CC).**\n\n- **Presupuesto:** Ocurre si la cosa presenta un mal estado o calidad que impida destinarla al uso para el cual fue arrendada.\n- **Acciones:** El arrendatario puede solicitar la **terminación del contrato** o la **rebaja de la renta**.\n- **Diferencia Radical con la Compraventa:** En el arrendamiento, los vicios pueden ser **coetáneos o sobrevinientes** (nacer durante la vigencia del contrato sin culpa del arrendatario). En la compraventa, el vicio redhibitorio debe existir imperativamente al tiempo de la venta.\n- **Indemnización:**\n  - Si la causa fue anterior: indemniza daño emergente.\n  - Si el vicio fue conocido del arrendador o debió preverlo por su profesión: indemniza **daño emergente y lucro cesante**.\n- **Exoneración (Art. 1934 CC):** No hay indemnización si el arrendatario contrató a sabiendas del vicio, si media negligencia grave en ignorarlo, o si renunció a la acción **designando explícitamente el vicio**.\n\n**Obligaciones accesorias del arrendador.**\n\n1. Reembolsar reparaciones necesarias no locativas hechas por el arrendatario (Art. 1935 CC).\n2. **Devolver la Garantía de Arriendo:** Salvo que proceda descontar el costo de reparaciones locativas o cuentas de consumos impagas; debe devolverse reajustada.\n3. Permitir la fijación de aviso o cartel de cambio de domicilio al término de arriendos comerciales (costumbre).\n\n#### 2. Obligaciones del arrendatario\n\n```\n                                  ┌── 1. Pagar el precio o renta convenida (Art. 1942 CC).\n                                  ├── 2. Usar la cosa según los términos o espíritu\n                                  │      del contrato (Art. 1938 CC).\nOBLIGACIONES DEL ARRENDATARIO ────┼── 3. Cuidar la cosa como un buen padre de familia\n(Arts. 1938 y ss. CC)             │      (Art. 1939 CC — Culpa Leve).\n                                  ├── 4. Ejecutar las reparaciones locativas (Art. 1940 CC).\n                                  └── 5. Restituir la cosa al término del arrendamiento\n                                         (Art. 1947 CC).\n```\n\n**Obligación de pagar la renta o precio (Art. 1942 del CC).**\n\n- **Carácter Esencial:** Constituye un elemento de la esencia particular del contrato.\n- **Época del Pago (Artículo 1944 del CC):**\n  - En la fecha estipulada o según la costumbre.\n  - **A falta de estipulación o costumbre:** en predios urbanos se paga por **meses** (por mensualidades anticipadas dentro de los primeros 5 días según práctica notoria); en predios rústicos por **años**.\n- **Discrepancia sobre el Monto de la Renta:**\n  - **Regla Civil (Art. 1943 CC):** Se está a la prueba legal presentada; si ninguna parte acredita su pretensión, **se estará al justiprecio de peritos** en partes iguales.\n  - **Regla Especial de Predios Urbanos sin Contrato Escrito (Art. 20 Ley 18.101):** **Se presumirá que la renta es la que declare el arrendatario**.\n- **Presunción de Pago de Períodos Anteriores (Artículo 1570 del CC):** La exhibición de los recibos de pago de las rentas correspondientes a **tres períodos consecutivos** hace presumir el pago de los períodos anteriores.\n- **Consignación por Negativa del Arrendador (Art. 23 Ley 18.101):** Si el arrendador se niega a recibir la renta, el arrendatario puede depositarla en la **Tesorería General de la República** de la comuna del inmueble.\n- **Mora en el Pago y Regla Especial de las Dos Reconvenciones (Artículo 1977 del CC):**\n  - Para poner término al contrato de casas o edificios por no pago de rentas, se requieren imperativamente **dos reconvenciones de pago**, entre las cuales deben mediar a lo menos **cuatro días hábiles**.\n  - **Tramitación Procesal (Art. 611 del Código de Procedimiento Civil):** La primera reconvención se efectúa al notificar la demanda y la segunda en la audiencia respectiva. El artículo 1977 es una excepción al artículo 1551 N.° 1 del CC; la mora no opera por el solo vencimiento del plazo.\n\n**Obligación de usar la cosa según los términos o espíritu del contrato (Art. 1938 del CC).**\n\n- **Límites de Uso:** A falta de convención expresa, debe usarse conforme a su **destino natural** o al que deba presumirse de las circunstancias o la costumbre (Art. 1546 CC).\n- **Sanción:** El incumplimiento otorga al arrendador la facultad alternativa de pedir la **terminación del arriendo con indemnización de perjuicios**, o bien limitar su pretensión a la indemnización manteniendo el contrato.\n- **Uso Ilícito (Art. 1973 CC):** Emplear el inmueble en un objeto ilícito o subarrendar a personas de notoria mala conducta faculta al arrendador para expeler de inmediato al inquilino.\n\n**Obligación de cuidar la cosa como un buen padre de familia (Art. 1939 del CC).**\n\n- **Grado de Responsabilidad:** El arrendatario responde hasta de **culpa leve** (Art. 1547 inc. 1.° CC) por ser un contrato en beneficio recíproco.\n- **Extensión de Responsabilidad:** Responde de su propia culpa y de los hechos culpables de su **familia, huéspedes, dependientes y subarrendatarios** (Arts. 1941 y 1947 inc. 4.° CC).\n- **Sanción:** En caso de un **grave y culpable deterioro**, el arrendador puede pedir la terminación inmediata del arriendo (Art. 1939 CC).\n\n**Régimen de subarrendamiento y cesión de derechos (Arts. 1946 del CC y 5.° de la Ley N.° 18.101).**\n\n| **Estatuto jurídico** | **Regla sobre subarriendo o cesión** | **Excepción / efectos** |\n| --- | --- | --- |\n| **Código Civil (Art. 1946 CC)** | **Prohibido por regla general.** | Requiere **autorización expresa** del arrendador. |\n| **Predios urbanos — vivienda a plazo fijo superior a 1 año (Art. 5.° de la Ley N.° 18.101)** | **Permitido por regla general.** | Salvo estipulación expresa de prohibición. Si se prohíbe, el arrendatario gana la facultad de **poner término anticipado sin pagar rentas futuras**. |\n| **Predios Rústicos (Art. 7.° DL 993)** | **Prohibición absoluta sin pacto escrito.** | Requiere autorización previa y **por escrito** del propietario. |\n\n**Obligación de restituir la cosa al fin del arriendo (Arts. 1947 a 1949 del CC).**\n\n- **Estado de Restitución:** Debe restituirse en el estado en que fue entregada, tomando en cuenta el deterioro por uso y goce legítimos. Si no constare el estado inicial, la ley presume de derecho supletorio que la recibió en **regular estado de servicio**.\n- **Forma de Restitución de Inmuebles (Art. 1948 CC):** Desocupándola enteramente, poniéndola a disposición del arrendador y entregando las llaves.\n- **Constitución en Mora de Restituir (Artículo 1949 del CC — punto crítico):**\n  - A diferencia del régimen general del artículo 1551 N.° 1 del CC, el vencimiento del plazo convenido o del desahucio **no constituye de pleno derecho en mora de restituir al arrendatario**.\n  - Se requiere imperativamente **requerimiento judicial e interpelación** al arrendatario (Art. 1551 N.° 3 CC). Una vez requerido, es condenado como injusto detentador.\n- **Plazos de Restitución en la Ley N.° 18.101:**\n1. *Contratos mes a mes o indefinidos (Art. 3.°):* El desahucio concede **2 meses** desde la notificación, aumentado en 1 mes por cada año de ocupación (tope máximo **6 meses**).\n2. *Contratos a plazo fijo no superior a 1 año (Art. 4.°):* La demanda de restitución concede al arrendatario **2 meses** contados desde la notificación.\n\n#### 3. Derecho legal de retención en el arrendamiento\n\nEl **derecho legal de retención** es una garantía y caución de origen legal que faculta a una de las partes para rehusar la entrega del bien retenido o de las especies que lo guarnecen mientras no se paguen los créditos e indemnizaciones adeudados.\n\n```\n                                  ┌── a) RETENCIÓN DEL ARRENDADOR (Art. 1942 CC y Art. 598 CPC):\n                                  │      Para asegurar rentas e indemnizaciones, retiene frutos\n                                  │      y objetos que amueblan/guarnecen el inmueble.\nDERECHO LEGAL DE RETENCIÓN ───────┼── b) RETENCIÓN DEL ARRENDATARIO (Art. 1937 CC):\n                                  │      Para asegurar indemnizaciones por mejoras necesarias/útiles\n                                  │      o vicios, retiene la cosa arrendada.\n                                  └── c) EXIGENCIA ADJETIVA COMÚN:\n                                         Requiere siempre DECLARACIÓN Y DECRETO JUDICIAL.\n```\n\n1. **Retención a favor del Arrendador (Art. 1942 CC y Art. 598 CPC):**\n   - **Objeto:** Para asegurar el pago de rentas e indemnizaciones, puede retener los frutos de la cosa y los bienes muebles con que el arrendatario amobló, guarneció o provisto la propiedad.\n   - **Auxilio Policial de Urgencia (Art. 598 CPC):** Si el arrendatario intenta retirar los muebles para burlar la retención, el arrendador puede pedir auxilio policial inmediato (fuerza pública), el cual se otorga por **2 días** en espera de la orden judicial formal.\n2. **Retención a favor del Arrendatario (Art. 1937 CC):**\n   - **Objeto:** Si el arrendador le adeuda indemnizaciones (por vicios, reparaciones necesarias o mejoras útiles autorizadas), el arrendatario no puede ser privado de la cosa retenida sin que se le pague o asegure el importe.\n3. **Requisito Indispensable:** Ninguna parte puede ejercer la retención por propia mano; exige **decreto y declaración judicial previa** para ser eficaz y gozar de la preferencia de la prenda.\n\n#### 4. Puntos críticos para el examen de grado\n\n1. **Constitución en Mora de Restituir (Art. 1949 CC):** En el examen de grado, jamás responda que el arrendatario queda en mora de restituir por la sola llegada del plazo convenido. El artículo 1949 exige **interpelación requerida judicialmente**.\n2. **Excepción a la Inoperancia del Subarriendo (Ley N.° 18.101):** Si le preguntan por la regla del subarriendo, diferencie: en el Código Civil la regla general es la **prohibición sin autorización**; en predios urbanos destinados a vivienda con plazo fijo mayor a 1 año, la regla general es la **facultad de subarrendar salvo pacto en contrario**.\n3. **Vicios Redhibitorios Sobrevinientes:** A diferencia de la compraventa (donde el vicio debe existir al momento del contrato), en el arrendamiento la acción por vicios del artículo 1932 del CC procede aun cuando el vicio nazca **durante la ejecución del contrato** sin culpa del arrendatario.\n4. **Las Dos Reconvenciones de Pago (Art. 1977 CC):** Para hacer cesar el arrendamiento por no pago de rentas, la ley exige imperativamente **dos reconvenciones de pago**. Notificada la demanda se hace la primera, e intermedian 4 días para la segunda en la audiencia respectiva.",
+    "charCount": 16768,
+    "connections": [
+      {
+        "targetTopicId": "civil-contratoar-1-4",
+        "targetTitle": "Subarrendamiento, cesión y oponibilidad del arrendamiento",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.38",
+        "crossoverType": "Materia-Afin",
+        "quote": "Permitido por regla general** en inmuebles destinados a la **vivienda** con plazo fijo superior a 1 año",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Permitido por regla general** en inmuebles destinados a la **vivienda** con plazo fijo superior a 1 año» (§ 1.38).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Permitido por regla general** en inmuebles destinados a la **vivienda*...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "civil-contratoar-1-2",
+        "targetTitle": "Arrendamiento de cosas: requisitos, características y capacidad",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.36",
+        "crossoverType": "Materia-Afin",
+        "quote": "El arrendador se obliga a conceder el goce tranquilo y el arrendatario a pagar el precio",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «El arrendador se obliga a conceder el goce tranquilo y el arrendatario a pagar el precio» (§ 1.36).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El arrendador se obliga a conceder el goce tranquilo y el arrendatario...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "civil-clase911-4-2",
+        "targetTitle": "Obligaciones del Vendedor (Entrega o Tradición, Teoría de los Riesgos y Saneamiento de Evicción y Vicios Redhibitorios)",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.32",
+        "crossoverType": "Materia-Afin",
+        "quote": "Prescribe en 6 meses para bienes muebles y en 1 año para bienes inmuebles, contados desde la entrega real",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Prescribe en 6 meses para bienes muebles y en 1 año para bienes inmuebles, contados desde la entrega real» (§ 1.32).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Prescribe en 6 meses para bienes muebles y en 1 año para bienes inmueb...» en la resolución de casos de civil."
+      }
+    ],
+    "indexCode": "1.37"
+  },
+  {
+    "id": "civil-contratoar-1-4",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 12,
+    "chapterTitle": "Contrato de Arrendamiento",
+    "category": "Contrato de Arrendamiento",
+    "code": "1.4",
+    "title": "Sección 1.4: Subarrendamiento, cesión y oponibilidad del arrendamiento",
+    "cleanTitle": "Subarrendamiento, cesión y oponibilidad del arrendamiento",
+    "sourceFile": "CONTRATOARRENDAMIENTO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOARRENDAMIENTO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Nulidad",
+      "Responsabilidad",
+      "Contrato",
+      "Obligación",
+      "Protección"
+    ],
+    "isFree": false,
+    "content": "### Sección 1.4 — Subarrendamiento, cesión y oponibilidad del arrendamiento\n\n#### 1. Subarrendamiento y cesión del contrato\n\n**Paralelo dogmático: subarrendamiento y cesión de arriendo.**\n\nAunque en el lenguaje práctico suelen confundirse, en el Derecho Civil chileno corresponden a dos figuras jurídicas conceptual y estructuralmente distintas:\n\n```\n                                  ┌── a) SUBARRENDAMIENTO: Celebración de un SUBCONTRATO.\n                                  │      El arrendatario directo pasa a ser arrendador de un tercero.\n                                  │      No se altera la relación jurídica originaria (se crea una segunda).\nFIGURAS DE TRASPASO DE USO/GOCE ──┤\n                                  └── b) CESIÓN DEL CONTRATO: Traspaso de la POSICIÓN CONTRACTUAL.\n                                         El arrendatario original cede su calidad de tal al cesionario.\n                                         Produce novación por cambio de deudor (requiere consentimiento).\n```\n\n- **El Subarrendamiento:** Es un **subcontrato** derivado y dependiente del contrato principal de arrendamiento. El arrendatario directo pasa a investir la calidad de “subarrendador” respecto de un tercero (“subarrendatario”).\n  - **Efecto Vinculante:** No existe relación jurídica directa entre el arrendador originario y el subarrendatario; las obligaciones y acciones son independientes (salvo excepciones legales como el saneamiento de notoria mala conducta del Art. 1973 CC o la responsabilidad del arrendatario por hechos del subarrendatario del Art. 1947 inc. 4.° CC).\n  - **Límite Causal:** El subarriendo depende del contrato principal; si se extingue el arrendamiento originario, expira por vía de consecuencia el subarrendamiento.\n- **La Cesión del Contrato:** Es el traspaso de la **posición contractual** del arrendatario a un tercero (cesionario).\n  - **Efecto Sustitutivo:** El arrendatario original abandona la relación jurídica y el cesionario lo sustituye íntegramente frente al arrendador.\n  - **Criterio de Inadmisibilidad Unilateral:** Dado que la cesión implica sustituir al deudor en la obligación de pagar la renta y cuidar el bien, entraña una **novación por cambio de deudor** (Art. 1635 del CC). Por ende, no puede realizarse sin el consentimiento expreso y previo del acreedor (arrendador).\n\n**Cuadro comparativo del régimen de subarrendamiento según el estatuto jurídico aplicable.**\n\nLa facultad de subarrendar varía radicalmente según la normativa que rige el contrato:\n\n| **Estatuto jurídico** | **Regla general sobre subarriendo** | **Excepción / efectos especiales** |\n| --- | --- | --- |\n| **Código Civil** *(Art. 1946 CC)* | **Prohibido por regla general.** El arrendatario no puede subarrendar ni ceder salvo autorización expresa. | Requiere **pacto expreso**. El subcontrato no puede extenderse más allá del plazo ni de las condiciones del arriendo originario. |\n| **Ley N.° 18.101 (Predios Urbanos)** *(Art. 5.°)* | **Permitido por regla general** en inmuebles destinados a la **vivienda** con plazo fijo superior a 1 año. | Permite subarrendar **salvo cláusula expresa de prohibición**. Si el contrato prohíbe subarrendar, el arrendatario gana la facultad de **poner término anticipado al contrato sin pagar rentas futuras**. |\n| **Predios urbanos (destino comercial / plazo indefinido / plazo inferior a 1 año)** | **Prohibido por regla general.** Vuelve a regir el artículo 1946 del Código Civil. | Exige autorización previa y expresa del arrendador. |\n| **Predios Rústicos** *(Art. 7.° DL 993)* | **Prohibición absoluta salvo pacto por escrito.** | Prohibido subarrendar, ceder o introducir mejoras sin autorización **previa y por escrito** del propietario. |\n\n**Situación procesal y protección del subarrendatario en la Ley N.° 18.101.**\n\nPara evitar la indefensión del subarrendatario frente a juicios seguidos entre el arrendador y el arrendatario directo:\n1. **Oponibilidad de la Sentencia (Art. 11 Ley 18.101):** Para que lo obrado y resuelto en los juicios de desahucio, restitución o terminación por no pago de rentas le sea oponible al subarrendatario, debe **notificársele la demanda** o debe haberse apersonado en el juicio.\n2. **Requerimiento bajo Juramento:** Notificada la demanda al arrendatario, el ministro de fe debe requerirle juramento sobre si existen subarrendatarios y la identidad de estos. Incurrir en falsedad o recibir rentas de subarriendo sin pagar al arrendador (provocando el lanzamiento del subarrendatario) se sanciona con **multas de 1 a 60 UF** (Art. 24 N.° 1 y 2 Ley 18.101).\n3. **Facultad de Enervar la Acción de Terminación (Art. 12 Ley 18.101):** En los juicios de terminación por no pago de rentas, los subarrendatarios pueden **pagar al arrendador las rentas adeudadas por el arrendatario directo** antes de la sentencia de primera instancia. Efectuado el pago, se enerva la acción y el subarrendatario tiene derecho a **reembolso con interés corriente** o a **imputar el pago a las rentas más inmediatas** de su subarriendo.\n\n#### 2. Oponibilidad del contrato de arrendamiento a terceros\n\n**Alcance dogmático y naturaleza del problema.**\n\nCuando el derecho del arrendador sobre la cosa expira por un hecho voluntario o involuntario (ej. venta, donación, ejecución forzada), la regla general es la **extinción del contrato de arrendamiento** por pérdida del derecho del arrendador.\n\nAl ser el arrendamiento un **título de mera tenencia** que otorga un **derecho personal o de crédito** (y no un derecho real), el nuevo dueño del bien no está sujeto al principio de relatividad del contrato originario (*res inter alios acta*). Sin embargo, el artículo 1962 del Código Civil establece una **excepción legal de oponibilidad**, imponiendo al adquirente la obligación de **respetar el arriendo vigente por el tiempo convenido** en los tres casos taxativos que contempla la ley.\n\n```\n                                  ┌── N.° 1: Adquirentes a TÍTULO LUCRATIVO (Gratuito).\n                                  │          (Donatarios, legatarios y herederos).\nOPONIBILIDAD DEL ARRENDAMIENTO ───┼── N.° 2: Adquirentes a TÍTULO ONEROSO.\nAL NUEVO DUEÑO (Art. 1962 CC)     │          (Si el contrato consta por ESCRITURA PÚBLICA).\n                                  └── N.° 3: ACREEDORES HIPOTECARIOS.\n                                             (Si consta por ESCRITURA PÚBLICA INCRITA\n                                             con anterioridad a la inscripción hipotecaria).\n```\n\n**Análisis sistemático de las numerales del Art. 1962 del Código Civil.**\n\n**Numeral 1.°: adquirentes a título lucrativo (gratuito).**\n\n- **Regla:** “Todo aquel a quien se transfiere el derecho del arrendador por un título lucrativo.” (Art. 1962 N.° 1 CC).\n- **Alcance:** La expresión “lucrativo” es empleada por el Código Civil como sinónimo de **título gratuito** (al igual que en el Art. 2303 CC). Comprende a los **donatarios**.\n- **Asignatarios por Causa de Muerte:** Los herederos del arrendador no necesitan esta norma, pues como sucesores a título universal representan a la persona del causante y están obligados por sus contratos (Art. 1097 y 1492 CC). Los legatarios (a título singular gratuito) quedan amparados por esta norma.\n\n**Numeral 2.°: adquirentes a título oneroso.**\n\n- **Regla:** “Todo aquel a quien se transfiere el derecho del arrendador, a título oneroso, si el arrendamiento ha sido contraído por escritura pública; exceptuados los acreedores hipotecarios.” (Art. 1962 N.° 2 CC).\n- **Requisito Único:** Exige que el arrendamiento **conste por escritura pública**. No requiere estar inscrito en el Conservador de Bienes Raíces para ser oponible al comprador, permutante o adquirente voluntario a título oneroso.\n- **Crítica de Estudio de Títulos:** Como el artículo 1962 N.° 2 no exige inscripción, se genera un riesgo para el adquirente de un inmueble, quien al revisar el Registro del Conservador no puede detectar si pesa un arrendamiento por escritura pública otorgado en cualquier notaría del país (afectando la fe pública registral).\n\n**Numeral 3.°: acreedores hipotecarios y adquirentes en ejecución hipotecaria.**\n\n- **Regla:** “Los acreedores hipotecarios, si el arrendamiento ha sido otorgado por escritura pública inscrita en el Registro del Conservador antes de la inscripción hipotecaria.” (Art. 1962 N.° 3 CC).\n- **Requisitos Copulativos:**\n1. Que el contrato de arrendamiento conste por **escritura pública**.\n2. Que la escritura esté **inscrita en el Registro de Hipotecas y Gravámenes** del Conservador de Bienes Raíces respectivo.\n3. Que dicha inscripción sea **anterior a la fecha de inscripción del derecho real de hipoteca**.\n- **Consecuencia:** Si la hipoteca se inscribió antes que el arriendo, **el arrendamiento es inoponible al acreedor hipotecario**. Si el acreedor ejecuta la propiedad y la finca es subastada, el comprador o el acreedor adjudicatario tiene derecho a exigir la **cancelación de la inscripción del arriendo** y el lanzamiento del arrendatario.\n\n**Grandes debates de grado sobre el Art. 1962 del Código Civil.**\n\n**Debate A: situación del tercero subastador que compra en remate promovido por un acreedor hipotecario.**\n\n- **El Problema:** Un inmueble es sacado a remate por un acreedor hipotecario. El arrendamiento constaba por escritura pública, pero **no estaba inscrito** (o se inscribió después de la hipoteca). Quien compra el bien en la subasta es un **tercero ajeno (que no es el acreedor hipotecario)**. ¿Está obligado el tercero subastador a respetar el arrendamiento?\n\n```\n                                  ┌── TESIS ALESSANDRI / SOMARRIVA / MEZA BARROS / DUCCI:\n                                  │   Aplica el Art. 1962 N.° 2 CC. El subastador es un adquirente\n                                  │   a título oneroso. Si el arriendo consta por escritura pública,\n                                  │   LE ES OPONIBLE (debe respetarlo).\nDEBATE DEL TERCERO SUBASTADOR ────┤\n                                  └── TESIS MERY / JURISPRUDENCIAL DOMINANTE:\n                                      Aplica el Art. 1962 N.° 3 CC. El subastador se subroga\n                                      en los derechos del acreedor hipotecario (Art. 1610 N.° 2 CC).\n                                      El arriendo no inscrito le es INOPONIBLE.\n```\n\n1. **Primera Tesis (Arturo Alessandri, Manuel Somarriva, Ramón Meza Barros, Carlos Ducci):**\n   - Sostienen que se aplica la regla general del **Art. 1962 N.° 2 del CC**. El tercero subastador es un adquirente a título oneroso (no es acreedor hipotecario).\n   - La excepción del numeral 3 es restrictiva para el acreedor hipotecario. Si el arriendo consta por escritura pública, el tercero rematante **debe respetarlo**.\n2. **Segunda Tesis (Rafael Mery, Fernando Alessandri y Jurisprudencia de la Corte Suprema):**\n   - Sostienen que aplica la regla del **Art. 1962 N.° 3 del CC**.\n   - El derecho del acreedor hipotecario a purgar o prescindir del arriendo no inscrito se transmite al tercero subastador en virtud de la **subrogación legal del Art. 1610 N.° 2 del CC**. Si no fuera así, nadie postularía en los remates y se arruinaría el valor de garantía de la hipoteca.\n\n**Debate B: inmuebles rústicos y la regla del Decreto Ley N.° 993 (Art. 10).**\n\n- **Regla Especial (Art. 10 DL 993):** “Si el arrendador vendiere o transfiriere a cualquier título el predio arrendado, el nuevo propietario estará obligado a mantener los términos del contrato de arrendamiento...”.\n- **Modificación al Art. 1962 N.° 2 CC:** En predios rústicos, el contrato de arrendamiento le es oponible al nuevo adquirente voluntario **aun si consta por instrumento privado** (no exige escritura pública).\n\n**Debate C: cláusula de prohibición de enajenar en el arrendamiento (Art. 1964 del CC).**\n\n- **Conflicto:** Las partes pactan en el arrendamiento una cláusula que prohíbe al arrendador vender la cosa mientras esté vigente el contrato, bajo pena de nulidad de la venta.\n- **Solución Legal (Art. 1964 CC):** La prohibición convencional de enajenar es **ineficaz para anular la venta**. El dueño conserva su facultad de disponer. Si el dueño enajena, el comprador sólo estará obligado a respetar el arriendo si este consta por escritura pública (Art. 1962 N.° 2 CC); de lo contrario, el contrato se extingue, pero el arrendatario conserva acción de perjuicios.\n\n**Debate D: excepción de la Ley General de Bancos (Art. 106 del DFL N.° 3).**\n\n- En los remates ejecutados por Bancos e Instituciones Financieras en juicios hipotecarios especiales, los subastadores **no están obligados a respetar los arrendamientos**, a menos que hayan sido otorgados por **escritura pública inscrita con anterioridad a la hipoteca del Banco** o hayan sido autorizados por este.\n\n#### 3. Puntos críticos para el examen de grado\n\n1. **Escritura pública e inscripción en el Art. 1962 CC:** En el examen de grado, tenga la máxima precisión: para que el arriendo sea oponible al comprador voluntario a título oneroso (Art. 1962 N.° 2) **basta la escritura pública** (no exige inscripción). Para que sea oponible al acreedor hipotecario (Art. 1962 N.° 3) **se exige imperativamente escritura pública e inscripción conservatoria previa a la hipoteca**.\n2. **Novación en la Cesión de Arriendo:** Jamás confunda el subarrendamiento con la cesión de arriendo. La cesión del contrato implica traspasar la deuda de la renta, configurando novación por cambio de deudor (Art. 1635 CC), por lo que **requiere siempre la autorización expresa del arrendador**.\n3. **Subarriendo en predios urbanos de vivienda con plazo fijo superior a 1 año:** Recuerde que en la Ley N.° 18.101 la regla general se invierte para inmuebles de vivienda a plazo fijo superior a 1 año: **está permitido subarrendar salvo estipulación en contrario** (Art. 5.°). Si se prohíbe, el arrendatario gana la facultad de **terminar el contrato anticipadamente**.\n4. **La Ineficacia de la Prohibición de Enajenar (Art. 1964 CC):** El pacto que prohíbe al arrendador vender la cosa arrendada no invalida la venta efectuada a un tercero; sólo concede al arrendatario derecho a permanecer en el arriendo si su contrato reúne los requisitos de oponibilidad del artículo 1962 del CC.",
+    "charCount": 14154,
+    "connections": [
+      {
+        "targetTopicId": "civil-contratoar-1-3",
+        "targetTitle": "Efectos del arrendamiento de cosas: obligaciones del arrendador y del arrendatario",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.37",
+        "crossoverType": "Materia-Afin",
+        "quote": "Si se prohíbe, el arrendatario gana la facultad de **poner término anticipado sin pagar rentas futuras**",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Si se prohíbe, el arrendatario gana la facultad de **poner término anticipado sin pagar rentas futuras**» (§ 1.37).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Si se prohíbe, el arrendatario gana la facultad de **poner término ant...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "civil-contratoar-1-2",
+        "targetTitle": "Arrendamiento de cosas: requisitos, características y capacidad",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.36",
+        "crossoverType": "Materia-Afin",
+        "quote": "El arrendamiento otorga un derecho personal de goce y no transfiere el dominio",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «El arrendamiento otorga un derecho personal de goce y no transfiere el dominio» (§ 1.36).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El arrendamiento otorga un derecho personal de goce y no transfiere el...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "La necesidad de citar a los acreedores hipotecarios en la subasta pública de un inmueble para extirpar los gravámenes sobre el bien",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «La necesidad de citar a los acreedores hipotecarios en la subasta pública de un inmueble para extirpar los gravámenes sobre el bien» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «La necesidad de citar a los acreedores hipotecarios en la subasta públ...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.38"
+  },
+  {
+    "id": "civil-contratoar-1-5",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 12,
+    "chapterTitle": "Contrato de Arrendamiento",
+    "category": "Contrato de Arrendamiento",
+    "code": "1.5",
+    "title": "Sección 1.5: Extinción del arrendamiento, Ley N.° 18.101 y contrato de confección de obra",
+    "cleanTitle": "Extinción del arrendamiento, Ley N.° 18.101 y contrato de confección de obra",
+    "sourceFile": "CONTRATOARRENDAMIENTO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOARRENDAMIENTO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Contrato"
+    ],
+    "isFree": false,
+    "content": "### Sección 1.5 — Extinción del arrendamiento, Ley N.° 18.101 y contrato de confección de obra\n\n- **Causales de terminación del arrendamiento de cosas.**\n- **Normas especiales de la Ley N.° 18.101** sobre arrendamiento de predios urbanos y procedimiento monitorio de cobro de rentas.\n- **Arrendamiento para la confección de una obra material** (Art. 1996 y ss. CC) y contrato de empresa (Art. 2003 CC).",
+    "charCount": 402,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Sujetos Habilitados para ser Mandatarios (Nómina Taxativa de la Ley N° 18",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Sujetos Habilitados para ser Mandatarios (Nómina Taxativa de la Ley N° 18» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Sujetos Habilitados para ser Mandatarios (Nómina Taxativa de la Ley N°...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "El _ius postulandi_ exige la concurrencia obligatoria de dos figuras reguladas en la Ley N° 18",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «El _ius postulandi_ exige la concurrencia obligatoria de dos figuras reguladas en la Ley N° 18» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El _ius postulandi_ exige la concurrencia obligatoria de dos figuras r...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-3-5",
+        "targetTitle": "La Prueba Pericial / Informe de Peritos (Artículos 409 a 425 del CPC)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.54",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Reconocimiento de vicios o defectos en el contrato de arrendamiento de obra (Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Reconocimiento de vicios o defectos en el contrato de arrendamiento de obra (Art» (§ 2.54).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Reconocimiento de vicios o defectos en el contrato de arrendamiento de...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.39"
+  },
+  {
+    "id": "civil-contratoco-1-1",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 13,
+    "chapterTitle": "Contrato de Comodato",
+    "category": "Contrato de Comodato",
+    "code": "1.1",
+    "title": "Sección 1.1: Definición dogmática y concepto",
+    "cleanTitle": "Definición dogmática y concepto",
+    "sourceFile": "CONTRATOCOMODATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOCOMODATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Dominio",
+      "Contrato",
+      "Obligación"
+    ],
+    "isFree": false,
+    "content": "### Sección 1.1 — Definición dogmática y concepto\n\n#### 1. Definición legal\n\n**Comodato o préstamo de uso:** contrato en que una de las partes entrega a la otra gratuitamente una especie, mueble o raíz, para que haga uso de ella, y con cargo de restituir la misma especie después de terminado el uso.\n\n**Base legal:** Art. 2174 inc. 1.° del Código Civil (C.C.).\n\n> “El comodato o préstamo de uso es un contrato en que una de las partes entrega a la otra gratuitamente una especie, mueble o raíz, para que haga uso de ella, y con cargo de restituir la misma especie después de terminado el uso.”\n\n#### 2. Análisis dogmático del concepto\n\nDe la definición legal se extraen los elementos conceptuales definitorios de la institución:\n\n1. **La entrega de la cosa:** el contrato requiere la entrega de un bien para perfeccionarse, y concede al comodatario el uso material de dicho bien.\n2. **La gratuidad:** la concesión del uso se realiza sin contraprestación económica alguna; constituye una gratuidad por esencia.\n3. **La individualización de la especie:** recae sobre un cuerpo cierto, mueble o inmueble, que no se consume por su primer uso ordinario.\n4. **La obligación de restitución *in natura*:** el comodatario asume el deber correlativo de conservar la cosa y devolver exactamente la misma especie recibida una vez finalizado el uso.\n\n#### 3. Distinción con figuras afines\n\n**Comodato y arrendamiento de cosas:** el comodato es por esencia gratuito; el arrendamiento es por esencia oneroso (Art. 1915 del C.C.). El comodato es un contrato real y unilateral; el arrendamiento es consensual, por regla general, y bilateral.\n\n**Comodato y usufructo:** el usufructo es un derecho real que confiere el uso y el goce, esto es, los frutos, sobre la cosa (Art. 764 del C.C.); el comodato es un contrato del cual solo nace un derecho personal de uso. El usufructo puede ser gratuito u oneroso y constituirse por ley, testamento o contrato; el comodato nace únicamente del contrato y es siempre gratuito.\n\n**Comodato y mutuo:** el comodato recae sobre especies o cuerpos ciertos no consumibles ni fungibles y obliga a restituir la misma cosa; el mutuo recae sobre cosas fungibles y consumibles y obliga a restituir otras tantas del mismo género y calidad (Art. 2196 del C.C.). El comodato es un título de mera tenencia; el mutuo es un título translaticio de dominio.",
+    "charCount": 2360,
+    "connections": [
+      {
+        "targetTopicId": "civil-contratoar-1-1",
+        "targetTitle": "Definición dogmática, naturaleza jurídica y clasificaciones",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.35",
+        "crossoverType": "Materia-Afin",
+        "quote": "En el examen de grado, nunca afirme que el arrendamiento se perfecciona con la entrega de la cosa",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «En el examen de grado, nunca afirme que el arrendamiento se perfecciona con la entrega de la cosa» (§ 1.35).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En el examen de grado, nunca afirme que el arrendamiento se perfeccion...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Si no lo cita y la cosa es evicta, el vendedor queda liberado de la obligación de saneamiento",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Si no lo cita y la cosa es evicta, el vendedor queda liberado de la obligación de saneamiento» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Si no lo cita y la cosa es evicta, el vendedor queda liberado de la ob...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "civil-contratoar-1-2",
+        "targetTitle": "Arrendamiento de cosas: requisitos, características y capacidad",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.36",
+        "crossoverType": "Materia-Afin",
+        "quote": "El arrendamiento otorga un derecho personal de goce y no transfiere el dominio",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «El arrendamiento otorga un derecho personal de goce y no transfiere el dominio» (§ 1.36).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El arrendamiento otorga un derecho personal de goce y no transfiere el...» en la resolución de casos de civil."
+      }
+    ],
+    "indexCode": "1.40"
+  },
+  {
+    "id": "civil-contratoco-1-2",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 13,
+    "chapterTitle": "Contrato de Comodato",
+    "category": "Contrato de Comodato",
+    "code": "1.2",
+    "title": "Sección 1.2: Fundamento normativo",
+    "cleanTitle": "Fundamento normativo",
+    "sourceFile": "CONTRATOCOMODATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOCOMODATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Dominio",
+      "Posesión",
+      "Contrato",
+      "Prueba"
+    ],
+    "isFree": false,
+    "content": "### Sección 1.2 — Fundamento normativo\n\n**Base legal:** Arts. 2174 a 2195 del C.C.; Arts. 1439, 1440, 1442 y 1443 del C.C.; Ley N.° 21.461; Art. 18-K de la Ley N.° 18.101.\n\n**Sede sistémica:** el contrato de comodato se encuentra regulado en el Título XXX del Libro IV del Código Civil, Arts. 2174 a 2195.\n\n**Disposiciones clave:**\n\n- **Definición, gratuidad, objeto y perfeccionamiento:** Art. 2174 del C.C.\n- **Prueba testimonial sin límite de monto:** Art. 2175 del C.C.\n- **Conservación del dominio y de la posesión por el comodante; mera tenencia:** Art. 2176 del C.C.\n- **Comodato de cosa ajena, oponibilidad y evicción:** Art. 2188 del C.C.\n- **Comodato precario y precario:** Arts. 2194 y 2195 del C.C.\n\n**Normas procesales complementarias:** la Ley N.° 21.461, que modificó la Ley N.° 18.101 y el Código de Procedimiento Civil, suprimió las acciones de comodato precario y precario del procedimiento sumario (Art. 680 N.° 6 del C.P.C.) y las sometió al procedimiento monitorio especial.",
+    "charCount": 995,
+    "connections": [
+      {
+        "targetTopicId": "procesal-derechopro-3-6",
+        "targetTitle": "Las Presunciones (Artículos 426 y 427 del CPC y Artículo 1712 del Código Civil)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.55",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "La Excepción Creada por el Artículo 426 del Código de Procedimiento Civil (La Regla de la Presunción Única)_**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «La Excepción Creada por el Artículo 426 del Código de Procedimiento Civil (La Regla de la Presunción Única)_**» (§ 2.55).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «La Excepción Creada por el Artículo 426 del Código de Procedimiento Ci...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "civil-contratoco-1-6",
+        "targetTitle": "Debates doctrinales y puntos de tesis",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.45",
+        "crossoverType": "Materia-Afin",
+        "quote": "El contrato de comodato podrá probarse por testigos, cualquiera que sea el valor de la cosa prestada” (Art",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «El contrato de comodato podrá probarse por testigos, cualquiera que sea el valor de la cosa prestada” (Art» (§ 1.45).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El contrato de comodato podrá probarse por testigos, cualquiera que se...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-6",
+        "targetTitle": "Las Medidas Cautelares y Precautorias",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.9",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Título IV del Libro II (Arts",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Título IV del Libro II (Arts» (§ 2.9).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Título IV del Libro II (Arts...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.41"
+  },
+  {
+    "id": "civil-contratoco-1-3",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 13,
+    "chapterTitle": "Contrato de Comodato",
+    "category": "Contrato de Comodato",
+    "code": "1.3",
+    "title": "Sección 1.3: Requisitos de existencia y validez",
+    "cleanTitle": "Requisitos de existencia y validez",
+    "sourceFile": "CONTRATOCOMODATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOCOMODATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Posesión",
+      "Contrato",
+      "Propiedad"
+    ],
+    "isFree": false,
+    "content": "### Sección 1.3 — Requisitos de existencia y validez\n\nLos requisitos de existencia y validez del comodato son los siguientes:\n\n1. **El consentimiento:** acuerdo de voluntades sobre la concesión gratuita de uso y la restitución de la especie.\n2. **El objeto:** especie o cuerpo cierto no consumible ni fungible, mueble o inmueble.\n3. **La causa lícita:** gratuidad por esencia, a título de beneficencia.\n4. **La entrega de la cosa:** requisito de perfeccionamiento, por tratarse de un contrato real.\n5. **La capacidad legal:** capacidad general de ejercicio (Art. 1445 del C.C.).\n\n#### 1. Consentimiento\n\nDebe versar sobre la naturaleza gratuita del préstamo y sobre la individualización del bien prestado. Si una parte entiende prestar gratuitamente y la otra entiende arrendar, el acto padece error obstáculo y es nulo o inexistente por falta de causa.\n\n#### 2. Objeto\n\nDebe recaer sobre una especie o cuerpo cierto, mueble o inmueble, no fungible y no consumible.\n\n#### 3. Causa\n\nRadica en la pura liberalidad o beneficio que el comodante otorga al comodatario.\n\n#### 4. Entrega de la cosa\n\nPor ser un contrato real (Arts. 1443 y 2174 inc. 2.° del C.C.), el comodato no nace a la vida del Derecho sin la entrega previa del bien. Antes de la entrega no existe contrato de comodato ni nacen obligaciones para las partes.\n\n#### 5. Capacidad\n\nSe aplican las reglas generales de capacidad de ejercicio (Art. 1445 del C.C.). Dado que el comodante conserva la propiedad y la posesión de la cosa, no se le exige facultad de enajenar, y basta la capacidad para administrar.",
+    "charCount": 1566,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Coincide exactamente con la capacidad de ejercicio del Derecho Civil",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Coincide exactamente con la capacidad de ejercicio del Derecho Civil» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Coincide exactamente con la capacidad de ejercicio del Derecho Civil...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Si un procurador transige o se desiste sin facultad expresa, el acto es inoponible y nulo por falta de personería",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Si un procurador transige o se desiste sin facultad expresa, el acto es inoponible y nulo por falta de personería» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Si un procurador transige o se desiste sin facultad expresa, el acto e...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "constitucional-constituci-2-5",
+        "targetTitle": "Orden Público Económico, Propiedad y Expropiación (Art. 19 N.° 21, 22, 23 y 24 de la CPR)",
+        "targetSubject": "constitucional",
+        "targetIndexCode": "3.9",
+        "crossoverType": "Fundamento-Constitucional",
+        "quote": "Requisitos Copulativos para la Validez de la Expropiación (Art",
+        "whyConnected": "Anclaje en garantías constitucionales y orden público de la Carta Fundamental. Cita textual del apunte: «Requisitos Copulativos para la Validez de la Expropiación (Art» (§ 3.9).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Requisitos Copulativos para la Validez de la Expropiación (Art...» en la resolución de casos de constitucional."
+      }
+    ],
+    "indexCode": "1.42"
+  },
+  {
+    "id": "civil-contratoco-1-4",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 13,
+    "chapterTitle": "Contrato de Comodato",
+    "category": "Contrato de Comodato",
+    "code": "1.4",
+    "title": "Sección 1.4: Clasificación y efectos jurídicos prácticos",
+    "cleanTitle": "Clasificación y efectos jurídicos prácticos",
+    "sourceFile": "CONTRATOCOMODATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOCOMODATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Dominio",
+      "Posesión",
+      "Contrato",
+      "Obligación",
+      "Propiedad"
+    ],
+    "isFree": false,
+    "content": "### Sección 1.4 — Clasificación y efectos jurídicos prácticos\n\nLas características contractuales del comodato son las siguientes:\n\n1. **Contrato real** (Arts. 1443 y 2174 inc. 2.° del C.C.): se perfecciona con la entrega.\n2. **Gratuito por esencia** (Art. 1440 del C.C.): solo beneficia al comodatario.\n3. **Unilateral y sinalagmático imperfecto** (Art. 1439 del C.C.).\n4. **Título de mera tenencia** (Arts. 714, 2176 y 2510 regla 3.ª del C.C.).\n5. **Contrato principal** (Art. 1442 del C.C.): subsiste por sí mismo.\n6. **Contrato** *intuitu personae* **respecto del comodatario.**\n\n#### 1. Contrato real\n\nSe perfecciona por la entrega material o ficta de la cosa prestada (Arts. 1443 y 2174 inc. 2.° del C.C.).\n\n#### 2. Gratuito por esencia\n\nGenera utilidad o provecho exclusivamente para una de las partes, el comodatario, y la otra, el comodante, sufre el gravamen. Si se estipula un estipendio o remuneración por el uso, la convención degenera en un contrato de arrendamiento de cosas (Art. 1915 del C.C.).\n\n#### 3. Unilateral y sinalagmático imperfecto\n\n**Unilateral al nacimiento:** en el instante de perfeccionarse por la entrega, solo resulta obligado el comodatario, quien contrae la obligación de conservar la cosa y restituirla al término del uso. El comodante no asume obligación alguna al momento de contratar, pues la entrega no es una obligación, sino el presupuesto de perfeccionamiento del contrato.\n\n**Sinalagmático imperfecto:** durante la ejecución del contrato pueden nacer obligaciones eventuales o sobrevinientes para el comodante, como el reembolso de expensas extraordinarias y necesarias de conservación (Art. 2191 del C.C.) o la indemnización de perjuicios por la mala calidad del bien prestado (Art. 2192 del C.C.).\n\n#### 4. Título de mera tenencia\n\nEl comodatario reconoce dominio ajeno sobre el bien (Arts. 714 y 2176 del C.C.). El comodante conserva intactos sus derechos de propiedad sobre la cosa, así como su posesión (Art. 725 del C.C.).\n\n**Excepción de prescripción adquisitiva:** el comodatario no puede ganar el dominio por prescripción ordinaria ni extraordinaria, salvo en la hipótesis excepcional de mutación del título prevista en el Art. 2510 regla 3.ª del C.C.\n\n#### 5. Contrato principal\n\nSubsiste por sí mismo sin necesidad de otra convención (Art. 1442 del C.C.).\n\n#### 6. Contrato celebrado en consideración a la persona del comodatario\n\nSe celebra en consideración a la persona del comodatario (*intuitu personae*). Como consecuencia dogmática, la muerte del comodatario extingue por regla general el contrato, y sus herederos no tienen derecho a continuar en el uso de la cosa (Arts. 2180 N.° 1 y 2186 del C.C.). Por el contrario, la muerte del comodante no pone término al comodato (Art. 2190 del C.C.), y sus herederos deben respetar el uso concedido.",
+    "charCount": 2803,
+    "connections": [
+      {
+        "targetTopicId": "civil-contratoar-1-1",
+        "targetTitle": "Definición dogmática, naturaleza jurídica y clasificaciones",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.35",
+        "crossoverType": "Materia-Afin",
+        "quote": "Subsiste por sí mismo sin necesidad de otra convención (Art",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Subsiste por sí mismo sin necesidad de otra convención (Art» (§ 1.35).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Subsiste por sí mismo sin necesidad de otra convención (Art...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "civil-contratoar-1-2",
+        "targetTitle": "Arrendamiento de cosas: requisitos, características y capacidad",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.36",
+        "crossoverType": "Materia-Afin",
+        "quote": "Se perfecciona por el mero acuerdo de voluntades sobre la cosa arrendada y el precio o renta (Art",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Se perfecciona por el mero acuerdo de voluntades sobre la cosa arrendada y el precio o renta (Art» (§ 1.36).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Se perfecciona por el mero acuerdo de voluntades sobre la cosa arrenda...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Por regla general, el ejercicio de la acción y la comparecencia en juicio son actos voluntarios (principio dispositivo)",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Por regla general, el ejercicio de la acción y la comparecencia en juicio son actos voluntarios (principio dispositivo)» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Por regla general, el ejercicio de la acción y la comparecencia en jui...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.43"
+  },
+  {
+    "id": "civil-contratoco-1-5",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 13,
+    "chapterTitle": "Contrato de Comodato",
+    "category": "Contrato de Comodato",
+    "code": "1.5",
+    "title": "Sección 1.5: Sanciones por infracción",
+    "cleanTitle": "Sanciones por infracción",
+    "sourceFile": "CONTRATOCOMODATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOCOMODATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Nulidad",
+      "Contrato",
+      "Obligación"
+    ],
+    "isFree": false,
+    "content": "### Sección 1.5 — Sanciones por infracción\n\n1. **Omisión de la entrega:** si las partes convienen verbalmente o por escrito prestar una cosa pero no efectúan la entrega, el contrato de comodato es inexistente, o nulo de nulidad absoluta por falta de objeto o solemnidad real (Art. 1443 del C.C.). La promesa de comodato no genera obligación de entregar, por carecer de eficacia como contrato real.\n\n2. **Estipulación de precio o pago por el uso:** la estipulación de contraprestación económica destruye la gratuidad esencial del comodato, de modo que la convención degenera en un contrato diferente, el arrendamiento de cosas (Arts. 1444 y 1915 del C.C.).\n\n3. **Entrega de cosas consumibles o fungibles con obligación de devolver otras equivalentes:** si se prestan cosas consumibles o fungibles para ser consumidas y devolver otras del mismo género y calidad, la convención degenera en un contrato de mutuo o préstamo de consumo (Art. 2196 del C.C.).\n\n4. **Infracción de la obligación de uso:** si el comodatario destina la cosa a un uso distinto del convenido o del natural (Art. 2177 del C.C.), el comodante puede exigir la indemnización de perjuicios y la restitución inmediata de la cosa, y caduca el plazo pactado.",
+    "charCount": 1220,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Si no lo cita y la cosa es evicta, el vendedor queda liberado de la obligación de saneamiento",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Si no lo cita y la cosa es evicta, el vendedor queda liberado de la obligación de saneamiento» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Si no lo cita y la cosa es evicta, el vendedor queda liberado de la ob...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "civil-contratoar-1-2",
+        "targetTitle": "Arrendamiento de cosas: requisitos, características y capacidad",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.36",
+        "crossoverType": "Materia-Afin",
+        "quote": "Mensuales (UTM), la entrega o la promesa de arrendamiento debe constar por escrito para ser probada mediante testigos en juicio",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Mensuales (UTM), la entrega o la promesa de arrendamiento debe constar por escrito para ser probada mediante testigos en juicio» (§ 1.36).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Mensuales (UTM), la entrega o la promesa de arrendamiento debe constar...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-procesal-1-1",
+        "targetTitle": "La Acción, la Pretensión y el Proceso",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.1",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Que el demandado sea el sujeto sobre el cual recae el deber correlativo u obligación de la prestación",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Que el demandado sea el sujeto sobre el cual recae el deber correlativo u obligación de la prestación» (§ 2.1).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Que el demandado sea el sujeto sobre el cual recae el deber correlativ...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.44"
+  },
+  {
+    "id": "civil-contratoco-1-6",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 13,
+    "chapterTitle": "Contrato de Comodato",
+    "category": "Contrato de Comodato",
+    "code": "1.6",
+    "title": "Sección 1.6: Debates doctrinales y puntos de tesis",
+    "cleanTitle": "Debates doctrinales y puntos de tesis",
+    "sourceFile": "CONTRATOCOMODATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOCOMODATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Dominio",
+      "Posesión",
+      "Contrato",
+      "Obligación",
+      "Prueba"
+    ],
+    "isFree": false,
+    "content": "### Sección 1.6 — Debates doctrinales y puntos de tesis\n\n#### 1. Imprecisión técnica del Art. 2174 inc. 2.° del C.C.: “tradición” y “entrega”\n\n**La crítica doctrinal:** el Art. 2174 inc. 2.° expresa que el comodato “no se perfecciona sino por la tradición de la cosa”.\n\n**Solución dogmática:** la doctrina y la jurisprudencia señalan unánimemente que Andrés Bello incurrió en un error de técnica jurídica al emplear la voz “tradición” en lugar de “entrega”.\n\n**Fundamento:** la tradición es un modo de adquirir el dominio que exige un título translaticio y transfiere la propiedad o la posesión (Arts. 670 y 675 del C.C.). Dado que el comodato es un título de mera tenencia (Art. 2176 del C.C.) que obliga a restituir la misma especie, el tradente no transfiere el dominio ni la posesión, sino la mera tenencia material del bien.\n\n#### 2. Comodato de cosa ajena\n\n**Base legal:** Art. 2188 del C.C.\n\n**Validez de la convención:** al no ser un título translaticio de dominio, el comodato de cosa ajena es plenamente válido entre comodante y comodatario. No se exige que el comodante sea dueño ni poseedor del bien prestado, sea mueble o raíz.\n\n**Inoponibilidad al verdadero dueño:** el contrato le es inoponible al dueño de la cosa. Si el propietario reclama la especie antes de vencido el plazo del comodato, el comodatario está obligado a restituírsela.\n\n**Falta de acción de saneamiento por evicción:**\n\n- **Regla general:** a diferencia del comprador o arrendatario, si el comodatario es privado de la cosa por la reclamación del verdadero dueño, esto es, por evicción, no tiene acción de perjuicios ni de saneamiento contra el comodante (Art. 2188 del C.C.).\n- **Fundamento:** la obligación de sanear la evicción es propia de los contratos onerosos.\n- **Excepción:** el comodatario sí tendrá acción de indemnización contra el comodante cuando este sabía que la cosa era ajena y no lo advirtió voluntariamente al comodatario, en sanción a la mala fe y al dolo (Art. 1465 del C.C.; Art. 2188 *in fine* del C.C.).\n\n#### 3. Excepción a las limitaciones de la prueba testimonial\n\n**Base legal:** Art. 2175 del C.C.\n\n**Regla general en materia de obligaciones:** no se admite prueba de testigos para acreditar actos o contratos que contengan la entrega o promesa de una cosa que valga más de dos unidades tributarias mensuales (Arts. 1708 y 1709 del C.C.).\n\n**Regla especial de excepción:** “El contrato de comodato podrá probarse por testigos, cualquiera que sea el valor de la cosa prestada” (Art. 2175 del C.C.).\n\n**Fundamento dogmático:** se vincula con la regla del Art. 1711 inc. final del C.C., sobre imposibilidad de obtener prueba escrita en casos de urgencia o confianza estrecha, esto es, el llamado “comodato miserable”. Dadas las circunstancias de cortesía o auxilio en que suele otorgarse el préstamo de uso, el legislador remueve la restricción probatoria ordinaria para permitir al comodante demostrar la existencia del contrato y exigir la restitución mediante prueba de testigos.\n\n#### 4. Comodato precario y precario\n\nSe trata de una de las distinciones de mayor recurrencia procesal y sustantiva en los exámenes de grado. La diferenciación sustancial de los Arts. 2194 y 2195 del C.C. es la siguiente:\n\n1. **Comodato precario** (Arts. 2194 y 2195 inc. 1.° del C.C.): existe contrato de comodato, esto es, acuerdo de voluntades. Se caracteriza porque el comodante se reserva la facultad de pedir la restitución en cualquier tiempo, o porque no se fija plazo ni servicio.\n2. **El precario** (Art. 2195 inc. 2.° del C.C.): no existe contrato ni título alguno; es una situación de hecho. Consiste en la tenencia de cosa ajena por ignorancia o mera tolerancia del dueño, y exige probar tres requisitos: dominio, tenencia ajena y ausencia de título.\n\n| **Criterio de comparación** | **Comodato precario** | **El precario** |\n| --- | --- | --- |\n| Naturaleza jurídica | Es un contrato de comodato, con estipulación de restitución a voluntad o vacíos de plazo. | Es una simple situación de hecho, una tenencia sufrida sin vínculo contractual. |\n| Existencia de título | Existe título contractual que justifica la tenencia inicial. | Hay ausencia absoluta de título jurídicamente relevante que autorice la tenencia. |\n| Requisitos de la acción | Probar la existencia del contrato de comodato y el ejercicio de la facultad de revocación. | Probar el dominio del actor, la tenencia del demandado y la ignorancia o mera tolerancia del dueño. |\n| Procedimiento judicial | Se tramita por el procedimiento monitorio (Ley N.° 21.461; Art. 18-K de la Ley N.° 18.101). | Se tramita por el procedimiento monitorio (Ley N.° 21.461; Art. 18-K de la Ley N.° 18.101). |\n\n**Base legal:** Arts. 2194 y 2195 del C.C.; Ley N.° 21.461; Art. 18-K de la Ley N.° 18.101.",
+    "charCount": 4756,
+    "connections": [
+      {
+        "targetTopicId": "civil-contratoar-1-2",
+        "targetTitle": "Arrendamiento de cosas: requisitos, características y capacidad",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.36",
+        "crossoverType": "Materia-Afin",
+        "quote": "Se perfecciona por el mero acuerdo de voluntades sobre la cosa arrendada y el precio o renta (Art",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Se perfecciona por el mero acuerdo de voluntades sobre la cosa arrendada y el precio o renta (Art» (§ 1.36).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Se perfecciona por el mero acuerdo de voluntades sobre la cosa arrenda...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-3-2",
+        "targetTitle": "La Prueba Testimonial",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.51",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "No se admitirá prueba de testigos respecto de una obligación que haya debido consignarse por escrito",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «No se admitirá prueba de testigos respecto de una obligación que haya debido consignarse por escrito» (§ 2.51).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «No se admitirá prueba de testigos respecto de una obligación que haya ...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "civil-contratoco-3-6",
+        "targetTitle": "Comodato precario y precario: análisis dogmático y procesal",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.59",
+        "crossoverType": "Materia-Afin",
+        "quote": "Cuando el comodante se reserva expresamente la facultad de pedir la restitución en cualquier tiempo** (Art",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Cuando el comodante se reserva expresamente la facultad de pedir la restitución en cualquier tiempo** (Art» (§ 1.59).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Cuando el comodante se reserva expresamente la facultad de pedir la re...» en la resolución de casos de civil."
+      }
+    ],
+    "indexCode": "1.45"
+  },
+  {
+    "id": "civil-contratoco-1-7",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 13,
+    "chapterTitle": "Contrato de Comodato",
+    "category": "Contrato de Comodato",
+    "code": "1.7",
+    "title": "Sección 1.7: Puntos críticos para el examen de grado",
+    "cleanTitle": "Puntos críticos para el examen de grado",
+    "sourceFile": "CONTRATOCOMODATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOCOMODATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Responsabilidad",
+      "Contrato",
+      "Prueba"
+    ],
+    "isFree": false,
+    "content": "### Sección 1.7 — Puntos críticos para el examen de grado\n\n1. **“Tradición” del Art. 2174 inc. 2.° del C.C.:** precise que la voz “tradición” es una imprecisión técnica de Andrés Bello. En el comodato solo opera la entrega material, que otorga la mera tenencia sobre el bien (Art. 2176 del C.C.).\n2. **Gratuidad por esencia:** si las partes pactan un pago por el uso de la cosa, el contrato no es nulo, sino que degenera en un arrendamiento de cosas (Arts. 1444 y 1915 del C.C.).\n3. **Prueba testimonial en el comodato:** el comodato es una de las excepciones expresas a las limitaciones de los Arts. 1708 y 1709 del C.C., y puede probarse la entrega y el contrato por testigos sin importar el valor de la cosa prestada (Art. 2175 del C.C.).\n4. **Comodato precario y precario:** en el comodato precario hay un contrato donde se acordó la restitución a voluntad o se omitió plazo o servicio; en el precario no hay contrato alguno, sino una tenencia de hecho por mera tolerancia o ignorancia del dueño (Art. 2195 inc. 2.° del C.C.).\n\n## Capítulo 2 — Efectos del comodato: obligaciones del comodatario, responsabilidad y transmisibilidad",
+    "charCount": 1134,
+    "connections": [
+      {
+        "targetTopicId": "procesal-derechopro-3-2",
+        "targetTitle": "La Prueba Testimonial",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.51",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.51).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "civil-contratoco-1-6",
+        "targetTitle": "Debates doctrinales y puntos de tesis",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.45",
+        "crossoverType": "Materia-Afin",
+        "quote": "El contrato de comodato podrá probarse por testigos, cualquiera que sea el valor de la cosa prestada” (Art",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «El contrato de comodato podrá probarse por testigos, cualquiera que sea el valor de la cosa prestada” (Art» (§ 1.45).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El contrato de comodato podrá probarse por testigos, cualquiera que se...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.46"
+  },
+  {
+    "id": "civil-contratoco-2-1",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 13,
+    "chapterTitle": "Contrato de Comodato",
+    "category": "Contrato de Comodato",
+    "code": "2.1",
+    "title": "Sección 2.1: Obligaciones del comodatario",
+    "cleanTitle": "Obligaciones del comodatario",
+    "sourceFile": "CONTRATOCOMODATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOCOMODATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Contrato"
+    ],
+    "isFree": false,
+    "content": "### Sección 2.1 — Obligaciones del comodatario\n\nDado que el comodato es un contrato unilateral al momento de su perfeccionamiento (Arts. 1439 y 2174 inc. 2.° del C.C.), únicamente el comodatario resulta obligado desde el nacimiento del acto. El comodatario asume tres obligaciones principales:\n\n1. **Conservar la cosa** (Art. 2178 del C.C., con graduación de culpa levísima).\n2. **Usar la cosa según las estipulaciones o su uso ordinario** (Art. 2177 del C.C.).\n3. **Restituir la especie al término del uso o del plazo** (Arts. 2180 a 2185 del C.C.).",
+    "charCount": 550,
+    "connections": [
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Incumbe probar las obligaciones o su extinción al que alega aquéllas o ésta",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Incumbe probar las obligaciones o su extinción al que alega aquéllas o ésta» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Incumbe probar las obligaciones o su extinción al que alega aquéllas o...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "La _Capacidad Procesal_ es un presupuesto formal de validez del proceso",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «La _Capacidad Procesal_ es un presupuesto formal de validez del proceso» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «La _Capacidad Procesal_ es un presupuesto formal de validez del proces...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Corte Suprema y que se encuentren al día en el pago de su patente profesional o colegiatura)",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Corte Suprema y que se encuentren al día en el pago de su patente profesional o colegiatura)» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Corte Suprema y que se encuentren al día en el pago de su patente prof...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.47"
+  },
+  {
+    "id": "civil-contratoco-2-2",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 13,
+    "chapterTitle": "Contrato de Comodato",
+    "category": "Contrato de Comodato",
+    "code": "2.2",
+    "title": "Sección 2.2: Conservación de la cosa y graduación de responsabilidad",
+    "cleanTitle": "Conservación de la cosa y graduación de responsabilidad",
+    "sourceFile": "CONTRATOCOMODATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOCOMODATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Responsabilidad",
+      "Contrato",
+      "Obligación",
+      "Propiedad"
+    ],
+    "isFree": false,
+    "content": "### Sección 2.2 — Conservación de la cosa y graduación de responsabilidad\n\n**Base legal:** Arts. 44, 1547 inc. 1.°, 2178 y 2179 del C.C.\n\n#### 1. Graduación de la culpa: regla general\n\n**Responsabilidad por culpa levísima:** el comodatario responde hasta de culpa levísima (Arts. 44, 1547 inc. 1.° y 2178 inc. 1.° del C.C.).\n\n**Fundamento:** al ser un contrato de beneficencia que reporta utilidad exclusiva para el comodatario, el legislador le exige la máxima diligencia y cuidado, esto es, la esmerada diligencia de un hombre juicioso.\n\n#### 2. Alteraciones excepcionales a la graduación de culpa\n\nPor aplicación de la autonomía de la voluntad o la naturaleza de la gestión, la escala de responsabilidad puede variar (Art. 2179 del C.C.):\n\n| **Hipótesis y utilidad del contrato** | **Grado de culpa imputable** | **Ejemplo ilustrativo** |\n| --- | --- | --- |\n| En beneficio exclusivo del comodatario (regla general) | Culpa levísima | Préstamo de un vehículo para vacaciones particulares del comodatario. |\n| En beneficio mutuo de comodante y comodatario (Art. 2179 del C.C.) | Culpa leve | Préstamo de un perro de caza con la obligación de entrenarlo; o préstamo de un predio con la obligación de efectuar innovaciones técnicas agrícolas. |\n| En beneficio exclusivo del comodante (Art. 2179 del C.C.) | Culpa lata o grave | Préstamo de un automóvil por el mandante a su mandatario para que este ejecute el encargo encomendado. |\n\n#### 3. Régimen de deterioros de la cosa\n\n**Base legal:** Art. 2178 inc. 2.° del C.C.\n\n**Deterioros imputables:** el comodatario responde de todo deterioro derivado de su hecho o culpa, aun levísima.\n\n**Facultad de venta forzada por deterioro grave:** si el deterioro es de tal magnitud que la cosa ya no sirve para su uso ordinario, el comodante tiene derecho a exigir al comodatario el pago del precio total que tenía el bien antes del deterioro, y abandona la propiedad de la cosa deteriorada a favor del comodatario.\n\n**Exoneración de deterioros:** el comodatario no responde por los deterioros que provengan de la naturaleza o vetustez del bien, del uso legítimo y ordinario convenido, o de caso fortuito o fuerza mayor, salvo las excepciones legales.\n\n#### 4. Responsabilidad por caso fortuito o fuerza mayor\n\n**Base legal:** Arts. 1550 y 2178 del C.C.\n\n**Regla general:** el comodatario no responde de la pérdida o deterioro por caso fortuito (*res perit domino*).\n\n**Cuatro excepciones taxativas en que sí responde por caso fortuito** (Art. 2178 del C.C.):\n\n1. **Uso indebido o mora:** cuando empleó la cosa en un uso no autorizado o se hallaba en mora de restituirla, salvo que pruebe que el hecho fortuito habría acontecido de todos modos sin la mora o el uso indebido.\n2. **Caso fortuito sobrevenido por culpa:** cuando el accidente provino de una negligencia previa del comodatario.\n3. **Inadmisibilidad del estado de necesidad:** cuando en un accidente prefirió salvar la cosa propia antes que la prestada; el legislador rechaza expresamente el estado de necesidad como eximente.\n4. **Pacto expreso:** cuando asumió contractualmente la responsabilidad por caso fortuito.",
+    "charCount": 3117,
+    "connections": [
+      {
+        "targetTopicId": "civil-lasobligac-1-7",
+        "targetTitle": "Factores de Imputabilidad, Mora, Causalidad, Daño y Avaluación de Perjuicios",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.20",
+        "crossoverType": "Materia-Afin",
+        "quote": "La culpa es la falta de la diligencia o cuidado debido en el cumplimiento de una obligación o en la ejecución de un hecho [1]",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «La culpa es la falta de la diligencia o cuidado debido en el cumplimiento de una obligación o en la ejecución de un hecho [1]» (§ 1.20).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «La culpa es la falta de la diligencia o cuidado debido en el cumplimie...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "El deudor debe probar que<br>actuó con la diligencia debida o<br>que operó caso fortuito (Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «El deudor debe probar que<br>actuó con la diligencia debida o<br>que operó caso fortuito (Art» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El deudor debe probar que<br>actuó con la diligencia debida o<br>que o...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "civil-contratoar-1-3",
+        "targetTitle": "Efectos del arrendamiento de cosas: obligaciones del arrendador y del arrendatario",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.37",
+        "crossoverType": "Materia-Afin",
+        "quote": "Si los deterioros provinieren de **caso fortuito o fuerza mayor** o de la **mala calidad o vetustez de la cosa** (Art",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Si los deterioros provinieren de **caso fortuito o fuerza mayor** o de la **mala calidad o vetustez de la cosa** (Art» (§ 1.37).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Si los deterioros provinieren de **caso fortuito o fuerza mayor** o de...» en la resolución de casos de civil."
+      }
+    ],
+    "indexCode": "1.48"
+  },
+  {
+    "id": "civil-contratoco-2-3",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 13,
+    "chapterTitle": "Contrato de Comodato",
+    "category": "Contrato de Comodato",
+    "code": "2.3",
+    "title": "Sección 2.3: Uso de la cosa según el contrato o su naturaleza",
+    "cleanTitle": "Uso de la cosa según el contrato o su naturaleza",
+    "sourceFile": "CONTRATOCOMODATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOCOMODATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Contrato",
+      "Obligación"
+    ],
+    "isFree": false,
+    "content": "### Sección 2.3 — Uso de la cosa según el contrato o su naturaleza\n\n**Base legal:** Art. 2177 del C.C.\n\n**Límites de uso:** el comodatario debe emplear el bien en el uso expresamente estipulado en la convención. A falta de estipulación, debe destinarlo al uso ordinario que corresponda a la naturaleza de las cosas de su clase.\n\n**Sanciones por uso indebido:** si el comodatario contraviene esta obligación, el comodante puede exigir acumulativamente la indemnización de todos los perjuicios causados y la restitución inmediata de la cosa, y caduca el plazo convenido para la devolución.",
+    "charCount": 587,
+    "connections": [
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "El acreedor sigue teniendo la carga de probar el hecho constitutivo (el contrato) y el incumplimiento",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «El acreedor sigue teniendo la carga de probar el hecho constitutivo (el contrato) y el incumplimiento» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El acreedor sigue teniendo la carga de probar el hecho constitutivo (e...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procemayor-6-4",
+        "targetTitle": "La contestación de la demanda y la reconvención",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.39",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "La contestación de la demanda y la reconvención",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «La contestación de la demanda y la reconvención» (§ 2.39).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «La contestación de la demanda y la reconvención...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-1-3",
+        "targetTitle": "La Competencia Judicial y sus Reglas",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.3",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Se pacta formalmente en el contrato o en un escrito posterior designando al juez",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Se pacta formalmente en el contrato o en un escrito posterior designando al juez» (§ 2.3).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Se pacta formalmente en el contrato o en un escrito posterior designan...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.49"
+  },
+  {
+    "id": "civil-contratoco-2-4",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 13,
+    "chapterTitle": "Contrato de Comodato",
+    "category": "Contrato de Comodato",
+    "code": "2.4",
+    "title": "Sección 2.4: Restitución de la especie",
+    "cleanTitle": "Restitución de la especie",
+    "sourceFile": "CONTRATOCOMODATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOCOMODATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Dominio",
+      "Contrato"
+    ],
+    "isFree": false,
+    "content": "### Sección 2.4 — Restitución de la especie\n\n**Base legal:** Arts. 1662, 2180 a 2185 y 2193 del C.C.; Art. 889 del C.C.\n\n#### 1. Oportunidad de la restitución\n\nLa restitución debe efectuarse en el plazo estipulado o, a falta de convención, una vez concluido el servicio o uso para el cual fue prestada (Art. 2180 del C.C.).\n\n#### 2. Restitución anticipada\n\n**Base legal:** Art. 2180 inc. 2.° del C.C.\n\nEl comodante puede exigir la devolución de la especie antes del vencimiento del plazo o uso en los siguientes casos taxativos:\n\n1. **Muerte del comodatario:** por regla general la muerte extingue el uso, salvo si la cosa fue prestada para un servicio particular que no puede suspenderse o diferirse.\n2. **Necesidad imprevista y urgente del comodante:** si al comodante le sobreviene un imprevisto urgente relativo a la cosa.\n3. **Terminación del servicio:** si terminó o no tuvo lugar el servicio para el cual se prestó.\n4. **Uso indebido:** si el comodatario infringe los límites de uso (Art. 2177 del C.C.).\n\n#### 3. Casos de suspensión legítima o negativa de restitución\n\nEl comodatario puede o debe negarse a restituir en las siguientes hipótesis:\n\n1. **Derecho legal de retención** (Art. 2193 del C.C.): para asegurar el pago de las expensas extraordinarias de conservación o de las indemnizaciones por la mala calidad del bien adeudadas por el comodante.\n2. **Embargo judicial:** cuando la cosa es embargada judicialmente en manos del comodatario (Art. 2183 del C.C.).\n3. **Cosa robada, hurtada o perdida:** debe suspender la entrega, avisar al dueño y fijarle un plazo razonable para reclamarla.\n4. **Objetos para uso criminal o incapacidad por demencia:** debe suspender la entrega y poner los bienes a disposición del juez (Art. 2184 del C.C.).\n5. **Comodatario dueño del bien:** si descubre que él es el verdadero propietario, salvo que el comodante le dispute el dominio, caso en que debe probarlo sumariamente (Art. 2185 del C.C.).\n\n#### 4. Imposibilidad de oponer compensación\n\n**Base legal:** Arts. 1662 y 2182 del C.C.\n\nEl comodatario no puede alegar compensación legal de sus propios créditos contra el comodante para excusarse de devolver la cosa prestada.\n\n#### 5. Acciones del comodante para exigir la restitución\n\n1. **Acción personal del contrato:** dirigida exclusivamente contra el comodatario o sus herederos.\n2. **Acción real reivindicatoria:** si el comodante es dueño y la cosa salió del poder del comodatario y pasó a manos de terceros (Art. 889 del C.C.).",
+    "charCount": 2486,
+    "connections": [
+      {
+        "targetTopicId": "civil-contratoco-3-5",
+        "targetTitle": "Modos de extinción del comodato",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.58",
+        "crossoverType": "Materia-Afin",
+        "quote": "El verdadero dueño puede exigir la restitución de forma inoponible",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «El verdadero dueño puede exigir la restitución de forma inoponible» (§ 1.58).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El verdadero dueño puede exigir la restitución de forma inoponible...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Por regla general, el ejercicio de la acción y la comparecencia en juicio son actos voluntarios (principio dispositivo)",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Por regla general, el ejercicio de la acción y la comparecencia en juicio son actos voluntarios (principio dispositivo)» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Por regla general, el ejercicio de la acción y la comparecencia en jui...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Corte Suprema y que se encuentren al día en el pago de su patente profesional o colegiatura)",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Corte Suprema y que se encuentren al día en el pago de su patente profesional o colegiatura)» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Corte Suprema y que se encuentren al día en el pago de su patente prof...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.50"
+  },
+  {
+    "id": "civil-contratoco-2-5",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 13,
+    "chapterTitle": "Contrato de Comodato",
+    "category": "Contrato de Comodato",
+    "code": "2.5",
+    "title": "Sección 2.5: Pluralidad de comodatarios",
+    "cleanTitle": "Pluralidad de comodatarios",
+    "sourceFile": "CONTRATOCOMODATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOCOMODATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Obligación"
+    ],
+    "isFree": false,
+    "content": "### Sección 2.5 — Pluralidad de comodatarios\n\n**Base legal:** Arts. 1526 N.° 2 y 2189 del C.C.\n\n**Solidaridad pasiva *ex lege*:** si la cosa ha sido prestada a dos o más personas conjuntamente, todos los comodatarios son solidariamente responsables de las indemnizaciones por daños causados al bien o del pago de su valor (Art. 2189 del C.C.).\n\n**Indivisibilidad de la restitución:** la obligación de restituir la especie o cuerpo cierto es indivisible por su naturaleza (Art. 1526 N.° 2 del C.C.), y puede demandarse la entrega íntegra a cualquiera de los comodatarios que tenga la cosa en su poder.",
+    "charCount": 600,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procemayor-5-4",
+        "targetTitle": "Efectos jurídicos sustanciales y procesales del emplazamiento",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.35",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Si la notificación de la demanda no ha sido hecha en forma legal, por nulidad del emplazamiento",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Si la notificación de la demanda no ha sido hecha en forma legal, por nulidad del emplazamiento» (§ 2.35).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Si la notificación de la demanda no ha sido hecha en forma legal, por ...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procemayor-2-4",
+        "targetTitle": "Efectos Jurídicos Prácticos (Procesales y Sustanciales)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.19",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Traslada al deudor el riesgo de la especie o cuerpo cierto debido (Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Traslada al deudor el riesgo de la especie o cuerpo cierto debido (Art» (§ 2.19).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Traslada al deudor el riesgo de la especie o cuerpo cierto debido (Art...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Si no lo cita y la cosa es evicta, el vendedor queda liberado de la obligación de saneamiento",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Si no lo cita y la cosa es evicta, el vendedor queda liberado de la obligación de saneamiento» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Si no lo cita y la cosa es evicta, el vendedor queda liberado de la ob...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.51"
+  },
+  {
+    "id": "civil-contratoco-2-6",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 13,
+    "chapterTitle": "Contrato de Comodato",
+    "category": "Contrato de Comodato",
+    "code": "2.6",
+    "title": "Sección 2.6: Transmisibilidad de derechos y obligaciones",
+    "cleanTitle": "Transmisibilidad de derechos y obligaciones",
+    "sourceFile": "CONTRATOCOMODATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOCOMODATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Responsabilidad",
+      "Contrato"
+    ],
+    "isFree": false,
+    "content": "### Sección 2.6 — Transmisibilidad de derechos y obligaciones\n\nLa sobrevivencia del contrato según la muerte de las partes es la siguiente:\n\n1. **Muerte del comodante** (Art. 2190 del C.C.): no extingue el contrato. El comodatario continúa en el uso y restituye a los herederos.\n2. **Muerte del comodatario** (Arts. 2180 N.° 1 y 2186 del C.C.): extingue el contrato por su carácter *intuitu personae*. Los herederos deben restituir la especie de inmediato.\n\n#### 1. Enajenación de la cosa por los herederos del comodatario\n\n**Base legal:** Art. 2187 del C.C.\n\nSi los herederos del comodatario fallecido enajenan la cosa prestada, su responsabilidad varía según su buena o mala fe:\n\n1. **Herederos de buena fe, que ignoraban el préstamo:** el comodante, si no puede o no quiere reivindicar, solo puede exigirles el pago del justo precio obtenido o la cesión de las acciones de la venta.\n2. **Herederos de mala fe, que sabían del préstamo:** deben resarcir todo perjuicio al comodante y quedan sujetos a responsabilidad penal por estafa o apropiación indebida.",
+    "charCount": 1058,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "La muerte del mandante extingue el mandato (Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «La muerte del mandante extingue el mandato (Art» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «La muerte del mandante extingue el mandato (Art...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "En el Derecho Civil, la muerte del mandante extingue el mandato (Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «En el Derecho Civil, la muerte del mandante extingue el mandato (Art» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En el Derecho Civil, la muerte del mandante extingue el mandato (Art...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "En el procedimiento laboral y en la Tutela de Derechos Fundamentales, basta que el trabajador",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «En el procedimiento laboral y en la Tutela de Derechos Fundamentales, basta que el trabajador» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En el procedimiento laboral y en la Tutela de Derechos Fundamentales, ...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.52"
+  },
+  {
+    "id": "civil-contratoco-2-7",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 13,
+    "chapterTitle": "Contrato de Comodato",
+    "category": "Contrato de Comodato",
+    "code": "2.7",
+    "title": "Sección 2.7: Puntos críticos para el examen de grado",
+    "cleanTitle": "Puntos críticos para el examen de grado",
+    "sourceFile": "CONTRATOCOMODATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOCOMODATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Responsabilidad"
+    ],
+    "isFree": false,
+    "content": "### Sección 2.7 — Puntos críticos para el examen de grado\n\n1. **Inadmisibilidad del estado de necesidad** (Art. 2178 del C.C.): si en un accidente el comodatario prefiere salvar una cosa propia antes que la prestada, la ley rechaza el estado de necesidad como eximente y lo hace responder del caso fortuito.\n2. **Exclusión de la compensación** (Art. 1662 del C.C.): el comodatario no puede retener el bien alegando compensación con deudas ordinarias que el comodante tenga a su favor. Solo procede el derecho legal de retención por expensas e indemnizaciones vinculadas directamente al bien (Art. 2193 del C.C.).\n3. **Solidaridad pasiva legal** (Art. 2189 del C.C.): cuando hay varios comodatarios, la responsabilidad por daños o por el valor de la cosa es solidaria por mandato legal.\n4. **Efectos de la muerte:** el comodato no se extingue por la muerte del comodante (Art. 2190 del C.C.), pero sí se extingue por la muerte del comodatario, por su carácter *intuitu personae* (Arts. 2180 N.° 1 y 2186 del C.C.).\n\n## Capítulo 3 — Obligaciones eventuales del comodante, extinción y precario",
+    "charCount": 1090,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.53"
+  },
+  {
+    "id": "civil-contratoco-3-1",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 13,
+    "chapterTitle": "Contrato de Comodato",
+    "category": "Contrato de Comodato",
+    "code": "3.1",
+    "title": "Sección 3.1: Obligaciones eventuales del comodante",
+    "cleanTitle": "Obligaciones eventuales del comodante",
+    "sourceFile": "CONTRATOCOMODATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOCOMODATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Contrato"
+    ],
+    "isFree": false,
+    "content": "### Sección 3.1 — Obligaciones eventuales del comodante\n\nEl comodato nace a la vida del Derecho como un contrato unilateral. En el instante de perfeccionarse por la entrega de la cosa, únicamente el comodatario resulta obligado, a conservar la cosa, usarla legítimamente y restituirla.\n\nSin embargo, durante la ejecución del contrato pueden surgir obligaciones posteriores o sobrevinientes para el comodante. Por esta razón, la dogmática clasifica al comodato como un contrato sinalagmático imperfecto. Esta circunstancia eventual no altera la naturaleza unilateral originaria del contrato, pues la bilateralidad se aprecia exclusivamente al momento de la celebración.\n\nLas obligaciones eventuales del comodante, como sinalagma imperfecto, son las siguientes:\n\n1. **Reembolso de expensas extraordinarias de conservación** (Art. 2191 del C.C.).\n2. **Indemnización de perjuicios por mala calidad o condición de la cosa prestada** (Art. 2192 del C.C.).\n3. **Mecanismo de tutela del comodatario:** derecho legal de retención (Art. 2193 del C.C.).",
+    "charCount": 1042,
+    "connections": [
+      {
+        "targetTopicId": "civil-contratoco-1-4",
+        "targetTitle": "Clasificación y efectos jurídicos prácticos",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.43",
+        "crossoverType": "Materia-Afin",
+        "quote": "Se perfecciona por la entrega material o ficta de la cosa prestada (Arts",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Se perfecciona por la entrega material o ficta de la cosa prestada (Arts» (§ 1.43).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Se perfecciona por la entrega material o ficta de la cosa prestada (Ar...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Incumbe probar las obligaciones o su extinción al que alega aquéllas o ésta",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Incumbe probar las obligaciones o su extinción al que alega aquéllas o ésta» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Incumbe probar las obligaciones o su extinción al que alega aquéllas o...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Aquellas personas que se incorporan al proceso con posterioridad a la traba de la litis originaria",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Aquellas personas que se incorporan al proceso con posterioridad a la traba de la litis originaria» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Aquellas personas que se incorporan al proceso con posterioridad a la ...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.54"
+  },
+  {
+    "id": "civil-contratoco-3-2",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 13,
+    "chapterTitle": "Contrato de Comodato",
+    "category": "Contrato de Comodato",
+    "code": "3.2",
+    "title": "Sección 3.2: Reembolso de expensas extraordinarias de conservación",
+    "cleanTitle": "Reembolso de expensas extraordinarias de conservación",
+    "sourceFile": "CONTRATOCOMODATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOCOMODATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Examen de Grado",
+      "Derecho"
+    ],
+    "isFree": false,
+    "content": "### Sección 3.2 — Reembolso de expensas extraordinarias de conservación\n\n**Base legal:** Art. 2191 del C.C.\n\n#### 1. Deslinde entre expensas ordinarias y extraordinarias\n\n**Expensas ordinarias de conservación:** son aquellos desembolsos menores derivados del uso y goce legítimo de la cosa prestada, como alimentar a un animal prestado, recargar combustible o cambiar el aceite a un vehículo. Corresponden siempre y exclusivamente al comodatario, pues son la contrapartida natural del beneficio gratuito de uso que obtiene.\n\n**Expensas extraordinarias de conservación:** son aquellos gastos de mayor envergadura, imprevisibles e indispensables para la supervivencia material o jurídica de la especie prestada. Corresponden al comodante.\n\n#### 2. Requisitos copulativos de procedencia del reembolso\n\nPara que el comodante quede legalmente obligado a reembolsar las expensas realizadas por el comodatario, deben concurrir tres requisitos copulativos:\n\n1. **Que las expensas no hayan sido de las ordinarias de conservación** (Art. 2191 N.° 1 del C.C.).\n2. **Que las expensas hayan sido necesarias y urgentes** (Art. 2191 N.° 2 del C.C.): necesarias, esto es, indispensables para evitar la pérdida, destrucción o ruina del bien; y urgentes, esto es, que no haya sido posible dar aviso o consultar previamente al comodante para que este las ejecutara por su cuenta.\n3. **Que se presuma fundadamente que el comodante las habría realizado teniendo la cosa en su poder** (Art. 2191 N.° 2 del C.C.).\n\n**Independencia de la consulta previa:** cumplidos estos requisitos, el comodante debe abonar el costo de las expensas al comodatario aun cuando este las haya ejecutado sin su autorización o conocimiento previo.",
+    "charCount": 1703,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procemayor-1-3",
+        "targetTitle": "Clasificación y finalidad",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.12",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Exhibición de la cosa que haya de ser objeto de la acción que se trata de entablar",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Exhibición de la cosa que haya de ser objeto de la acción que se trata de entablar» (§ 2.12).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Exhibición de la cosa que haya de ser objeto de la acción que se trata...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procemayor-4-2",
+        "targetTitle": "Fundamento normativo",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.27",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Civil dispone expresamente que se entenderá no interrumpida la prescripción si el demandante desistió expresamente de la demanda",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Civil dispone expresamente que se entenderá no interrumpida la prescripción si el demandante desistió expresamente de la demanda» (§ 2.27).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Civil dispone expresamente que se entenderá no interrumpida la prescri...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Se produce cuando una de las partes cede a un tercero el objeto incierto de la litis tras la notificación de la demanda",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Se produce cuando una de las partes cede a un tercero el objeto incierto de la litis tras la notificación de la demanda» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Se produce cuando una de las partes cede a un tercero el objeto incier...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.55"
+  },
+  {
+    "id": "civil-contratoco-3-3",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 13,
+    "chapterTitle": "Contrato de Comodato",
+    "category": "Contrato de Comodato",
+    "code": "3.3",
+    "title": "Sección 3.3: Indemnización de perjuicios por mala calidad de la cosa",
+    "cleanTitle": "Indemnización de perjuicios por mala calidad de la cosa",
+    "sourceFile": "CONTRATOCOMODATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOCOMODATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Responsabilidad",
+      "Contrato"
+    ],
+    "isFree": false,
+    "content": "### Sección 3.3 — Indemnización de perjuicios por mala calidad de la cosa\n\n**Base legal:** Art. 2192 del C.C.\n\n#### 1. Fundamento de la responsabilidad\n\nDado que el comodato es un contrato gratuito, el comodante no otorga garantía ni responde de los vicios redhibitorios de la cosa por la sola vía contractual. Sin embargo, la ley sanciona el dolo o la negligencia grave del comodante que presta un objeto sabiendo que está defectuoso y que causará daños al comodatario.\n\n#### 2. Requisitos copulativos de procedencia\n\nPara que el comodatario pueda exigir la indemnización de perjuicios al comodante por los daños que le ocasione la cosa prestada, como un caballo enfermo que contagia al ganado del comodatario o un vehículo con fallas graves en los frenos no advertidas, deben acreditarse tres circunstancias indispensables:\n\n1. **Que la mala calidad o condición sea de tal naturaleza que probablemente hubiese de ocasionar los perjuicios** (Art. 2192 N.° 1 del C.C.).\n2. **Que la mala calidad haya sido conocida y no declarada por el comodante** (Art. 2192 N.° 2 del C.C.), en sanción a su mala fe o dolo omitido.\n3. **Que el comodatario no haya podido, con mediano cuidado, conocer la mala calidad o precaver los perjuicios** (Art. 2192 N.° 3 del C.C.). Si el vicio era aparente o el comodatario obró con negligencia grave en ignorarlo, carece de acción indemnizatoria.",
+    "charCount": 1372,
+    "connections": [
+      {
+        "targetTopicId": "civil-contratomu-4-3",
+        "targetTitle": "Obligaciones Eventuales del Mutuante",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.88",
+        "crossoverType": "Materia-Afin",
+        "quote": "Que la mala calidad o condición sea de tal naturaleza que probablemente hubiese de ocasionar los perjuicios (Art",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Que la mala calidad o condición sea de tal naturaleza que probablemente hubiese de ocasionar los perjuicios (Art» (§ 1.88).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Que la mala calidad o condición sea de tal naturaleza que probablement...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Por el término del juicio o ejecución de la sentencia",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Por el término del juicio o ejecución de la sentencia» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Por el término del juicio o ejecución de la sentencia...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Es una exigencia impuesta en interés de la comunidad o de la recta administración de justicia (ej",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Es una exigencia impuesta en interés de la comunidad o de la recta administración de justicia (ej» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Es una exigencia impuesta en interés de la comunidad o de la recta adm...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.56"
+  },
+  {
+    "id": "civil-contratoco-3-4",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 13,
+    "chapterTitle": "Contrato de Comodato",
+    "category": "Contrato de Comodato",
+    "code": "3.4",
+    "title": "Sección 3.4: Derecho legal de retención del comodatario",
+    "cleanTitle": "Derecho legal de retención del comodatario",
+    "sourceFile": "CONTRATOCOMODATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOCOMODATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Contrato"
+    ],
+    "isFree": false,
+    "content": "### Sección 3.4 — Derecho legal de retención del comodatario\n\n**Base legal:** Arts. 1662, 2182, 2191, 2192 y 2193 del C.C.\n\n**Concepto y garantía:** la ley confiere al comodatario la facultad de rehusar la restitución de la cosa prestada mientras el comodante no le pague o satisfaga las indemnizaciones por expensas extraordinarias (Art. 2191 del C.C.) o por los perjuicios derivados de la mala calidad del bien (Art. 2192 del C.C.).\n\n**Enervación del derecho de retención:** el derecho de retención cesa inmediatamente si el comodante cauciona a satisfacción el pago de las cantidades o indemnizaciones adeudadas.\n\n**Imposibilidad de retención por deudas ordinarias:** el comodatario no puede ejercer el derecho de retención ni oponer compensación por deudas o créditos ordinarios ajenos al contrato de comodato que mantenga contra el comodante (Arts. 1662 y 2182 del C.C.). La retención solo procede de forma causal para las expensas e indemnizaciones del comodato mismo (Arts. 2191 y 2192 del C.C.).",
+    "charCount": 1003,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "En el Derecho Procesal Civil (Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «En el Derecho Procesal Civil (Art» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En el Derecho Procesal Civil (Art...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Es la aptitud legal para ser titular de los derechos, cargas y deberes que emanan de la relación jurídica procesal",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Es la aptitud legal para ser titular de los derechos, cargas y deberes que emanan de la relación jurídica procesal» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Es la aptitud legal para ser titular de los derechos, cargas y deberes...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-4",
+        "targetTitle": "Ineficacia de los Actos Procesales (Nulidad Procesal)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.7",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "En el Derecho Procesal es imperativo desvincular la nulidad procesal de la teoría clásica de las ineficacias del Derecho Civil (Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «En el Derecho Procesal es imperativo desvincular la nulidad procesal de la teoría clásica de las ineficacias del Derecho Civil (Art» (§ 2.7).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En el Derecho Procesal es imperativo desvincular la nulidad procesal d...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.57"
+  },
+  {
+    "id": "civil-contratoco-3-5",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 13,
+    "chapterTitle": "Contrato de Comodato",
+    "category": "Contrato de Comodato",
+    "code": "3.5",
+    "title": "Sección 3.5: Modos de extinción del comodato",
+    "cleanTitle": "Modos de extinción del comodato",
+    "sourceFile": "CONTRATOCOMODATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOCOMODATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Contrato",
+      "Obligación",
+      "Resolución"
+    ],
+    "isFree": false,
+    "content": "### Sección 3.5 — Modos de extinción del comodato\n\nEl comodato, como contrato de tracto único o de ejecución continuada temporal, se extingue por causales ordinarias de los contratos y por causales especiales derivadas de su fisonomía jurídica.\n\nLas causales de extinción del comodato son las siguientes:\n\n1. **Llegada del plazo estipulado o conclusión del uso o servicio** (Art. 2180 del C.C.).\n2. **Restitución anticipada** (Art. 2180 inc. 2.° del C.C.): muerte del comodatario, necesidad imprevista y urgente del comodante, terminación o inexistencia del servicio, y uso indebido con caducidad del plazo (Art. 2177 del C.C.).\n3. **Muerte del comodatario** (Arts. 2180 N.° 1 y 2186 del C.C., por regla general).\n4. **Pérdida fortuita de la especie prestada**, por imposibilidad de ejecución.\n5. **Extinción o resolución del derecho del comodante sobre la cosa.**\n\n#### 1. Modos ordinarios: plazo convenido o servicio concluido\n\n**Base legal:** Art. 2180 inc. 1.° del C.C.\n\nEl contrato expira por el cumplimiento del plazo fijado por las partes o por la finalización del servicio particular para el cual la cosa fue prestada. Llegado ese momento, la obligación de restituir se torna actualmente exigible.\n\n#### 2. Hipótesis de restitución anticipada\n\n**Base legal:** Art. 2180 inc. 2.° del C.C.\n\nEl legislador autoriza al comodante para exigir la restitución de la cosa antes de vencido el plazo o finalizado el servicio en cuatro hipótesis excepcionales:\n\n1. **Muerte del comodatario** (Art. 2180 N.° 1 del C.C.): por ser un contrato *intuitu personae* en favor del comodatario, su fallecimiento extingue el uso.\n2. **Necesidad imprevista y urgente del comodante** (Art. 2180 N.° 2 del C.C.): si al comodante le sobreviene un caso fortuito o contingencia urgente e imprevista que le haga indispensable recuperar el bien prestado. Constituye un caso legal de vulneración de la fuerza obligatoria del contrato (*pacta sunt servanda* del Art. 1545 del C.C.), justificado por la gratuidad del préstamo.\n3. **Terminación o inexistencia del servicio** (Art. 2180 N.° 3 del C.C.): si concluyó o no tuvo lugar el servicio para el cual se prestó la cosa, como libros prestados para rendir el examen de grado que ya fue rendido o cancelado.\n4. **Uso indebido de la cosa** (Art. 2177 inc. 2.° del C.C.): si el comodatario destina el bien a un uso distinto del convenido o del natural, opera la caducidad legal del plazo, y el comodante puede exigir la devolución inmediata.\n\n#### 3. Muerte de las partes como causal de extinción\n\n**Muerte del comodatario** (Arts. 2180 N.° 1 y 2186 del C.C.): por regla general pone fin al contrato de comodato. Sus herederos no tienen derecho a continuar en el uso de la cosa prestada y están obligados a restituirla inmediatamente al comodante. Por excepción, los herederos podrán continuar en el uso únicamente cuando la cosa se haya prestado para un servicio particular que no pueda diferirse ni suspenderse sin grave perjuicio (Art. 2180 N.° 1 del C.C.).\n\n**Muerte del comodante** (Art. 2190 del C.C.): no extingue el contrato de comodato. El comodatario conserva el derecho de continuar usando la cosa hasta el vencimiento del plazo o servicio, y debe hacer la restitución posterior a los herederos del comodante (Arts. 2186 y 2190 del C.C.).\n\n#### 4. Pérdida fortuita de la cosa y extinción del derecho del comodante\n\n**Pérdida fortuita de la especie:** si la especie o cuerpo cierto se destruye totalmente por caso fortuito sin culpa ni mora del comodatario, la obligación de restituir se extingue por imposibilidad sobrevenida de ejecución, esto es, por pérdida de la cosa que se debe (Arts. 1670 y 2178 del C.C.).\n\n**Extinción del derecho del comodante** (Art. 2188 del C.C.): si el comodante prestó la cosa como arrendatario o usufructuario y su derecho sobre el bien expira o se resuelve, se extingue el comodato. El verdadero dueño puede exigir la restitución de forma inoponible.",
+    "charCount": 3917,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Nace del acuerdo de las partes o de la decisión unilateral del actor de agrupar pretensiones",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Nace del acuerdo de las partes o de la decisión unilateral del actor de agrupar pretensiones» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Nace del acuerdo de las partes o de la decisión unilateral del actor d...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-5",
+        "targetTitle": "Teoría General de los Incidentes (Incidente Ordinario, Desistimiento de la Demanda y Abandono del Procedimiento)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.8",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Pregunta obligatoria e ineludible en el Examen de Grado)_",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Pregunta obligatoria e ineludible en el Examen de Grado)_» (§ 2.8).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Pregunta obligatoria e ineludible en el Examen de Grado)_...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-3-2",
+        "targetTitle": "La Prueba Testimonial",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.51",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Antes de declarar sobre el fondo, se le pregunta si le empece alguna de las causales de inhabilidad",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Antes de declarar sobre el fondo, se le pregunta si le empece alguna de las causales de inhabilidad» (§ 2.51).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Antes de declarar sobre el fondo, se le pregunta si le empece alguna d...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.58"
+  },
+  {
+    "id": "civil-contratoco-3-6",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 13,
+    "chapterTitle": "Contrato de Comodato",
+    "category": "Contrato de Comodato",
+    "code": "3.6",
+    "title": "Sección 3.6: Comodato precario y precario: análisis dogmático y procesal",
+    "cleanTitle": "Comodato precario y precario: análisis dogmático y procesal",
+    "sourceFile": "CONTRATOCOMODATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOCOMODATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Dominio",
+      "Contrato",
+      "Prueba",
+      "Propiedad"
+    ],
+    "isFree": false,
+    "content": "### Sección 3.6 — Comodato precario y precario: análisis dogmático y procesal\n\nEn el estudio del Derecho Civil chileno, la institución del precario exige distinguir de forma categórica entre la figura contractual del comodato precario y la situación de hecho del precario.\n\n#### 1. El comodato precario\n\n**Base legal:** Arts. 2194 y 2195 inc. 1.° del C.C.\n\n**Definición y naturaleza jurídica:** el comodato precario es un verdadero y propio contrato de comodato, esto es, existe acuerdo de voluntades, que presenta la particularidad de que el comodante puede exigir la restitución de la cosa prestada en cualquier tiempo.\n\n**Las tres hipótesis legales de comodato precario:** un contrato de comodato reviste la calidad de comodato precario cuando se verifica cualquiera de las siguientes tres situaciones:\n\n1. **Cuando el comodante se reserva expresamente la facultad de pedir la restitución en cualquier tiempo** (Art. 2194 del C.C.).\n2. **Cuando no se presta la cosa para un servicio particular** (Art. 2195 inc. 1.° del C.C.).\n3. **Cuando no se fija un plazo para su restitución** (Art. 2195 inc. 1.° del C.C.).\n\n#### 2. El precario\n\n**Base legal:** Art. 2195 inc. 2.° del C.C.\n\n**Definición y naturaleza jurídica:** el precario no es un contrato, sino una situación de hecho. Ocurre cuando una persona tiene la tenencia de una cosa ajena sin previo contrato que la justifique, y por ignorancia o mera tolerancia del dueño.\n\n**Requisitos copulativos de la acción de precario:** para que prospere la acción de precario deducida por el actor, deben acreditarse en juicio tres requisitos imperativos y copulativos:\n\n1. **Que el demandante sea dueño o propietario de la cosa.**\n2. **Que el demandado sea tenedor material de la cosa ajena.**\n3. **Que la tenencia sea sin previo contrato y por ignorancia o mera tolerancia del dueño.**\n\n**Desarrollo de los requisitos:**\n\n1. **Que el actor sea dueño de la cosa:** el demandante debe acreditar el dominio sobre la especie mueble o inmueble cuya restitución persigue.\n2. **Que el demandado sea tenedor de la cosa ajena:** el demandado debe detentar la mera tenencia material del bien.\n3. **Ausencia de título e ignorancia o tolerancia:** la tenencia debe mantenerse sin contrato alguno que la autorice y por la simple ignorancia o beneplácito no vinculante del propietario. Si el demandado exhibe cualquier título jurídicamente relevante que justifique su tenencia, como un contrato de arriendo, una promesa de venta, un usufructo o una concesión, la acción de precario debe ser desestimada.\n\n#### 3. Cuadro comparativo de grado: comodato precario y precario\n\n| **Criterio de comparación** | **Comodato precario** | **El precario** |\n| --- | --- | --- |\n| Naturaleza jurídica | Es un contrato, esto es, un acuerdo de voluntades vinculante. | Es una simple situación de hecho. |\n| Existencia de título | Existe título contractual de comodato. | Hay ausencia total de contrato o título. |\n| Prueba de la demanda | El actor debe probar la existencia del contrato de comodato. | El actor debe probar su dominio, la tenencia ajena y la mera tolerancia. |\n| Facultad de restitución | Nace del pacto de libre revocación o de los vacíos de plazo o servicio. | Nace del derecho de propiedad vulnerado por la tenencia sin causa. |\n\n**Base legal:** Arts. 2194 y 2195 del C.C.",
+    "charCount": 3309,
+    "connections": [
+      {
+        "targetTopicId": "civil-contratoco-4-2",
+        "targetTitle": "El precario",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.63",
+        "crossoverType": "Materia-Afin",
+        "quote": "Constituye también precario la tenencia de una cosa ajena, sin previo contrato y por ignorancia o mera tolerancia del dueño",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Constituye también precario la tenencia de una cosa ajena, sin previo contrato y por ignorancia o mera tolerancia del dueño» (§ 1.63).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Constituye también precario la tenencia de una cosa ajena, sin previo ...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "civil-contratoco-1-6",
+        "targetTitle": "Debates doctrinales y puntos de tesis",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.45",
+        "crossoverType": "Materia-Afin",
+        "quote": "Requisitos de la acción | Probar la existencia del contrato de comodato y el ejercicio de la facultad de revocación",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Requisitos de la acción | Probar la existencia del contrato de comodato y el ejercicio de la facultad de revocación» (§ 1.45).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Requisitos de la acción | Probar la existencia del contrato de comodat...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "civil-contratoco-4-1",
+        "targetTitle": "El comodato precario",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.62",
+        "crossoverType": "Materia-Afin",
+        "quote": "Se entiende precario cuando no se presta la cosa para un servicio particular ni se fija tiempo para su restitución",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Se entiende precario cuando no se presta la cosa para un servicio particular ni se fija tiempo para su restitución» (§ 1.62).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Se entiende precario cuando no se presta la cosa para un servicio part...» en la resolución de casos de civil."
+      }
+    ],
+    "indexCode": "1.59"
+  },
+  {
+    "id": "civil-contratoco-3-7",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 13,
+    "chapterTitle": "Contrato de Comodato",
+    "category": "Contrato de Comodato",
+    "code": "3.7",
+    "title": "Sección 3.7: Tramitación procesal actualizada",
+    "cleanTitle": "Tramitación procesal actualizada",
+    "sourceFile": "CONTRATOCOMODATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOCOMODATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Dominio",
+      "Resolución"
+    ],
+    "isFree": false,
+    "content": "### Sección 3.7 — Tramitación procesal actualizada\n\n**Base legal:** Ley N.° 21.461; Art. 680 N.° 6 del C.P.C.; Art. 18-K y Art. 13 inc. 2.° de la Ley N.° 18.101.\n\n#### 1. Reforma de la Ley N.° 21.461\n\nLa Ley N.° 21.461 modificó de forma trascendental el juzgamiento de estas acciones para dotar de celeridad a la restitución de inmuebles.\n\n**Derogación de la vía sumaria:** la Ley N.° 21.461 suprimió del procedimiento sumario ordinario la tramitación de los juicios de comodato precario y de precario (Art. 2.° de la Ley N.° 21.461; Art. 680 N.° 6 del C.P.C.).\n\n**Sometimiento al procedimiento monitorio:** actualmente, tanto la acción de comodato precario como la acción de precario que persigan la restitución de un inmueble se tramitan bajo las reglas del procedimiento monitorio especial regulado en el Título III bis de la Ley N.° 18.101 (Art. 18-K).\n\n#### 2. Esquema del procedimiento monitorio de precario\n\n1. **Demanda monitoria:** el dueño interpone la demanda solicitando el requerimiento de restitución e indica los antecedentes de su dominio y la tenencia tolerada.\n2. **Requerimiento judicial y plazo de oposición:** el juez requiere al ocupante para que en el plazo de diez días hábiles restituya el inmueble o formule oposición fundada.\n3. **Efectos del requerimiento:** si el demandado no se opone ni restituye, la resolución se tiene por sentencia definitiva ejecutoriada y se decreta el lanzamiento con auxilio de la fuerza pública. Si el demandado formula oposición fundada, como exhibir un título contractual, se pone fin a la vía monitoria y las partes deben discutir sus derechos en el juicio ordinario o declarativo correspondiente.\n4. **Suspensión del lanzamiento** (Art. 13 inc. 2.° de la Ley N.° 18.101): decretado el lanzamiento, el juez de la causa solo puede suspenderlo en casos graves y calificados, por un plazo máximo e improrrogable de treinta días.",
+    "charCount": 1884,
+    "connections": [
+      {
+        "targetTopicId": "civil-contratoco-4-4",
+        "targetTitle": "Aspectos procesales y tramitación actualizada",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.65",
+        "crossoverType": "Materia-Afin",
+        "quote": "Históricamente, los juicios de comodato precario y de precario se tramitaban por el procedimiento sumario (Art",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Históricamente, los juicios de comodato precario y de precario se tramitaban por el procedimiento sumario (Art» (§ 1.65).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Históricamente, los juicios de comodato precario y de precario se tram...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-3",
+        "targetTitle": "Los Actos Jurídicos Procesales, Plazos, Resoluciones y Notificaciones",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.6",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Los Actos Jurídicos Procesales y la Tramitación Digital (Ley N° 20",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Los Actos Jurídicos Procesales y la Tramitación Digital (Ley N° 20» (§ 2.6).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Los Actos Jurídicos Procesales y la Tramitación Digital (Ley N° 20...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procemayor-3-3",
+        "targetTitle": "Facultades del tribunal y causales de rechazo de plano",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.22",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "No se da curso a la demanda",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «No se da curso a la demanda» (§ 2.22).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «No se da curso a la demanda...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.60"
+  },
+  {
+    "id": "civil-contratoco-3-8",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 13,
+    "chapterTitle": "Contrato de Comodato",
+    "category": "Contrato de Comodato",
+    "code": "3.8",
+    "title": "Sección 3.8: Puntos críticos para el examen de grado",
+    "cleanTitle": "Puntos críticos para el examen de grado",
+    "sourceFile": "CONTRATOCOMODATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOCOMODATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Contrato"
+    ],
+    "isFree": false,
+    "content": "### Sección 3.8 — Puntos críticos para el examen de grado\n\n1. **Naturaleza del sinalagma imperfecto:** la aparición de obligaciones eventuales para el comodante, sea el reembolso de expensas (Art. 2191 del C.C.) o la indemnización por vicios (Art. 2192 del C.C.), no transforma al comodato en un contrato bilateral. El comodato se mantiene como contrato unilateral.\n2. **Límite del derecho de retención** (Art. 2182 del C.C.): el comodatario no puede retener la cosa prestada para compensar deudas u obligaciones ajenas que el comodante mantenga con él. El derecho legal de retención (Art. 2193 del C.C.) procede exclusivamente por las expensas e indemnizaciones del propio comodato.\n3. **Efecto de la muerte de las partes:** la muerte del comodante no extingue el comodato (Art. 2190 del C.C.); la muerte del comodatario sí extingue el contrato por regla general, por su carácter *intuitu personae* (Arts. 2180 N.° 1 y 2186 del C.C.).\n4. **Comodato precario y precario:** el comodato precario es un contrato (Arts. 2194 y 2195 inc. 1.° del C.C.); el precario es una simple situación de hecho por falta total de contrato e ignorancia o mera tolerancia del dueño (Art. 2195 inc. 2.° del C.C.).\n5. **Procedimiento procesal actualizado:** tras la Ley N.° 21.461, la demanda de precario ya no se tramita en procedimiento sumario, sino en el procedimiento monitorio especial del Art. 18-K de la Ley N.° 18.101.\n\n## Capítulo 4 — Comodato precario vs. precario: diferencias radicales",
+    "charCount": 1476,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procemayor-7-1",
+        "targetTitle": "La Réplica: fase de contradicción del actor",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.40",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos críticos para el examen de grado",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos críticos para el examen de grado» (§ 2.40).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos críticos para el examen de grado...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.61"
+  },
+  {
+    "id": "civil-contratoco-4-1",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 13,
+    "chapterTitle": "Contrato de Comodato",
+    "category": "Contrato de Comodato",
+    "code": "4.1",
+    "title": "Sección 4.1: El comodato precario",
+    "cleanTitle": "El comodato precario",
+    "sourceFile": "CONTRATOCOMODATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOCOMODATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Dominio",
+      "Contrato"
+    ],
+    "isFree": false,
+    "content": "### Sección 4.1 — El comodato precario\n\n#### 1. Definición y fundamento legal\n\n**Base legal:** Arts. 2194 y 2195 inc. 1.° del C.C.\n\n**Comodato precario:** verdadero y propio contrato de comodato, esto es, acuerdo de voluntades que genera obligaciones, en el que se ha pactado o la ley presume que el comodante conserva la facultad de exigir la restitución de la cosa prestada en cualquier momento.\n\nEl Código Civil contempla el comodato precario en dos disposiciones complementarias:\n\n> “El comodato toma el título de precario si el comodante se reserva la facultad de pedir la restitución de la cosa prestada en cualquier tiempo.” (Art. 2194 del C.C.)\n\n> “Se entiende precario cuando no se presta la cosa para un servicio particular ni se fija tiempo para su restitución.” (Art. 2195 inc. 1.° del C.C.)\n\n#### 2. Las tres hipótesis legales de comodato precario\n\nUn contrato de comodato reviste la categoría técnica de comodato precario cuando se configura cualquiera de las siguientes tres situaciones:\n\n1. **Reserva expresa de restitución:** cuando las partes estipulan explícitamente que el comodante podrá exigir la devolución de la especie en cualquier tiempo.\n2. **Ausencia de servicio particular:** cuando la cosa no se ha prestado para la ejecución de un uso o servicio especial y determinado.\n3. **Ausencia de plazo:** cuando no se ha fijado un plazo cierto de restitución en la convención.\n\n#### 3. Naturaleza jurídica y efectos\n\n**Existencia de vínculo contractual:** en las tres hipótesis anteriores existe un contrato bilateralmente constituido, esto es, un acuerdo de voluntades.\n\n**Título de mera tenencia:** el comodatario ingresa a la tenencia de la cosa en virtud de un contrato de préstamo de uso, y reconoce el dominio ajeno del comodante (Arts. 714 y 2176 del C.C.).\n\n**Facultad discrecional de revocación:** la única particularidad dogmática es que la exigibilidad de la restitución no depende de la llegada de un plazo o del término de un servicio, sino de la sola voluntad manifestada por el comodante.",
+    "charCount": 2025,
+    "connections": [
+      {
+        "targetTopicId": "civil-contratoco-3-6",
+        "targetTitle": "Comodato precario y precario: análisis dogmático y procesal",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.59",
+        "crossoverType": "Materia-Afin",
+        "quote": "Cuando el comodante se reserva expresamente la facultad de pedir la restitución en cualquier tiempo** (Art",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Cuando el comodante se reserva expresamente la facultad de pedir la restitución en cualquier tiempo** (Art» (§ 1.59).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Cuando el comodante se reserva expresamente la facultad de pedir la re...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Por el término del juicio o ejecución de la sentencia",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Por el término del juicio o ejecución de la sentencia» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Por el término del juicio o ejecución de la sentencia...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "civil-contratoco-1-6",
+        "targetTitle": "Debates doctrinales y puntos de tesis",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.45",
+        "crossoverType": "Materia-Afin",
+        "quote": "Dado que el comodato es un título de mera tenencia (Art",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Dado que el comodato es un título de mera tenencia (Art» (§ 1.45).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Dado que el comodato es un título de mera tenencia (Art...» en la resolución de casos de civil."
+      }
+    ],
+    "indexCode": "1.62"
+  },
+  {
+    "id": "civil-contratoco-4-2",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 13,
+    "chapterTitle": "Contrato de Comodato",
+    "category": "Contrato de Comodato",
+    "code": "4.2",
+    "title": "Sección 4.2: El precario",
+    "cleanTitle": "El precario",
+    "sourceFile": "CONTRATOCOMODATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOCOMODATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Dominio",
+      "Posesión",
+      "Contrato",
+      "Prueba",
+      "Propiedad"
+    ],
+    "isFree": false,
+    "content": "### Sección 4.2 — El precario\n\n#### 1. Definición y fundamento legal\n\n**Base legal:** Art. 2195 inc. 2.° del C.C.\n\n**Precario:** simple situación de hecho, no un contrato ni un acto jurídico. La ley lo define en los siguientes términos:\n\n> “Constituye también precario la tenencia de una cosa ajena, sin previo contrato y por ignorancia o mera tolerancia del dueño.”\n\n#### 2. Naturaleza jurídica\n\nA diferencia de cualquier contrato, el precario supone la ausencia absoluta de todo vínculo jurídico entre el propietario del bien y el tenedor. Se trata de una tenencia meramente sufrida, permitida o ignorada por el dueño, sin ningún título que la autorice o la justifique jurídicamente.\n\n#### 3. Requisitos copulativos de la acción de precario\n\nPara que la demanda o acción de precario sea acogida por el tribunal, el demandante debe acreditar la concurrencia de tres requisitos imperativos y copulativos:\n\n1. **Que el actor sea dueño o propietario de la cosa.**\n2. **Que el demandado detente la tenencia material de la cosa ajena.**\n3. **Que la tenencia sea sin previo contrato y por ignorancia o mera tolerancia del dueño.**\n\n**Desarrollo de los requisitos:**\n\n1. **Dominio del demandante:** el actor debe probar su derecho de propiedad, plena, nuda, absoluta o fiduciaria, sobre la cosa corporal, mueble o inmueble, cuya restitución solicita.\n2. **Tenencia material del demandado:** el demandado debe encontrarse en posesión material o tenencia efectiva del bien ajeno.\n3. **Ausencia de título e ignorancia o tolerancia del dueño:** la ocupación o tenencia debe ejercerse sin contrato previo y únicamente en razón de la mera tolerancia o desconocimiento del propietario.\n\n> **Nota:** si el demandado prueba que ocupa el bien en virtud de algún título jurídicamente relevante, como un contrato de arrendamiento, una promesa de compraventa, un usufructo o una concesión, la acción de precario debe ser desestimada de plano, por faltar el presupuesto esencial de la ausencia de contrato.",
+    "charCount": 1986,
+    "connections": [
+      {
+        "targetTopicId": "civil-contratoco-3-6",
+        "targetTitle": "Comodato precario y precario: análisis dogmático y procesal",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.59",
+        "crossoverType": "Materia-Afin",
+        "quote": "Que la tenencia sea sin previo contrato y por ignorancia o mera tolerancia del dueño",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Que la tenencia sea sin previo contrato y por ignorancia o mera tolerancia del dueño» (§ 1.59).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Que la tenencia sea sin previo contrato y por ignorancia o mera tolera...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "El tercero alega hallarse en posesión del bien al momento del embargo (amparado por la presunción de dominio del Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «El tercero alega hallarse en posesión del bien al momento del embargo (amparado por la presunción de dominio del Art» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El tercero alega hallarse en posesión del bien al momento del embargo ...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "civil-contratoco-1-6",
+        "targetTitle": "Debates doctrinales y puntos de tesis",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.45",
+        "crossoverType": "Materia-Afin",
+        "quote": "Probar el dominio del actor, la tenencia del demandado y la ignorancia o mera tolerancia del dueño",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Probar el dominio del actor, la tenencia del demandado y la ignorancia o mera tolerancia del dueño» (§ 1.45).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Probar el dominio del actor, la tenencia del demandado y la ignorancia...» en la resolución de casos de civil."
+      }
+    ],
+    "indexCode": "1.63"
+  },
+  {
+    "id": "civil-contratoco-4-3",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 13,
+    "chapterTitle": "Contrato de Comodato",
+    "category": "Contrato de Comodato",
+    "code": "4.3",
+    "title": "Sección 4.3: Cuadro comparativo de diferencias radicales",
+    "cleanTitle": "Cuadro comparativo de diferencias radicales",
+    "sourceFile": "CONTRATOCOMODATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOCOMODATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Dominio",
+      "Contrato",
+      "Prueba",
+      "Protección"
+    ],
+    "isFree": false,
+    "content": "### Sección 4.3 — Cuadro comparativo de diferencias radicales\n\nLas diferencias entre ambas instituciones son estructurales y se resumen en el siguiente cuadro dogmático:\n\n| **Criterio de comparación** | **Comodato precario** | **El precario** |\n| --- | --- | --- |\n| Naturaleza jurídica | Es un contrato de comodato, esto es, un acto jurídico bilateral. | Es una simple situación de hecho, con ausencia de contrato. |\n| Origen de la tenencia | Deriva de un acuerdo de voluntades previo entre las partes. | Nace del desconocimiento o la mera tolerancia del dueño. |\n| Existencia de título | Existe título contractual que justifica la tenencia inicial. | Hay inexistencia absoluta de título o contrato previo. |\n| Carga de la prueba | El actor debe probar la existencia del contrato de comodato. | El actor prueba su dominio y la tenencia ajena; el demandado debe probar su título si lo tiene. |\n| Restitución | Procede por el ejercicio de la facultad contractual de revocación. | Procede por la protección del derecho de dominio del propietario. |\n\n**Base legal:** Arts. 2194 y 2195 del C.C.",
+    "charCount": 1090,
+    "connections": [
+      {
+        "targetTopicId": "civil-contratoco-3-6",
+        "targetTitle": "Comodato precario y precario: análisis dogmático y procesal",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.59",
+        "crossoverType": "Materia-Afin",
+        "quote": "El actor debe probar su dominio, la tenencia ajena y la mera tolerancia",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «El actor debe probar su dominio, la tenencia ajena y la mera tolerancia» (§ 1.59).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El actor debe probar su dominio, la tenencia ajena y la mera toleranci...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "civil-contratoco-1-6",
+        "targetTitle": "Debates doctrinales y puntos de tesis",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.45",
+        "crossoverType": "Materia-Afin",
+        "quote": "Requisitos de la acción | Probar la existencia del contrato de comodato y el ejercicio de la facultad de revocación",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Requisitos de la acción | Probar la existencia del contrato de comodato y el ejercicio de la facultad de revocación» (§ 1.45).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Requisitos de la acción | Probar la existencia del contrato de comodat...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Un error muy común en el examen oral es afirmar que \"en materia contractual la carga de la prueba se invierte totalmente\"",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Un error muy común en el examen oral es afirmar que \"en materia contractual la carga de la prueba se invierte totalmente\"» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Un error muy común en el examen oral es afirmar que \"en materia contra...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.64"
+  },
+  {
+    "id": "civil-contratoco-4-4",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 13,
+    "chapterTitle": "Contrato de Comodato",
+    "category": "Contrato de Comodato",
+    "code": "4.4",
+    "title": "Sección 4.4: Aspectos procesales y tramitación actualizada",
+    "cleanTitle": "Aspectos procesales y tramitación actualizada",
+    "sourceFile": "CONTRATOCOMODATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOCOMODATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Dominio"
+    ],
+    "isFree": false,
+    "content": "### Sección 4.4 — Aspectos procesales y tramitación actualizada\n\n**Base legal:** Ley N.° 21.461; Art. 680 N.° 6 del C.P.C.; Art. 18-K y Art. 13 inc. 2.° de la Ley N.° 18.101.\n\n#### 1. Reforma de la Ley N.° 21.461\n\nHistóricamente, los juicios de comodato precario y de precario se tramitaban por el procedimiento sumario (Art. 680 N.° 6 del C.P.C.). Sin embargo, la Ley N.° 21.461 introdujo una reforma procesal sustancial.\n\n**Modificación al Código de Procedimiento Civil:** se suprimió del numeral 6.° del Art. 680 la mención al comodato precario y al precario.\n\n**Sometimiento al procedimiento monitorio:** de acuerdo con el Art. 18-K de la Ley N.° 18.101, las acciones de comodato precario y de precario que persigan la restitución de inmuebles se tramitan hoy bajo las reglas del procedimiento monitorio especial.\n\n#### 2. Estructura del procedimiento monitorio de precario\n\n1. **Demanda monitoria:** el propietario interpone la demanda con los requisitos del procedimiento monitorio, y acompaña los antecedentes que acrediten su dominio y la tenencia del ocupante.\n2. **Requerimiento judicial e interpelación:** acogida a tramitación la demanda, el tribunal requiere al tenedor para que en el plazo de diez días corridos restituya el inmueble o formule oposición fundada.\n3. **Efectos según la actitud del demandado:** si no hay oposición ni restitución, el requerimiento se convierte de pleno derecho en sentencia definitiva ejecutoriada y se decreta el lanzamiento con el auxilio de la fuerza pública. Si formula oposición fundada, como alegar y probar un título contractual, se pone fin a la vía monitoria, y el actor debe demandar posteriormente en juicio declarativo u ordinario.\n4. **Suspensión del lanzamiento** (Art. 13 inc. 2.° de la Ley N.° 18.101): decretado el lanzamiento en el juicio de precario o comodato precario, el juez solo puede suspenderlo por motivos graves y calificados, por un plazo máximo e improrrogable de treinta días.",
+    "charCount": 1953,
+    "connections": [
+      {
+        "targetTopicId": "civil-contratoco-3-7",
+        "targetTitle": "Tramitación procesal actualizada",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.60",
+        "crossoverType": "Materia-Afin",
+        "quote": "Esquema del procedimiento monitorio de precario",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Esquema del procedimiento monitorio de precario» (§ 1.60).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Esquema del procedimiento monitorio de precario...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-5",
+        "targetTitle": "Teoría General de los Incidentes (Incidente Ordinario, Desistimiento de la Demanda y Abandono del Procedimiento)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.8",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Título, si no tiene señalada por la ley una tramitación especial\"_",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Título, si no tiene señalada por la ley una tramitación especial\"_» (§ 2.8).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Título, si no tiene señalada por la ley una tramitación especial\"_...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "N° 2 del Código de Procedimiento Civil - CPC)",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «N° 2 del Código de Procedimiento Civil - CPC)» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «N° 2 del Código de Procedimiento Civil - CPC)...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.65"
+  },
+  {
+    "id": "civil-contratoco-4-5",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 13,
+    "chapterTitle": "Contrato de Comodato",
+    "category": "Contrato de Comodato",
+    "code": "4.5",
+    "title": "Sección 4.5: Puntos críticos para el examen de grado",
+    "cleanTitle": "Puntos críticos para el examen de grado",
+    "sourceFile": "CONTRATOCOMODATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOCOMODATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Contrato"
+    ],
+    "isFree": false,
+    "content": "### Sección 4.5 — Puntos críticos para el examen de grado\n\n1. **Contrato y hecho:** en el comodato precario existe un contrato donde se omitió plazo o se acordó restitución a voluntad (Arts. 2194 y 2195 inc. 1.° del C.C.); en el precario no hay contrato alguno, sino una tenencia de hecho por mera tolerancia o ignorancia del dueño (Art. 2195 inc. 2.° del C.C.).\n2. **El título que enerva el precario:** para destruir la acción de precario no se exige que el demandado sea dueño; basta que pruebe la existencia de cualquier título jurídico que lo autorice a ocupar la cosa, como un contrato de arriendo verbal o escrito o una promesa de venta.\n3. **Mera tolerancia:** supone la permisión o beneplácito del dueño sin ánimo de constituir un derecho real o personal a favor del tenedor.\n4. **Cambio procedimental:** las demandas de precario y comodato precario de inmuebles ya no se tramitan por el juicio sumario del Art. 680 del C.P.C., sino por el procedimiento monitorio del Título III bis de la Ley N.° 18.101 (Art. 18-K).\n\n**Conclusión:** el comodato es un contrato real, gratuito por esencia, unilateral y título de mera tenencia, que obliga al comodatario a conservar, usar legítimamente y restituir la misma especie; solo por excepción impone obligaciones eventuales al comodante y solo se extingue por las causales legales, con un régimen especial y diferenciado para el comodato precario y el precario.",
+    "charCount": 1410,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-1-1",
+        "targetTitle": "La Acción, la Pretensión y el Proceso",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.1",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.1).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.66"
+  },
+  {
+    "id": "civil-contratomu-1-1",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 14,
+    "chapterTitle": "Contrato de Mutuo",
+    "category": "Contrato de Mutuo",
+    "code": "1.1",
+    "title": "Sección 1.1: Definición Legal, Análisis Dogmático y Ubicación Normativa",
+    "cleanTitle": "Definición Legal, Análisis Dogmático y Ubicación Normativa",
+    "sourceFile": "CONTRATOMUTUO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMUTUO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Contrato",
+      "Obligación"
+    ],
+    "isFree": false,
+    "content": "### Sección 1.1 — Definición Legal, Análisis Dogmático y Ubicación Normativa\n\n#### 1. Sede normativa\n\n**Base legal:** Título XXXI del Libro IV del Código Civil (Art. 2196 a 2209) y Ley N.° 18.010 sobre Operaciones de Crédito de Dinero.\n\nEl contrato de mutuo o préstamo de consumo se encuentra orgánicamente regulado en el Título XXXI del Libro IV del Código Civil (Art. 2196 a 2209). Asimismo, cuando el mutuo recae sobre una suma de dinero, queda sujeto a la reglamentación especial de la Ley N.° 18.010 sobre Operaciones de Crédito de Dinero.\n\n#### 2. Definición legal\n\n**Mutuo o préstamo de consumo:** contrato en que una de las partes entrega a la otra cierta cantidad de cosas fungibles con cargo de restituir otras tantas del mismo género y calidad (Art. 2196 del Código Civil).\n\n> “El mutuo o préstamo de consumo es un contrato en que una de las partes entrega a la otra cierta cantidad de cosas fungibles con cargo de restituir otras tantas del mismo género y calidad.” (Art. 2196 del Código Civil)\n\n#### 3. Análisis dogmático del concepto\n\nDe la definición contenida en el Art. 2196 del Código Civil se extraen siete elementos conceptuales configuradores de la institución:\n\n- **a) Variante de préstamo de consumo:** constituye la especie de préstamo destinada al consumo material o jurídico del bien por parte del prestatario.\n- **b) Requisito de la entrega:** el contrato nace jurídicamente al verificarse la entrega de las cosas.\n- **c) Certeza en la cantidad:** exige la determinación previa y precisa del número, peso, medida o volumen de las especies entregadas.\n- **d) Fungibilidad de las cosas:** las cosas deben ser fungibles, esto es, objetiva o subjetivamente reemplazables entre sí por poseer un idéntico poder liberatorio y prestar la misma utilidad.\n- **e) Recae exclusivamente sobre bienes muebles:** al estar destinadas al consumo o la enajenación, las cosas objeto del mutuo deben ser imperativamente bienes muebles.\n- **f) Obligación de restituir “otras tantas”:** el mutuario no devuelve las mismas especies corporales recibidas (puesto que se destruyen o enajenan), sino otras tantas equivalentes en número, peso o medida.\n- **g) Restitución del “mismo género y calidad”:** las cosas restituidas deben presentar características comunes y un valor semejante a las recibidas.\n\n#### 4. Imprecisión técnica del Art. 2196 (fungibilidad y consumibilidad)\n\n**Doctrina:** la dogmática observa que el Art. 2196 alude únicamente al carácter “fungible” de las cosas prestadas, omitiendo mencionar su calidad de “consumibles”.\n\n**Base legal:** esta omisión se explica porque el Art. 575 del Código Civil trata de forma promiscua ambos conceptos, al señalar que pertenecerán a las cosas fungibles “aquellas de que no puede hacerse el uso conveniente a su naturaleza sin que se destruyan”.\n\nOrdinariamente las cosas objeto de mutuo son simultáneamente consumibles y fungibles (por ejemplo, dinero, alimentos o combustibles). Sin embargo, la definición es acertada al exigir imperativamente la fungibilidad, pues el mutuo podría recaer sobre cosas fungibles pero objetivamente no consumibles (por ejemplo, el préstamo de doscientas sillas idénticas y nuevas a un establecimiento educacional, con obligación de restituir otras doscientas sillas iguales y nuevas). En este caso no hay comodato ni arrendamiento, porque no se devuelven las mismas especies corporales, y subsiste la estructura del mutuo gracias a la fungibilidad de las sillas.",
+    "charCount": 3454,
+    "connections": [
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Siempre debe recordarse que, aunque se encuentra ubicado en el Código Civil, el Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Siempre debe recordarse que, aunque se encuentra ubicado en el Código Civil, el Art» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Siempre debe recordarse que, aunque se encuentra ubicado en el Código ...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "El _ius postulandi_ exige la concurrencia obligatoria de dos figuras reguladas en la Ley N° 18",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «El _ius postulandi_ exige la concurrencia obligatoria de dos figuras reguladas en la Ley N° 18» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El _ius postulandi_ exige la concurrencia obligatoria de dos figuras r...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-3-2",
+        "targetTitle": "La Prueba Testimonial",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.51",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Toda persona citada en forma legal está obligada a concurrir a la presencia del tribunal a prestar declaración",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Toda persona citada en forma legal está obligada a concurrir a la presencia del tribunal a prestar declaración» (§ 2.51).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Toda persona citada en forma legal está obligada a concurrir a la pres...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.67"
+  },
+  {
+    "id": "civil-contratomu-1-2",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 14,
+    "chapterTitle": "Contrato de Mutuo",
+    "category": "Contrato de Mutuo",
+    "code": "1.2",
+    "title": "Sección 1.2: Características Contractuales del Mutuo",
+    "cleanTitle": "Características Contractuales del Mutuo",
+    "sourceFile": "CONTRATOMUTUO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMUTUO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Dominio",
+      "Contrato",
+      "Obligación"
+    ],
+    "isFree": false,
+    "content": "### Sección 1.2 — Características Contractuales del Mutuo\n\nLas características contractuales del mutuo son las siguientes:\n\n1. **Real en el Código Civil y consensual en la Ley N.° 18.010** (Art. 2197 del Código Civil).\n2. **Título translaticio de dominio** (Art. 2197, 675 y 703 del Código Civil).\n3. **Unilateral en el Código Civil y bilateral en la Ley N.° 18.010 consensual.**\n4. **Gratuito por naturaleza en el Código Civil y oneroso por naturaleza en la Ley N.° 18.010.**\n5. **Contrato principal y nominado.**\n6. **Impersonal y de ejecución diferida.**\n\n#### 1. Contrato real o consensual\n\n**a) En el mutuo civil:** es un contrato real (Art. 1443 y 2197 del Código Civil): se perfecciona mediante la tradición de las cosas prestadas.\n\n**Anomalía en la teoría general del contrato:** mientras que por regla general de los contratos solo nacen derechos personales, en el mutuo civil la entrega opera simultáneamente como presupuesto de perfeccionamiento del contrato y como tradición que transfiere el dominio al mutuario. El contrato hace las veces de título y modo de adquirir.\n\n**Efectos:** la tradición inicial que efectúa el mutuante no es un pago, por cuanto el mutuante nada le adeudaba previamente al mutuario.\n\n**b) En el mutuo de dinero (Ley N.° 18.010):** real o consensual (Art. 1.º de la Ley N.° 18.010). La ley define las operaciones de crédito de dinero como aquellas en que una parte “entrega” (mutuo real) “o se obliga a entregar” (mutuo consensual) una cantidad de dinero.\n\n**Efectos:** si las partes celebran un mutuo de dinero consensual, la entrega posterior que hace el mutuante sí constituye formalmente un pago, pues cumple la obligación previa asumida en el contrato.\n\n**c) Casos de mutuo solemne:** excepcionalmente, el mutuo reviste carácter solemne en dos hipótesis legales:\n\n1. **Mutuo hipotecario:** los mutuos hipotecarios endosables o en letras de crédito deben otorgarse imperativamente por escritura pública (Art. 69 y 91 de la Ley General de Bancos).\n2. **Pago con subrogación legal:** el préstamo que un tercero hace al deudor para pagar una deuda debe constar en escritura pública (Art. 1610 N.° 6 del Código Civil).\n\n#### 2. Título translaticio de dominio\n\n**Base legal:** Art. 2197, 675 y 703 del Código Civil.\n\nEl mutuo es el único contrato real que por su naturaleza transfiere el dominio de la cosa prestada al adquirente (salvo las figuras excepcionales del depósito irregular del Art. 2221 del Código Civil y la prenda de dinero).\n\n**Efectos:** al hacerse dueño de los bienes o del dinero, el mutuario soporta de forma absoluta la pérdida o destrucción fortuita de las especies (*res perit domino*). La pérdida no lo libera de su obligación de restituir, por aplicación del principio de que el género no perece (*genus nunquam perit*).\n\n#### 3. Contrato unilateral o bilateral\n\n- **En el Código Civil, unilateral:** en el instante de su perfeccionamiento por la entrega, solo resulta obligado el mutuario, a saber, a restituir igual cantidad de cosas del mismo género y calidad. A diferencia del comodatario o depositario, el mutuario no tiene obligación alguna de conservar la cosa, puesto que se ha hecho dueño de ella.\n- **En la Ley N.° 18.010, unilateral o bilateral:** si la operación de crédito de dinero se configura como contrato real, es unilateral; si se acuerda como contrato consensual (donde el mutuante se obliga a entregar la suma en un plazo), es un contrato bilateral.\n\n#### 4. Contrato gratuito u oneroso\n\n**a) En el mutuo civil (cosas fungibles que no sean dinero):** gratuito por naturaleza (Art. 2198 del Código Civil). La ley obliga únicamente a restituir la misma cantidad de cosas entregadas, siendo irrelevante que su precio haya subido o bajado en el intervalo.\n\n**Pacto de intereses:** para que el mutuo civil sea oneroso, las partes deben estipular expresamente el pago de intereses en dinero o en otras cosas fungibles (Art. 2205 del Código Civil).\n\n**b) En el mutuo sobre dinero (Ley N.° 18.010):** oneroso por naturaleza (Art. 12 de la Ley N.° 18.010). En las operaciones de crédito de dinero los intereses se presumen legalmente. En el silencio de las partes, el mutuario está legalmente obligado a pagar el interés corriente. Para que el mutuo de dinero sea gratuito se requiere estipulación expresa de gratuidad.\n\n#### 5. Otras características dogmáticas\n\n- **a) Principal:** subsiste por sí mismo sin necesidad de otra convención. Es el contrato principal por antonomasia al cual acceden cauciones reales como la hipoteca o la prenda.\n- **b) Típico o nominado:** posee regulación orgánica y sistemática en el Código Civil (Art. 2196 a 2209) y en la Ley N.° 18.010.\n- **c) Impersonal:** a diferencia del comodato o del depósito, el mutuo no es un contrato *intuitu personae*. La identidad del deudor no es la causa determinante del contrato, por lo que no se extingue por la muerte de ninguna de las partes; sus derechos y obligaciones se transmiten íntegramente a los herederos.\n- **d) De ejecución diferida:** supone necesariamente un lapso temporal entre la tradición de las cosas y la restitución posterior.",
+    "charCount": 5092,
+    "connections": [
+      {
+        "targetTopicId": "civil-clase911-2-2",
+        "targetTitle": "Clasificaciones Legales (Arts. 1439 a 1443 CC) y Doctrinales Contemporáneas",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.26",
+        "crossoverType": "Materia-Afin",
+        "quote": "Subsiste por sí mismo sin necesidad de otra convención (ej",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Subsiste por sí mismo sin necesidad de otra convención (ej» (§ 1.26).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Subsiste por sí mismo sin necesidad de otra convención (ej...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "civil-contratoar-1-1",
+        "targetTitle": "Definición dogmática, naturaleza jurídica y clasificaciones",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.35",
+        "crossoverType": "Materia-Afin",
+        "quote": "Subsiste por sí mismo sin necesidad de otra convención (Art",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Subsiste por sí mismo sin necesidad de otra convención (Art» (§ 1.35).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Subsiste por sí mismo sin necesidad de otra convención (Art...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Si no lo cita y la cosa es evicta, el vendedor queda liberado de la obligación de saneamiento",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Si no lo cita y la cosa es evicta, el vendedor queda liberado de la obligación de saneamiento» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Si no lo cita y la cosa es evicta, el vendedor queda liberado de la ob...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.68"
+  },
+  {
+    "id": "civil-contratomu-1-3",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 14,
+    "chapterTitle": "Contrato de Mutuo",
+    "category": "Contrato de Mutuo",
+    "code": "1.3",
+    "title": "Sección 1.3: Objeto del Contrato y Régimen Probatorio",
+    "cleanTitle": "Objeto del Contrato y Régimen Probatorio",
+    "sourceFile": "CONTRATOMUTUO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMUTUO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Contrato",
+      "Prueba"
+    ],
+    "isFree": false,
+    "content": "### Sección 1.3 — Objeto del Contrato y Régimen Probatorio\n\n#### 1. Requisitos del objeto\n\nEl objeto del mutuo debe recaer sobre cosas muebles que sean fungibles y, usualmente, consumibles.\n\n#### 2. Clasificación del objeto según el estatuto aplicable\n\n1. **Mutuo de cosas fungibles y consumibles que no consistan en dinero:** se rige íntegramente por las disposiciones del Código Civil.\n2. **Mutuo de dinero:** se rige de forma prevalente por las normas especiales de la Ley N.° 18.010.\n\n#### 3. Régimen de prueba de la entrega y del contrato\n\n- **Exclusión de la prueba de testigos en materia civil:** a diferencia del comodato (Art. 2175 del Código Civil), el mutuo civil que recaiga sobre cosas o sumas de valor superior a 2 Unidades Tributarias Mensuales (UTM) no puede probarse por testigos (Art. 1709 y 1710 del Código Civil).\n- **Admisibilidad de la prueba testimonial en materia mercantil:** si el mutuo es mercantil para ambas partes, la prueba de testigos es siempre admisible sin importar el monto (Art. 128 del Código de Comercio). Si se trata de un acto mixto (mercantil para el mutuante y civil para el mutuario), rige la limitación probatoria respecto del mutuario civil.\n- **Impugnación de la confesión de recibo por el mutuario:** si en la escritura o documento el mutuario declaró haber recibido el dinero pero sostiene que la entrega no ocurrió (contrato simulado o sin causa «VERIFICAR: Art. 471 N.° 2 del Código Penal citado a propósito de la simulación»), la carga de la prueba recae sobre el mutuario, quien no podrá valerse de testigos para alterar o adicionar lo expresado en el contrato (Art. 1709 inc. 2.º del Código Civil).",
+    "charCount": 1652,
+    "connections": [
+      {
+        "targetTopicId": "procesal-derechopro-3-2",
+        "targetTitle": "La Prueba Testimonial",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.51",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Unidades Tributarias Mensuales (UTM)",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Unidades Tributarias Mensuales (UTM)» (§ 2.51).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Unidades Tributarias Mensuales (UTM)...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Un error muy común en el examen oral es afirmar que \"en materia contractual la carga de la prueba se invierte totalmente\"",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Un error muy común en el examen oral es afirmar que \"en materia contractual la carga de la prueba se invierte totalmente\"» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Un error muy común en el examen oral es afirmar que \"en materia contra...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-3-1",
+        "targetTitle": "La Prueba Instrumental o Documental",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.50",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Código Civil y en el artículo 341 numeral 1 del Código de Procedimiento Civil como el primer medio de prueba en el catálogo legal",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Código Civil y en el artículo 341 numeral 1 del Código de Procedimiento Civil como el primer medio de prueba en el catálogo legal» (§ 2.50).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Código Civil y en el artículo 341 numeral 1 del Código de Procedimient...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.69"
+  },
+  {
+    "id": "civil-contratomu-1-4",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 14,
+    "chapterTitle": "Contrato de Mutuo",
+    "category": "Contrato de Mutuo",
+    "code": "1.4",
+    "title": "Sección 1.4: Puntos Críticos para el Examen de Grado",
+    "cleanTitle": "Puntos Críticos para el Examen de Grado",
+    "sourceFile": "CONTRATOMUTUO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMUTUO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Dominio",
+      "Contrato",
+      "Obligación",
+      "Propiedad"
+    ],
+    "isFree": false,
+    "content": "### Sección 1.4 — Puntos Críticos para el Examen de Grado\n\n1. **La tradición como título y modo:** en el examen de grado, destaque que el mutuo civil es el único contrato real que por su propia naturaleza transfiere el dominio (Art. 2197, 675 y 703 del Código Civil). La entrega no otorga la mera tenencia, sino la propiedad de las especies.\n2. **Gratuidad y onerosidad:** en el Código Civil (cosas fungibles que no sean dinero), el mutuo es gratuito por naturaleza (Art. 2198 del Código Civil); en las operaciones de crédito de dinero (Ley N.° 18.010), el mutuo de dinero es oneroso por naturaleza y los intereses se presumen (Art. 12 de la Ley N.° 18.010).\n3. **Consensualidad en el mutuo financiero:** mientras el mutuo del Código Civil es estrictamente un contrato real, en las operaciones de crédito de dinero de la Ley N.° 18.010 el mutuo puede convenirse válidamente como un contrato consensual.\n4. **Mutuo, comodato y arrendamiento:** si el contrato impone la obligación de devolver la “misma” especie corporal recibida, se trata de un comodato (o de un arrendamiento si es oneroso); si impone la obligación de devolver otras tantas del mismo género y calidad, se trata de un mutuo.\n\n## Capítulo 2 — Requisitos de las Partes, Mutuo de Cosa Ajena e Incapacidades",
+    "charCount": 1269,
+    "connections": [
+      {
+        "targetTopicId": "civil-contratomu-1-2",
+        "targetTitle": "Características Contractuales del Mutuo",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.68",
+        "crossoverType": "Materia-Afin",
+        "quote": "En las operaciones de crédito de dinero los intereses se presumen legalmente",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «En las operaciones de crédito de dinero los intereses se presumen legalmente» (§ 1.68).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En las operaciones de crédito de dinero los intereses se presumen lega...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-3-2",
+        "targetTitle": "La Prueba Testimonial",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.51",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.51).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.70"
+  },
+  {
+    "id": "civil-contratomu-2-1",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 14,
+    "chapterTitle": "Contrato de Mutuo",
+    "category": "Contrato de Mutuo",
+    "code": "2.1",
+    "title": "Sección 2.1: Requisitos y Capacidad del Mutuante",
+    "cleanTitle": "Requisitos y Capacidad del Mutuante",
+    "sourceFile": "CONTRATOMUTUO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMUTUO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Dominio",
+      "Nulidad",
+      "Contrato",
+      "Propiedad"
+    ],
+    "isFree": false,
+    "content": "### Sección 2.1 — Requisitos y Capacidad del Mutuante\n\nEl **mutuante** es la parte que otorga el préstamo de consumo (el acreedor en el mutuo real, o acreedor y deudor en el mutuo consensual). Dado que en el Código Civil la entrega inicial no es un mero traspaso de la tenencia material, sino una tradición que transfiere la propiedad de las cosas fungibles, la ley somete al mutuante a requisitos dobles y estrictos de capacidad y legitimación dominical.\n\nLos requisitos del mutuante (Art. 2197, 2202, 670 y 1575 del Código Civil) son los siguientes:\n\n1. **Capacidad general y facultad de enajenar** (Art. 2202 inc. 1.º del Código Civil): al ser un título translaticio, el tradente debe tener facultad de disposición.\n2. **Ser dueño de la cosa dada en mutuo:** si no es dueño, la tradición es inoponible al verdadero propietario.\n3. **Ausencia de gravámenes o prohibiciones de disposición:** el bien debe estar inmune a medidas precautorias o embargos (Art. 1464 N.° 3 del Código Civil).\n\n#### 1. Capacidad de ejercicio y facultad de enajenar\n\n**Fundamento dogmático:** al constituir el mutuo un título translaticio de dominio (Art. 675, 703 y 2197 del Código Civil), la tradición inicial requiere imperativamente que el mutuante tenga capacidad general de ejercicio y la facultad de enajenar la cosa.\n\n**Armonía sistemática:** esta exigencia concuerda con las reglas generales de la tradición (Art. 670 del Código Civil), del pago que transfiere el dominio (Art. 1575 inc. 2.º del Código Civil) y de la ausencia de objeto ilícito en la enajenación (Art. 1464 del Código Civil).\n\n**Doctrina:** un sujeto plenamente capaz para contratar puede carecer de la facultad de enajenar respecto de un bien determinado (por ejemplo, si sobre el dinero o las cosas fungibles se hubiere decretado un embargo o una medida precautoria de prohibir celebrar actos y contratos, conforme al Art. 296 del Código de Procedimiento Civil).\n\n**Efectos:** si el mutuante entrega bienes cuya enajenación está prohibida por decreto judicial (Art. 1464 N.° 3 del Código Civil), la tradición y el contrato adolecen de nulidad absoluta por objeto ilícito (Art. 10, 1466 y 1682 del Código Civil). Si la falta de capacidad proviene de una incapacidad legal del mutuante, se aplican las reglas de la nulidad absoluta o relativa según la naturaleza de la incapacidad.\n\n#### 2. Exigencia de ser dueño de las cosas dadas en mutuo\n\nPara que la tradición transfiera eficazmente el dominio al mutuario, el mutuante debe ser el verdadero dueño de las cosas fungibles que entrega.\n\nSi el mutuante entrega cosas de las que no es propietario, el contrato de mutuo y la entrega son válidos, pero la tradición no produce su efecto propio y natural de transferir el dominio. El verdadero propietario conserva su derecho de dominio y las acciones protectoras correspondientes, por serle el contrato inoponible.",
+    "charCount": 2865,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "N° 2 del Código de Procedimiento Civil - CPC)",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «N° 2 del Código de Procedimiento Civil - CPC)» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «N° 2 del Código de Procedimiento Civil - CPC)...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "civil-actojuridi-1-5",
+        "targetTitle": "Requisitos de Validez (II) — Objeto Lícito y Causa Lícita",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.5",
+        "crossoverType": "Materia-Afin",
+        "quote": "Regula la venta de cosas cuya enajenación está prohibida por la ley (vínculo directo con el Art",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Regula la venta de cosas cuya enajenación está prohibida por la ley (vínculo directo con el Art» (§ 1.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Regula la venta de cosas cuya enajenación está prohibida por la ley (v...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-6",
+        "targetTitle": "Las Medidas Cautelares y Precautorias",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.9",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "N° 3 y 4 (objeto ilícito en la enajenación de bienes embargados o litigiosos)",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «N° 3 y 4 (objeto ilícito en la enajenación de bienes embargados o litigiosos)» (§ 2.9).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «N° 3 y 4 (objeto ilícito en la enajenación de bienes embargados o liti...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.71"
+  },
+  {
+    "id": "civil-contratomu-2-2",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 14,
+    "chapterTitle": "Contrato de Mutuo",
+    "category": "Contrato de Mutuo",
+    "code": "2.2",
+    "title": "Sección 2.2: Efectos del Mutuo Otorgado por No Dueño",
+    "cleanTitle": "Efectos del Mutuo Otorgado por No Dueño",
+    "sourceFile": "CONTRATOMUTUO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMUTUO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Dominio",
+      "Prueba"
+    ],
+    "isFree": false,
+    "content": "### Sección 2.2 — Efectos del Mutuo Otorgado por No Dueño\n\nCuando el mutuante entrega cosas fungibles ajenas, el Art. 2202 del Código Civil soluciona el conflicto entre el verdadero dueño, el mutuante y el mutuario, distinguiendo si las especies conservan o no su individualidad e identidad:\n\n- **a) Mientras conste su identidad** (Art. 2202 inc. 1.º del Código Civil): el verdadero dueño puede ejercitar la acción reivindicatoria.\n- **b) Desaparecida la identidad** (mezcla o consumo): el dueño no puede reivindicar. Se distingue la buena o mala fe del mutuario:\n  - **Mutuario de buena fe:** paga tras 10 días (Art. 2200 del Código Civil) y solo los intereses pactados.\n  - **Mutuario de mala fe:** pago inmediato y máximo de intereses legal o convencional.\n\n#### 1. Especies que conservan su identidad\n\n**Base legal:** Art. 2202 inc. 1.º del Código Civil.\n\n**Procedencia de la reivindicación:** mientras las cosas fungibles entregadas por el no dueño puedan ser identificadas e individualizadas de forma inconfundible en poder del mutuario (por ejemplo, sacos de trigo cerrados y marcados con un sello especial, o billetes individualizados por su número de serie conservados en una caja de seguridad), el verdadero dueño conserva intacta la acción reivindicatoria (Art. 889 del Código Civil) para exigir su restitución material.\n\n**Fundamento:** dado que el mutuario no adquirió el dominio por tradición de un no dueño (*nemo dat quod non habet*), retiene la cosa como mero tenedor o poseedor frente al verdadero propietario.\n\n#### 2. Especies que pierden su identidad\n\n**Base legal:** Art. 2202 inc. 2.º del Código Civil.\n\n**Imposibilidad de reivindicar:** si las cosas prestadas se confundieron irremediablemente con otras del mismo género en el patrimonio del mutuario, o fueron consumidas o enajenadas por este, la identidad desaparece de forma absoluta y se extingue la acción reivindicatoria del dueño.\n\n**Validación de la restitución y buena o mala fe del mutuario:** al desaparecer la identidad, el legislador consolida el derecho del mutuante o dueño a exigir la devolución del valor o género equivalente, sancionando o protegiendo al mutuario según su estado anímico al momento de recibir las especies:\n\n**a) Si el mutuario recibió las cosas de buena fe:**\n\n**Concepto:** estará de buena fe cuando ignoraba justificadamente que las cosas entregadas pertenecían a un tercero y no al mutuante.\n\n**Efectos:**\n\n1. No se le puede exigir el pago inmediato. Solo estará obligado al pago tras expirar el plazo estipulado o el término legal de 10 días subsiguientes a la entrega (Art. 2200 y 2202 inc. 2.º del Código Civil).\n2. Solo responderá de los intereses expresamente estipulados en la convención. Si el mutuo civil era gratuito, no devengará interés alguno.\n\n**b) Si el mutuario recibió las cosas de mala fe:**\n\n**Concepto:** estará de mala fe cuando sabía o no podía ignorar que las cosas dadas en préstamo eran ajenas.\n\n**Efectos punitivos:**\n\n1. Sufre la caducidad del plazo: queda obligado al pago o restitución de forma inmediata.\n2. Queda legalmente sancionado a pagar el máximo de los intereses que la ley permite estipular (es decir, la tasa del interés máximo convencional, conforme al Art. 2202 inc. 2.º del Código Civil y la Ley N.° 18.010), aun cuando el mutuo hubiere sido convenido como gratuito.\n\n#### 3. Carga de la prueba de la mala fe\n\nConforme a la regla general consagrada en el Art. 707 del Código Civil, la buena fe se presume siempre. Por tanto, la carga de la prueba respecto de la mala fe del mutuario le corresponde íntegramente al reivindicante o mutuante que pretenda la restitución inmediata y el cobro de la tasa máxima de interés.",
+    "charCount": 3672,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Sujetos Habilitados para ser Mandatarios (Nómina Taxativa de la Ley N° 18",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Sujetos Habilitados para ser Mandatarios (Nómina Taxativa de la Ley N° 18» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Sujetos Habilitados para ser Mandatarios (Nómina Taxativa de la Ley N°...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Un error muy común en el examen oral es afirmar que \"en materia contractual la carga de la prueba se invierte totalmente\"",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Un error muy común en el examen oral es afirmar que \"en materia contractual la carga de la prueba se invierte totalmente\"» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Un error muy común en el examen oral es afirmar que \"en materia contra...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-3-6",
+        "targetTitle": "Las Presunciones (Artículos 426 y 427 del CPC y Artículo 1712 del Código Civil)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.55",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "No se admitirá la prueba de presunciones judiciales en aquellos casos en que la ley prohíbe la prueba testimonial (ej",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «No se admitirá la prueba de presunciones judiciales en aquellos casos en que la ley prohíbe la prueba testimonial (ej» (§ 2.55).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «No se admitirá la prueba de presunciones judiciales en aquellos casos ...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.72"
+  },
+  {
+    "id": "civil-contratomu-2-3",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 14,
+    "chapterTitle": "Contrato de Mutuo",
+    "category": "Contrato de Mutuo",
+    "code": "2.3",
+    "title": "Sección 2.3: Requisitos y Capacidad del Mutuario",
+    "cleanTitle": "Requisitos y Capacidad del Mutuario",
+    "sourceFile": "CONTRATOMUTUO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMUTUO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Nulidad",
+      "Contrato",
+      "Obligación",
+      "Prueba"
+    ],
+    "isFree": false,
+    "content": "### Sección 2.3 — Requisitos y Capacidad del Mutuario\n\n#### 1. Capacidad general para obligarse\n\nEl **mutuario** (o prestatario) es la parte que recibe el préstamo y asume la obligación de restituir. La ley únicamente le exige la capacidad general para obligarse (capacidad de ejercicio, conforme al Art. 1445 del Código Civil). Si el mutuario es un incapaz absoluto o relativo y celebra el mutuo sin las formalidades habilitantes, el contrato adolece de nulidad absoluta o relativa.\n\n#### 2. Menor adulto y peculio profesional\n\n**Base legal:** Art. 260 del Código Civil.\n\nEl Art. 260 del Código Civil contempla una regulación especial de capacidad respecto del menor adulto que administra su peculio profesional o industrial (bienes adquiridos con el fruto de su trabajo):\n\n1. **Mutuo a interés o compra al fiado** (Art. 260 inc. 2.º del Código Civil): requiere autorización escrita de los padres o del curador. Sin autorización, el menor no queda obligado por el contrato, sino solo hasta concurrencia del beneficio reportado (enriquecimiento).\n2. **Mutuo gratuito (sin intereses):** *a contrario sensu*, el menor adulto puede actuar por sí solo y obligar válidamente los bienes de su peculio profesional.\n\n**Restricción expresa del Art. 260 inc. 2.º:** el menor adulto, aun actuando dentro del giro de su peculio profesional, no puede tomar dinero a interés ni comprar al fiado sin autorización escrita del padre, la madre o el curador adjunto.\n\n**Efectos:** si se omite la autorización en mutuos a interés, el contrato no obliga al peculio del menor en los términos pactados, sino únicamente hasta concurrencia del beneficio que el menor hubiere reportado de la operación.\n\n**Doctrina:** René Ramos Pazos destaca que, interpretado el precepto *a contrario sensu*, si el menor adulto toma dinero o cosas en mutuo estipulándose que el capital no devengará intereses, el menor puede contratar válidamente por sí solo, obligando plenamente su peculio profesional o industrial sin requerir venia alguna.\n\n#### 3. Nulidad del mutuo por incapacidad del mutuario\n\nCuando se declara la nulidad del contrato de mutuo por haberse celebrado con un mutuario incapaz sin cumplir las formalidades habilitantes, se genera un debate dogmático de alto interés sobre la aplicación del Art. 1688 del Código Civil.\n\n**a) La regla excepcional del Art. 1688:** el Art. 1688 establece que, declarada la nulidad del contrato celebrado con un incapaz, se limita la repetición en los siguientes términos:\n\n> “El que contrató con él no puede pedir restitución o reembolso de lo que gastó o pagó en virtud del contrato, sino en cuanto probare haberse hecho más rica la persona incapaz.” (Art. 1688 del Código Civil)\n\n**b) Aplicación distintiva en el mutuo civil y en el mutuo financiero:** la doctrina dominante (René Abeliuk) distingue:\n\n1. **En el mutuo real del Código Civil:** la entrega inicial no es un “pago” ni un “gasto” (es el contrato mismo). No aplica el obstáculo del Art. 1688: el mutuante puede exigir la restitución total de lo entregado al representante legal.\n2. **En el mutuo de dinero consensual (Ley N.° 18.010):** la entrega posterior que hace el mutuante sí constituye un “pago”. Aplica plenamente el Art. 1688: el mutuante solo podrá exigir reembolso si prueba que el incapaz se hizo más rico.\n\n**Doctrina:** en el mutuo real del Código Civil, el Art. 1688 exige que haya habido un “pago” o un “gasto” efectuado por el cocontratante en favor del incapaz. Pero la entrega material de las cosas fungibles que hace el mutuante al perfeccionarse el acto no constituye técnicamente un “pago” ni un “gasto”, sino la tradición que da nacimiento al contrato. En consecuencia, declarada la nulidad, el mutuante no se halla privado por el Art. 1688 de exigir la restitución de las cosas entregadas; el representante legal del incapaz debe devolver las especies o su valor al mutuante sin que este tenga que probar el enriquecimiento del incapaz.\n\nEn cambio, dado que el mutuo de dinero de la Ley N.° 18.010 puede nacer como contrato consensual bilateral, la entrega posterior del dinero que efectúa el mutuante sí constituye formalmente un “pago” destinado a cumplir su obligación contractual previa. En consecuencia, aplica estrictamente la restricción del Art. 1688: si el mutuo consensual se anula por incapacidad del mutuario, el mutuante solo podrá exigir el reembolso si prueba que la suma entregada sirvió para cosas necesarias del incapaz o subsiste invertida en su patrimonio.",
+    "charCount": 4474,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "La _Capacidad Procesal_ es un presupuesto formal de validez (se alega de plano mediante excepción dilatoria del Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «La _Capacidad Procesal_ es un presupuesto formal de validez (se alega de plano mediante excepción dilatoria del Art» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «La _Capacidad Procesal_ es un presupuesto formal de validez (se alega ...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Sujetos Habilitados para ser Mandatarios (Nómina Taxativa de la Ley N° 18",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Sujetos Habilitados para ser Mandatarios (Nómina Taxativa de la Ley N° 18» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Sujetos Habilitados para ser Mandatarios (Nómina Taxativa de la Ley N°...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-5",
+        "targetTitle": "Teoría General de los Incidentes (Incidente Ordinario, Desistimiento de la Demanda y Abandono del Procedimiento)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.8",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Aquellos que poseen una regulación sistemática propia en el CPC (ej",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Aquellos que poseen una regulación sistemática propia en el CPC (ej» (§ 2.8).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Aquellos que poseen una regulación sistemática propia en el CPC (ej...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.73"
+  },
+  {
+    "id": "civil-contratomu-2-4",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 14,
+    "chapterTitle": "Contrato de Mutuo",
+    "category": "Contrato de Mutuo",
+    "code": "2.4",
+    "title": "Sección 2.4: Intervención de Mandatarios en el Mutuo",
+    "cleanTitle": "Intervención de Mandatarios en el Mutuo",
+    "sourceFile": "CONTRATOMUTUO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMUTUO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Nulidad",
+      "Contrato"
+    ],
+    "isFree": false,
+    "content": "### Sección 2.4 — Intervención de Mandatarios en el Mutuo\n\nPara que un apoderado o mandatario pueda celebrar válidamente un contrato de mutuo en representación de su mandante, debe contar con facultades expresas (“tomar dinero prestado”, “dar dinero a interés”, “suscribir pagarés o mutuos”).\n\nAdemás, el Código Civil impone reglas imperativas en el contrato de mandato para evitar conflictos de interés y abusos en la autocontratación de préstamos (Art. 2145 y 2146 del Código Civil):\n\n- **a) Mandatario encargado de tomar dinero prestado** (Art. 2145 inc. 1.º del Código Civil): puede prestárselo él mismo de sus propios fondos al interés fijado por el mandante o, a falta de este, al interés corriente. No requiere autorización de autocontrato.\n- **b) Mandatario facultado para colocar dinero a interés** (Art. 2145 *in fine* del Código Civil): no puede tomarlo prestado para sí sin aprobación del mandante. La sanción es la inoponibilidad según Stitchkin, o la nulidad relativa para la doctrina mayoritaria.\n- **c) Dineros del mandante en poder del mandatario** (Art. 2146 del Código Civil): no puede colocarlos a interés sin autorización expresa. Si obtiene un interés mayor al fijado, el exceso pertenece al mandante.\n\n#### 1. Mandatario que actúa como mutuante de su mandante\n\n**Base legal:** Art. 2145 inc. 1.º del Código Civil.\n\nSi el mandante encarga a su mandatario conseguir o tomar dinero prestado (mutuario), el mandatario está legalmente facultado para prestarle él mismo de sus propios fondos en calidad de mutuante.\n\nNo se exige autorización especial para autocontratar. La única exigencia legal versa sobre la tasa: debe prestarlo al interés designado por el mandante o, en su defecto, al interés corriente.\n\n#### 2. Mandatario que pretende tomar para sí dineros del mandante\n\n**Base legal:** Art. 2145 inc. 2.º del Código Civil.\n\nSi el mandante autoriza a su apoderado para colocar o prestar dinero a interés, el mandatario no puede tomar dicho dinero en préstamo para sí mismo sin la “aprobación” del mandante.\n\n**Doctrina:** el uso del término “aprobación” (en lugar de “autorización previa”) permite que el mandatario celebre el mutuo consigo mismo y obtenga la venia o ratificación del mandante con posterioridad.\n\n**Efectos:** David Stitchkin sostiene que el acto es inoponible al mandante; la doctrina mayoritaria estima que adolece de nulidad relativa, por tratarse de un requisito fijado en atención a la calidad de la persona que ejecuta el acto (Art. 1682 y 2144 del Código Civil).\n\n#### 3. Prohibición sobre colocación de dineros\n\n**Base legal:** Art. 2146 del Código Civil.\n\nEl mandatario que tiene en su poder dineros de su mandante no puede colocarlos a interés sin autorización expresa.\n\nSi estaba autorizado a un determinado interés y logra negociarlo a una tasa superior, el exceso pertenece íntegramente al mandante (salvo pacto que lo autorice a apropiárselo).",
+    "charCount": 2898,
+    "connections": [
+      {
+        "targetTopicId": "civil-contratoma-2-2",
+        "targetTitle": "La Autocontratación del Mandatario",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.98",
+        "crossoverType": "Materia-Afin",
+        "quote": "Si el mandante encarga colocar dinero a interés, el mandatario **no puede tomarlo prestado para sí sin aprobación del mandante**",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Si el mandante encarga colocar dinero a interés, el mandatario **no puede tomarlo prestado para sí sin aprobación del mandante**» (§ 1.98).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Si el mandante encarga colocar dinero a interés, el mandatario **no pu...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Si un procurador transige o se desiste sin facultad expresa, el acto es inoponible y nulo por falta de personería",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Si un procurador transige o se desiste sin facultad expresa, el acto es inoponible y nulo por falta de personería» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Si un procurador transige o se desiste sin facultad expresa, el acto e...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "En su defecto, designado por el juez (Procurador del Número o litigante)",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «En su defecto, designado por el juez (Procurador del Número o litigante)» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En su defecto, designado por el juez (Procurador del Número o litigant...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.74"
+  },
+  {
+    "id": "civil-contratomu-2-5",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 14,
+    "chapterTitle": "Contrato de Mutuo",
+    "category": "Contrato de Mutuo",
+    "code": "2.5",
+    "title": "Sección 2.5: Puntos Críticos para el Examen de Grado",
+    "cleanTitle": "Puntos Críticos para el Examen de Grado",
+    "sourceFile": "CONTRATOMUTUO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMUTUO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Nulidad"
+    ],
+    "isFree": false,
+    "content": "### Sección 2.5 — Puntos Críticos para el Examen de Grado\n\n1. **Mutuo de cosa ajena (Art. 2202 del Código Civil):** si le preguntan qué ocurre cuando se entrega en mutuo una cosa ajena, distinga: si las especies constan identificables, el dueño reivindica; si perdieron su identidad, no cabe reivindicación. En este último caso, si el mutuario estaba de buena fe, restituye tras 10 días y solo los intereses pactados; si estaba de mala fe, debe restituir de inmediato y con el máximo del interés convencional permitido por la ley.\n2. **Menor adulto y peculio profesional (Art. 260 del Código Civil):** recuerde que el menor adulto no necesita autorización para celebrar un mutuo gratuito en el giro de su peculio profesional. Solo requiere autorización escrita cuando pretende tomar dinero a interés o comprar al fiado.\n3. **Art. 1688 en la nulidad del mutuo real:** en el mutuo real del Código Civil, la entrega no es un “pago”, por lo que el mutuante no está obligado a probar que el incapaz se hizo más rico para exigir la restitución de la cantidad entregada tras la declaración de nulidad.\n4. **Autocontratación en el mandato (Art. 2145 del Código Civil):** el mandatario encargado de tomar dinero prestado puede prestárselo él mismo sin autorización previa; pero el mandatario facultado para colocar dinero a interés no puede tomarlo para sí sin aprobación posterior o previa del mandante.\n\n## Capítulo 3 — Mutuo Civil y Operaciones de Crédito de Dinero",
+    "charCount": 1459,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procemayor-5-4",
+        "targetTitle": "Efectos jurídicos sustanciales y procesales del emplazamiento",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.35",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos críticos para el examen de grado",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos críticos para el examen de grado» (§ 2.35).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos críticos para el examen de grado...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "civil-contratomu-2-3",
+        "targetTitle": "Requisitos y Capacidad del Mutuario",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.73",
+        "crossoverType": "Materia-Afin",
+        "quote": "En cambio, dado que el mutuo de dinero de la Ley N",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «En cambio, dado que el mutuo de dinero de la Ley N» (§ 1.73).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En cambio, dado que el mutuo de dinero de la Ley N...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.75"
+  },
+  {
+    "id": "civil-contratomu-3-1",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 14,
+    "chapterTitle": "Contrato de Mutuo",
+    "category": "Contrato de Mutuo",
+    "code": "3.1",
+    "title": "Sección 3.1: Delimitación de los Estatutos Normativos y Ámbito de Aplicación",
+    "cleanTitle": "Delimitación de los Estatutos Normativos y Ámbito de Aplicación",
+    "sourceFile": "CONTRATOMUTUO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMUTUO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Contrato"
+    ],
+    "isFree": false,
+    "content": "### Sección 3.1 — Delimitación de los Estatutos Normativos y Ámbito de Aplicación\n\nEn el Derecho chileno conviven dos regímenes jurídicos profundamente diferenciados para el contrato de mutuo, según la naturaleza del bien prestado y la calidad de las partes:\n\n1. **Mutuo civil del Código Civil** (Art. 2196 a 2209): aplica al préstamo de cosas muebles consumibles y fungibles que no consistan en dinero (por ejemplo, trigo, combustibles o insumos).\n2. **Operaciones de crédito de dinero** (Ley N.° 18.010): estatuto especial y orgánico aplicable a todo mutuo que recaiga sobre dinero, sea celebrado por particulares o por bancos.\n\n**Base legal:** el estatuto civil regula de manera general el préstamo de consumo sobre cosas fungibles y consumibles distintas del dinero. El estatuto especial de la Ley N.° 18.010 (D. O. 27 de junio de 1981) regula las operaciones de crédito de dinero, conceptualizadas en su Art. 1.º como aquellas por las cuales una de las partes entrega o se obliga a entregar una cantidad de dinero y la otra a pagarla en un momento distinto de aquel en que se celebra la convención.",
+    "charCount": 1103,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Se produce cuando una de las partes cede a un tercero el objeto incierto de la litis tras la notificación de la demanda",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Se produce cuando una de las partes cede a un tercero el objeto incierto de la litis tras la notificación de la demanda» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Se produce cuando una de las partes cede a un tercero el objeto incier...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Sujetos Habilitados para ser Mandatarios (Nómina Taxativa de la Ley N° 18",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Sujetos Habilitados para ser Mandatarios (Nómina Taxativa de la Ley N° 18» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Sujetos Habilitados para ser Mandatarios (Nómina Taxativa de la Ley N°...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-3-2",
+        "targetTitle": "La Prueba Testimonial",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.51",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Aquellos que no presenciaron los hechos directamente, sino que relatan lo que escucharon de los propios actores o de terceros",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Aquellos que no presenciaron los hechos directamente, sino que relatan lo que escucharon de los propios actores o de terceros» (§ 2.51).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Aquellos que no presenciaron los hechos directamente, sino que relatan...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.76"
+  },
+  {
+    "id": "civil-contratomu-3-2",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 14,
+    "chapterTitle": "Contrato de Mutuo",
+    "category": "Contrato de Mutuo",
+    "code": "3.2",
+    "title": "Sección 3.2: Comparación Estructural: Naturaleza Jurídica y Perfeccionamiento",
+    "cleanTitle": "Comparación Estructural: Naturaleza Jurídica y Perfeccionamiento",
+    "sourceFile": "CONTRATOMUTUO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMUTUO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Dominio",
+      "Contrato",
+      "Obligación"
+    ],
+    "isFree": false,
+    "content": "### Sección 3.2 — Comparación Estructural: Naturaleza Jurídica y Perfeccionamiento\n\nLa primera diferencia dogmática reside en la forma en que se perfecciona el contrato y en las obligaciones que nacen de él:\n\n- **Mutuo del Código Civil:** siempre es un contrato real (se perfecciona con la tradición, Art. 2197 del Código Civil) y siempre es unilateral (solo resulta obligado el mutuario).\n- **Mutuo de dinero (Ley N.° 18.010):** puede ser real (“entrega”) o consensual (“se obliga a entregar”, Art. 1.º). Si es real, es unilateral; si es consensual, es bilateral.\n\n#### 1. Mutuo civil del Código Civil\n\n**Estrictamente real:** no existe el mutuo civil consensual. El contrato nace únicamente cuando se verifica la tradición de las cosas fungibles (Art. 1443 y 2197 del Código Civil). La promesa de mutuo civil no genera contrato de mutuo ni traspasa el dominio.\n\n**Estrictamente unilateral:** al perfeccionarse con la tradición inicial, únicamente el mutuario asume obligaciones (restituir otras tantas del mismo género y calidad). El mutuante no contrae ninguna obligación al momento del nacimiento del contrato.\n\n#### 2. Mutuo de dinero bajo la Ley N.° 18.010\n\n**Real o consensual:** el Art. 1.º de la Ley N.° 18.010 autoriza expresamente el mutuo consensual, al definir las operaciones de dinero como aquellas en que una parte “entrega” (mutuo real) “o se obliga a entregar” (mutuo consensual) una suma de dinero.\n\n**Unilateral o bilateral:** si se acuerda como contrato real, es unilateral; si se conviene como contrato consensual, es bilateral, pues el mutuante asume la obligación de entregar el dinero en el plazo convenido y el mutuario la obligación recíproca de restituirlo con sus intereses.",
+    "charCount": 1703,
+    "connections": [
+      {
+        "targetTopicId": "civil-contratomu-1-2",
+        "targetTitle": "Características Contractuales del Mutuo",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.68",
+        "crossoverType": "Materia-Afin",
+        "quote": "Gratuito por naturaleza en el Código Civil y oneroso por naturaleza en la Ley N",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Gratuito por naturaleza en el Código Civil y oneroso por naturaleza en la Ley N» (§ 1.68).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Gratuito por naturaleza en el Código Civil y oneroso por naturaleza en...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "El _ius postulandi_ exige la concurrencia obligatoria de dos figuras reguladas en la Ley N° 18",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «El _ius postulandi_ exige la concurrencia obligatoria de dos figuras reguladas en la Ley N° 18» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El _ius postulandi_ exige la concurrencia obligatoria de dos figuras r...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Concepto y Naturaleza Jurídica de la Carga Procesal**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Concepto y Naturaleza Jurídica de la Carga Procesal**» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Concepto y Naturaleza Jurídica de la Carga Procesal**...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.77"
+  },
+  {
+    "id": "civil-contratomu-3-3",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 14,
+    "chapterTitle": "Contrato de Mutuo",
+    "category": "Contrato de Mutuo",
+    "code": "3.3",
+    "title": "Sección 3.3: Régimen de Onerosidad e Intereses",
+    "cleanTitle": "Régimen de Onerosidad e Intereses",
+    "sourceFile": "CONTRATOMUTUO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMUTUO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Contrato",
+      "Obligación"
+    ],
+    "isFree": false,
+    "content": "### Sección 3.3 — Régimen de Onerosidad e Intereses\n\nEl aspecto de mayor repercusión económica es el tratamiento supletorio que ambos cuerpos legales otorgan a la retribución o cobro de intereses:\n\n- **a) Mutuo civil** (Art. 2198 del Código Civil): gratuito por naturaleza. En el silencio de las partes no se devengan intereses. Requiere pacto expreso para cobrar intereses (Art. 2205 del Código Civil).\n- **b) Mutuo de dinero** (Art. 12 de la Ley N.° 18.010): oneroso por naturaleza. En el silencio de las partes se presumen intereses corrientes. Requiere estipulación expresa de gratuidad para no devengarlos.\n\n#### 1. Mutuo civil (gratuito por naturaleza)\n\n**Base legal:** Art. 2198 del Código Civil.\n\nEl mutuario cumple su obligación restituyendo exactamente la misma cantidad de cosas fungibles recibidas. La gratuidad se presume por el legislador como un elemento de la naturaleza del contrato.\n\n**Pacto expreso:** para que se deban intereses en el mutuo civil, las partes deben estipularlo explícitamente (Art. 2205 del Código Civil). En el mutuo civil, los intereses pueden pactarse en dinero o en otras cosas fungibles (por ejemplo, se prestan 100 sacos de trigo y se acuerda restituir 110 sacos).\n\n#### 2. Mutuo de dinero de la Ley N.° 18.010 (oneroso por naturaleza)\n\n**Base legal:** Art. 12 de la Ley N.° 18.010.\n\nEn las operaciones de crédito de dinero no se presume la gratuidad.\n\n**Presunción legal de intereses:** si las partes guardan silencio acerca de los intereses, el mutuario queda legalmente obligado a pagar el interés corriente vigente a la fecha de la convención.\n\n**Pacto de gratuidad:** para que un préstamo de dinero no devengue intereses ni reajustes, las partes deben estipular expresamente la gratuidad en el contrato. Los intereses en el mutuo de dinero deben pagarse exclusivamente en dinero.",
+    "charCount": 1826,
+    "connections": [
+      {
+        "targetTopicId": "civil-contratomu-1-2",
+        "targetTitle": "Características Contractuales del Mutuo",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.68",
+        "crossoverType": "Materia-Afin",
+        "quote": "En el silencio de las partes, el mutuario está legalmente obligado a pagar el interés corriente",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «En el silencio de las partes, el mutuario está legalmente obligado a pagar el interés corriente» (§ 1.68).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En el silencio de las partes, el mutuario está legalmente obligado a p...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Siempre debe recordarse que, aunque se encuentra ubicado en el Código Civil, el Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Siempre debe recordarse que, aunque se encuentra ubicado en el Código Civil, el Art» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Siempre debe recordarse que, aunque se encuentra ubicado en el Código ...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-3-2",
+        "targetTitle": "La Prueba Testimonial",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.51",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "El testigo compareciente está legalmente obligado a responder los interrogatorios que se le formulen",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «El testigo compareciente está legalmente obligado a responder los interrogatorios que se le formulen» (§ 2.51).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El testigo compareciente está legalmente obligado a responder los inte...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.78"
+  },
+  {
+    "id": "civil-contratomu-3-4",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 14,
+    "chapterTitle": "Contrato de Mutuo",
+    "category": "Contrato de Mutuo",
+    "code": "3.4",
+    "title": "Sección 3.4: Reajustabilidad del Capital y Distinción con los Intereses",
+    "cleanTitle": "Reajustabilidad del Capital y Distinción con los Intereses",
+    "sourceFile": "CONTRATOMUTUO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMUTUO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Obligación"
+    ],
+    "isFree": false,
+    "content": "### Sección 3.4 — Reajustabilidad del Capital y Distinción con los Intereses\n\n#### 1. Principio nominalista en el Código Civil\n\nEn el mutuo civil rige de forma estricta el principio nominalista. El mutuario se libera devolviendo la misma cantidad numérica o volumétrica de especies entregadas, sin importar si su valor de mercado aumentó o disminuyó en el tiempo (Art. 2198 del Código Civil).\n\n#### 2. Reajustabilidad en la Ley N.° 18.010\n\n**Base legal:** Art. 3.º de la Ley N.° 18.010.\n\n**No presunción de reajuste:** la reajustabilidad del dinero no se presume. Salvo estipulación en contrario, la obligación es nominal.\n\n**Pacto de reajuste:** las partes pueden acordar libremente la reajustabilidad mediante índices representativos de la inflación (por ejemplo, Unidad de Fomento o variaciones del IPC).\n\n> **Nota:** entre particulares, la forma de reajuste es libre; si interviene un banco, financiera u otro colocador masivo de fondos, el sistema de reajuste debe estar expresamente autorizado por el Banco Central de Chile (Art. 3.º de la Ley N.° 18.010).\n\n#### 3. Distinción dogmática entre reajuste e interés\n\n- **El reajuste:** es la mera actualización del valor adquisitivo de la moneda para evitar la pérdida por inflación. El reajuste no constituye ganancia ni lucro para el acreedor; busca mantener la equivalencia objetiva del capital.\n- **El interés:** es el precio, beneficio o fruto civil que percibe el mutuante como retribución por el uso que el mutuario hace de su dinero o capital reajustado.",
+    "charCount": 1514,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procemayor-5-4",
+        "targetTitle": "Efectos jurídicos sustanciales y procesales del emplazamiento",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.35",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Regulados en el Código Civil",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Regulados en el Código Civil» (§ 2.35).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Regulados en el Código Civil...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-3-1",
+        "targetTitle": "La Prueba Instrumental o Documental",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.50",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Código Civil y en el artículo 341 numeral 1 del Código de Procedimiento Civil como el primer medio de prueba en el catálogo legal",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Código Civil y en el artículo 341 numeral 1 del Código de Procedimiento Civil como el primer medio de prueba en el catálogo legal» (§ 2.50).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Código Civil y en el artículo 341 numeral 1 del Código de Procedimient...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "En el procedimiento laboral y en la Tutela de Derechos Fundamentales, basta que el trabajador",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «En el procedimiento laboral y en la Tutela de Derechos Fundamentales, basta que el trabajador» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En el procedimiento laboral y en la Tutela de Derechos Fundamentales, ...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.79"
+  },
+  {
+    "id": "civil-contratomu-3-5",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 14,
+    "chapterTitle": "Contrato de Mutuo",
+    "category": "Contrato de Mutuo",
+    "code": "3.5",
+    "title": "Sección 3.5: Tasa de Interés, Límites Legales e Interés Máximo Convencional",
+    "cleanTitle": "Tasa de Interés, Límites Legales e Interés Máximo Convencional",
+    "sourceFile": "CONTRATOMUTUO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMUTUO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Responsabilidad"
+    ],
+    "isFree": false,
+    "content": "### Sección 3.5 — Tasa de Interés, Límites Legales e Interés Máximo Convencional\n\n#### 1. Clasificación de las tasas de interés\n\n- **Interés corriente:** es el promedio ponderado por montos de las tasas cobradas por los bancos establecidos en Chile en sus operaciones ordinarias, determinado y publicado periódicamente en el Diario Oficial y en su sitio web por la Comisión para el Mercado Financiero (CMF, ex SBIF) (Art. 6.º de la Ley N.° 18.010).\n- **Interés convencional:** es el pactado de común acuerdo por las partes en la convención.\n\n#### 2. Límite del interés máximo convencional\n\n- **a) En el Código Civil** (Art. 2206): el interés no puede exceder en una mitad (50 %) al interés corriente vigente al tiempo de la convención.\n- **b) En la Ley N.° 18.010** (Art. 6.º inc. final y Art. 6.º bis y ter): no puede exceder la cifra mayor entre: i) 1,5 veces la tasa de interés corriente; o ii) la tasa corriente más 2 puntos porcentuales anuales.\n\n#### 3. Sanción por exceso en el interés pactado\n\nExisten diferencias trascendentales en la sanción que aplica la ley si las partes sobrepasan el límite del interés máximo convencional:\n\n1. **Sanción en la Ley N.° 18.010 (Art. 8.º):**\n   - Todo pacto de intereses que exceda el interés máximo convencional se tiene por no escrito.\n   - La sanción legal consiste en que los intereses se reducen automáticamente al interés corriente que rija al tiempo de la convención.\n   - Además, el mutuante que cobró en exceso queda obligado a devolver lo percibido indebidamente, debidamente reajustado, sin perjuicio de la responsabilidad penal por el delito de usura (Art. 472 del Código Penal).\n2. **Sanción en el Código Civil para la cláusula penal enorme (Art. 1544 inc. 3.º):**\n   - Si en un mutuo civil que recae sobre cosas fungibles se estipula una cláusula penal moratoria excesiva (interés penal), el Art. 1544 inc. 3.º dispone que la pena enorme se rebaja hasta el máximo del interés que es permitido estipular (interés máximo convencional), a diferencia de la Ley N.° 18.010, que rebaja al interés corriente.\n   - **Doctrina:** René Abeliuk explica que, en el mutuo civil del Código Civil, el interés por el uso excesivo se rebaja al corriente (Art. 2206 del Código Civil), pero la cláusula penal excesiva se rebaja únicamente al máximo convencional (Art. 1544 del Código Civil).",
+    "charCount": 2331,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Sujetos Habilitados para ser Mandatarios (Nómina Taxativa de la Ley N° 18",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Sujetos Habilitados para ser Mandatarios (Nómina Taxativa de la Ley N° 18» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Sujetos Habilitados para ser Mandatarios (Nómina Taxativa de la Ley N°...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-3-2",
+        "targetTitle": "La Prueba Testimonial",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.51",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Los que tengan interés directo o indirecto en el resultado del juicio",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Los que tengan interés directo o indirecto en el resultado del juicio» (§ 2.51).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Los que tengan interés directo o indirecto en el resultado del juicio...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-1-2",
+        "targetTitle": "La Función Jurisdiccional y sus Bases Fundamentales",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.2",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "El juzgador debe ser un tercero neutral, equidistante y desinteresado respecto de las partes y de la pretensión",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «El juzgador debe ser un tercero neutral, equidistante y desinteresado respecto de las partes y de la pretensión» (§ 2.2).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El juzgador debe ser un tercero neutral, equidistante y desinteresado ...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.80"
+  },
+  {
+    "id": "civil-contratomu-3-6",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 14,
+    "chapterTitle": "Contrato de Mutuo",
+    "category": "Contrato de Mutuo",
+    "code": "3.6",
+    "title": "Sección 3.6: Anatocismo",
+    "cleanTitle": "Anatocismo",
+    "sourceFile": "CONTRATOMUTUO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMUTUO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Examen de Grado",
+      "Derecho"
+    ],
+    "isFree": false,
+    "content": "### Sección 3.6 — Anatocismo\n\nEl **anatocismo** es la capitalización de intereses, en virtud de la cual los intereses devengados y no pagados se suman al capital originario para generar, a su vez, nuevos intereses.\n\n- **a) En el Código Civil** (Art. 1559 N.° 3): rige la prohibición legal de anatocismo automático (“los intereses atrasados no producen interés”). Tras la derogación del Art. 2210 del Código Civil en 1981, la doctrina (Abeliuk) entiende que sí es lícito pactarlo expresamente.\n- **b) En la Ley N.° 18.010** (Art. 9.º): autorizado expresamente por períodos no inferiores a 30 días. Opera por el solo ministerio de la ley (silencio de las partes): los intereses vencidos no pagados se incorporan al capital.",
+    "charCount": 721,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "El _ius postulandi_ exige la concurrencia obligatoria de dos figuras reguladas en la Ley N° 18",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «El _ius postulandi_ exige la concurrencia obligatoria de dos figuras reguladas en la Ley N° 18» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El _ius postulandi_ exige la concurrencia obligatoria de dos figuras r...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Sujetos Habilitados para ser Mandatarios (Nómina Taxativa de la Ley N° 18",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Sujetos Habilitados para ser Mandatarios (Nómina Taxativa de la Ley N° 18» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Sujetos Habilitados para ser Mandatarios (Nómina Taxativa de la Ley N°...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Siempre debe recordarse que, aunque se encuentra ubicado en el Código Civil, el Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Siempre debe recordarse que, aunque se encuentra ubicado en el Código Civil, el Art» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Siempre debe recordarse que, aunque se encuentra ubicado en el Código ...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.81"
+  },
+  {
+    "id": "civil-contratomu-3-7",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 14,
+    "chapterTitle": "Contrato de Mutuo",
+    "category": "Contrato de Mutuo",
+    "code": "3.7",
+    "title": "Sección 3.7: Régimen de Prepago o Pago Anticipado",
+    "cleanTitle": "Régimen de Prepago o Pago Anticipado",
+    "sourceFile": "CONTRATOMUTUO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMUTUO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Examen de Grado",
+      "Derecho"
+    ],
+    "isFree": false,
+    "content": "### Sección 3.7 — Régimen de Prepago o Pago Anticipado\n\nCuando el mutuario desea restituir la suma o cosas prestadas antes del vencimiento del plazo, las reglas se contraponen abiertamente.\n\n#### 1. Código Civil\n\n**Base legal:** Art. 2204 del Código Civil.\n\n**Regla general:** el mutuario puede pagar toda la suma prestada aun antes del término estipulado.\n\n**Excepción:** no puede prepagar si se han pactado intereses (Art. 2204 del Código Civil y Art. 1497 inc. 2.º del Código Civil).\n\n**Fundamento:** cuando se pactan intereses, el plazo no se ha establecido en beneficio exclusivo del deudor, sino en favor de ambas partes. El acreedor tiene derecho a mantener invertido su capital y percibir la totalidad de los rendimientos acordados durante todo el lapso contractual.\n\n#### 2. Ley N.° 18.010 (derecho de prepago irrenunciable)\n\n**Base legal:** Art. 10 de la Ley N.° 18.010.\n\n**Derecho irrenunciable al prepago:** en las operaciones de crédito de dinero cuyo capital no supere el equivalente a 5.000 UF, y para pagos no inferiores al 20 % del saldo de la deuda, el deudor tiene el derecho legal e irrenunciable de pagar anticipadamente, aun contra la voluntad del acreedor.\n\n**Comisión de prepago:** para ejercer el prepago, el deudor debe abonar el capital, los intereses devengados hasta el día del pago efectivo y una comisión de prepago fija:\n\n- **Operaciones no reajustables:** comisión máxima de 1 mes de intereses.\n- **Operaciones reajustables:** comisión máxima de 1,5 meses de intereses calculados sobre el capital prepagado.",
+    "charCount": 1540,
+    "connections": [
+      {
+        "targetTopicId": "civil-contratomu-4-2",
+        "targetTitle": "Época, Lugar de Restitución y Prepago",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.87",
+        "crossoverType": "Efecto-Patrimonial",
+        "quote": "Exige pagar el capital, los intereses devengados y la comisión de prepago (1 mes de interés en operaciones no reajustables",
+        "whyConnected": "Efectos patrimoniales correlativos e ineficacias vinculadas en el tráfico jurídico. Cita textual del apunte: «Exige pagar el capital, los intereses devengados y la comisión de prepago (1 mes de interés en operaciones no reajustables» (§ 1.87).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Exige pagar el capital, los intereses devengados y la comisión de prep...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "El deudor debe probar que<br>actuó con la diligencia debida o<br>que operó caso fortuito (Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «El deudor debe probar que<br>actuó con la diligencia debida o<br>que operó caso fortuito (Art» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El deudor debe probar que<br>actuó con la diligencia debida o<br>que o...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "El _ius postulandi_ exige la concurrencia obligatoria de dos figuras reguladas en la Ley N° 18",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «El _ius postulandi_ exige la concurrencia obligatoria de dos figuras reguladas en la Ley N° 18» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El _ius postulandi_ exige la concurrencia obligatoria de dos figuras r...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.82"
+  },
+  {
+    "id": "civil-contratomu-3-8",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 14,
+    "chapterTitle": "Contrato de Mutuo",
+    "category": "Contrato de Mutuo",
+    "code": "3.8",
+    "title": "Sección 3.8: Pago de Intereses no Estipulados y Presunción del Art. 2208",
+    "cleanTitle": "Pago de Intereses no Estipulados y Presunción del Art. 2208",
+    "sourceFile": "CONTRATOMUTUO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMUTUO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Obligación"
+    ],
+    "isFree": false,
+    "content": "### Sección 3.8 — Pago de Intereses no Estipulados y Presunción del Art. 2208\n\n**Base legal:** Art. 2208 del Código Civil.\n\nEl Art. 2208 del Código Civil dispone que “si se han pagado intereses, aunque no estipulados, no podrán repetirse ni imputarse al capital”.\n\n**Naturaleza jurídica en el mutuo civil:** la doctrina discute por qué se prohíbe repetir lo pagado si el mutuo civil era gratuito por naturaleza:\n\n1. **Tesis de la obligación natural:** algunos autores estiman que constituye un caso de obligación natural.\n2. **Tesis de la presunción de estipulación:** Leopoldo Urrutia y René Abeliuk sostienen que la norma consagra una presunción de derecho de que medió un acuerdo posterior entre las partes para convertir el mutuo en oneroso, respondiendo a la justicia contractual.\n\n**En el mutuo de dinero de la Ley N.° 18.010:** dado que el mutuo de dinero es oneroso por naturaleza (Art. 12 de la Ley N.° 18.010), el pago de intereses obedece siempre al cumplimiento de una obligación civil originaria presunta.",
+    "charCount": 1018,
+    "connections": [
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Siempre debe recordarse que, aunque se encuentra ubicado en el Código Civil, el Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Siempre debe recordarse que, aunque se encuentra ubicado en el Código Civil, el Art» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Siempre debe recordarse que, aunque se encuentra ubicado en el Código ...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "El tercero alega hallarse en posesión del bien al momento del embargo (amparado por la presunción de dominio del Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «El tercero alega hallarse en posesión del bien al momento del embargo (amparado por la presunción de dominio del Art» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El tercero alega hallarse en posesión del bien al momento del embargo ...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-3-1",
+        "targetTitle": "La Prueba Instrumental o Documental",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.50",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Entre las partes, el instrumento privado reconocido tiene fecha cierta desde el día de su suscripción o la expresada en él (Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Entre las partes, el instrumento privado reconocido tiene fecha cierta desde el día de su suscripción o la expresada en él (Art» (§ 2.50).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Entre las partes, el instrumento privado reconocido tiene fecha cierta...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.83"
+  },
+  {
+    "id": "civil-contratomu-3-9",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 14,
+    "chapterTitle": "Contrato de Mutuo",
+    "category": "Contrato de Mutuo",
+    "code": "3.9",
+    "title": "Sección 3.9: Cuadro Comparativo Integrador",
+    "cleanTitle": "Cuadro Comparativo Integrador",
+    "sourceFile": "CONTRATOMUTUO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMUTUO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Contrato"
+    ],
+    "isFree": false,
+    "content": "### Sección 3.9 — Cuadro Comparativo Integrador\n\n| Criterio de comparación | Mutuo civil (Código Civil, Art. 2196 y ss.) | Mutuo de dinero (Ley N.° 18.010) |\n| --- | --- | --- |\n| Objeto del contrato | Cosas muebles consumibles y fungibles distintas de dinero. | Sumas de dinero. |\n| Perfeccionamiento | Siempre es un contrato real (tradición, Art. 2197 del Código Civil). | Puede ser real o consensual (Art. 1.º de la Ley N.° 18.010). |\n| Bilateralidad | Siempre es unilateral. | Unilateral (si es real) o bilateral (si es consensual). |\n| Onerosidad e intereses | Gratuito por naturaleza (Art. 2198 del Código Civil). | Oneroso por naturaleza (se presumen intereses, Art. 12). |\n| Moneda o especie de pago | Restituye igual cantidad del mismo género y calidad. | Restituye suma de dinero (moneda nacional o extranjera). |\n| Anatocismo | Prohibición legal automática (Art. 1559 N.° 3 del Código Civil). | Autorizado por ley y opera por el solo ministerio de la ley. |\n| Sanción por interés excesivo | Se reduce al interés corriente (Art. 2206 del Código Civil). | Se reduce al interés corriente (Art. 8.º de la Ley N.° 18.010). |\n| Derecho de prepago | No procede si se pactaron intereses (Art. 2204 del Código Civil). | Derecho irrenunciable al prepago previo pago de comisión (Art. 10). |",
+    "charCount": 1291,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Sujetos Habilitados para ser Mandatarios (Nómina Taxativa de la Ley N° 18",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Sujetos Habilitados para ser Mandatarios (Nómina Taxativa de la Ley N° 18» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Sujetos Habilitados para ser Mandatarios (Nómina Taxativa de la Ley N°...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "El juez civil ordinario está estrictamente sujeto al mandato del artículo 1698 del Código Civil",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «El juez civil ordinario está estrictamente sujeto al mandato del artículo 1698 del Código Civil» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El juez civil ordinario está estrictamente sujeto al mandato del artíc...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-1-2",
+        "targetTitle": "La Función Jurisdiccional y sus Bases Fundamentales",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.2",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Emana de la soberanía nacional y se encomienda a tribunales creados por ley con anterioridad al hecho ( _juez natural_ , Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Emana de la soberanía nacional y se encomienda a tribunales creados por ley con anterioridad al hecho ( _juez natural_ , Art» (§ 2.2).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Emana de la soberanía nacional y se encomienda a tribunales creados po...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.84"
+  },
+  {
+    "id": "civil-contratomu-3-10",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 14,
+    "chapterTitle": "Contrato de Mutuo",
+    "category": "Contrato de Mutuo",
+    "code": "3.10",
+    "title": "Sección 3.10: Puntos Críticos para el Examen de Grado",
+    "cleanTitle": "Puntos Críticos para el Examen de Grado",
+    "sourceFile": "CONTRATOMUTUO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMUTUO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Contrato"
+    ],
+    "isFree": false,
+    "content": "### Sección 3.10 — Puntos Críticos para el Examen de Grado\n\n1. **Inversión de las presunciones de onerosidad:** en el examen de grado, responda con claridad: el mutuo civil del Código Civil es gratuito por naturaleza; el mutuo de dinero de la Ley N.° 18.010 es oneroso por naturaleza y los intereses se presumen en el silencio de las partes.\n2. **Consensualidad en las operaciones de crédito de dinero:** no afirme que todo mutuo en Chile es un contrato real. La Ley N.° 18.010 autoriza que las operaciones de crédito de dinero se perfeccionen por el solo consentimiento (mutuo consensual bilateral).\n3. **Anatocismo por el solo ministerio de la ley:** en las operaciones de crédito de dinero, los intereses vencidos y no pagados se capitalizan automáticamente por mandato del Art. 9.º de la Ley N.° 18.010.\n4. **Irrenunciabilidad del prepago (Art. 10 de la Ley N.° 18.010):** en operaciones de dinero de hasta 5.000 UF, el deudor tiene un derecho irrenunciable a prepagar abonando la comisión legal. Esto modifica expresamente la regla del Art. 2204 del Código Civil.\n\n## Capítulo 4 — Efectos y Término del Mutuo",
+    "charCount": 1113,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.85"
+  },
+  {
+    "id": "civil-contratomu-4-1",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 14,
+    "chapterTitle": "Contrato de Mutuo",
+    "category": "Contrato de Mutuo",
+    "code": "4.1",
+    "title": "Sección 4.1: Obligación de Restitución del Mutuario",
+    "cleanTitle": "Obligación de Restitución del Mutuario",
+    "sourceFile": "CONTRATOMUTUO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMUTUO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Contrato",
+      "Obligación",
+      "Propiedad"
+    ],
+    "isFree": false,
+    "content": "### Sección 4.1 — Obligación de Restitución del Mutuario\n\nEn el mutuo civil regido por el Código Civil —por tratarse de un contrato real e inherentemente unilateral al momento de su perfeccionamiento (Art. 1443, 1439 y 2197 del Código Civil)— el mutuario es la única parte obligada desde el nacimiento del contrato. Su obligación principal y esencial consiste en la restitución del equivalente en género y calidad.\n\nLas obligaciones del mutuario son las siguientes:\n\n1. **Restituir igual cantidad de cosas del mismo género y calidad** (Art. 2198 del Código Civil).\n2. **Restituir el valor en dinero si la restitución en especie no es posible.**\n3. **Pagar los intereses si han sido expresamente estipulados** (Art. 2205 del Código Civil) o si se presumen legalmente (Ley N.° 18.010).\n\n#### 1. Contenido y forma de la restitución\n\n**Base legal:** Art. 2198 del Código Civil.\n\n**a) Regla general (restitución *in genere*):**\n\n- **Devolución por equivalencia:** el mutuario no devuelve los mismos cuerpos ciertos recibidos (puesto que se hicieron de su propiedad y fueron consumidos o dispuestos). En su lugar, debe devolver igual cantidad de cosas fungibles del mismo género y calidad (Art. 2198 del Código Civil).\n- **Irrelevancia de las variaciones de precio:** al aplicarse el principio de la intangibilidad cuantitativa del género, la restitución se efectúa por el número, peso o medida originario, siendo totalmente indiferente que el precio de mercado de las especies haya subido o bajado en el intervalo que media entre la entrega y el pago (Art. 2198 inc. 1.º del Código Civil).\n\n**b) Regla subsidiaria (restitución en dinero por imposibilidad):**\n\n- **Imposibilidad de devolver el mismo género** (Art. 2198 inc. 2.º del Código Civil): si no fuere posible restituir cosas del mismo género y calidad (por ejemplo, por extinción o escasez absoluta en el mercado de las especies prestadas) o si el acreedor no lo exigiere, el mutuario se libera pagando el valor pecuniario que tengan las cosas.\n- **Determinación del valor:** para fijar la suma equivalente, se atiende al valor que tengan las cosas en el tiempo y lugar en que haya debido hacerse el pago (no al tiempo de la entrega ni al del contrato).\n\n**c) Indivisibilidad del pago (Art. 1591 del Código Civil):**\n\nEl mutuario debe restituir la totalidad de la suma o cantidad adeudada de una sola vez. No puede obligar al acreedor a recibir pagos parciales o fraccionados (Art. 1591 del Código Civil), a menos que las partes hayan pactado expresamente el servicio de la deuda en cuotas periódicas (mensuales, trimestrales, etc.).\n\n#### 2. Presunción de pago de intereses\n\n**Base legal:** Art. 2209 del Código Civil.\n\nEl Art. 2209 del Código Civil consagra una presunción legal a favor del deudor: “si se han estipulado intereses y el mutuante ha dado carta de pago por el capital, sin reservar expresamente los intereses, se presumirán pagados”.\n\n**Requisito de la “carta de pago”:** la presunción exige que la cancelación del capital conste formalmente en un recibo o finiquito (“carta de pago”) otorgado por el acreedor. Si el finiquito del capital no contiene reserva explícita sobre los intereses devengados, la ley los presume íntegramente extinguidos.",
+    "charCount": 3214,
+    "connections": [
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Siempre debe recordarse que, aunque se encuentra ubicado en el Código Civil, el Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Siempre debe recordarse que, aunque se encuentra ubicado en el Código Civil, el Art» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Siempre debe recordarse que, aunque se encuentra ubicado en el Código ...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "civil-contratomu-1-2",
+        "targetTitle": "Características Contractuales del Mutuo",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.68",
+        "crossoverType": "Materia-Afin",
+        "quote": "Real en el Código Civil y consensual en la Ley N",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Real en el Código Civil y consensual en la Ley N» (§ 1.68).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Real en el Código Civil y consensual en la Ley N...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "civil-lasobligac-1-4",
+        "targetTitle": "Modos de Extinguir las Obligaciones (I) — El Pago Efectivo y sus Modalidades",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.17",
+        "crossoverType": "Efecto-Patrimonial",
+        "quote": "Si el acreedor otorga carta de pago del capital sin mencionar los intereses, se presumen estos pagados [18]",
+        "whyConnected": "Efectos patrimoniales correlativos e ineficacias vinculadas en el tráfico jurídico. Cita textual del apunte: «Si el acreedor otorga carta de pago del capital sin mencionar los intereses, se presumen estos pagados [18]» (§ 1.17).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Si el acreedor otorga carta de pago del capital sin mencionar los inte...» en la resolución de casos de civil."
+      }
+    ],
+    "indexCode": "1.86"
+  },
+  {
+    "id": "civil-contratomu-4-2",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 14,
+    "chapterTitle": "Contrato de Mutuo",
+    "category": "Contrato de Mutuo",
+    "code": "4.2",
+    "title": "Sección 4.2: Época, Lugar de Restitución y Prepago",
+    "cleanTitle": "Época, Lugar de Restitución y Prepago",
+    "sourceFile": "CONTRATOMUTUO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMUTUO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Contrato",
+      "Obligación"
+    ],
+    "isFree": false,
+    "content": "### Sección 4.2 — Época, Lugar de Restitución y Prepago\n\n#### 1. Época de la restitución\n\n**Base legal:** Art. 2200 y 2201 del Código Civil.\n\n**a) En primer lugar, la época estipulada en el contrato:**\n\nRige el principio de la autonomía de la voluntad (Art. 1545 del Código Civil). La restitución se hará exigible al vencimiento del plazo fijado por las partes en la convención.\n\n**b) En segundo lugar, la regla supletoria legal de 10 días (Art. 2200 del Código Civil):**\n\n- **El plazo legal:** si las partes no fijaron término o plazo para el pago, el mutuante no puede exigir la restitución sino transcurridos diez días subsiguientes a la entrega (Art. 2200 del Código Civil).\n- **Naturaleza del término de 10 días:** dogmáticamente, constituye un plazo de gracia o consumo legal concedido al mutuario para que pueda disponer de las cosas prestadas.\n- **Constitución en mora tras los 10 días:** vencido el plazo supletorio de diez días, el deudor no queda automáticamente en mora (el solo transcurso del tiempo no lo constituye en mora, conforme al Art. 1551 N.° 3 del Código Civil). Para constituir en mora al mutuario se requiere que el mutuante lo reconvenga judicialmente mediante la notificación de una demanda.\n\nLa secuencia es la siguiente:\n\n1. **Entrega del mutuo.**\n2. **Plazo de 10 días** (Art. 2200 del Código Civil).\n3. **Vencimiento.**\n4. **Requerimiento judicial.**\n5. **Mora** (Art. 1551 N.° 3 del Código Civil).\n\n**c) Caso especial: cláusula de “pagar cuando sea posible” (Art. 2201 del Código Civil):**\n\n- **Intervención judicial:** si se estipuló que el mutuario pagará “cuando le sea posible”, el juez queda legalmente facultado para fijar un término de pago atendiendo a las circunstancias (Art. 2201 del Código Civil).\n- **Validez de la cláusula:** la estipulación es válida y no configura una condición meramente potestativa dependiente de la pura voluntad del deudor (la cual sería nula conforme al Art. 1478 inc. 1.º del Código Civil), pues no subordina la existencia de la obligación, sino solo la época de su cumplimiento a la capacidad económica del deudor.\n\n#### 2. Lugar de la restitución\n\n**Base legal:** Art. 1587 y 1588 del Código Civil.\n\nLa restitución se hará en el lugar estipulado en la convención. A falta de estipulación, y tratándose de una obligación de género, la restitución debe efectuarse en el domicilio del deudor (mutuario) al tiempo de la celebración del contrato (Art. 1588 inc. 2.º y Art. 2200 del Código Civil).\n\n#### 3. Posibilidad de prepago o pago anticipado\n\nExisten diferencias irreconciliables entre el régimen del Código Civil y el de la Ley N.° 18.010 sobre la facultad del deudor de pagar antes del vencimiento del plazo:\n\n- **a) En el Código Civil** (Art. 2204): en el mutuo gratuito, el deudor puede prepagar libremente; en el mutuo con intereses, no puede prepagar sin el consentimiento del acreedor, pues el plazo está establecido en beneficio de ambas partes.\n- **b) En la Ley N.° 18.010** (Art. 10.º, operaciones de dinero): derecho irrenunciable al prepago (en deudas de hasta 5.000 UF). Exige pagar el capital, los intereses devengados y la comisión de prepago (1 mes de interés en operaciones no reajustables; 1,5 meses en operaciones reajustables).\n\n**Régimen del Código Civil (Art. 2204):** el mutuario puede pagar toda la suma prestada antes del término estipulado, salvo que se hayan pactado intereses. Si hay intereses, el plazo cede en beneficio de ambas partes y el acreedor no puede ser forzado a recibir el pago antes de tiempo perdiendo sus rendimientos futuros.\n\n**Régimen financiero (Art. 10 de la Ley N.° 18.010):** el deudor de una operación de crédito de dinero tiene el derecho legal e irrenunciable a prepagar anticipadamente, debiendo abonar los intereses devengados y la comisión de prepago autorizada por la ley.",
+    "charCount": 3803,
+    "connections": [
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Siempre debe recordarse que, aunque se encuentra ubicado en el Código Civil, el Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Siempre debe recordarse que, aunque se encuentra ubicado en el Código Civil, el Art» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Siempre debe recordarse que, aunque se encuentra ubicado en el Código ...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Si no lo cita y la cosa es evicta, el vendedor queda liberado de la obligación de saneamiento",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Si no lo cita y la cosa es evicta, el vendedor queda liberado de la obligación de saneamiento» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Si no lo cita y la cosa es evicta, el vendedor queda liberado de la ob...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "civil-lasobligac-1-3",
+        "targetTitle": "Obligaciones Sujetas a Modalidad (Condición y Plazo) y Acción Resolutoria",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.16",
+        "crossoverType": "Efecto-Patrimonial",
+        "quote": "El plazo es la época que se fija para el cumplimiento de la obligación, y puede ser expreso o tácito\"",
+        "whyConnected": "Efectos patrimoniales correlativos e ineficacias vinculadas en el tráfico jurídico. Cita textual del apunte: «El plazo es la época que se fija para el cumplimiento de la obligación, y puede ser expreso o tácito\"» (§ 1.16).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El plazo es la época que se fija para el cumplimiento de la obligación...» en la resolución de casos de civil."
+      }
+    ],
+    "indexCode": "1.87"
+  },
+  {
+    "id": "civil-contratomu-4-3",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 14,
+    "chapterTitle": "Contrato de Mutuo",
+    "category": "Contrato de Mutuo",
+    "code": "4.3",
+    "title": "Sección 4.3: Obligaciones Eventuales del Mutuante",
+    "cleanTitle": "Obligaciones Eventuales del Mutuante",
+    "sourceFile": "CONTRATOMUTUO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMUTUO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Nulidad",
+      "Responsabilidad",
+      "Contrato",
+      "Resolución"
+    ],
+    "isFree": false,
+    "content": "### Sección 4.3 — Obligaciones Eventuales del Mutuante\n\nEl mutuo civil es un contrato unilateral por excelencia. Sin embargo, la ley prevé la eventualidad de que nazcan obligaciones sobrevinientes a cargo del mutuante derivadas de vicios ocultos de la cosa prestada (Art. 2203 del Código Civil).\n\n#### 1. Responsabilidad por mala calidad o vicios ocultos de la cosa\n\n**Base legal:** Art. 2203 del Código Civil, que remite a las reglas del comodato (Art. 2192 del Código Civil).\n\n**Requisitos copulativos de responsabilidad:** para que el mutuante responda de los perjuicios ocasionados por la mala calidad o condición de las cosas fungibles prestadas (por ejemplo, combustible adulterado que daña un motor, o semillas descompuestas), deben concurrir tres requisitos imperativos y copulativos (Art. 2192 y 2203 del Código Civil):\n\n1. Que la mala calidad o condición sea de tal naturaleza que probablemente hubiese de ocasionar los perjuicios (Art. 2192 N.° 1 del Código Civil).\n2. Que dicha mala calidad o vicio haya sido conocida y no declarada por el mutuante (Art. 2192 N.° 2 del Código Civil). Sanciona el dolo o mala fe del mutuante.\n3. Que el mutuario no haya podido, con mediano cuidado, conocer la mala calidad o precaver los perjuicios (Art. 2192 N.° 3 del Código Civil).\n\n#### 2. Terminación por vicios graves\n\n**Base legal:** Art. 2203 inc. 2.º del Código Civil.\n\n**Facultad de terminación anticipada:** si los vicios ocultos eran de tal gravedad que, de haberlos conocido, el mutuario no habría celebrado el contrato, la ley le otorga el derecho a pedir que se deje sin efecto la convención (Art. 2203 inc. 2.º del Código Civil).\n\n**Efectos de la terminación:** aunque el texto legal emplea la voz “rescinda” (que sugeriría nulidad relativa), la doctrina (René Abeliuk, Leopoldo Urrutia) señala que se trata en rigor de la terminación anticipada del contrato por incumplimiento.\n\n**Liberación de intereses:** declarada la terminación, el mutuario devuelve inmediatamente la cantidad fungible recibida y queda liberado del pago de los intereses estipulados para el período faltante, desde la resolución hasta el plazo originalmente convenido.",
+    "charCount": 2152,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-5",
+        "targetTitle": "Teoría General de los Incidentes (Incidente Ordinario, Desistimiento de la Demanda y Abandono del Procedimiento)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.8",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Título, si no tiene señalada por la ley una tramitación especial\"_",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Título, si no tiene señalada por la ley una tramitación especial\"_» (§ 2.8).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Título, si no tiene señalada por la ley una tramitación especial\"_...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Código Civil y a las disposiciones especiales del Código Orgánico de Tribunales (Arts",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Código Civil y a las disposiciones especiales del Código Orgánico de Tribunales (Arts» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Código Civil y a las disposiciones especiales del Código Orgánico de T...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "N° 2 del Código de Procedimiento Civil - CPC)",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «N° 2 del Código de Procedimiento Civil - CPC)» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «N° 2 del Código de Procedimiento Civil - CPC)...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.88"
+  },
+  {
+    "id": "civil-contratomu-4-4",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 14,
+    "chapterTitle": "Contrato de Mutuo",
+    "category": "Contrato de Mutuo",
+    "code": "4.4",
+    "title": "Sección 4.4: Causales de Extinción y Término del Mutuo",
+    "cleanTitle": "Causales de Extinción y Término del Mutuo",
+    "sourceFile": "CONTRATOMUTUO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMUTUO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Nulidad",
+      "Contrato",
+      "Obligación"
+    ],
+    "isFree": false,
+    "content": "### Sección 4.4 — Causales de Extinción y Término del Mutuo\n\nEl mutuo y las obligaciones que emanan de él se extinguen por los modos generales de extinguir las obligaciones (Art. 1567 del Código Civil) y por mecanismos propios de su estructura contractual:\n\n1. **Pago efectivo** (restitución del capital, reajustes e intereses).\n2. **Prepago o pago anticipado** (Art. 10 de la Ley N.° 18.010 y Art. 2204 del Código Civil).\n3. **Novación de la deuda** (sustitución de obligación o de partes).\n4. **Dación en pago** (entrega de bien diverso aceptado por el acreedor).\n5. **Caducidad del plazo por cláusula de aceleración.**\n6. **Terminación judicial por vicios ocultos graves** (Art. 2203 del Código Civil).\n7. **Remisión o condonación de la deuda** (Art. 1652 a 1654 del Código Civil).\n8. **Compensación legal o convencional** (Art. 1655 del Código Civil).\n9. **Confusión de calidades** (Art. 1665 del Código Civil).\n10. **Declaración de nulidad del contrato** (Art. 1687 del Código Civil).\n\n#### 1. Pago efectivo y prepago\n\nEs la forma natural de extinción. Comprende la entrega íntegra de las cosas fungibles del mismo género o del dinero (capital, reajustes e intereses). En las operaciones de dinero, la obligación se extingue también por el ejercicio del derecho de prepago.\n\n#### 2. Novación de la obligación\n\n**Base legal:** Art. 1628 y ss. del Código Civil.\n\nOcurre cuando la obligación de restituir derivada del mutuo se extingue por la creación de una nueva obligación destinada a reemplazarla (sea por cambio de objeto, de causa, o por sustitución de deudor o acreedor).\n\n#### 3. Dación en pago\n\nConvención en virtud de la cual el mutuante acepta recibir del mutuario una prestación diversa a la adeudada (por ejemplo, la entrega de un bien inmueble o vehículo en lugar de dinero o grano) para dar por extinguida la deuda.\n\n#### 4. Caducidad del plazo por cláusula de aceleración\n\nOcurre cuando el mutuo pactado en cuotas se extingue de forma anticipada por el acaecimiento del hecho constitutivo de la cláusula de aceleración (por ejemplo, mora en el pago de una cuota).\n\n- **Cláusula imperativa:** se acelera y torna exigible la totalidad de la deuda de pleno derecho desde el momento de la mora. En esta fecha comienza a correr la prescripción extintiva.\n- **Cláusula facultativa:** exige que el acreedor manifieste expresamente su voluntad de acelerar interponiendo la demanda ejecutiva.\n\n#### 5. Compensación legal\n\n**Base legal:** Art. 1655 del Código Civil.\n\nA diferencia del comodato o del depósito (donde la compensación legal se halla expresamente prohibida, conforme a los Art. 2182 y 2234 del Código Civil), el mutuo se extingue perfectamente por compensación legal.\n\n**Fundamento:** las obligaciones recíprocas en el mutuo recaen sobre dinero o cosas fungibles del mismo género y calidad, reuniéndose los requisitos del Art. 1656 del Código Civil.\n\n#### 6. Confusión\n\n**Base legal:** Art. 1665 del Código Civil.\n\nOpera cuando se reúnen en una misma persona las calidades incompatibles de mutuante y mutuario.\n\n**Ejemplo:** el padre presta dinero al hijo (mutuo); al fallecer el padre, el hijo lo sucede como heredero único, extinguiéndose la deuda por confusión. Si existen varios coherederos, la deuda solo se extingue a prorrata de la cuota hereditaria del hijo.\n\n#### 7. Declaración de nulidad y excepción del Art. 1688\n\nPronunciada la sentencia de nulidad (absoluta o relativa), opera el efecto retroactivo (Art. 1687 del Código Civil): el mutuario debe restituir las cosas fungibles recibidas y el mutuante devolver los intereses cobrados.\n\n**Regla del Art. 1688:** si el mutuo real del Código Civil se anula por incapacidad del mutuario, no aplica el límite del Art. 1688 (el mutuante no debe probar que el incapaz se hizo más rico), pues la entrega real no constituye un “pago” o “gasto”. En cambio, si se anula un mutuo de dinero consensual, sí aplica el Art. 1688.",
+    "charCount": 3896,
+    "connections": [
+      {
+        "targetTopicId": "civil-lasobligac-1-4",
+        "targetTitle": "Modos de Extinguir las Obligaciones (I) — El Pago Efectivo y sus Modalidades",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.17",
+        "crossoverType": "Efecto-Patrimonial",
+        "quote": "La obligación se extingue sin que el acreedor reciba la prestación (ej",
+        "whyConnected": "Efectos patrimoniales correlativos e ineficacias vinculadas en el tráfico jurídico. Cita textual del apunte: «La obligación se extingue sin que el acreedor reciba la prestación (ej» (§ 1.17).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «La obligación se extingue sin que el acreedor reciba la prestación (ej...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Es la aptitud legal para ser titular de los derechos, cargas y deberes que emanan de la relación jurídica procesal",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Es la aptitud legal para ser titular de los derechos, cargas y deberes que emanan de la relación jurídica procesal» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Es la aptitud legal para ser titular de los derechos, cargas y deberes...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Siempre debe recordarse que, aunque se encuentra ubicado en el Código Civil, el Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Siempre debe recordarse que, aunque se encuentra ubicado en el Código Civil, el Art» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Siempre debe recordarse que, aunque se encuentra ubicado en el Código ...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.89"
+  },
+  {
+    "id": "civil-contratomu-4-5",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 14,
+    "chapterTitle": "Contrato de Mutuo",
+    "category": "Contrato de Mutuo",
+    "code": "4.5",
+    "title": "Sección 4.5: Puntos Críticos para el Examen de Grado",
+    "cleanTitle": "Puntos Críticos para el Examen de Grado",
+    "sourceFile": "CONTRATOMUTUO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMUTUO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Examen de Grado",
+      "Derecho"
+    ],
+    "isFree": false,
+    "content": "### Sección 4.5 — Puntos Críticos para el Examen de Grado\n\n1. **Reconvención judicial tras los 10 días (Art. 2200 del Código Civil):** transcurrido el plazo supletorio de 10 días en el mutuo donde no se pactó plazo, el deudor no queda en mora automáticamente. Se requiere la interpelación o reconvención judicial (Art. 1551 N.° 3 del Código Civil).\n2. **Admisibilidad de la compensación en el mutuo:** responda con seguridad: el mutuo sí admite compensación legal (Art. 1655 del Código Civil). Es una diferencia fundamental con el comodato y el depósito, donde el detentador no puede excusarse de devolver alegando compensación.\n3. **Restitución por imposibilidad (Art. 2198 inc. 2.º del Código Civil):** si no es posible devolver cosas del mismo género, se paga su valor pecuniario fijado al tiempo y lugar en que debió hacerse el pago.\n4. **Vicios ocultos en el mutuo (Art. 2203 del Código Civil):** el mutuante no responde objetivamente por los defectos de las cosas fungibles; solo responde si se cumplen los 3 requisitos copulativos del Art. 2192 (gravedad, conocimiento no declarado y falta de negligencia del mutuario).",
+    "charCount": 1126,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procemayor-5-4",
+        "targetTitle": "Efectos jurídicos sustanciales y procesales del emplazamiento",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.35",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos críticos para el examen de grado",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos críticos para el examen de grado» (§ 2.35).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos críticos para el examen de grado...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-3-2",
+        "targetTitle": "La Prueba Testimonial",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.51",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.51).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-6",
+        "targetTitle": "Las Medidas Cautelares y Precautorias",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.9",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.9).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.90"
+  },
+  {
+    "id": "civil-contratoma-1-1",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 15,
+    "chapterTitle": "Contrato de Mandato",
+    "category": "Contrato de Mandato",
+    "code": "1.1",
+    "title": "Sección 1.1: Definición Legal, Análisis Dogmático y Partes del Contrato",
+    "cleanTitle": "Definición Legal, Análisis Dogmático y Partes del Contrato",
+    "sourceFile": "CONTRATOMANDATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMANDATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Contrato"
+    ],
+    "isFree": false,
+    "content": "### Sección 1.1 — Definición Legal, Análisis Dogmático y Partes del Contrato\n\n#### 1. Definición Legal (Artículo 2116 Inciso 1.° del Código Civil)\n\nEl artículo 2116, inciso 1.°, del Código Civil define el contrato de mandato en los siguientes términos:\n\n> “El mandato es un contrato en que una persona confía la gestión de uno o más negocios a otra, que se hace cargo de ellos por cuenta y riesgo de la primera.”\n\n#### 2. Análisis Dogmático de los Elementos Constitutivos de la Definición\n\nDe la definición legal se extraen cuatro elementos dogmáticos esenciales:\n\n* **a) El Elemento “Confía”:** La voz “confía” destaca que el mandato es un contrato basado esencialmente en la confianza recíproca, revistiendo un carácter *intuitu personae*.\n\n* **b) “La Gestión de uno o más Negocios”:** El objeto del mandato consiste en la realización de **negocios jurídicos** (ej. celebrar contratos, cobrar, percibir, demandar, etc.). Si el encargo consiste en un hecho material (ej. construir una pared, confeccionar un traje), no hay mandato, sino un contrato de arrendamiento de servicios o de confección de obra material.\n\n* **c) “Se hace Cargo de Ellos”:** El mandatario asume la conducción del encargo y queda jurídicamente obligado a responder ante el mandante por la recta ejecución de la gestión.\n\n* **d) “Por Cuenta y Riesgo del Mandante”:** Constituye la característica definitoria del mandato. Significa que las consecuencias económicas y jurídicas del negocio —tanto los beneficios como los déficits o pérdidas— se radican en el patrimonio del mandante y no en el del mandatario, sea que este actúe con o sin representación (Art. 1448 del CC).\n\n#### 3. Las Partes en el Contrato (Artículo 2116 Inciso 2.° del Código Civil)\n\n* **Mandante, Comitente o Poderdante:** Es la parte que confiere el encargo.\n\n* **Mandatario, Apoderado o Procurador:** Es la parte que acepta el encargo y se obliga a ejecutarlo.\n\n* **Pluralidad Subjetiva (Artículo 2126 del CC):** Por aplicación de las reglas generales de los contratos (Art. 1438 CC), la ley admite expresamente la existencia de **uno o más mandantes y uno o más mandatarios**.\n\n---",
+    "charCount": 2126,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Código Civil para los contratos de esta clase, salvas las modificaciones contenidas en los artículos siguientes\"_",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Código Civil para los contratos de esta clase, salvas las modificaciones contenidas en los artículos siguientes\"_» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Código Civil para los contratos de esta clase, salvas las modificacion...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Análisis Dogmático del Artículo 1698 del Código Civil**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Análisis Dogmático del Artículo 1698 del Código Civil**» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Análisis Dogmático del Artículo 1698 del Código Civil**...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-3-2",
+        "targetTitle": "La Prueba Testimonial",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.51",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "El testigo compareciente está legalmente obligado a responder los interrogatorios que se le formulen",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «El testigo compareciente está legalmente obligado a responder los interrogatorios que se le formulen» (§ 2.51).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El testigo compareciente está legalmente obligado a responder los inte...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.91"
+  },
+  {
+    "id": "civil-contratoma-1-2",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 15,
+    "chapterTitle": "Contrato de Mandato",
+    "category": "Contrato de Mandato",
+    "code": "1.2",
+    "title": "Sección 1.2: Requisitos Específicos de Existencia y Validez del Mandato",
+    "cleanTitle": "Requisitos Específicos de Existencia y Validez del Mandato",
+    "sourceFile": "CONTRATOMANDATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMANDATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Responsabilidad",
+      "Contrato",
+      "Obligación"
+    ],
+    "isFree": false,
+    "content": "### Sección 1.2 — Requisitos Específicos de Existencia y Validez del Mandato\n\n#### 1. Encargo de Ejecución de Negocios Jurídicos\n\nEn principio, todos los actos jurídicos son susceptibles de ejecutarse mediante mandatario.\n\n* **Excepciones Legales (Actos Personalísimos no Delegables):**\n\n  1. *El Testamento (Art. 1004 CC):* La facultad de testar es indelegable.\n\n  2. *El Albaceazgo (Art. 1280 inc. 1.° CC):* Es indelegable, salvo autorización expresa del testador.\n\n  3. *Capitulaciones Matrimoniales (Art. 1721 CC):* Deben convenirse personalmente por los esposos (sin perjuicio del asenso de los representantes para menores).\n\n  4. *Ratificación del Matrimonio ante el Registro Civil (Art. 20 Ley de Matrimonio Civil).* «VERIFICAR: número de la Ley de Matrimonio Civil».\n\n#### 2. Que el Negocio no Interese Solo al Mandatario (Artículos 2119 a 2121 del CC)\n\nAtendiendo a quién reporta utilidad el negocio, se sistematizan las siguientes hipótesis:\n\n* **Verdadero Mandato (Art. 2120 CC):** Habrá mandato si el negocio interesa: i) Al mandante y al mandatario conjuntamente; ii) Al mandante y a un tercero; iii) Al mandante exclusivamente; o iv) A un tercero exclusivamente (si el mandante obra sin autorización del tercero, se genera entre ellos el cuasicontrato de **agencia oficiosa**).\n\n* **Negocio que Interesa Solo al Mandatario (Art. 2119 CC):** Si el negocio beneficia de forma exclusiva al mandatario, constituye un **mero consejo** que no produce obligación contractual alguna.\n\n  * *Sanción por Consejo Malicioso:* Si el consejo fue dado a sabiendas y con dolo (“maliciosamente”), obliga al aconsejante a indemnizar perjuicios como **delito civil** (Art. 2119 inc. 2.° CC).\n\n* **Simple Recomendación (Art. 2121 CC):** La recomendación de negocios ajenos no es mandato; en caso de duda, la ley presume que constituye simple recomendación.\n\n#### 3. Capacidad de las Partes (Artículo 2128 del Código Civil)\n\n* **Capacidad del Mandante:** El Código Civil no contempla reglas especiales; se aplican las normas generales. El mandante debe ser **plenamente capaz** y contar con la capacidad de ejercicio necesaria para celebrar el acto jurídico que encarga (pues es en su patrimonio donde se radicarán los efectos ex Art. 1448 CC).\n\n* **Capacidad del Mandatario (Regla Especial del Art. 2128 CC):**\n\n  * *El Menor Adulto como Mandatario:* La ley autoriza expresamente que un **menor adulto** (incapaz relativo) sea constituido como mandatario. Los actos que ejecute a nombre del mandante son **plenamente válidos respecto de terceros y del mandante**, obligando a ambos.\n\n  * *Fundamento:* Como el menor adulto no compromete su propio patrimonio sino el del mandante capaz, los terceros no sufren riesgo de lesión patrimonial.\n\n  * *Efectos de la Responsabilidad Personal del Menor Adulto:* Si el mandatario menor adulto actúa a nombre propio (Art. 2151 CC) o se extralimita en sus poderes (Art. 2160 CC), la obligación que contraiga será **natural** (Art. 1470 N.° 1 CC) y solo responderá conforme a las reglas protectoras de la incapacidad.\n\n  * *Incapaces Absolutos:* Jamás pueden ser mandatarios, pues carecen totalmente de voluntad jurídica.\n\n---",
+    "charCount": 3157,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Facultades de la Naturaleza (Delegación del Mandato - Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Facultades de la Naturaleza (Delegación del Mandato - Art» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Facultades de la Naturaleza (Delegación del Mandato - Art...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Se produce cuando una de las partes cede a un tercero el objeto incierto de la litis tras la notificación de la demanda",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Se produce cuando una de las partes cede a un tercero el objeto incierto de la litis tras la notificación de la demanda» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Se produce cuando una de las partes cede a un tercero el objeto incier...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-3-2",
+        "targetTitle": "La Prueba Testimonial",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.51",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Aquellos que no presenciaron los hechos directamente, sino que relatan lo que escucharon de los propios actores o de terceros",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Aquellos que no presenciaron los hechos directamente, sino que relatan lo que escucharon de los propios actores o de terceros» (§ 2.51).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Aquellos que no presenciaron los hechos directamente, sino que relatan...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.92"
+  },
+  {
+    "id": "civil-contratoma-1-3",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 15,
+    "chapterTitle": "Contrato de Mandato",
+    "category": "Contrato de Mandato",
+    "code": "1.3",
+    "title": "Sección 1.3: Características Contractuales del Mandato",
+    "cleanTitle": "Características Contractuales del Mandato",
+    "sourceFile": "CONTRATOMANDATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMANDATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Responsabilidad",
+      "Contrato"
+    ],
+    "isFree": false,
+    "content": "### Sección 1.3 — Características Contractuales del Mandato\n\nLas características contractuales del mandato (**Base legal:** Art. 2116 a 2129 del CC) son las siguientes:\n\n1. **Consensual por regla general:** se perfecciona por el solo acuerdo de voluntades, expreso o tácito (Art. 2123 y 2124 del CC).\n2. **Por naturaleza oneroso:** se presume remunerado; para ser gratuito requiere pacto expreso (Art. 2117 y Art. 2158 N.° 3 del CC).\n3. **Por naturaleza bilateral:** genera obligaciones para ambas partes desde su perfeccionamiento (Art. 2116 y 2158 del CC).\n4. **Gestión por cuenta y riesgo del mandante:** los beneficios y pérdidas se radican en el patrimonio del mandante.\n5. **Contrato principal y nominado:** tiene regulación propia en el Código Civil.\n6. **Contrato *intuitu personae*:** fundado en la confianza recíproca.\n\n#### 1. Consensual por Regla General (Artículos 2123 y 2124 del CC)\n\nSe perfecciona por el solo acuerdo de voluntades expreso o tácito.\n\n* **Aceptación del Mandatario (Art. 2124 CC):** Puede ser expresa o tácita. Aceptación tácita es todo acto en ejecución del mandato.\n\n* **El Silencio como Aceptación (Art. 2125 CC - Excepción):** En las personas que por su profesión u oficio se encargan de negocios ajenos (ej. abogados, corredores), el silencio transcurrido un término razonable frente al encargo hecho por un ausente **se mira como aceptación**. Aun si se excusan, están obligados a tomar providencias conservativas urgentes.\n\n* **Solemnidades Legales Especiales (Excepciones):** Mandato judicial (Art. 6.° CPC), mandato para contraer matrimonio (Art. 103 CC y Art. 15 Ley Registro Civil «VERIFICAR: número de la ley»), mandato de la mujer casada para gravar/enajenar bienes sociales o propios (Arts. 1749 y 1754 CC), y mandato para reconocer un hijo (Art. 190 CC).\n\n* **Debate Doctrinal: ¿Debe ser Solemne el Mandato para Celebrar un Acto Solemne?**\n\n  * *Tesis Mayoritaria / Jurisprudencia:* Sí. Sostiene que si la ley exige escritura pública para el contrato encomendado (ej. compraventa de bienes raíces), el mandato debe otorgarse por la misma solemnidad, pues es allí donde el mandante presta su voluntad (*Art. 2123 alude a instrumento auténtico*).\n\n  * *Tesis Meza Barros / Representación-Modalidad:* No. Argumenta que el mandante no manifiesta el consentimiento del contrato definitivo al otorgar el mandato; quien manifiesta la voluntad es el mandatario al contratar. La representación es una modalidad que traspasa los efectos (Art. 1448 CC). Exigir solemnidad requiere texto legal expreso (como los Arts. 142 o 1749 CC).\n\n#### 2. Por Naturaleza Oneroso (Artículo 2117 del Código Civil)\n\n* **Regla General:** El mandato es por naturaleza remunerado. A falta de estipulación expresa de honorarios, la remuneración se determina por la ley, la costumbre o el juez (Art. 2117 inc. 2.° CC y Art. 2158 N.° 3 CC). Para que sea gratuito debe pactarse de forma expresa.\n\n* **Graduación de la Responsabilidad del Mandatario (Artículo 2129 del CC):**\n\n  1. *Regla General:* Responde hasta de **culpa leve**.\n\n  2. *Mandatario Remunerado:* La responsabilidad recae **más estrictamente** sobre él.\n\n  3. *Mandatario Forzado:* Si manifestó repugnancia y actuó cediendo a instancias del mandante, la responsabilidad será **menos estricta**.\n\n  > **Nota:** La doctrina aclara que estas variaciones operan siempre dentro de la categoría de la culpa leve, siendo pautas de apreciación para el juez).*\n\n#### 3. Por Naturaleza Bilateral\n\n* **Debate Doctrinal sobre la Bilateralidad:**\n\n  * *Tesis Dominante (Stitchkin, Meza Barros):* Es **siempre bilateral**. Aun si es gratuito, genera obligaciones desde el perfeccionamiento para ambas partes: el mandatario a ejecutar el encargo y rendir cuenta; y el mandante a **proveer de los medios necesarios para la ejecución** (Art. 2158 N.° 1 CC).\n\n  * *Tesis Minoritaria (Alessandri, Vodanovic):* Sostenían que el mandato gratuito es unilateral (las obligaciones del mandante de reembolsar serian posteriores y configurarían un contrato sinalagmático imperfecto).\n\n#### 4. El Mandatario actúa por Cuenta y Riesgo del Mandante\n\nLos resultados financieros (utilidades o pérdidas) ingresan directamente al patrimonio del mandante. Esto ocurre independientemente de si el mandatario actúa con representación (a nombre del mandante) o sin representación (a nombre propio).\n\n#### 5. Contrato Intuitu Personae\n\nEmanado de la confianza recíproca. Consecuencias:\n\n* Confiere la facultad legal de revocación unilateral al mandante (Art. 2163 N.° 3 CC) y de renuncia al mandatario (Art. 2163 N.° 4 CC).\n\n* Por regla general, **se extingue por la muerte de cualquiera de las partes** (Art. 2163 N.° 5 CC).\n\n* **Excepción al carácter *intuitu personae*:** El mandato otorgado a persona indeterminada para requerir inscripciones o subinscripciones en el Conservador de Bienes Raíces.\n\n---",
+    "charCount": 4846,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "En virtud del artículo 396 del Código Orgánico de Tribunales, el mandato judicial no concluye por la muerte del mandante",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «En virtud del artículo 396 del Código Orgánico de Tribunales, el mandato judicial no concluye por la muerte del mandante» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En virtud del artículo 396 del Código Orgánico de Tribunales, el manda...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "En el Derecho Procesal Civil, la **muerte del mandante NO extingue el mandato judicial** (Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «En el Derecho Procesal Civil, la **muerte del mandante NO extingue el mandato judicial** (Art» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En el Derecho Procesal Civil, la **muerte del mandante NO extingue el ...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "El juez civil ordinario está estrictamente sujeto al mandato del artículo 1698 del Código Civil",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «El juez civil ordinario está estrictamente sujeto al mandato del artículo 1698 del Código Civil» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El juez civil ordinario está estrictamente sujeto al mandato del artíc...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.93"
+  },
+  {
+    "id": "civil-contratoma-1-4",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 15,
+    "chapterTitle": "Contrato de Mandato",
+    "category": "Contrato de Mandato",
+    "code": "1.4",
+    "title": "Sección 1.4: Clasificaciones del Contrato de Mandato",
+    "cleanTitle": "Clasificaciones del Contrato de Mandato",
+    "sourceFile": "CONTRATOMANDATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMANDATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Contrato"
+    ],
+    "isFree": false,
+    "content": "### Sección 1.4 — Clasificaciones del Contrato de Mandato\n\nLa clasificación del mandato (**Base legal:** Art. 2130, 2132 y 2133 del CC) se sistematiza así:\n\n| Criterio | Clases |\n| --- | --- |\n| **Extensión de los negocios (Art. 2130 del CC* | **General:** para todos los negocios del mandante. **Especial:** para uno o más negocios determinados (simplemente especial o especialísimo, según precisión de la cátedra). |\n| **Facultades conferidas (Art. 2132 y 2133 del CC)** | **Indefinido:** sin precisión de facultades (el general es por esencia indefinido, limitado a la administración ordinaria). **Definido:** con facultades expresa y delimitadas. La cláusula de libre administración no autoriza actos de disposición (Art. 2133 del CC). |\n| **Materia u objeto** | **Extrajudicial:** rige el Código Civil o el de Comercio. **Judicial:** representación en juicio (Art. 6.° y 7.° del CPC; Art. 395 a 397 del COT); no se extingue por la muerte del mandante (Art. 396 del COT). |\n\n#### 1. Atendiendo a la Extensión de los Negocios (Artículo 2130 del Código Civil)\n\n* **Mandato General:** Aquel que se da para todos los negocios del mandante (o para todos con algunas excepciones determinadas).\n\n  * *Alcance de las Facultades del Mandato General (Artículo 2132 del CC):* No confiere naturalmente más que la **facultad de ejecutar actos de administración dentro del giro ordinario** (ej. cobrar créditos, pagar deudas del giro, perseguir deudores en juicio, efectuar reparaciones necesarias). Para actos de disposición o que salgan del giro ordinario, **requiere imperativamente poder especial**.\n\n* **Mandato Especial:** Aquel que comprende uno o más negocios especialmente determinados.\n\n  * *Subclasificación de la Cátedra:*\n\n    1. *Simplemente Especial:* Ej. poder para vender o administrar todos los inmuebles del mandante sin singularizarlos.\n\n    2. *Especialísimo:* Ej. poder para vender un inmueble determinado especificando deslindes.\n\n#### 2. Atendiendo a las Facultades Conferidas (Mandato Definido e Indefinido)\n\n* **Mandato Indefinido:** Aquel en que el mandante no precisa las facultades o atribuciones concedidas. El mandato general es por esencia indefinido (quedando restringido a la administración del Art. 2132 CC).\n\n* **Mandato Definido:** Aquel en que el mandante delimita y especifica expresamente las facultades del mandatario (ej. poder para vender el inmueble X, autorizándolo para percibir el precio, fijar plazos y pactar cláusula penal).\n\n* **La Cláusula de Libre Administración (Artículo 2133 del CC):** Facultar al mandatario para actuar “del modo que más conveniente le parezca” o con “libre administración” **no lo autoriza para ejecutar actos de disposición ni para alterar la substancia del mandato**; solo lo faculta para los actos de administración autorizados por la ley.\n\n#### 3. Atendiendo a la Materia u Objeto (Mandato Judicial vs. Extrajudicial)\n\n* **Mandato Extrajudicial:** Se rige por las normas ordinarias del Código Civil o del Código de Comercio.\n\n* **Mandato Judicial:** Aquel otorgado para representar a una parte en juicio. Se rige por el Código de Procedimiento Civil (Art. 6.° y 7.° CPC) y el Código Orgánico de Tribunales (Arts. 395 a 397 COT).\n\n  * *Efecto Especial:* **No se extingue por la muerte del mandante** (Art. 396 del COT, excepción al Art. 2163 N.° 5 del CC).\n\n---",
+    "charCount": 3329,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "En virtud del artículo 396 del Código Orgánico de Tribunales, el mandato judicial no concluye por la muerte del mandante",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «En virtud del artículo 396 del Código Orgánico de Tribunales, el mandato judicial no concluye por la muerte del mandante» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En virtud del artículo 396 del Código Orgánico de Tribunales, el manda...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "En el Derecho Procesal Civil, la **muerte del mandante NO extingue el mandato judicial** (Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «En el Derecho Procesal Civil, la **muerte del mandante NO extingue el mandato judicial** (Art» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En el Derecho Procesal Civil, la **muerte del mandante NO extingue el ...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-6",
+        "targetTitle": "Las Medidas Cautelares y Precautorias",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.9",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Se pueden pedir una o más a la vez (Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Se pueden pedir una o más a la vez (Art» (§ 2.9).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Se pueden pedir una o más a la vez (Art...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.94"
+  },
+  {
+    "id": "civil-contratoma-1-5",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 15,
+    "chapterTitle": "Contrato de Mandato",
+    "category": "Contrato de Mandato",
+    "code": "1.5",
+    "title": "Sección 1.5: La Representación en el Mandato: Elemento de la Naturaleza",
+    "cleanTitle": "La Representación en el Mandato: Elemento de la Naturaleza",
+    "sourceFile": "CONTRATOMANDATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMANDATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Contrato"
+    ],
+    "isFree": false,
+    "content": "### Sección 1.5 — La Representación en el Mandato: Elemento de la Naturaleza\n\n#### 1. Distinción Dogmática Indispensable: Mandato vs. Apoderamiento\n\n* **Apoderamiento:** Es un **acto jurídico unilateral** por el cual una persona confiere a otra la facultad de representarla.\n\n* **Mandato:** Es un **contrato bilateral** por el cual se confía la gestión de un negocio.\n\n#### 2. La Representación como Elemento de la Naturaleza (Artículo 2151 del CC)\n\nLa representación **no es de la esencia del contrato de mandato, sino un elemento de la naturaleza**. Por ende, existen dos modalidades de ejecución:\n\nLas modalidades de ejecución del mandato (**Base legal:** Art. 2151 y 1448 del CC) son las siguientes:\n\n| Modalidad | Régimen | Efectos |\n| --- | --- | --- |\n| **Con representación (a nombre del mandante)** | El mandatario declara que contrata para otro (*contemplatio domini*). | Los efectos se radican directa e inmediatamente en el mandante (Art. 1448 del CC). |\n| **Sin representación (a nombre propio)** | El mandatario contrata en su propio nombre; no obliga al mandante frente a terceros (Art. 2151 del CC). | Requiere rendición de cuentas para traspasar derechos y deudas al mandante. |\n\n#### 3. Mecanismo de Traspaso en el Mandato a Nombre Propio\n\nCuando el mandatario contrata a su propio nombre, se obliga personalmente ante los terceros. Posteriormente, en la **rendición de cuentas**, debe efectuar:\n\n1. **Traspaso de Derechos Reales:** Se realiza mediante tradición (entrega o inscripción), sirviendo como título traslaticio el propio contrato de mandato.\n\n2. **Traspaso de Derechos Personales/Créditos:** Mediante la cesión de créditos (entrega del título y notificación al deudor, Arts. 1901 y ss. CC).\n\n3. **Traspaso de Deudas:** El mandante asume el pago ante el mandatario; respecto del tercero, el traspaso exige consentimiento del acreedor para no generar novación por cambio de deudor (Art. 1635 CC).\n\n---",
+    "charCount": 1928,
+    "connections": [
+      {
+        "targetTopicId": "civil-contratoma-4-2",
+        "targetTitle": "Efectos del Mandato respecto de Terceros",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.110",
+        "crossoverType": "Materia-Afin",
+        "quote": "Mediante la **cesión de créditos del derecho común** (entrega del título y notificación al deudor, Arts",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Mediante la **cesión de créditos del derecho común** (entrega del título y notificación al deudor, Arts» (§ 1.110).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Mediante la **cesión de créditos del derecho común** (entrega del títu...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "En el Derecho Civil, la muerte del mandante extingue el mandato (Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «En el Derecho Civil, la muerte del mandante extingue el mandato (Art» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En el Derecho Civil, la muerte del mandante extingue el mandato (Art...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Facultades de la Naturaleza (Delegación del Mandato - Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Facultades de la Naturaleza (Delegación del Mandato - Art» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Facultades de la Naturaleza (Delegación del Mandato - Art...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.95"
+  },
+  {
+    "id": "civil-contratoma-1-6",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 15,
+    "chapterTitle": "Contrato de Mandato",
+    "category": "Contrato de Mandato",
+    "code": "1.6",
+    "title": "Sección 1.6: Puntos Críticos para el Examen de Grado",
+    "cleanTitle": "Puntos Críticos para el Examen de Grado",
+    "sourceFile": "CONTRATOMANDATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMANDATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Responsabilidad"
+    ],
+    "isFree": false,
+    "content": "### Sección 1.6 — Puntos Críticos para el Examen de Grado\n\n1. **La Representación no es de la Esencia del Mandato:** En el examen de grado, nunca responda que todo mandato es con representación. El artículo 2151 del CC autoriza expresamente al mandatario a **contratar a nombre propio**, existiendo mandato perfecto sin representación.\n\n2. **Capacidad del Menor Adulto Mandatario (Art. 2128 CC):** El menor adulto puede actuar como mandatario y sus actos obligan válidamente al mandante y a terceros. No obstante, sus obligaciones personales quedan sujetas a las reglas de la menor edad (obligaciones naturales ex Art. 1470 N.° 1 CC).\n\n3. **Inextinguibilidad del Mandato Judicial por Muerte:** La muerte del mandante extingue por regla general el mandato civil (Art. 2163 N.° 5 CC), pero **no extingue el mandato judicial** (Art. 396 del COT).\n\n4. **Graduación de Culpa (Art. 2129 CC):** Recuerde que tanto el mandatario gratuito como el remunerado responden de **culpa leve**. La remuneración no modifica el grado de culpa a levísima, sino que sirve de pauta para que el juez aplique un estándar de apreciación “más estricto” dentro de la culpa leve.\n\n## Capítulo 2 — Facultades, Responsabilidad y Autocontratación del Mandatario\n\n---",
+    "charCount": 1235,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-3-1",
+        "targetTitle": "La Prueba Instrumental o Documental",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.50",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.50).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.96"
+  },
+  {
+    "id": "civil-contratoma-2-1",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 15,
+    "chapterTitle": "Contrato de Mandato",
+    "category": "Contrato de Mandato",
+    "code": "2.1",
+    "title": "Sección 2.1: Facultades del Mandatario",
+    "cleanTitle": "Facultades del Mandatario",
+    "sourceFile": "CONTRATOMANDATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMANDATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Examen de Grado",
+      "Derecho"
+    ],
+    "isFree": false,
+    "content": "### Sección 2.1 — Facultades del Mandatario\n\n#### 1. Regla General de Ejecución: Inmutabilidad y Medios (Artículos 2131 y 2134 del Código Civil)\n\n* **Sujeción Estricta a los Términos del Mandato (Art. 2131 CC):** El mandatario debe ceñirse rigurosamente a las instrucciones del mandante.\n\n* **Integridad de la Ejecución (Art. 2134 Inciso 1.° CC):** La recta ejecución comprende la **substancia del negocio** (aspectos de fondo o fin) y los **medios** por los cuales el mandante ha querido que se lleve a efecto (aspectos de forma o vía de ejecución).\n\n#### 2. Actos de Administración Ordinaria (Artículo 2132 del Código Civil)\n\nPor la sola celebración del mandato (aun general o indefinido), el mandatario queda investido de la facultad legal para realizar todos los actos comprendidos dentro del **giro ordinario de la administración**.\n\nPor la sola celebración del mandato, el mandatario queda investido de la facultad legal para realizar los actos del giro ordinario de administración (**Base legal:** Art. 2132 del CC). La enumeración legal es ejemplar:\n\n1. **Pagar las deudas y cobrar los créditos** del giro ordinario.\n2. **Perseguir en juicio a los deudores** e intentar las acciones posesorias del giro.\n3. **Interrumpir las prescripciones** relativas a dicho giro.\n4. **Contratar las reparaciones necesarias** de las cosas administradas.\n5. **Comprar los materiales necesarios** para el cultivo o la explotación de tierras, minas, fábricas u objetos de industria.\n\n#### 3. Actos que Exigen Poder Especial o Mención Expresa\n\nPara todo acto que **salga de los límites de la administración ordinaria** (especialmente actos de disposición gravosos o renuncia de derechos), se requiere **poder especial o mención expresa**:\n\n* **Compraventa de Inmuebles (Art. 2142 CC):** Quien tiene poder especial para vender, tiene implícitamente la facultad de **recibir el precio**.\n\n* **Independencia entre Vender e Hipotecar (Art. 2143 CC):** La facultad de hipotecar **no comprende la de vender, ni viceversa** (no aplica el aforismo “quien puede lo más puede lo menos”).\n\n* **Independencia entre Transigir y Comprometer (Art. 2141 CC):** La facultad de transigir no autoriza para someter el asunto a arbitraje (comprometer), ni viceversa.\n\n* **Aceptación de Pagos Indeterminados (Art. 2140 CC):** Si el crédito no está suficientemente designado en el mandato en su monto o especie, la aceptación de pago que haga el mandatario **no es oponible al mandante**.\n\n#### 4. Alteración de las Instrucciones por Necesidad u Oportunidad (Artículos 2134 inc. 2.°, 2148, 2149 y 2150 del CC)\n\nEl legislador contempla hipótesis en que el mandatario debe o puede apartarse de las instrucciones estrictas:\n\n* **Uso de Medios Equivalentes (Art. 2134 inc. 2.° CC):** Puede emplear medios distintos si la necesidad obligare a ello y se obtuviere completamente el objeto del encargo.\n\n* **Interpretación con Latitud (Art. 2148 CC):** Si el mandatario **no está en situación de consultar al mandante**, sus facultades se interpretarán con mayor amplitud.\n\n* **Deber de Abstención (Art. 2149 CC):** Debe abstenerse imperativamente de cumplir el mandato cuando su ejecución sea **manifiestamente perniciosa al mandante**.\n\n* **Imposibilidad de Cumplimiento (Art. 2150 CC):** Si no puede actuar según sus instrucciones, no está obligado a convertirse en agente oficioso; basta con adoptar **providencias conservativas**. Si no es posible dejar de obrar sin comprometer gravemente al mandante, deberá tomar el camino que más se acerque a sus instrucciones y convenga al negocio.\n\n---",
+    "charCount": 3555,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Estudio Profundo de las Facultades del Mandato Judicial (Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Estudio Profundo de las Facultades del Mandato Judicial (Art» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Estudio Profundo de las Facultades del Mandato Judicial (Art...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "En el Derecho Civil, la muerte del mandante extingue el mandato (Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «En el Derecho Civil, la muerte del mandante extingue el mandato (Art» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En el Derecho Civil, la muerte del mandante extingue el mandato (Art...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-6",
+        "targetTitle": "Las Medidas Cautelares y Precautorias",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.9",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "El juez posee facultades para dictar providencias conservativas atípicas no contempladas en el Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «El juez posee facultades para dictar providencias conservativas atípicas no contempladas en el Art» (§ 2.9).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El juez posee facultades para dictar providencias conservativas atípic...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.97"
+  },
+  {
+    "id": "civil-contratoma-2-2",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 15,
+    "chapterTitle": "Contrato de Mandato",
+    "category": "Contrato de Mandato",
+    "code": "2.2",
+    "title": "Sección 2.2: La Autocontratación del Mandatario",
+    "cleanTitle": "La Autocontratación del Mandatario",
+    "sourceFile": "CONTRATOMANDATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMANDATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Nulidad",
+      "Contrato",
+      "Protección"
+    ],
+    "isFree": false,
+    "content": "### Sección 2.2 — La Autocontratación del Mandatario\n\n---\n\n#### 1. Concepto y Naturaleza Jurídica\n\nLa **autocontratación** o *acto jurídico consigo mismo* es la situación que se verifica cuando una sola persona, actuando simultáneamente con dos calidades jurídicas distintas (sea en representación de dos patrimonios diversos, o en representación de un tercero y a nombre propio), celebra un acto jurídico que vincula a ambas esferas patrimoniales.\n\n#### 2. Reglas Específicas e Imperativas del Código Civil\n\nLa regulación de la autocontratación en el mandato (**Base legal:** Art. 2144 a 2147 del CC) se resume así:\n\n1. **En la compraventa (Art. 2144 del CC):** prohibido comprar lo que se mandó vender, o vender de lo propio lo que se mandó comprar, salvo aprobación expresa del mandante.\n2. **En el mutuo de dinero (Art. 2145 del CC):** encargado de tomar prestado, puede prestar de lo suyo; encargado de colocar a interés, no puede tomarlo para sí sin aprobación del mandante.\n3. **En la colocación a interés (Art. 2146 del CC):** requiere autorización expresa; si coloca a mayor interés que el designado, el exceso pertenece al mandante.\n\n**a) En la Compraventa (Artículo 2144 del CC):**\n\n* **Regla:** El mandatario no puede, por sí ni por interpuesta persona, **comprar las cosas que el mandante le ordenó vender**, ni **vender de lo suyo al mandante lo que este le ordenó comprar**.\n\n* **Excepción:** Se permite si media **aprobación expresa del mandante**.\n\n* **Sanción por Contravención del Art. 2144 CC:** La doctrina mayoritaria (Stitchkin) sostiene que la sanción es la **nulidad relativa** (Art. 1682 inc. final CC), pues no se trata de una prohibición absoluta (norma prohibitiva), sino de una norma *imperativa de requisito* establecida en protección del interés privado del mandante. Por ende, es saneable por ratificación o prescripción de 4 años.\n\n**b) En el Contrato de Mutuo (Artículo 2145 del CC):**\n\n1. *Tomar Dinero Prestado:* Si el mandante encarga al mandatario tomar dinero prestado, este **puede prestárselo él mismo de sus propios fondos** al interés designado o al corriente. No requiere autorización previa.\n\n2. *Colocar Dinero a Interés:* Si el mandante encarga colocar dinero a interés, el mandatario **no puede tomarlo prestado para sí sin aprobación del mandante**.\n\n   * *Aprobación vs. Autorización:* La voz “aprobación” del Art. 2145 permite que el mandatario tome el dinero y obtenga la venia del mandante con posterioridad (ratificación).\n\n**c) Colocación a Interés y Aprovechamiento de Beneficios (Artículos 2146 y 2147 del CC):**\n\n* **Autorización Expresa (Art. 2146 CC):** El mandatario no puede colocar a interés dineros del mandante sin **autorización expresa**. Si los coloca a mayor interés que el designado, **el exceso pertenece íntegramente al mandante**.\n\n* **Regla General del Mayor Beneficio (Art. 2147 CC):** El mandatario debe aprovechar las circunstancias para ejecutar el encargo con el mayor beneficio o menor gravamen posible para el mandante. **Se le prohíbe apropiarse de los excedentes o ahorros**; si negocia con menos beneficio o mayor gravamen, responde ante el mandante por la diferencia.\n\n---",
+    "charCount": 3158,
+    "connections": [
+      {
+        "targetTopicId": "civil-contratomu-2-4",
+        "targetTitle": "Intervención de Mandatarios en el Mutuo",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.74",
+        "crossoverType": "Materia-Afin",
+        "quote": "La sanción es la inoponibilidad según Stitchkin, o la nulidad relativa para la doctrina mayoritaria",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «La sanción es la inoponibilidad según Stitchkin, o la nulidad relativa para la doctrina mayoritaria» (§ 1.74).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «La sanción es la inoponibilidad según Stitchkin, o la nulidad relativa...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "En virtud del artículo 396 del Código Orgánico de Tribunales, el mandato judicial no concluye por la muerte del mandante",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «En virtud del artículo 396 del Código Orgánico de Tribunales, el mandato judicial no concluye por la muerte del mandante» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En virtud del artículo 396 del Código Orgánico de Tribunales, el manda...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "En el Derecho Civil, la muerte del mandante extingue el mandato (Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «En el Derecho Civil, la muerte del mandante extingue el mandato (Art» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En el Derecho Civil, la muerte del mandante extingue el mandato (Art...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.98"
+  },
+  {
+    "id": "civil-contratoma-2-3",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 15,
+    "chapterTitle": "Contrato de Mandato",
+    "category": "Contrato de Mandato",
+    "code": "2.3",
+    "title": "Sección 2.3: Obligación de Rendir Cuenta",
+    "cleanTitle": "Obligación de Rendir Cuenta",
+    "sourceFile": "CONTRATOMANDATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMANDATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Dominio",
+      "Responsabilidad",
+      "Contrato",
+      "Obligación",
+      "Prueba"
+    ],
+    "isFree": false,
+    "content": "### Sección 2.3 — Obligación de Rendir Cuenta\n\n---\n\n#### 1. Naturaleza Jurídica (Artículo 2155 del Código Civil)\n\n* **Elemento de la Naturaleza:** La obligación de rendir cuentas pertenece naturalmente al mandato (Art. 2155 CC). El mandante puede exonerar al mandatario de esta obligación mediante cláusula expresa.\n\n* **Incondicionalidad de los Cargos por Dolo o Culpa:** La exoneración o relevación de rendir cuentas **no libera jamás al mandatario de los cargos o responsabilidades que el mandante pruebe en su contra** (Art. 2155 inc. 3.° y Art. 1465 del CC).\n\n#### 2. Contenido y Forma de la Rendición de Cuentas\n\n* **Documentación:** Las partidas importantes de la cuenta deben presentarse obligatoriamente **documentadas**.\n\n* **Intereses a Cargo del Mandatario (Artículo 2156 del CC):**\n\n  1. *Intereses por Uso Propio de Dinero (Art. 2156 inc. 1.° CC):* Si el mandatario emplea dineros del mandante en utilidad propia, **debe intereses corrientes desde el día en que los aplicó a su provecho** (por configurar contravención a una obligación de no hacer ex Art. 1557 CC).\n\n  2. *Intereses por Saldo de Cuentas (Art. 2156 inc. 2.° CC):* Debe los intereses corrientes del saldo que resulte en su contra **desde que es constituido en mora de restituir**.\n\n* **Obligación de Restituir (Artículo 2157 del CC):** Debe restituir cuanto haya recibido de terceros en razón del mandato (aun cuando no se debía al mandante) y **aquello que dejó de percibir por su culpa**. Frente a las cosas que retiene indebidamente, responde con el estatuto de **injusto detentador** (Art. 915 CC).\n\n#### 3. Rendición de Cuentas en el Mandato a Nombre Propio (Sin Representación)\n\nCuando el mandatario actúa en nombre propio (Art. 2151 CC), la rendición de cuentas exige la ejecución de actos de traspaso:\n\n1. **Traspaso de Derechos Reales:** Se realiza mediante tradición. El **título traslaticio de dominio** es el propio contrato de mandato (que genera una obligación de dar para el mandatario). No se requiere celebrar una compraventa simulada de traspaso.\n\n2. **Traspaso de Derechos Personales o Créditos:** Se efectúa mediante la **cesión de créditos** del derecho común (entrega del título y notificación al deudor, Arts. 1901 y ss. CC).\n\n3. **Traspaso de Deudas:** El mandante queda obligado en la **contribución a la deuda** (debe reembolsar e indemnizar al mandatario). Frente a terceros, el mandatario continúa siendo el deudor directo, a menos que el acreedor acepte expresamente la sustitución (evitando la novación por cambio de deudor ex Art. 1635 CC).\n\n#### 4. Aspectos Procesales del Juicio de Cuentas\n\n* **Arbitraje Forzoso (Art. 227 N.° 3 del COT):** El examen y aprobación de la cuenta presentada es materia de arbitraje forzoso.\n\n* **Procedimiento Sumario Previos (Art. 680 N.° 8 del CPC):** Si se discute la existencia de la obligación de rendir cuenta, la controversia se tramita ante la justicia ordinaria en procedimiento sumario.\n\n* **Juicio de Cuentas (Arts. 693 a 696 del CPC):** Presentada la cuenta por el mandatario o por el mandante (en caso de rebeldía), la omisión imputable del mandatario constituye **presunción grave en la apreciación de la prueba**.\n\n---",
+    "charCount": 3175,
+    "connections": [
+      {
+        "targetTopicId": "civil-contratoma-4-2",
+        "targetTitle": "Efectos del Mandato respecto de Terceros",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.110",
+        "crossoverType": "Materia-Afin",
+        "quote": "El **título traslaticio de dominio es el propio contrato de mandato** (que genera la obligación de dar para el mandatario ex Art",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «El **título traslaticio de dominio es el propio contrato de mandato** (que genera la obligación de dar para el mandatario ex Art» (§ 1.110).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El **título traslaticio de dominio es el propio contrato de mandato** ...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Por el término del juicio o ejecución de la sentencia",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Por el término del juicio o ejecución de la sentencia» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Por el término del juicio o ejecución de la sentencia...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Si no lo cita y la cosa es evicta, el vendedor queda liberado de la obligación de saneamiento",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Si no lo cita y la cosa es evicta, el vendedor queda liberado de la obligación de saneamiento» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Si no lo cita y la cosa es evicta, el vendedor queda liberado de la ob...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.99"
+  },
+  {
+    "id": "civil-contratoma-2-4",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 15,
+    "chapterTitle": "Contrato de Mandato",
+    "category": "Contrato de Mandato",
+    "code": "2.4",
+    "title": "Sección 2.4: Responsabilidad del Mandatario",
+    "cleanTitle": "Responsabilidad del Mandatario",
+    "sourceFile": "CONTRATOMANDATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMANDATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Responsabilidad"
+    ],
+    "isFree": false,
+    "content": "### Sección 2.4 — Responsabilidad del Mandatario\n\n---\n\n#### 1. Graduación y Ponderación de la Culpa (Artículo 2129 del Código Civil)\n\n* **Regla General:** El mandatario responde hasta de **culpa leve** en la ejecución de su cometido (Art. 2129 inc. 1.° CC).\n\n* **Pauta de Apreciación Judicial:**\n\n  1. *Mandatario Remunerado:* La responsabilidad recae **más estrictamente** sobre él (Art. 2129 inc. 2.° CC).\n\n  2. *Mandatario Forzado (por repugnancia o instancias):* La responsabilidad recae **menos estrictamente** (Art. 2129 inc. 3.° CC).\n\n* **Debate Doctrinal de Grado (David Stitchkin vs. Tesis Extremas):**\n\n  * *Tesis Extrema:* Afirma que el remunerado responde de *culpa levísima* y el forzado de *culpa grave*.\n\n  * *Tesis Dominante (Stitchkin, Meza Barros, Orrego):* El mandatario **responde siempre de culpa leve**. Las normas de los incisos 2.° y 3.° del Art. 2129 no alteran el tipo de culpa de la escala del Art. 1547 CC, sino que entregan al juez una pauta de apreciación para ser más severo o más benévolo dentro de la misma culpa leve.\n\n#### 2. Responsabilidad por Solvencia de Terceros y Caso Fortuito (Artículos 2152 y 2153 del CC)\n\n* **Inexistencia de Garantía de Solvencia (Art. 2152 CC):** El mandatario no responde de la solvencia de los terceros con quienes contrata.\n\n  * *Excepción (Pacto de Del Credere / Estipulación Especial):* Si el mandatario asume expresamente sobre sí la solvencia de los deudores, **se constituye en principal deudor ante el mandante**, respondiendo incluso por caso fortuito o fuerza mayor.\n\n* **Riesgo de Especies Metálicas / Dinero (Artículo 2153 del CC):** Las especies metálicas o dinero que el mandatario tiene en su poder por cuenta del mandante **perecen para el mandatario aun por caso fortuito o fuerza mayor**.\n\n  * *Fundamento:* Dado que el dinero es fungible, el mandato funciona como título traslaticio de un **depósito irregular** (Art. 2221 CC); el mandatario se hace dueño del dinero y se obliga a restituir otro tanto (*res perit domino*).\n\n  * *Excepción:* Se exonera si el dinero estaba contenido en cajas o sacos cerrados y sellados sobre los cuales recayó el caso fortuito.\n\n---",
+    "charCount": 2150,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Sujetos Habilitados para ser Mandatarios (Nómina Taxativa de la Ley N° 18",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Sujetos Habilitados para ser Mandatarios (Nómina Taxativa de la Ley N° 18» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Sujetos Habilitados para ser Mandatarios (Nómina Taxativa de la Ley N°...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-6",
+        "targetTitle": "Las Medidas Cautelares y Precautorias",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.9",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Pregunta estelar de Examen de Grado sobre la ejecución de la medida)_",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Pregunta estelar de Examen de Grado sobre la ejecución de la medida)_» (§ 2.9).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Pregunta estelar de Examen de Grado sobre la ejecución de la medida)_...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "El juez civil ordinario está estrictamente sujeto al mandato del artículo 1698 del Código Civil",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «El juez civil ordinario está estrictamente sujeto al mandato del artículo 1698 del Código Civil» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El juez civil ordinario está estrictamente sujeto al mandato del artíc...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.100"
+  },
+  {
+    "id": "civil-contratoma-2-5",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 15,
+    "chapterTitle": "Contrato de Mandato",
+    "category": "Contrato de Mandato",
+    "code": "2.5",
+    "title": "Sección 2.5: Puntos Críticos para el Examen de Grado",
+    "cleanTitle": "Puntos Críticos para el Examen de Grado",
+    "sourceFile": "CONTRATOMANDATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMANDATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Dominio",
+      "Nulidad",
+      "Contrato",
+      "Protección"
+    ],
+    "isFree": false,
+    "content": "### Sección 2.5 — Puntos Críticos para el Examen de Grado\n\n1. **Nulidad Relativa en el Art. 2144 CC:** Ante la pregunta de examen: “¿Qué sanción tiene la compraventa celebrada por el mandatario consigo mismo sin autorización del mandante?”, responda que es la **nulidad relativa**, pues se trata de una norma imperativa de requisito establecida en protección del mandante (no una ley prohibitiva absoluta).\n\n2. **Título Traslaticio en el Mandato a Nombre Propio:** Cuando el mandatario que contrató a nombre propio rinde cuentas y traspasa un inmueble al mandante, **el título traslaticio de dominio es el propio contrato de mandato**. No se celebra una compraventa entre mandatario y mandante.\n\n3. **El Grado de Culpa del Mandatario Remunerado (Art. 2129 CC):** Nunca sostenga categóricamente que el mandatario remunerado responde de *culpa levísima*. La doctrina uniforme aclara que responde de **culpa leve**, sirviendo la remuneración como criterio para una apreciación judicial “más estricta”.\n\n4. **Pérdida del Dinero (Art. 2153 CC):** El mandatario siempre responde por la pérdida fortuita del dinero que recibió del mandante, porque al ser una cosa fungible opera como depósito irregular y se hace dueño de las especies metálicas (*res perit domino*).\n\n## Capítulo 3 — La Delegación del Mandato\n\n---",
+    "charCount": 1307,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-5",
+        "targetTitle": "Teoría General de los Incidentes (Incidente Ordinario, Desistimiento de la Demanda y Abandono del Procedimiento)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.8",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.8).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.101"
+  },
+  {
+    "id": "civil-contratoma-3-1",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 15,
+    "chapterTitle": "Contrato de Mandato",
+    "category": "Contrato de Mandato",
+    "code": "3.1",
+    "title": "Sección 3.1: Concepto, Naturaleza Jurídica y Carácter de Elemento de la Naturaleza",
+    "cleanTitle": "Concepto, Naturaleza Jurídica y Carácter de Elemento de la Naturaleza",
+    "sourceFile": "CONTRATOMANDATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMANDATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Contrato"
+    ],
+    "isFree": false,
+    "content": "### Sección 3.1 — Concepto, Naturaleza Jurídica y Carácter de Elemento de la Naturaleza\n\n#### 1. Definición Dogmática\n\nLa **delegación del mandato** es el acto o subcontrato por el cual el mandatario primitivo (*delegante*) encarga a un tercero (*delegado* o submandatario) la ejecución total o parcial de la gestión que a él le había sido confiada por el mandante originario.\n\n#### 2. Naturaleza Jurídica\n\nLa delegación constituye dogmáticamente un **subcontrato** (submandato). Por regla general, no extingue la relación jurídica primaria entre el mandante y el mandatario delegante, sino que superpone un segundo vínculo contractual derivado entre el mandatario delegante y el tercero delegado.\n\n#### 3. Elemento de la Naturaleza del Mandato Civil (Artículo 2135 del Código Civil)\n\n* **Regla General:** A diferencia de la regla general de los contratos *intuitu personae*, en el Derecho Civil chileno **la facultad de delegar es un elemento de la naturaleza del contrato de mandato**.\n\n* **Fundamento (Art. 2135 CC):** El mandatario puede delegar libremente el encargo a menos que el mandante se lo haya **prohibido expresamente**. Por ende, no se requiere estipulación expresa para autorizar la delegación.\n\n---",
+    "charCount": 1215,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Facultades de la Naturaleza (Delegación del Mandato - Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Facultades de la Naturaleza (Delegación del Mandato - Art» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Facultades de la Naturaleza (Delegación del Mandato - Art...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Concepto y Naturaleza Jurídica de la Carga Procesal**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Concepto y Naturaleza Jurídica de la Carga Procesal**» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Concepto y Naturaleza Jurídica de la Carga Procesal**...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Es la aptitud legal para ser titular de los derechos, cargas y deberes que emanan de la relación jurídica procesal",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Es la aptitud legal para ser titular de los derechos, cargas y deberes que emanan de la relación jurídica procesal» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Es la aptitud legal para ser titular de los derechos, cargas y deberes...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.102"
+  },
+  {
+    "id": "civil-contratoma-3-2",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 15,
+    "chapterTitle": "Contrato de Mandato",
+    "category": "Contrato de Mandato",
+    "code": "3.2",
+    "title": "Sección 3.2: Régimen de Efectos de la Delegación (Sistematización Tripartita)",
+    "cleanTitle": "Régimen de Efectos de la Delegación (Sistematización Tripartita)",
+    "sourceFile": "CONTRATOMANDATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMANDATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Responsabilidad",
+      "Contrato"
+    ],
+    "isFree": false,
+    "content": "### Sección 3.2 — Régimen de Efectos de la Delegación (Sistematización Tripartita)\n\nLos efectos jurídicos que produce la delegación —tanto respecto de la responsabilidad del mandatario como de las obligaciones del mandante frente a terceros— varían según la actitud asumida por el mandante al constituir el poder:\n\nLos efectos de la delegación (**Base legal:** Art. 2135 a 2137 del CC) varían según la actitud del mandante:\n\n1. **El mandante nada dijo (silencio):** la delegación es válida; el mandatario responde de los hechos del delegado como de los propios (Art. 2135 inc. 1.° del CC); los actos del delegado son inoponibles al mandante salvo ratificación (Art. 2136 del CC).\n2. **El mandante autorizó expresamente la delegación:** *a)* sin designar persona, el mandatario no responde, salvo *culpa in eligendo* si el delegado era notoriamente incapaz o insolvente (Art. 2135 inc. 2.° del CC); los actos obligan al mandante; *b)* designando nominativamente al delegado, nace un nuevo mandato directo entre mandante y delegado, que no se extingue por la muerte del primer mandatario y solo el mandante puede revocarlo (Art. 2137 del CC).\n3. **El mandante prohibió expresamente la delegación:** los actos del delegado son inoponibles al mandante; el mandatario responde por contravención contractual.\n\n---\n\n#### 1. Primer Escenario: El Mandante nada dijo sobre la Delegación (Silencio)\n\nOcurre cuando el contrato nada estipula sobre la posibilidad de delegar.\n\n* **Validez de la Delegación:** La delegación es plenamente válida.\n\n* **Responsabilidad del Mandatario (Art. 2135 Inciso 1.° CC):** El mandatario delegante **responde ante el mandante de los hechos y omisiones del delegado como de los suyos propios**.\n\n* **Efectos frente a Terceros (Artículo 2136 del CC):**\n\n  * Los actos ejecutados por el delegado **son inoponibles al mandante** y no lo obligan frente a los terceros que contrataron con el delegado, **a menos que el mandante ratifique la delegación** de forma expresa o tácita.\n\n  * *Sin ratificación:* Los terceros solo tienen acción contra el delegado y contra el mandatario delegante.\n\n* **Facultad de Revocación:** El mandatario delegante conserva la facultad de revocar la delegación en cualquier momento.\n\n---\n\n#### 2. Segundo Escenario: El Mandante autorizó expresamente la Delegación\n\nSe distinguen dos hipótesis de efectos radicalmente diversos:\n\n**a) Autorizó Sin designar la persona del delegado (Artículo 2135 Inciso 2.° del CC):**\n\n* **Regla General de Exoneración:** El mandatario delegante **no responde** ante el mandante por los actos u omisiones del delegado.\n\n* **Excepción de *culpa in eligendo* (Art. 2135 Inc. 2.° CC):** El mandatario **sí responderá** de los actos del delegado si este era **notoriamente incapaz o insolvente al tiempo de la delegación**. La ley sanciona la falta de diligencia u orfandad de prudencia del mandatario al elegir al submandatario.\n\n* **Efecto respecto de Terceros:** Los actos del delegado **obligan al mandante** en los mismos términos que si hubieren sido ejecutados por el mandatario primitivo.\n\n* **Revocación:** El mandatario delegante puede revocar la delegación.\n\n**b) Autorizó designando nominativamente la persona del delegado (Artículo 2137 del CC):**\n\n* **Constitución de un Nuevo Mandato Directo:** Al delegar en la persona expresamente designada por el mandante, **se constituye un nuevo contrato de mandato directo entre el mandante y el delegado**.\n\n* **Iresponsabilidad e Independencia del Mandatario Primitivo:** El mandatario inicial no responde en absoluto de la gestión del delegado.\n\n* **Inextinguibilidad por Muerte del Mandatario Primitivo (Art. 2137 CC):** El nuevo mandato **no se extingue por la muerte u otro accidente que sobrevenga al anterior mandatario**.\n\n* **Titularidad Exclusiva de Revocación:** **Solo el mandante puede revocar** el mandato conferido al delegado. El mandatario inicial carece de facultades para revocarlo.\n\n---\n\n#### 3. Tercer Escenario: El Mandante prohibió expresamente la Delegación (Artículo 2135 del CC)\n\n* **Inoponibilidad Absoluta (Art. 2135 y 2136 CC):** Si el mandatario infringe la prohibición expresa y delega el cometido, **los actos del delegado son inoponibles al mandante**, no produciendo efecto alguno sobre su patrimonio, salvo que decida voluntariamente ratificarlos.\n\n* **Responsabilidad por Contravención:** El mandatario infringe la prohibición contractual de no hacer (Art. 1557 CC), quedando obligado a indemnizar al mandante todos los perjuicios derivados de la delegación indebida.\n\n---",
+    "charCount": 4538,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "En virtud del artículo 396 del Código Orgánico de Tribunales, el mandato judicial no concluye por la muerte del mandante",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «En virtud del artículo 396 del Código Orgánico de Tribunales, el mandato judicial no concluye por la muerte del mandante» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En virtud del artículo 396 del Código Orgánico de Tribunales, el manda...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-6",
+        "targetTitle": "Las Medidas Cautelares y Precautorias",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.9",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Efectos respecto de Terceros y Registro (Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Efectos respecto de Terceros y Registro (Art» (§ 2.9).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Efectos respecto de Terceros y Registro (Art...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-3-2",
+        "targetTitle": "La Prueba Testimonial",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.51",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Aquellos que no presenciaron los hechos directamente, sino que relatan lo que escucharon de los propios actores o de terceros",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Aquellos que no presenciaron los hechos directamente, sino que relatan lo que escucharon de los propios actores o de terceros» (§ 2.51).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Aquellos que no presenciaron los hechos directamente, sino que relatan...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.103"
+  },
+  {
+    "id": "civil-contratoma-3-3",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 15,
+    "chapterTitle": "Contrato de Mandato",
+    "category": "Contrato de Mandato",
+    "code": "3.3",
+    "title": "Sección 3.3: Acciones Directas del Mandante contra el Delegado (Artículo 2138 del Código Civil)",
+    "cleanTitle": "Acciones Directas del Mandante contra el Delegado (Artículo 2138 del Código Civil)",
+    "sourceFile": "CONTRATOMANDATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMANDATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Nulidad",
+      "Responsabilidad",
+      "Contrato"
+    ],
+    "isFree": false,
+    "content": "### Sección 3.3 — Acciones Directas del Mandante contra el Delegado (Artículo 2138 del Código Civil)\n\n#### 1. Principio de Acción Directa Universal\n\nEl artículo 2138 del Código Civil consagra una relevante excepción al principio de relatividad de los contratos:\n\n> “El mandante podrá en todos casos ejercer contra el delegado las acciones del mandatario que le ha conferido el encargo.”\n\n#### 2. Alcance y Aplicación Práctica\n\n* **Generalidad:** La locución “en todos casos” autoriza al mandante a accionar contra el delegado en cualquiera de las tres hipótesis de delegación (silencio, autorizada o prohibida).\n\n* **Demandas Comprendidas:** El mandante puede demandar directamente al delegado la **rendición de cuentas**, la **restitución de los bienes o dineros percibidos** de terceros, o las indemnizaciones por mala ejecución, sin necesidad de pedir autorización al mandatario delegante.\n\n#### 3. Límite de Oponibilidad del Finiquito y Excepción de Dolo/Fraude\n\n* **Regla General del Finiquito:** Si el delegado ya rindió cuentas válidamente al mandatario delegante y este las aprobó otorgándole finiquito antes de la revocación o intervención del mandante, el delegado queda liberado de responsabilidad frente al mandante (*non bis in idem*).\n\n* **Excepción por Dolo, Colución o Fraude (Art. 1465 del CC):** Si el mandante acredita que en el finiquito o aprobación de cuentas otorgado por el mandatario al delegado hubo dolo, fraude o colusión, el finiquito adolece de nulidad absoluta por objeto ilícito. En tal evento, el mandante conserva intacta la acción para demandar al delegado.\n\n---",
+    "charCount": 1597,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-6",
+        "targetTitle": "Las Medidas Cautelares y Precautorias",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.9",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Consagradas expresamente en el catálogo del artículo 290 del CPC",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Consagradas expresamente en el catálogo del artículo 290 del CPC» (§ 2.9).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Consagradas expresamente en el catálogo del artículo 290 del CPC...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Código Civil para los contratos de esta clase, salvas las modificaciones contenidas en los artículos siguientes\"_",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Código Civil para los contratos de esta clase, salvas las modificaciones contenidas en los artículos siguientes\"_» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Código Civil para los contratos de esta clase, salvas las modificacion...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "El juez civil ordinario está estrictamente sujeto al mandato del artículo 1698 del Código Civil",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «El juez civil ordinario está estrictamente sujeto al mandato del artículo 1698 del Código Civil» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El juez civil ordinario está estrictamente sujeto al mandato del artíc...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.104"
+  },
+  {
+    "id": "civil-contratoma-3-4",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 15,
+    "chapterTitle": "Contrato de Mandato",
+    "category": "Contrato de Mandato",
+    "code": "3.4",
+    "title": "Sección 3.4: Prohibición de Subdelegación (Delegación del Mandato Delegado)",
+    "cleanTitle": "Prohibición de Subdelegación (Delegación del Mandato Delegado)",
+    "sourceFile": "CONTRATOMANDATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMANDATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Examen de Grado",
+      "Derecho"
+    ],
+    "isFree": false,
+    "content": "### Sección 3.4 — Prohibición de Subdelegación (Delegación del Mandato Delegado)\n\n#### 1. Regla de Inadmisibilidad\n\nLa doctrina unánime (David Stitchkin, Ramón Meza Barros) y la jurisprudencia uniforme de la Corte Suprema sostienen que **el delegado no puede volver a delegar (subdelegar) el encargo en un tercero**.\n\n#### 2. Fundamento Dogmático\n\n1. **Ausencia de Autorización Legal:** No existe disposición legal alguna en el Código Civil ni en estatutos especiales que faculte al delegado para subdelegar.\n\n2. **Carácter *intuitu personae*:** El mandato descansa en la confianza. La delegación efectuada por el mandatario primitivo atiende a la confianza depositada en el delegado; este no puede transferir esa confianza a un tercero ajeno a la relación.\n\n3. **Sanción:** La subdelegación no autorizada adolece de inoponibilidad absoluta respecto del mandante.\n\n---",
+    "charCount": 868,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Facultades de la Naturaleza (Delegación del Mandato - Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Facultades de la Naturaleza (Delegación del Mandato - Art» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Facultades de la Naturaleza (Delegación del Mandato - Art...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procemayor-4-2",
+        "targetTitle": "Fundamento normativo",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.27",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Sede principal en el Código de Procedimiento Civil",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Sede principal en el Código de Procedimiento Civil» (§ 2.27).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Sede principal en el Código de Procedimiento Civil...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-3-2",
+        "targetTitle": "La Prueba Testimonial",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.51",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "El declarante debe ser un tercero ajeno a la relación jurídico-procesal",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «El declarante debe ser un tercero ajeno a la relación jurídico-procesal» (§ 2.51).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El declarante debe ser un tercero ajeno a la relación jurídico-procesa...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.105"
+  },
+  {
+    "id": "civil-contratoma-3-5",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 15,
+    "chapterTitle": "Contrato de Mandato",
+    "category": "Contrato de Mandato",
+    "code": "3.5",
+    "title": "Sección 3.5: Extinción de la Delegación",
+    "cleanTitle": "Extinción de la Delegación",
+    "sourceFile": "CONTRATOMANDATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMANDATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Contrato"
+    ],
+    "isFree": false,
+    "content": "### Sección 3.5 — Extinción de la Delegación\n\nAl ser un subcontrato accesorio y dependiente del mandato originario, la delegación se extingue por las siguientes causales:\n\n1. **Revocación:** Realizada por el mandatario delegante (en los casos autorizados) o por el mandante.\n\n2. **Cese de Funciones del Mandatario Primitivo:** Toda causal de extinción del mandato principal (muerte, renuncia, revocación, insolvencia del mandatario originario ex Art. 2163 CC) **pone término automáticamente a la delegación**, salvo en la delegación nominativa del artículo 2137 del CC.\n\n3. **Cumplimiento o Desempeño:** Ejecución completa del cometido encomendado al delegado.\n\n---",
+    "charCount": 665,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Facultades de la Naturaleza (Delegación del Mandato - Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Facultades de la Naturaleza (Delegación del Mandato - Art» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Facultades de la Naturaleza (Delegación del Mandato - Art...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-3-2",
+        "targetTitle": "La Prueba Testimonial",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.51",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "El declarante debe ser un tercero ajeno a la relación jurídico-procesal",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «El declarante debe ser un tercero ajeno a la relación jurídico-procesal» (§ 2.51).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El declarante debe ser un tercero ajeno a la relación jurídico-procesa...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-3-1",
+        "targetTitle": "La Prueba Instrumental o Documental",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.50",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Instrumento público o auténtico es el autorizado con las solemnidades legales por el competente funcionario\"_",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Instrumento público o auténtico es el autorizado con las solemnidades legales por el competente funcionario\"_» (§ 2.50).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Instrumento público o auténtico es el autorizado con las solemnidades ...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.106"
+  },
+  {
+    "id": "civil-contratoma-3-6",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 15,
+    "chapterTitle": "Contrato de Mandato",
+    "category": "Contrato de Mandato",
+    "code": "3.6",
+    "title": "Sección 3.6: Análisis Comparativo: Delegación en el Mandato Civil vs. Mandato Judicial",
+    "cleanTitle": "Análisis Comparativo: Delegación en el Mandato Civil vs. Mandato Judicial",
+    "sourceFile": "CONTRATOMANDATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMANDATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Examen de Grado",
+      "Derecho"
+    ],
+    "isFree": false,
+    "content": "### Sección 3.6 — Análisis Comparativo: Delegación en el Mandato Civil vs. Mandato Judicial\n\nExiste un marcado contraste entre el régimen de delegación del Código Civil y el del Código de Procedimiento Civil:\n\n| Criterio de Comparación | Mandato Civil *(Código Civil)* | Mandato Judicial *(Art. 7.° inc. 1.° CPC)* |\n|:--- |:--- |:--- |\n| **Facultad de Delegar** | Es un **elemento de la naturaleza** (se entiende incluida salvo prohibición). | Es un **elemento de la naturaleza** (autoriza al procurador salvo prohibición expresa). |\n| **Efecto de la Delegación no Autorizada frente a Terceros/Proceso** | Sus actos son **inoponibles al mandante** a menos que este ratifique (Art. 2136 CC). | Los actos del delegado **obligan directamente al mandante** sin necesidad de ratificación. |\n| **Pluralidad de Delegaciones** | **Prohibida la subdelegación** por el delegado. | El procurador judicial delegado puede **volver a delegar** el poder a otro abogado o procurador habilitado. |\n\n---",
+    "charCount": 985,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Facultades de la Naturaleza (Delegación del Mandato - Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Facultades de la Naturaleza (Delegación del Mandato - Art» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Facultades de la Naturaleza (Delegación del Mandato - Art...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-5",
+        "targetTitle": "Teoría General de los Incidentes (Incidente Ordinario, Desistimiento de la Demanda y Abandono del Procedimiento)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.8",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Basta el mandato judicial con **facultades ordinarias**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Basta el mandato judicial con **facultades ordinarias**» (§ 2.8).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Basta el mandato judicial con **facultades ordinarias**...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "En el Derecho Procesal Civil, la **muerte del mandante NO extingue el mandato judicial** (Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «En el Derecho Procesal Civil, la **muerte del mandante NO extingue el mandato judicial** (Art» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En el Derecho Procesal Civil, la **muerte del mandante NO extingue el ...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.107"
+  },
+  {
+    "id": "civil-contratoma-3-7",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 15,
+    "chapterTitle": "Contrato de Mandato",
+    "category": "Contrato de Mandato",
+    "code": "3.7",
+    "title": "Sección 3.7: Puntos Críticos para el Examen de Grado",
+    "cleanTitle": "Puntos Críticos para el Examen de Grado",
+    "sourceFile": "CONTRATOMANDATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMANDATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Responsabilidad"
+    ],
+    "isFree": false,
+    "content": "### Sección 3.7 — Puntos Críticos para el Examen de Grado\n\n1. **Inoponibilidad por Silencio (Art. 2136 CC):** En el examen de grado, si el mandante nada dijo sobre delegar y el mandatario delega, no responda que el acto es nulo; los actos del delegado son **válidos pero inoponibles al mandante** mientras no los ratifique.\n\n2. **Exención de Responsabilidad en la Delegación Autorizada:** Si el mandante autorizó delegar sin señalar persona, el mandatario solo responde por *culpa in eligendo* si el delegado era **notoriamente incapaz o insolvente** al momento de la delegación (Art. 2135 inc. 2.° CC).\n\n3. **Efecto Especial de la Delegación Nominativa (Art. 2137 CC):** Cuando el mandante autoriza expresamente la delegación en una persona determinada, se extingue la responsabilidad del primer mandatario y **nace un nuevo mandato directo entre mandante y delegado** que no muere por el fallecimiento del primer mandatario.\n\n4. **La Acción Directa del Art. 2138 CC:** El mandante puede demandar directamente al delegado la rendición de cuentas e indemnizaciones sin necesidad de subrogarse ni pedir autorización al mandatario primitivo.\n\n5. **Diferencia Civil vs. Procesal:** Recuerde que en el mandato judicial (Art. 7.° CPC) los actos del delegado vinculan al mandante sin necesidad de ratificación, marcando una diferencia sustancial con la regla del artículo 2136 del Código Civil.\n\n---\n\n## Capítulo 4 — Obligaciones del Mandante y Efectos respecto de Terceros\n\n---",
+    "charCount": 1472,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "civil-contratoma-3-2",
+        "targetTitle": "Régimen de Efectos de la Delegación (Sistematización Tripartita)",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.103",
+        "crossoverType": "Materia-Afin",
+        "quote": "El Mandante nada dijo sobre la Delegación (Silencio)",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «El Mandante nada dijo sobre la Delegación (Silencio)» (§ 1.103).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El Mandante nada dijo sobre la Delegación (Silencio)...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-6",
+        "targetTitle": "Las Medidas Cautelares y Precautorias",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.9",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.9).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.108"
+  },
+  {
+    "id": "civil-contratoma-4-1",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 15,
+    "chapterTitle": "Contrato de Mandato",
+    "category": "Contrato de Mandato",
+    "code": "4.1",
+    "title": "Sección 4.1: Obligaciones del Mandante (Artículo 2158 del Código Civil)",
+    "cleanTitle": "Obligaciones del Mandante (Artículo 2158 del Código Civil)",
+    "sourceFile": "CONTRATOMANDATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMANDATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Responsabilidad",
+      "Contrato",
+      "Obligación",
+      "Prueba"
+    ],
+    "isFree": false,
+    "content": "### Sección 4.1 — Obligaciones del Mandante (Artículo 2158 del Código Civil)\n\nA diferencia de las obligaciones del mandatario que nacen al tiempo de perfeccionarse el contrato, las obligaciones del mandante pueden ser coetáneas al perfeccionamiento o derivar posteriormente de la ejecución o desarrollo del encargo.\n\nLas obligaciones del mandante (**Base legal:** Art. 2158 del CC) son las siguientes:\n\n1. **Proveer lo necesario** para la ejecución (Art. 2158 N.° 1 del CC).\n2. **Reembolsar los gastos razonables** (Art. 2158 N.° 2 del CC).\n3. **Pagar la remuneración** estipulada o usual (Art. 2158 N.° 3 del CC).\n4. **Pagar las anticipaciones de dinero con intereses** corrientes desde el desembolso (Art. 2158 N.° 4 del CC).\n5. **Indemnizar las pérdidas** sufridas sin culpa del mandatario (Art. 2158 N.° 5 del CC).\n\n---\n\n#### 1. Análisis Sistemático de las Obligaciones del Artículo 2158\n\n**a) Obligación de Proveer lo Necesario para la Ejecución del Mandato (Art. 2158 N.° 1 CC)**\n\n* **Contenido:** El mandante debe suministrar al mandatario los fondos, documentos e instrumentos indispensables para iniciar y llevar a cabo la gestión encomendada (ej. provisión de fondos para pagar un precio o derechos notariales).\n\n* **Momento:** Es una obligación coetánea a la celebración del contrato. Su omisión autoriza al mandatario para desistirse del encargo (Art. 2159 CC).\n\n**b) Obligación de Reembolsar los Gastos Razonables (Art. 2158 N.° 2 CC)**\n\n* **Alcance de la “Razonabilidad”:** El mandante no debe reembolsar cualquier desembolso superfluo o extravagante, sino aquellos gastos que habría realizado un hombre de mediana prudencia (un *buen padre de familia*, bajo el estándar de la culpa leve).\n\n* **Inclusión de Ligeras Gratificaciones:** Se comprenden dentro de los gastos razonables las pequeñas gratificaciones o propinas que por costumbre de los negocios deba efectuar el mandatario a auxiliares o personas de servicio (Art. 2139 CC).\n\n**c) Obligación de Pagar la Remuneración Estipulada o Usual (Art. 2158 N.° 3 CC)**\n\n* **Elemento de la Naturaleza:** Salvo estipulación expresa de gratuidad, el mandato es por naturaleza oneroso. A falta de pacto de honorarios, se deben los usuales en plaza, los fijados por la ley o por el juez conforme a la equidad.\n\n**d) Obligación de Pagar las Anticipaciones de Dinero con Intereses (Art. 2158 N.° 4 CC)**\n\n* **Naturaleza de la Anticipación:** Si el mandatario invierte fondos de su propio patrimonio para cumplir el encargo, la anticipación funciona jurídicamente como un mutuo otorgado al mandante.\n\n* **Devengamiento Automático de Intereses Corrientes:** El mandante debe restituir el capital desembolsado **más los intereses corrientes**, los cuales se devengan por el solo ministerio de la ley desde la fecha del desembolso o anticipación (sin necesidad de constituir en mora al mandante). La ley consagra este beneficio para premiar el celo del mandatario y sancionar la omisión del mandante que no provino de fondos suficientes.\n\n**e) Obligación de Indemnizar las Pérdidas Sufridas por Causa del Mandato (Art. 2158 N.° 5 CC)**\n\n* **Responsabilidad Objetiva Legal:** El mandante debe indemnizar todos los menoscabos o perjuicios patrimoniales que el mandatario haya experimentado por causa de la gestión.\n\n* **Inexistencia de Culpa del Mandante:** La responsabilidad del mandante no requiere que este haya incurrido en culpa contractual o extracontractual; es una **responsabilidad legal objetiva basada en la teoría del riesgo-provecho** (*quien se beneficia de la actividad ajena debe soportar sus riesgos asociados*).\n\n* **Exoneración por Culpa del Mandatario:** El mandante solo se exime de reparar la pérdida si prueba que el daño se produjo por **hecho o culpa propia del mandatario**.\n\n---\n\n#### 2. Inexcusabilidad del Mandante (Artículo 2158 Inciso Final del CC)\n\n> “No podrá el mandante dispensarse de cumplir estas obligaciones, alegando que el negocio encomendado al mandatario no ha tenido buen éxito, o que pudo desempeñarse a menos costo; salvo que le pruebe culpa.”\n\n* **Irrelevantia del Resultado Final:** El mandato es una **obligación de medios y no de resultado**. Por ende, aunque el negocio resulte infructuoso o deficitario, el mandante debe pagar los honorarios, reembolsar gastos y reparar pérdidas. La única causal de liberación es la prueba de que el mal éxito o el mayor costo provino de la culpa del mandatario.\n\n---\n\n#### 3. Remedios del Mandatario ante el Incumplimiento del Mandante\n\n1. **Facultad de Desistimiento (Artículo 2159 del CC):** El incumplimiento por parte del mandante de cualquiera de las obligaciones del artículo 2158 autoriza al mandatario para **desistir de la ejecución del encargo sin incurrir en responsabilidad alguna**.\n\n2. **Derecho Legal de Retención (Artículo 2162 del CC):** El mandatario puede retener en su poder las especies, bienes, valores o efectos que se le hayan entregado por cuenta del mandante para asegurar el pago de los honorarios, reembolsos o indemnizaciones adeudados.\n\n---",
+    "charCount": 5009,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "En virtud del artículo 396 del Código Orgánico de Tribunales, el mandato judicial no concluye por la muerte del mandante",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «En virtud del artículo 396 del Código Orgánico de Tribunales, el mandato judicial no concluye por la muerte del mandante» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En virtud del artículo 396 del Código Orgánico de Tribunales, el manda...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "civil-contratoar-1-3",
+        "targetTitle": "Efectos del arrendamiento de cosas: obligaciones del arrendador y del arrendatario",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.37",
+        "crossoverType": "Materia-Afin",
+        "quote": "Obligación de cuidar la cosa como un buen padre de familia (Art",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Obligación de cuidar la cosa como un buen padre de familia (Art» (§ 1.37).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Obligación de cuidar la cosa como un buen padre de familia (Art...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "El juez civil ordinario está estrictamente sujeto al mandato del artículo 1698 del Código Civil",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «El juez civil ordinario está estrictamente sujeto al mandato del artículo 1698 del Código Civil» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El juez civil ordinario está estrictamente sujeto al mandato del artíc...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.109"
+  },
+  {
+    "id": "civil-contratoma-4-2",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 15,
+    "chapterTitle": "Contrato de Mandato",
+    "category": "Contrato de Mandato",
+    "code": "4.2",
+    "title": "Sección 4.2: Efectos del Mandato respecto de Terceros",
+    "cleanTitle": "Efectos del Mandato respecto de Terceros",
+    "sourceFile": "CONTRATOMANDATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMANDATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Dominio",
+      "Nulidad",
+      "Responsabilidad",
+      "Contrato",
+      "Obligación"
+    ],
+    "isFree": false,
+    "content": "### Sección 4.2 — Efectos del Mandato respecto de Terceros\n\nPara determinar los efectos que genera la actuación del mandatario frente a terceros, debe distinguirse si este actuó a nombre del mandante (con representación) o a nombre propio (sin representación).\n\nLos efectos del mandato frente a terceros se distinguen así:\n\n| Actuación | Efectos |\n| --- | --- |\n| **A nombre del mandante, dentro de los límites (Art. 2160 inc. 1.° del CC)** | Obliga directamente al mandante (Art. 1448 del CC). |\n| **A nombre del mandante, con exceso de poder (Art. 2160 inc. 2.° del CC)** | Acto válido pero inoponible al mandante, salvo ratificación expresa o tácita con efecto retroactivo. El mandatario solo responde ante terceros si no dio suficiente conocimiento de sus poderes o si se obligó personalmente (Art. 2154 del CC). |\n| **A nombre propio, sin representación (Art. 2151 del CC)** | Solo el mandatario queda obligado frente a terceros; exige traspaso de derechos y deudas en la rendición de cuentas. |\n\n---\n\n#### 1. Mandatario que Contrata a nombre del mandante (Con Representación)\n\n**a) Actuación Dentro de los Límites del Mandato (Artículo 2160 Inciso 1.° del CC)**\n\n* **Principio de Representación (Art. 1448 CC):** Lo ejecutado por el mandatario dentro de sus atribuciones produce sobre el patrimonio del mandante **iguales efectos que si este hubiere contratado personalmente**. Los derechos y obligaciones nacen directa e inmediatamente en la esfera del mandante.\n\n**b) Actuación Excediendo los Límites del Mandato (Exceso o Defecto de Poder)**\n\n* **Sanción Dogmática — Inoponibilidad:** Si el mandatario actúa sin poder suficiente o sobrepasa sus facultades, el acto o contrato celebrado con el tercero es perfectamente válido, pero es **inoponible al mandante por falta de personería o concurrencia de voluntad** (Art. 2160 inc. 2.° CC).\n\n* **Debate sobre la Nulidad vs. Inoponibilidad:**\n\n  * *Jurisprudencia Minoritaria / Aislada:* Ha declarado la nulidad absoluta del acto por “falta de consentimiento del mandante”.\n\n  * *Tesis Dominante (David Stitchkin, Meza Barros):* Sancionar con nulidad es un error categórico. La nulidad no admitiría saneamiento por ratificación ni permitiría exigir el cumplimiento al tercero. La sanción adecuada es la **inoponibilidad sustancial**, la cual permite al mandante ratificar el acto o defenderse oponiendo la excepción de inoponibilidad sin necesidad de demandar previamente la nulidad del contrato.\n\n* **La Ratificación del Mandante (Art. 2160 Inciso 2.° CC):** La ratificación es el acto jurídico unilateral por el cual el mandante aprueba lo actuado por el mandatario con exceso de poder. Puede ser expresa o tácita y **valida el acto con efecto retroactivo**, obligando al mandante como si hubiere existido poder suficiente desde el principio.\n\n**c) Responsabilidad del Mandatario frente a Terceros por Exceso de Poder (Artículo 2154 del CC)**\n\nPor regla general, el mandatario que actúa a nombre del mandante **no responde personalmente ante los terceros con quienes contrató** (los terceros deben dirigir sus acciones contra el mandante).\n\n**Excepciones Taxativas en que el Mandatario Responde ante Terceros (Art. 2154 CC):**\n\n1. **Cuando no dio a los terceros suficiente conocimiento de sus poderes:** Si omitió informar la limitación de sus facultades, incurre en responsabilidad extracontractual por dolo o culpa (*culpa in contrahendo*) frente a los terceros de buena fe.\n\n2. **Cuando se obligó personalmente:** Si mediante una cláusula especial o promesa de hecho ajeno (Art. 1450 CC) asumió la responsabilidad personal para el evento de que el mandante no ratificare lo actuado.\n\n---\n\n#### 2. Mandatario que Contrata a nombre propio (Sin Representación)\n\n**a) Estructura de la Relación Externa (Artículo 2151 del CC)**\n\n* **Regla de Inoponibilidad Externa:** Si el mandatario contrata a su propio nombre, **no obliga respecto de terceros al mandante**. Frente al tercero, el único acreedor o deudor es el mandatario.\n\n* **Inexistencia de Vinculo Directo:** El tercero carece de acción directa contra el mandante, y el mandante carece de acción directa contra el tercero.\n\n**b) Circuito de Traspaso en la Rendición de Cuentas**\n\nUna vez ejecutado el encargo a nombre propio, el mandato subsiste en la relación interna entre mandante y mandatario, exigiendo la ejecución de los siguientes traspasos:\n\n1. **Traspaso de Derechos Reales:** Se efectúa por tradición. El **título traslaticio de dominio es el propio contrato de mandato** (que genera la obligación de dar para el mandatario ex Art. 2157 CC).\n\n2. **Traspaso de Créditos:** Mediante la **cesión de créditos del derecho común** (entrega del título y notificación al deudor, Arts. 1901 y ss. CC).\n\n3. **Traspaso de Deudas:** En la relación interna, el mandante debe asumir el pago indemnizando al mandatario. Frente al tercero acreedor, la asunción de deuda por el mandante no libera al mandatario (salvo aceptación expresa del tercero para evitar novación por cambio de deudor ex Art. 1635 CC).\n\n---\n\n#### 3. Situaciones Especiales de Ejecución\n\n**a) Mandatario que se convierte en Agente Oficioso (Artículo 2122 del CC)**\n\nEl mandatario pasa a revestir la calidad de agente oficioso en dos hipótesis:\n\n1. Cuando ejecuta de buena fe un mandato nulo (ignorando la nulidad).\n\n2. Cuando, ante una necesidad imperiosa, debe salir de los límites de sus instrucciones.\n\n* *Efecto:* Puede exigir el reembolso de los gastos útiles y necesarios hechos en favor del interesado (Art. 2290 CC), pero no el pago de remuneración u honorarios.\n\n**b) Ejecución Parcial del Mandato (Artículo 2161 del CC)**\n\n* **Si la gestión admitía ejecución parcial:** El mandante queda obligado a cumplir las obligaciones derivadas de lo ejecutado.\n\n* **Si la gestión era indivisible o debía cumplirse íntegramente:** La ejecución parcial **no obliga al mandante sino en cuanto le aprovechare**. De la inejecución del resto responde el mandatario por los perjuicios causados.\n\n---",
+    "charCount": 5969,
+    "connections": [
+      {
+        "targetTopicId": "civil-actojuridi-1-7",
+        "targetTitle": "Instituciones Complementarias (Representación, Modalidades del Acto Jurídico y Simulación)",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.7",
+        "crossoverType": "Materia-Afin",
+        "quote": "Es un acto jurídico _unilateral_ por el cual el poderdante confiere la facultad de representarlo",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Es un acto jurídico _unilateral_ por el cual el poderdante confiere la facultad de representarlo» (§ 1.7).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Es un acto jurídico _unilateral_ por el cual el poderdante confiere la...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "civil-actojuridi-1-6",
+        "targetTitle": "Teoría de las Ineficacias del Acto Jurídico",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.6",
+        "crossoverType": "Materia-Afin",
+        "quote": "El tercero puede ignorar el acto e impedir que se ejecuten contra su patrimonio los efectos del contrato o de la sentencia",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «El tercero puede ignorar el acto e impedir que se ejecuten contra su patrimonio los efectos del contrato o de la sentencia» (§ 1.6).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El tercero puede ignorar el acto e impedir que se ejecuten contra su p...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Es la aptitud legal para ser titular de los derechos, cargas y deberes que emanan de la relación jurídica procesal",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Es la aptitud legal para ser titular de los derechos, cargas y deberes que emanan de la relación jurídica procesal» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Es la aptitud legal para ser titular de los derechos, cargas y deberes...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.110"
+  },
+  {
+    "id": "civil-contratoma-4-3",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 15,
+    "chapterTitle": "Contrato de Mandato",
+    "category": "Contrato de Mandato",
+    "code": "4.3",
+    "title": "Sección 4.3: Puntos Críticos para el Examen de Grado",
+    "cleanTitle": "Puntos Críticos para el Examen de Grado",
+    "sourceFile": "CONTRATOMANDATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMANDATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Nulidad",
+      "Responsabilidad",
+      "Contrato",
+      "Obligación"
+    ],
+    "isFree": false,
+    "content": "### Sección 4.3 — Puntos Críticos para el Examen de Grado\n\n1. **Responsabilidad Legal Objetiva del Mandante (Art. 2158 N.° 5 CC):** En el examen de grado, precise que la obligación del mandante de indemnizar las pérdidas del mandatario es una **responsabilidad legal objetiva sin culpa**, fundada en el principio del *riesgo-provecho*. El mandante no puede eximirse alegando haber actuado sin culpa.\n\n2. **Intereses de las Anticipaciones (Art. 2158 N.° 4 CC):** Las anticipaciones de dinero hechas por el mandatario devengan **intereses corrientes por el solo ministerio de la ley desde el día en que se realizaron**, sin requerir constitución en mora del mandante.\n\n3. **Sanción al Exceso de Poder en la Representación:** Frente a la pregunta: “¿Qué sanción tiene el contrato celebrado por el mandatario excediendo sus facultades?”, responda categóricamente que es la **inoponibilidad sustancial por falta de personería**. No responda nulidad absoluta, pues la inoponibilidad permite la ratificación posterior con efecto retroactivo (Art. 2160 inc. 2.° CC).\n\n4. **Traspaso de Deudas en el Mandato a Nombre Propio:** El traspaso de las deudas del mandatario al mandante en la rendición de cuentas **no libera al mandatario frente al tercero** con quien contrató, a menos que el tercero consienta expresamente en la sustitución de deudor (Art. 1635 CC).\n\n## Capítulo 5 — Extinción del Mandato\n\n---",
+    "charCount": 1396,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-6",
+        "targetTitle": "Las Medidas Cautelares y Precautorias",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.9",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.9).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.111"
+  },
+  {
+    "id": "civil-contratoma-5-1",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 15,
+    "chapterTitle": "Contrato de Mandato",
+    "category": "Contrato de Mandato",
+    "code": "5.1",
+    "title": "Sección 5.1: Enumeración Legal y Clasificación de las Causales (Artículo 2163 del Código Civil)",
+    "cleanTitle": "Enumeración Legal y Clasificación de las Causales (Artículo 2163 del Código Civil)",
+    "sourceFile": "CONTRATOMANDATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMANDATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Contrato"
+    ],
+    "isFree": false,
+    "content": "### Sección 5.1 — Enumeración Legal y Clasificación de las Causales (Artículo 2163 del Código Civil)\n\nEl artículo 2163 del Código Civil contempla la nómina de causales por las cuales expira el contrato de mandato. Atendiendo a su origen dogmático, la doctrina las clasifica en tres grandes grupos:\n\nLas causales de extinción del mandato (**Base legal:** Art. 2163 del CC) se clasifican en tres grupos:\n\n1. **Causales ordinarias:** cumplimiento del negocio encomendado (Art. 2163 N.° 1 del CC); llegada del plazo o condición resolutoria (Art. 2163 N.° 2 del CC).\n2. **Causales basadas en el carácter *intuitu personae*:** revocación del mandante (Art. 2163 N.° 3 del CC); renuncia del mandatario (Art. 2163 N.° 4 del CC); muerte del mandante o del mandatario (Art. 2163 N.° 5 del CC).\n3. **Causales por incapacidad o insolvencia:** procedimiento concursal de liquidación (Art. 2163 N.° 6 del CC); interdicción de cualquiera de las partes (Art. 2163 N.° 7 del CC); cesación de las funciones del mandante (Art. 2163 N.° 9 del CC).\n\n---",
+    "charCount": 1032,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "En virtud del artículo 396 del Código Orgánico de Tribunales, el mandato judicial no concluye por la muerte del mandante",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «En virtud del artículo 396 del Código Orgánico de Tribunales, el mandato judicial no concluye por la muerte del mandante» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En virtud del artículo 396 del Código Orgánico de Tribunales, el manda...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-3-1",
+        "targetTitle": "La Prueba Instrumental o Documental",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.50",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Código Civil y en el artículo 341 numeral 1 del Código de Procedimiento Civil como el primer medio de prueba en el catálogo legal",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Código Civil y en el artículo 341 numeral 1 del Código de Procedimiento Civil como el primer medio de prueba en el catálogo legal» (§ 2.50).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Código Civil y en el artículo 341 numeral 1 del Código de Procedimient...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "N° 2 del Código de Procedimiento Civil - CPC)",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «N° 2 del Código de Procedimiento Civil - CPC)» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «N° 2 del Código de Procedimiento Civil - CPC)...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.112"
+  },
+  {
+    "id": "civil-contratoma-5-2",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 15,
+    "chapterTitle": "Contrato de Mandato",
+    "category": "Contrato de Mandato",
+    "code": "5.2",
+    "title": "Sección 5.2: La Revocación del Mandante",
+    "cleanTitle": "La Revocación del Mandante",
+    "sourceFile": "CONTRATOMANDATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMANDATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Contrato",
+      "Obligación"
+    ],
+    "isFree": false,
+    "content": "### Sección 5.2 — La Revocación del Mandante\n\n#### 1. Concepto y Naturaleza Discrecional (Artículos 2163 N.° 3 y 2165 del CC)\n\nLa **revocación** es el acto jurídico unilateral por el cual el mandante pone fin de manera anticipada al contrato de mandato. Por ser un contrato basado en la confianza (*intuitu personae*), **la facultad de revocar es un elemento de la esencia del mandato civil** y el mandante la puede ejercitar a su entero arbitrio.\n\n#### 2. Formas de la Revocación (Artículo 2164 del CC)\n\n* **Revocación Expresa:** Se efectúa mediante una declaración explícita de voluntad comunicada al mandatario.\n\n* **Revocación Tácita (Art. 2164 inc. 1.° CC):** Ocurre cuando el mandante encomienda el mismo negocio a una persona distinta de su mandatario originario.\n\n  * *Regla de Coexistencia (Art. 2164 inc. 2.° CC):* Si el primer mandato era **general** y el segundo **especial**, el primer mandato subsiste para todos los negocios no comprendidos en el segundo (la revocación opera solo de forma parcial).\n\n#### 3. Excepciones a la Revocabilidad (Casos de Irrevocabilidad)\n\nEl mandante no puede revocar el mandato de forma unilateral en las siguientes situaciones:\n\n1. **Cuando el negocio interesa al mandatario o a un tercero (Art. 241 del Código de Comercio):** En materia mercantil, si la comisión interesa al comisionista o a un tercero (ej. mandato conferido a un Banco para pagar su propio crédito), es **irrevocable a su arbitrio**.\n\n2. **Diputación para el Pago Convenida por Acreedor y Deudor (Art. 1584 del CC):** El encargo al tercero para recibir el pago conferido por ambas partes no puede ser revocado por la sola voluntad del acreedor sin autorización judicial o consentimiento del deudor.\n\n3. **Pacto de Irrevocabilidad:** Las partes pueden pactar expresamente la irrevocabilidad cuando el mandato se otorga como un medio de cumplir una obligación previa o como una garantía.\n\n#### 4. Caso Especial de Revocación por Tercero (Artículo 2171 del CC)\n\nSi la mujer otorgó un mandato siendo soltera relativo a bienes que tras el matrimonio pasan a ser administrados por el marido en sociedad conyugal (Art. 1749 CC), el **marido queda facultado para revocar dicho mandato** a su arbitrio.\n\n---",
+    "charCount": 2213,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "En virtud del artículo 396 del Código Orgánico de Tribunales, el mandato judicial no concluye por la muerte del mandante",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «En virtud del artículo 396 del Código Orgánico de Tribunales, el mandato judicial no concluye por la muerte del mandante» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En virtud del artículo 396 del Código Orgánico de Tribunales, el manda...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Un error muy común en el examen oral es afirmar que \"en materia contractual la carga de la prueba se invierte totalmente\"",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Un error muy común en el examen oral es afirmar que \"en materia contractual la carga de la prueba se invierte totalmente\"» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Un error muy común en el examen oral es afirmar que \"en materia contra...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "En el Derecho Civil, la muerte del mandante extingue el mandato (Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «En el Derecho Civil, la muerte del mandante extingue el mandato (Art» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En el Derecho Civil, la muerte del mandante extingue el mandato (Art...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.113"
+  },
+  {
+    "id": "civil-contratoma-5-3",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 15,
+    "chapterTitle": "Contrato de Mandato",
+    "category": "Contrato de Mandato",
+    "code": "5.3",
+    "title": "Sección 5.3: La Renuncia del Mandatario",
+    "cleanTitle": "La Renuncia del Mandatario",
+    "sourceFile": "CONTRATOMANDATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMANDATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Responsabilidad",
+      "Prueba"
+    ],
+    "isFree": false,
+    "content": "### Sección 5.3 — La Renuncia del Mandatario\n\n#### 1. Concepto y Formalidades (Artículos 2163 N.° 4 y 2167 del CC)\n\nLa **renuncia** es el acto jurídico unilateral por el cual el mandatario manifiesta expresamente al mandante su decisión de no continuar con la ejecución del encargo. A diferencia de la revocación, **la renuncia debe ser siempre expresa**.\n\n#### 2. Tiempo Razonable y Responsabilidad del Mandatario (Artículo 2167 del CC)\n\n* **Continuidad Temporal de las Obligaciones:** La renuncia no pone fin de inmediato a las responsabilidades del mandatario. Este **debe continuar al frente del negocio durante un tiempo razonable** hasta que el mandante pueda asumirlo personalmente o encargárselo a un tercero.\n\n* **Indemnización por Renuncia Intempestiva:** Si el mandatario renuncia y abandona la gestión sin otorgar dicho tiempo razonable, **responde de todos los perjuicios causar al mandante**.\n\n* **Causales Exoneratorias de Responsabilidad (Art. 2167 inc. 2.° CC):** El mandatario se exime de indemnizar la renuncia intempestiva si prueba:\n\n  1. *Imposibilidad física o moral por enfermedad u otra causa grave*.\n\n  2. *Que la continuación del encargo le ocasionaba un grave perjuicio en sus propios intereses*.\n\n#### 3. Regla Excepcional del Mandato Mercantil (Artículo 242 del Código de Comercio)\n\nEl comisionista no puede renunciar a la comisión cuando la renuncia cause al comitente un **perjuicio irreparable** por no poder proveer por sí mismo al negocio o por la dificultad de hallar un sustituto.\n\n---",
+    "charCount": 1522,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Produce efectos solo transcurrido el término de emplazamiento contado desde la notificación de la renuncia al cliente (Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Produce efectos solo transcurrido el término de emplazamiento contado desde la notificación de la renuncia al cliente (Art» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Produce efectos solo transcurrido el término de emplazamiento contado ...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-3-2",
+        "targetTitle": "La Prueba Testimonial",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.51",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "El declarante debe ser un tercero ajeno a la relación jurídico-procesal",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «El declarante debe ser un tercero ajeno a la relación jurídico-procesal» (§ 2.51).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El declarante debe ser un tercero ajeno a la relación jurídico-procesa...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-3-3",
+        "targetTitle": "La Prueba Confesional y la Absolución de Posiciones",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.52",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "No busca renunciar a un derecho, sino atestiguar la veracidad o existencia de un hecho material",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «No busca renunciar a un derecho, sino atestiguar la veracidad o existencia de un hecho material» (§ 2.52).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «No busca renunciar a un derecho, sino atestiguar la veracidad o existe...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.114"
+  },
+  {
+    "id": "civil-contratoma-5-4",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 15,
+    "chapterTitle": "Contrato de Mandato",
+    "category": "Contrato de Mandato",
+    "code": "5.4",
+    "title": "Sección 5.4: La Muerte de una de las Partes y sus Excepciones Fundamentales",
+    "cleanTitle": "La Muerte de una de las Partes y sus Excepciones Fundamentales",
+    "sourceFile": "CONTRATOMANDATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMANDATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Responsabilidad",
+      "Contrato"
+    ],
+    "isFree": false,
+    "content": "### Sección 5.4 — La Muerte de una de las Partes y sus Excepciones Fundamentales\n\nLas reglas de la muerte de las partes (**Base legal:** Art. 2163 N.° 5, 2168 a 2170 del CC) son las siguientes:\n\n1. **Muerte del mandatario:** extingue siempre el mandato civil (Art. 2163 N.° 5 del CC); los herederos hábiles deben dar aviso inmediato y adoptar las providencias conservativas urgentes (Art. 2170 del CC).\n2. **Muerte del mandante:** por regla general extingue el mandato civil (Art. 2163 N.° 5 del CC).\n3. **Excepciones a la extinción por muerte del mandante:** riesgo o perjuicio grave a los herederos, que obliga a finalizar la gestión principiada (Art. 2168 del CC); mandato póstumo destinado a ejecutarse después de la muerte (Art. 2169 del CC); mandato judicial (Art. 396 y 529 del COT); mandato mercantil (Art. 240 del Código de Comercio).\n\n#### 1. Muerte del Mandatario (Artículo 2170 del CC)\n\nLa muerte del mandatario **pone siempre término al mandato** por ser *intuitu personae*.\n\n* **Obligaciones de los Herederos del Mandatario (Art. 2170 CC):** Los herederos que sean plenamente capaces de administrar sus bienes están legalmente obligados a:\n\n  1. Dar aviso inmediato al mandante de la muerte del mandatario.\n\n  2. Ejecutar a favor del mandante las **providencias conservativas urgentes** que las circunstancias exijan.\n\n* **Sanción:** La omisión de estos deberes genera responsabilidad indemnizatoria por los perjuicios causados al mandante.\n\n#### 2. Muerte del Mandante y sus Excepciones de Inextinguibilidad\n\nLa regla general es que la muerte del mandante extingue el mandato civil (Art. 2163 N.° 5 CC). Sin embargo, existen cuatro excepciones trascendentales en que **el mandato no se extingue**:\n\n1. **Riesgo o Perjuicio a los Herederos (Art. 2168 CC):** Sabida la muerte del mandante, el mandatario debe cesar en sus funciones; pero si de la suspensión inmediata se sigue un perjuicio grave a los herederos del causante, **el mandatario está obligado a finalizar la gestión principiada**.\n\n2. **Mandato Póstumo (Art. 2169 CC):** No se extingue el mandato que de acuerdo al contrato estaba destinado a ejecutarse expresamente **después de la muerte del mandante** (ej. comisión de albaceazgo o funerales). Los herederos suceden en los derechos y obligaciones.\n\n3. **El Mandato Judicial (Art. 396 y 529 del COT / Art. 5.° del CPC):** En el Derecho Procesal Chileno, **el mandato para negocios judiciales no se extingue por la muerte del mandante**. El procurador o abogado continuará representando la masa hereditaria y la litis hasta que los herederos comparezcan formalmente al juicio.\n\n4. **El Mandato Mercantil (Art. 240 del Código de Comercio):** La comisión mercantil no concluye por la muerte del comitente; los derechos y deudas pasan directamente a sus herederos.\n\n---",
+    "charCount": 2793,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Excepcion-Procesal",
+        "quote": "En virtud del artículo 396 del Código Orgánico de Tribunales, el mandato judicial no concluye por la muerte del mandante",
+        "whyConnected": "Intersección entre el derecho de fondo y las vías procesales de excepción o defensa. Cita textual del apunte: «En virtud del artículo 396 del Código Orgánico de Tribunales, el mandato judicial no concluye por la muerte del mandante» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En virtud del artículo 396 del Código Orgánico de Tribunales, el manda...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Excepcion-Procesal",
+        "quote": "En el Derecho Procesal Civil, la **muerte del mandante NO extingue el mandato judicial** (Art",
+        "whyConnected": "Intersección entre el derecho de fondo y las vías procesales de excepción o defensa. Cita textual del apunte: «En el Derecho Procesal Civil, la **muerte del mandante NO extingue el mandato judicial** (Art» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En el Derecho Procesal Civil, la **muerte del mandante NO extingue el ...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-6",
+        "targetTitle": "Las Medidas Cautelares y Precautorias",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.9",
+        "crossoverType": "Excepcion-Procesal",
+        "quote": "Consagradas expresamente en el catálogo del artículo 290 del CPC",
+        "whyConnected": "Intersección entre el derecho de fondo y las vías procesales de excepción o defensa. Cita textual del apunte: «Consagradas expresamente en el catálogo del artículo 290 del CPC» (§ 2.9).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Consagradas expresamente en el catálogo del artículo 290 del CPC...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.115"
+  },
+  {
+    "id": "civil-contratoma-5-5",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 15,
+    "chapterTitle": "Contrato de Mandato",
+    "category": "Contrato de Mandato",
+    "code": "5.5",
+    "title": "Sección 5.5: Otras Causales de Extinción del Mandato",
+    "cleanTitle": "Otras Causales de Extinción del Mandato",
+    "sourceFile": "CONTRATOMANDATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMANDATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Contrato"
+    ],
+    "isFree": false,
+    "content": "### Sección 5.5 — Otras Causales de Extinción del Mandato\n\n#### 1. Procedimiento Concursal de Liquidación (Artículos 2163 N.° 6 CC y Ley N.° 20.720)\n\nSi el mandante o el mandatario son sometidos a un procedimiento concursal de liquidación de bienes, el desasimiento legal los inhibe de la administración de su patrimonio (pasando dicha facultad al Liquidador), provocando la **extinción automática del mandato**.\n\n#### 2. Interdicción y Demencia Sobreviniente (Artículo 2163 N.° 7 del CC)\n\n* **Interdicción:** La declaración judicial de interdicción por demencia o disipación extingue el contrato.\n\n* **Demencia Sobreviniente no Declarada:**\n\n  * *Del Mandatario:* La demencia sobreviniente extingue el mandato de plano, pues al convertirse en incapaz absoluto carece de voluntad jurídica (Art. 2128 y 1586 CC).\n\n  * *Del Mandante:* La doctrina (Stitchkin) sostiene que extingue el mandato desde que el mandatario o terceros toman conocimiento, pues el mandatario no tendría frente a quién rendir cuenta.\n\n#### 3. Cesación de las Funciones del Mandante (Artículo 2163 N.° 9 del CC)\n\nOcurre cuando el mandato se concedió por una persona en ejercicio de una representación o cargo legal o convencional (ej. el mandato conferido por un tutor respecto de los bienes del pupilo, o por el padre respecto del hijo bajo patria potestad). **Terminada la guarda o la patria potestad, expira el mandato otorgado**.\n\n#### 4. Mandatarios Conjuntos (Artículo 2172 del CC)\n\nSi se nombró a dos o más mandatarios obligados a actuar conjuntamente, la llegada de una causal de extinción respecto de **uno solo de ellos extingue el mandato para los demás**.\n\n---",
+    "charCount": 1642,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "En el Derecho Civil, la muerte del mandante extingue el mandato (Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «En el Derecho Civil, la muerte del mandante extingue el mandato (Art» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En el Derecho Civil, la muerte del mandante extingue el mandato (Art...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Extinción del Mandato Judicial y la Regla Excepcional del Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Extinción del Mandato Judicial y la Regla Excepcional del Art» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Extinción del Mandato Judicial y la Regla Excepcional del Art...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-3-1",
+        "targetTitle": "La Prueba Instrumental o Documental",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.50",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "La Fecha Cierta respecto de Terceros (Artículo 1703 del CC y Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «La Fecha Cierta respecto de Terceros (Artículo 1703 del CC y Art» (§ 2.50).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «La Fecha Cierta respecto de Terceros (Artículo 1703 del CC y Art...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.116"
+  },
+  {
+    "id": "civil-contratoma-5-6",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 15,
+    "chapterTitle": "Contrato de Mandato",
+    "category": "Contrato de Mandato",
+    "code": "5.6",
+    "title": "Sección 5.6: Protección de Terceros de Buena Fe y Efectos de los Actos Ejecutados tras la Extinción (Artículo 2173 del CC)",
+    "cleanTitle": "Protección de Terceros de Buena Fe y Efectos de los Actos Ejecutados tras la Extinción (Artículo 2173 del CC)",
+    "sourceFile": "CONTRATOMANDATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMANDATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Responsabilidad",
+      "Protección"
+    ],
+    "isFree": false,
+    "content": "### Sección 5.6 — Protección de Terceros de Buena Fe y Efectos de los Actos Ejecutados tras la Extinción (Artículo 2173 del CC)\n\n#### 1. Fundamento Dogmático\n\nPara proteger la seguridad del tráfico jurídico y la buena fe de los terceros frente a causales de extinción que no son de conocimiento público, el artículo 2173 del Código Civil contempla un **caso emblemático de aplicación de la doctrina del error común y la apariencia de derecho**.\n\n#### 2. Las Tres Hipótesis del Artículo 2173 del Código Civil\n\n| Hipótesis / Situación | Conocimiento de la Extinción | Efecto respecto del Mandante / Terceros |\n|:--- |:--- |:--- |\n| **a) Mandatario e Ignorancia Típica (Art. 2173 inc. 1.° CC)** | El mandatario **ignoraba de buena fe** la causal de extinción. | Lo actuado **es plenamente válido y oponible al mandante**, concediendo acción directa a los terceros de buena fe. |\n| **b) Mandatario Sabedor y Tercero de Buena Fe (Art. 2173 inc. 2.° CC)** | El mandatario **sabía que el mandato había expirado**, pero el tercero **lo ignoraba de buena fe**. | El mandante **queda obligado frente al tercero** como si el mandato subsistiera, teniendo **acción de indemnización de perjuicios** contra el exmandatario (responsabilidad extracontractual). |\n| **c) Notificación Pública / Absolución Judicial (Art. 2173 inc. 3.° CC)** | Se notificó la extinción por **periódicos** o no parece probable la ignorancia del tercero. | El juez queda facultado para **absolver al mandante de toda responsabilidad** frente a los terceros. |\n\n---",
+    "charCount": 1526,
+    "connections": [
+      {
+        "targetTopicId": "procesal-derechopro-3-2",
+        "targetTitle": "La Prueba Testimonial",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.51",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Aquellos que no presenciaron los hechos directamente, sino que relatan lo que escucharon de los propios actores o de terceros",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Aquellos que no presenciaron los hechos directamente, sino que relatan lo que escucharon de los propios actores o de terceros» (§ 2.51).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Aquellos que no presenciaron los hechos directamente, sino que relatan...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "En virtud del artículo 396 del Código Orgánico de Tribunales, el mandato judicial no concluye por la muerte del mandante",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «En virtud del artículo 396 del Código Orgánico de Tribunales, el mandato judicial no concluye por la muerte del mandante» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En virtud del artículo 396 del Código Orgánico de Tribunales, el manda...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Clasificación de los Terceros atendiendo a su Interés (Arts",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Clasificación de los Terceros atendiendo a su Interés (Arts» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Clasificación de los Terceros atendiendo a su Interés (Arts...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.117"
+  },
+  {
+    "id": "civil-contratoma-5-7",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 15,
+    "chapterTitle": "Contrato de Mandato",
+    "category": "Contrato de Mandato",
+    "code": "5.7",
+    "title": "Sección 5.7: Puntos Críticos para el Examen de Grado",
+    "cleanTitle": "Puntos Críticos para el Examen de Grado",
+    "sourceFile": "CONTRATOMANDATO-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOMANDATO-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Examen de Grado",
+      "Derecho"
+    ],
+    "isFree": false,
+    "content": "### Sección 5.7 — Puntos Críticos para el Examen de Grado\n\n1. **Inextinguibilidad del Mandato Judicial por Muerte:** En el examen de grado, recuerde la contraposición clásica: en el Código Civil la muerte del mandante extingue el mandato por regla general (Art. 2163 N.° 5); en el Código Orgánico de Tribunales, **la muerte del mandante no extingue el mandato judicial** (Art. 396 y 529 COT).\n\n2. **Traspaso Inmediato vs. Tiempo Razonable en la Renuncia:** La renuncia del mandatario no pone término inmediato a sus obligaciones; debe continuar en el cargo durante un **tiempo razonable** para que el mandante asuma el negocio o nombre a otro (Art. 2167 CC).\n\n3. **Validez frente a Terceros de Buena Fe (Art. 2173 CC):** Si el mandato expiró pero el tercero contratante ignoraba de buena fe la extinción, el acto celebrado por el exmandatario **obliga al mandante** como si el mandato estuviere plenamente vigente.\n\n4. **Efecto de la Muerte en Mandatarios Conjuntos (Art. 2172 CC):** Si los mandatarios debían actuar de consuno y uno de ellos fallece o entra en liquidación, **el mandato se extingue automáticamente para todos los demás**.",
+    "charCount": 1139,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "En el Derecho Procesal Civil, la **muerte del mandante NO extingue el mandato judicial** (Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «En el Derecho Procesal Civil, la **muerte del mandante NO extingue el mandato judicial** (Art» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En el Derecho Procesal Civil, la **muerte del mandante NO extingue el ...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procemayor-5-4",
+        "targetTitle": "Efectos jurídicos sustanciales y procesales del emplazamiento",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.35",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos críticos para el examen de grado",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos críticos para el examen de grado» (§ 2.35).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos críticos para el examen de grado...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.118"
+  },
+  {
+    "id": "civil-contratohi-1-1",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 11,
+    "chapterTitle": "Derechos Reales de Garantía",
+    "category": "Derechos Reales de Garantía",
+    "code": "1.1",
+    "title": "Sección 1.1: Definición legal, crítica doctrinaria y sede normativa",
+    "cleanTitle": "Definición legal, crítica doctrinaria y sede normativa",
+    "sourceFile": "CONTRATOHIPOTECA-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOHIPOTECA-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Responsabilidad",
+      "Contrato"
+    ],
+    "isFree": false,
+    "content": "### Sección 1.1 — Definición legal, crítica doctrinaria y sede normativa\n\n#### 1. Definición legal (Art. 2407 del Código Civil)\n\nEl artículo 2407 del Código Civil define la hipoteca en los siguientes términos:\n\n> “La hipoteca es un derecho de prenda, constituido sobre inmuebles que no dejan por eso de permanecer en poder del deudor.”\n\n#### 2. Críticas dogmáticas a la definición legal\n\nLa doctrina chilena (Alessandri, Somarriva) ha criticado de forma unánime la definición del artículo 2407 por estimarla incompleta e imprecisa en tres aspectos fundamentales:\n\n1. **Asimilación impropia a la prenda:** asimila la hipoteca a un “derecho de prenda”. Aunque históricamente, en el Derecho romano, ambas cauciones reales compartían la categoría genérica del *pignus*, la hipoteca posee hoy una fisonomía e individualidad técnica propia, absolutamente diferenciada de la prenda civil.\n2. **Uso incorrecto del término “deudor”:** expresa que los inmuebles hipotecados permanecen “en poder del deudor”. Lo riguroso es señalar que el bien permanece en poder del **constituyente**, por cuanto la garantía hipotecaria puede ser otorgada por un tercero (*garante hipotecario*) que no asume una deuda personal (Arts. 2414 inc. 2.° y 2430 del Código Civil).\n3. **Omisión de su doble naturaleza y atributos:** define la hipoteca únicamente como un derecho real, omitiendo su vertiente contractual (el *contrato hipotecario*) y silenciando los derechos fundamentales que otorga al acreedor: el **derecho de persecución** y el **derecho de preferencia** sobre el producto de la subasta.\n\n#### 3. Definición doctrinaria de Manuel Somarriva Undurraga\n\nPara corregir los vacíos de la norma legal, el profesor Manuel Somarriva formula la definición dogmática más aceptada en los exámenes de grado:\n\n> “La hipoteca es el derecho real que recae sobre un inmueble que, permaneciendo en poder del constituyente, da derecho al acreedor para perseguirlo de manos de quien se encuentre y de pagarse preferentemente del producto de la subasta.”\n\n#### 4. Etimología y sede normativa\n\n- **Etimología:** la palabra *hipoteca* proviene del griego *hipo* (“debajo de”) y *teca* (“lugar donde se guarda algo”). Alude a un inmueble colocado debajo de un gravamen o sometido a la responsabilidad de un crédito.\n- **Sede normativa:** se regula en los artículos 2407 a 2434, que conforman el **Título XXXVIII del Libro IV del Código Civil**.",
+    "charCount": 2405,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-6",
+        "targetTitle": "Las Medidas Cautelares y Precautorias",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.9",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Título IV del Libro II (Arts",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Título IV del Libro II (Arts» (§ 2.9).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Título IV del Libro II (Arts...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "El juez civil ordinario está estrictamente sujeto al mandato del artículo 1698 del Código Civil",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «El juez civil ordinario está estrictamente sujeto al mandato del artículo 1698 del Código Civil» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El juez civil ordinario está estrictamente sujeto al mandato del artíc...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "La necesidad de citar a los acreedores hipotecarios en la subasta pública de un inmueble para extirpar los gravámenes sobre el bien",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «La necesidad de citar a los acreedores hipotecarios en la subasta pública de un inmueble para extirpar los gravámenes sobre el bien» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «La necesidad de citar a los acreedores hipotecarios en la subasta públ...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.119"
+  },
+  {
+    "id": "civil-contratohi-1-2",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 11,
+    "chapterTitle": "Derechos Reales de Garantía",
+    "category": "Derechos Reales de Garantía",
+    "code": "1.2",
+    "title": "Sección 1.2: Naturaleza dual: contrato hipotecario y derecho real de hipoteca",
+    "cleanTitle": "Naturaleza dual: contrato hipotecario y derecho real de hipoteca",
+    "sourceFile": "CONTRATOHIPOTECA-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOHIPOTECA-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Contrato",
+      "Obligación",
+      "Propiedad"
+    ],
+    "isFree": false,
+    "content": "### Sección 1.2 — Naturaleza dual: contrato hipotecario y derecho real de hipoteca\n\n#### 1. La doble naturaleza jurídica de la hipoteca\n\nEn la dogmática jurídica chilena, la hipoteca presenta una **doble naturaleza jurídica** indisoluble, en la que se distingue el *título* que le da origen del *derecho real* que nace de él (**Base legal:** Arts. 577, 686, 2409 y 2410 del Código Civil):\n\n1. **El contrato hipotecario (el título o la fuente):** acto jurídico bilateral que genera la obligación de constituir el gravamen; requiere escritura pública (Art. 2409 del Código Civil).\n2. **El derecho real de hipoteca (la caución real):** derecho real sobre cosa ajena (Art. 577 del Código Civil); nace por la tradición efectuada mediante la inscripción en el Registro Conservatorio (Arts. 686 y 2410 del Código Civil).\n\n#### 2. El contrato hipotecario (la fuente o el título)\n\n**Concepto:** es aquel acuerdo de voluntades en que el deudor o un tercero (*garante hipotecario*) se obliga, respecto del acreedor, a transferirle el derecho real de hipoteca sobre un inmueble de su propiedad y a conservarlo en condiciones idóneas para asegurar el pago del crédito garantizado.\n\n**Características del contrato hipotecario:**\n\n- **Unilateral (regla general):** en la doctrina mayoritaria (Somarriva, Meza Barros), es unilateral porque solo resulta obligado el constituyente, quien asume la obligación de transferir el derecho real mediante la inscripción y el deber de conservación de la finca (Art. 2427 del Código Civil). El acreedor no contrae obligaciones al tiempo de su perfeccionamiento.\n- **Eventualmente bilateral:** lo es si el acreedor asume contraprestaciones directas; por ejemplo, si se obliga a pagar una remuneración al tercero garante o a conceder al deudor una rebaja de intereses o una prórroga.\n- **Solemne:** requiere imperativamente ser otorgado por escritura pública (Art. 2409 del Código Civil).\n- **Gratuito u oneroso:** depende de la oportunidad y del sujeto que lo constituya. Si lo constituye el deudor simultáneamente con el crédito, es oneroso; si se constituye con posterioridad sin contraprestación, o por un tercero sin pago, es gratuito.\n- **Accesorio:** accede a una obligación principal a la que sirve de garantía.\n\n#### 3. El debate dogmático: el rol de la inscripción en el Conservador de Bienes Raíces\n\nExiste una célebre controversia doctrinal en Chile sobre la función que cumple la inscripción conservatoria frente a la hipoteca:\n\n| **Postura doctrinal** | **Exponentes** | **Doctrina y tesis central** | **Argumentos y consecuencias prácticas** |\n| --- | --- | --- | --- |\n| **Tesis minoritaria (inscripción como solemnidad del contrato)** | Fernando Alessandri Rodríguez; voto disidente de la Corte Suprema. | Sostienen que la inscripción en el Conservador de Bienes Raíces es solemnidad del contrato hipotecario y no solo la tradición. Se fundan en el Art. 2410 del Código Civil (“sin este requisito no tendrá valor alguno”). | **Efecto:** sin inscripción no existe contrato hipotecario ni nace obligación alguna. La hipoteca sobre cosa ajena sería nula absolutamente. |\n| **Tesis mayoritaria (inscripción como tradición del derecho real)** | Manuel Somarriva, Ramón Meza Barros, Rodrigo Barcia, Luis Claro Solar. | La única solemnidad del contrato es la escritura pública (Art. 2409 del Código Civil). La inscripción es la tradición del derecho real de hipoteca (Art. 686 del Código Civil). | **Efecto:** el contrato de hipoteca nace y es plenamente válido desde la firma de la escritura pública. Si el constituyente se niega a inscribir, el acreedor puede demandar el cumplimiento forzado. |\n\n#### 4. Excepciones: hipotecas que nacen sin contrato hipotecario (hipotecas legales)\n\nAunque por regla general toda hipoteca presupone un contrato, en casos excepcionales el título de donde emana el derecho real es directamente la ley (contratos forzosos fictos o heterodoxos):\n\n1. **Partición de bienes (Arts. 660 y 662 del Código de Procedimiento Civil):** en las adjudicaciones de inmuebles hechas en juicios divisorios, cuando la adjudicación excede del 80 % del haber probable del comunero y no se paga el exceso al contado, la ley entiende constituida hipoteca de pleno derecho sobre el inmueble para caucionar los alcances, debiendo el Conservador inscribirla de oficio.\n2. **Código de Aguas (Arts. 212 y 214):** gravamen de pleno derecho sobre los derechos de aprovechamiento de aguas para caucionar el pago de las cuotas de contribución de gastos comunitarios.\n3. **Ley N.° 20.720 (Art. 221):** venta de bienes del deudor como unidad económica a plazo, en el marco de la reorganización y liquidación.",
+    "charCount": 4639,
+    "connections": [
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Invierten de pleno derecho la carga de la prueba (Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Invierten de pleno derecho la carga de la prueba (Art» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Invierten de pleno derecho la carga de la prueba (Art...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "La necesidad de citar a los acreedores hipotecarios en la subasta pública de un inmueble para extirpar los gravámenes sobre el bien",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «La necesidad de citar a los acreedores hipotecarios en la subasta pública de un inmueble para extirpar los gravámenes sobre el bien» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «La necesidad de citar a los acreedores hipotecarios en la subasta públ...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "civil-contratohi-2-2",
+        "targetTitle": "Formalidades del contrato y la inscripción hipotecaria",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.124",
+        "crossoverType": "Materia-Afin",
+        "quote": "La inscripción conservatoria es la tradición del derecho real de hipoteca (Arts",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «La inscripción conservatoria es la tradición del derecho real de hipoteca (Arts» (§ 1.124).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «La inscripción conservatoria es la tradición del derecho real de hipot...» en la resolución de casos de civil."
+      }
+    ],
+    "indexCode": "1.120"
+  },
+  {
+    "id": "civil-contratohi-1-3",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 11,
+    "chapterTitle": "Derechos Reales de Garantía",
+    "category": "Derechos Reales de Garantía",
+    "code": "1.3",
+    "title": "Sección 1.3: Características del derecho real de hipoteca",
+    "cleanTitle": "Características del derecho real de hipoteca",
+    "sourceFile": "CONTRATOHIPOTECA-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOHIPOTECA-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Dominio",
+      "Posesión",
+      "Nulidad",
+      "Contrato",
+      "Obligación"
+    ],
+    "isFree": false,
+    "content": "### Sección 1.3 — Características del derecho real de hipoteca\n\nEl derecho real de hipoteca presenta siete características dogmáticas fundamentales:\n\n1. **Es un derecho real (Arts. 577 y 2428 del Código Civil).**\n2. **Es un derecho inmueble (Art. 580 del Código Civil).**\n3. **Es un derecho accesorio (Arts. 46 y 2434 del Código Civil).**\n4. **Constituye una limitación del dominio (Art. 2427 del Código Civil).**\n5. **Lleva envuelto un principio de enajenación, con sanción de objeto ilícito (Arts. 1464 y 2414 del Código Civil).**\n6. **Da origen a una preferencia de tercera clase (Arts. 2470 y 2477 del Código Civil).**\n7. **Es indivisible (Arts. 1526 N.° 1 y 2408 del Código Civil).**\n\n#### 1. Es un derecho real (Arts. 577 y 2428 del Código Civil)\n\n- **Ejercicio independiente de la tenencia:** a diferencia de otros derechos reales (como el usufructo o el dominio), en que el titular ejercita su derecho mediante la tenencia o goce directo de la cosa, en la hipoteca el derecho real se materializa en la facultad del acreedor de pedir la venta forzada de la finca en pública subasta si la obligación no se cumple.\n- **Derecho de persecución (Art. 2428 del Código Civil):** por ser derecho real, se ejerce sobre el inmueble sin respecto a determinada persona, otorgando la **acción de desposeimiento** para perseguir la finca de manos de cualquier tercero poseedor.\n\n#### 2. Es un derecho inmueble (Art. 580 del Código Civil)\n\n- **Regla general:** recae siempre sobre bienes raíces (inmuebles por naturaleza).\n- **Consecuencias civiles y procesales:**\n  1. Su tradición se realiza imperativamente por la inscripción del título en el Registro de Hipotecas y Gravámenes del Conservador de Bienes Raíces (Art. 686 del Código Civil).\n  2. Su posesión se ampara a través de las acciones posesorias (Art. 916 del Código Civil).\n- **Excepciones legales:** hipoteca de naves mayores (Ley de Navegación) y de aeronaves (Código Aeronáutico).\n\n#### 3. Es un derecho accesorio (Arts. 46 y 2434 del Código Civil)\n\n- **Principio aplicable:** *accessorium sequitur principale*. No puede subsistir sin una obligación principal válida a la que acceda.\n- **Autonomía relativa de la hipoteca:** no obstante su accesoriedad, el derecho de hipoteca puede gozar de cierta independencia temporal o subjetiva:\n  1. **Garantía de obligaciones futuras (Art. 2413 inc. 3.° del Código Civil):** puede otorgarse e inscribirse antes de que nazca el contrato o la obligación principal a que acceda.\n  2. **Garante hipotecario tercero:** la acción personal (contra el deudor) y la acción real (contra el dueño del inmueble) se separan y se dirigen contra personas distintas.\n  3. **Reserva de hipoteca en la novación (Arts. 1642 a 1644 del Código Civil):** extinguida la obligación principal por novación, las partes pueden pactar la reserva expresamente para que la hipoteca pase a garantizar la nueva deuda.\n\n#### 4. Constituye una limitación del dominio y lleva envuelto un principio de enajenación\n\n- **Limitación del dominio (Art. 2427 del Código Civil):** impide al propietario destruir las construcciones o gozar del bien en términos que menoscaben la garantía.\n- **Principio de enajenación (Art. 2414 del Código Civil):** dado que la hipoteca encierra una enajenación condicionada (el bien puede ser subastado), el constituyente debe tener capacidad para enajenar. Constituir hipoteca sobre bienes embargados produce objeto ilícito y nulidad absoluta (Art. 1464 N.° 3 del Código Civil).\n\n#### 5. Da origen a una preferencia de tercera clase (Arts. 2470 y 2477 del Código Civil)\n\nConfiere al acreedor hipotecario la facultad de pagarse preferentemente con el producto del remate del inmueble gravado. Es una **preferencia especial** que recae exclusivamente sobre la finca hipotecada y sus aumentos.\n\n#### 6. Es indivisible (Arts. 1526 N.° 1 y 2408 del Código Civil)\n\nEl principio de indivisibilidad opera desde un doble prisma (**Base legal:** Arts. 1526 N.° 1 y 2408 del Código Civil):\n\n1. **Respecto del inmueble gravado:** cada parte del inmueble responde de la totalidad de la deuda. Si son varios los inmuebles, el acreedor puede perseguir cualquiera de ellos o a todos por el total (Art. 1365 del Código Civil). Si la finca se divide en lotes, la acción se dirige contra cada lote por el total.\n2. **Respecto del crédito garantizado:** mientras quede insoluta una fracción del crédito, por pequeña que sea, subsiste la totalidad de la hipoteca. El pago parcial no da derecho a la cancelación proporcional del gravamen.\n\n> **Nota:** la indivisibilidad no es de la esencia, sino un elemento de la naturaleza establecido en favor del acreedor. Por ende, el acreedor puede renunciarla voluntariamente mediante el alzamiento parcial de la hipoteca.",
+    "charCount": 4730,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "La necesidad de citar a los acreedores hipotecarios en la subasta pública de un inmueble para extirpar los gravámenes sobre el bien",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «La necesidad de citar a los acreedores hipotecarios en la subasta pública de un inmueble para extirpar los gravámenes sobre el bien» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «La necesidad de citar a los acreedores hipotecarios en la subasta públ...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-1-1",
+        "targetTitle": "La Acción, la Pretensión y el Proceso",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.1",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Es una condición de acogimiento de la pretensión (titularidad sustancial del derecho o de la deuda)",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Es una condición de acogimiento de la pretensión (titularidad sustancial del derecho o de la deuda)» (§ 2.1).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Es una condición de acogimiento de la pretensión (titularidad sustanci...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "civil-lasobligac-1-4",
+        "targetTitle": "Modos de Extinguir las Obligaciones (I) — El Pago Efectivo y sus Modalidades",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.17",
+        "crossoverType": "Efecto-Patrimonial",
+        "quote": "Del acreedor que paga a otro acreedor de mejor derecho en razón de un privilegio u hipoteca [9]",
+        "whyConnected": "Efectos patrimoniales correlativos e ineficacias vinculadas en el tráfico jurídico. Cita textual del apunte: «Del acreedor que paga a otro acreedor de mejor derecho en razón de un privilegio u hipoteca [9]» (§ 1.17).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Del acreedor que paga a otro acreedor de mejor derecho en razón de un ...» en la resolución de casos de civil."
+      }
+    ],
+    "indexCode": "1.121"
+  },
+  {
+    "id": "civil-contratohi-1-4",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 11,
+    "chapterTitle": "Derechos Reales de Garantía",
+    "category": "Derechos Reales de Garantía",
+    "code": "1.4",
+    "title": "Sección 1.4: Puntos críticos para el examen de grado",
+    "cleanTitle": "Puntos críticos para el examen de grado",
+    "sourceFile": "CONTRATOHIPOTECA-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOHIPOTECA-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Posesión",
+      "Responsabilidad",
+      "Contrato"
+    ],
+    "isFree": false,
+    "content": "### Sección 1.4 — Puntos críticos para el examen de grado\n\n1. **La discrepancia sobre la inscripción conservatoria:** si se pregunta si la inscripción en el Conservador de Bienes Raíces es una solemnidad del contrato hipotecario, cabe diferenciar las dos doctrinas: para la tesis tradicional de Fernando Alessandri es solemnidad; para la tesis mayoritaria (Somarriva, Meza Barros), la escritura pública es la única solemnidad del contrato, mientras que la inscripción en el Registro de Hipotecas es la tradición del derecho real de hipoteca.\n2. **El término “constituyente” frente a “deudor” en el Art. 2407 del Código Civil:** corresponde corregir la imprecisión del artículo 2407 señalando que el bien permanece en poder del constituyente, pues la garantía puede ser otorgada por un tercero garante hipotecario que no contrae responsabilidad personal.\n3. **Tradición inmaterial y acciones posesorias:** por ser la hipoteca un derecho real inmueble (Art. 580 del Código Civil), su tradición se verifica por inscripción conservatoria (Art. 686 del Código Civil) y su posesión se halla amparada por las acciones o interdictos posesorios (Art. 916 del Código Civil).\n4. **Renunciabilidad de la indivisibilidad:** la indivisibilidad de la hipoteca (Art. 2408 del Código Civil) no es de la esencia sino de la naturaleza. Por ello, el acreedor hipotecario puede renunciarla válidamente otorgando escrituras de alzamiento o liberación parcial.\n\n## Capítulo 2 — Requisitos y elementos de la hipoteca",
+    "charCount": 1492,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-6",
+        "targetTitle": "Las Medidas Cautelares y Precautorias",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.9",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.9).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-3-6",
+        "targetTitle": "Las Presunciones (Artículos 426 y 427 del CPC y Artículo 1712 del Código Civil)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.55",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.55).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.122"
+  },
+  {
+    "id": "civil-contratohi-2-1",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 11,
+    "chapterTitle": "Derechos Reales de Garantía",
+    "category": "Derechos Reales de Garantía",
+    "code": "2.1",
+    "title": "Sección 2.1: Capacidad para hipotecar y formalidades habilitantes",
+    "cleanTitle": "Capacidad para hipotecar y formalidades habilitantes",
+    "sourceFile": "CONTRATOHIPOTECA-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOHIPOTECA-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Posesión",
+      "Nulidad",
+      "Contrato",
+      "Obligación",
+      "Protección"
+    ],
+    "isFree": false,
+    "content": "### Sección 2.1 — Capacidad para hipotecar y formalidades habilitantes\n\n#### 1. Capacidad del constituyente (Art. 2414 del Código Civil)\n\n- **Regla general:** para constituir válidamente una hipoteca se exige que el constituyente (sea el deudor personal o un tercero garante) tenga capacidad para enajenar.\n- **Fundamento:** dado que la hipoteca encierra una enajenación condicionada o un principio de enajenación (el bien puede ser ejecutado y vendido en pública subasta en caso de incumplimiento), no basta la capacidad general para obligarse, sino que se requiere poseer la facultad de libre disposición sobre el bien raíz.\n- **Separación de capacidades entre obligación principal y caución:** la capacidad para obligarse es distinta de la capacidad para enajenar. Por ello, puede ocurrir que la obligación principal sea plenamente válida (por ejemplo, un préstamo pactado por quien tiene capacidad de ejercicio) pero que la hipoteca adolezca de nulidad relativa o absoluta si el constituyente carecía de la facultad de disponer del bien; y de nulidad absoluta si el inmueble se hallaba embargado por decreto judicial (Art. 1464 N.° 3 del Código Civil).\n\n#### 2. Capacidad del acreedor hipotecario\n\nAl acreedor hipotecario le basta tener la capacidad general para contratar (capacidad de ejercicio). No se le exige facultad de enajenar, pues no se desprende de ningún derecho real de su patrimonio al tiempo de la constitución del gravamen.\n\n#### 3. Formalidades habilitantes en casos especiales (incapaces y régimen patrimonial)\n\nCuando la hipoteca recae sobre inmuebles de personas sujetas a protección legal o bajo regímenes de administración de bienes ajenos, el legislador exige el cumplimiento estricto de **formalidades habilitantes**:\n\n1. **Guardadores, tutores y curadores (Arts. 393 y 407 del Código Civil):** requieren autorización judicial previa por causa de utilidad o necesidad manifiesta, y venta en pública subasta (Art. 394 del Código Civil).\n2. **Padres en patria potestad (Art. 254 del Código Civil):** requieren autorización judicial con conocimiento de causa para hipotecar bienes raíces del hijo.\n3. **Marido en sociedad conyugal (Arts. 1749 y 1754 del Código Civil):** para inmuebles sociales, autorización específica de la mujer; para inmuebles propios de la mujer, voluntad o autorización de ella.\n4. **Bienes familiares (Art. 142 del Código Civil):** autorización del cónyuge no propietario (o venia judicial en subsidio).\n5. **Posesión provisoria de presunto muerto (Art. 88 del Código Civil):** autorización judicial dada con conocimiento de causa y audiencia del defensor.\n\n**Sanción por omisión de formalidades habilitantes:** la omisión de estas autorizaciones o decretos judiciales no anula el acto por objeto ilícito ni lo torna inoponible por el plazo, sino que genera la nulidad relativa del contrato hipotecario, por haberse omitido un requisito establecido en atención al estado o calidad de las personas (Art. 1682 inc. final del Código Civil).",
+    "charCount": 2986,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Coincide exactamente con la capacidad de ejercicio del Derecho Civil",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Coincide exactamente con la capacidad de ejercicio del Derecho Civil» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Coincide exactamente con la capacidad de ejercicio del Derecho Civil...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "civil-contratoar-1-2",
+        "targetTitle": "Arrendamiento de cosas: requisitos, características y capacidad",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.36",
+        "crossoverType": "Materia-Afin",
+        "quote": "Para celebrar el contrato de arrendamiento se requiere capacidad de ejercicio ordinaria",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Para celebrar el contrato de arrendamiento se requiere capacidad de ejercicio ordinaria» (§ 1.36).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Para celebrar el contrato de arrendamiento se requiere capacidad de ej...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-6",
+        "targetTitle": "Las Medidas Cautelares y Precautorias",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.9",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "N° 3 y 4 (objeto ilícito en la enajenación de bienes embargados o litigiosos)",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «N° 3 y 4 (objeto ilícito en la enajenación de bienes embargados o litigiosos)» (§ 2.9).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «N° 3 y 4 (objeto ilícito en la enajenación de bienes embargados o liti...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.123"
+  },
+  {
+    "id": "civil-contratohi-2-2",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 11,
+    "chapterTitle": "Derechos Reales de Garantía",
+    "category": "Derechos Reales de Garantía",
+    "code": "2.2",
+    "title": "Sección 2.2: Formalidades del contrato y la inscripción hipotecaria",
+    "cleanTitle": "Formalidades del contrato y la inscripción hipotecaria",
+    "sourceFile": "CONTRATOHIPOTECA-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOHIPOTECA-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Nulidad",
+      "Contrato",
+      "Obligación"
+    ],
+    "isFree": false,
+    "content": "### Sección 2.2 — Formalidades del contrato y la inscripción hipotecaria\n\n#### 1. La escritura pública como solemnidad (Art. 2409 del Código Civil)\n\n**Solemnidad del contrato:** el contrato de hipoteca debe otorgarse imperativamente por escritura pública (Art. 2409 del Código Civil). La misma escritura pública puede contener el contrato principal y la hipoteca que le accede, o bien constituirse la garantía en un acto separado.\n\n#### 2. La inscripción conservatoria (Art. 2410 del Código Civil) y el gran debate dogmático\n\n**Texto legal:** el artículo 2410 del Código Civil dispone: “La hipoteca deberá además ser inscrita en el Registro Conservatorio; sin este requisito no tendrá valor alguno; ni se contará su fecha sino desde la inscripción.”\n\nSobre el rol de la inscripción conservatoria se enfrentan dos tesis:\n\n1. **Tesis de Fernando Alessandri Rodríguez (inscripción como solemnidad del contrato):** sostiene que el contrato hipotecario requiere dos solemnidades concurrentes, la escritura pública y la inscripción conservatoria. Se funda en el tenor literal del Art. 2410 del Código Civil (“sin este requisito no tendrá valor alguno”). Concluye que antes de la inscripción no existe contrato ni nace la obligación de inscribir.\n2. **Tesis mayoritaria de Manuel Somarriva, Ramón Meza Barros y Luis Claro Solar (inscripción como tradición):** la única solemnidad del contrato hipotecario es la escritura pública (Art. 2409 del Código Civil). El contrato nace perfecto y produce todos sus efectos obligacionales desde que se otorga la escritura. La inscripción conservatoria es la tradición del derecho real de hipoteca (Arts. 670 y 686 del Código Civil).\n\n**Argumentos de Somarriva:**\n\n- **El Mensaje del Código Civil:** Andrés Bello declara expresamente que la inscripción en el Registro cumple la función de tradición de los derechos reales inmuebles.\n- **Arts. 2411 y 2419 del Código Civil:** el Código reconoce que los contratos celebrados en el extranjero “darán hipoteca” y que la hipoteca sobre bienes futuros “da derecho al acreedor de hacerla inscribir”. Si el contrato no existiera antes de la inscripción, el acreedor carecería de título para exigir judicialmente que se practique la inscripción.\n\n#### 3. Requisitos mínimos de la inscripción hipotecaria (Art. 2432 del Código Civil)\n\nLa inscripción de la hipoteca se realiza en el Registro de Hipotecas y Gravámenes del Conservador de Bienes Raíces del territorio donde esté situado el inmueble (Art. 153 del Código Orgánico de Tribunales) y debe contener:\n\n1. Individualización del acreedor, del deudor o del tercero garante hipotecario.\n2. Fecha y naturaleza del contrato a que accede la hipoteca (principio de especialidad del crédito).\n3. Ubicación de la finca hipotecada y sus linderos (principio de especialidad de la finca).\n4. La suma determinada a que se extiende la hipoteca, en el caso de haberse limitado a cierta cantidad (Art. 2431 del Código Civil).\n5. Fecha de la inscripción y firma del Conservador.\n\n**Sanción por omisiones en la inscripción (Art. 2433 del Código Civil):** la omisión de las menciones de los numerales 1.°, 2.°, 3.° y 4.° no anula la inscripción, siempre que por medio de ella o del contrato citado se pueda venir en conocimiento de los datos omitidos. La fecha de la inscripción y la firma del Conservador son las únicas menciones cuya falta produce nulidad absoluta e insubsanable de la inscripción.\n\n#### 4. Hipotecas celebradas en el extranjero (Art. 2411 del Código Civil)\n\nLos contratos hipotecarios otorgados en país extranjero sobre bienes raíces situados en Chile producen plena hipoteca, a condición de que se inscriban en el Registro de Hipotecas y Gravámenes del Conservador de Bienes Raíces respectivo en Chile (cumpliendo además con la legalización o apostilla del instrumento).",
+    "charCount": 3799,
+    "connections": [
+      {
+        "targetTopicId": "civil-contratohi-1-2",
+        "targetTitle": "Naturaleza dual: contrato hipotecario y derecho real de hipoteca",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.120",
+        "crossoverType": "Materia-Afin",
+        "quote": "Sostienen que la inscripción en el Conservador de Bienes Raíces es solemnidad del contrato hipotecario y no solo la tradición",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Sostienen que la inscripción en el Conservador de Bienes Raíces es solemnidad del contrato hipotecario y no solo la tradición» (§ 1.120).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Sostienen que la inscripción en el Conservador de Bienes Raíces es sol...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-3-1",
+        "targetTitle": "La Prueba Instrumental o Documental",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.50",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Código Civil y en el artículo 341 numeral 1 del Código de Procedimiento Civil como el primer medio de prueba en el catálogo legal",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Código Civil y en el artículo 341 numeral 1 del Código de Procedimiento Civil como el primer medio de prueba en el catálogo legal» (§ 2.50).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Código Civil y en el artículo 341 numeral 1 del Código de Procedimient...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Código Civil y a las disposiciones especiales del Código Orgánico de Tribunales (Arts",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Código Civil y a las disposiciones especiales del Código Orgánico de Tribunales (Arts» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Código Civil y a las disposiciones especiales del Código Orgánico de T...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.124"
+  },
+  {
+    "id": "civil-contratohi-2-3",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 11,
+    "chapterTitle": "Derechos Reales de Garantía",
+    "category": "Derechos Reales de Garantía",
+    "code": "2.3",
+    "title": "Sección 2.3: Cosas susceptibles de hipotecarse",
+    "cleanTitle": "Cosas susceptibles de hipotecarse",
+    "sourceFile": "CONTRATOHIPOTECA-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOHIPOTECA-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Dominio",
+      "Posesión",
+      "Nulidad",
+      "Contrato",
+      "Propiedad"
+    ],
+    "isFree": false,
+    "content": "### Sección 2.3 — Cosas susceptibles de hipotecarse\n\nPor aplicación del **principio de especialidad en cuanto a los bienes**, el ordenamiento rechaza las hipotecas generales sobre todo el patrimonio y exige singularizar con precisión las fincas gravadas. Conforme al artículo 2418 del Código Civil y a los estatutos especiales, son susceptibles de hipotecarse:\n\n1. **Inmuebles que se posean en propiedad** (absoluta, fiduciaria, plena o nuda).\n2. **Inmuebles que se posean en usufructo.**\n3. **Naves mayores** (de más de 50 toneladas) **y aeronaves.**\n4. **Concesiones mineras inscritas.**\n5. **Bienes futuros** (Art. 2419 del Código Civil) **y unidades en copropiedad** (Ley N.° 21.442).\n6. **Cuota del comunero** sobre el bien común (Art. 2417 del Código Civil).\n7. **Bienes con derecho eventual, limitado, rescindible o resolutorio** (Art. 2416 del Código Civil).\n\n#### 1. Inmuebles que se posean en propiedad (Art. 2418 del Código Civil)\n\n- **Dominio sobre bienes raíces por naturaleza:** comprende el suelo y las minas.\n- **Inmuebles por adherencia y destinación (Art. 2420 del Código Civil):** no se pueden hipotecar independientemente del inmueble al que acceden. Sin embargo, la hipoteca constituida sobre el suelo se extiende automáticamente a ellos. Si el dueño los enajena a terceros separadamente, pasan a ser muebles por anticipación (Art. 571 del Código Civil) y dejan de ser afectados por la hipoteca.\n- **Tipos de propiedad comprendidos:**\n  - **Nuda propiedad:** si se hipoteca la nuda propiedad y durante la vigencia del gravamen se extingue el usufructo, la hipoteca pasa a gravar la propiedad plena, por el principio de extensión a los aumentos (Art. 2421 del Código Civil).\n  - **Propiedad fiduciaria (Art. 757 del Código Civil):** para que el propietario fiduciario hipoteque la finca, requiere autorización judicial previa con conocimiento de causa y audiencia de los fideicomisarios. De omitirse, la sanción es la inoponibilidad al fideicomisario cuando se cumpla la condición.\n\n#### 2. Inmuebles que se posean en usufructo (Art. 2418 del Código Civil)\n\n- **Objeto del gravamen:** la hipoteca no recae sobre el bien raíz corporal, sino sobre el derecho real de usufructo.\n- **Garantía incierta:** si el usufructo se extingue por la llegada del plazo o la muerte del usufructuario, la hipoteca se extingue por vía accesoria.\n- **Excepciones a la extinción:** si el usufructuario renuncia fraudulentamente al usufructo para perjudicar al acreedor, este puede ejercitar la acción pauliana u oponerse a la renuncia (Art. 803 inc. 2.° del Código Civil). Si el usufructo se consolida con la nuda propiedad, la hipoteca se extiende a la propiedad plena por el Art. 2421 del Código Civil.\n- **Exclusión:** los derechos personalísimos de uso y habitación son inalienables e inembargables; no admiten hipoteca.\n\n#### 3. Naves mayores, aeronaves y concesiones mineras\n\n- **Naves mayores y aeronaves:** se admite hipoteca sobre naves mayores (de más de 50 toneladas de registro) e incluso sobre naves en construcción (Ley de Navegación N.° 18.916 y Código Aeronáutico).\n- **Concesiones mineras (Arts. 217 a 222 del Código de Minería):** la hipoteca recae sobre la concesión minera de exploración o explotación inscrita. Comprende las construcciones e instalaciones destinadas permanentemente a la extracción. En la hipoteca minera no rige el Art. 2427 del Código Civil por deterioros, a menos que provengan de dolo o culpa grave del deudor.\n\n#### 4. Hipoteca de bienes futuros (Art. 2419 del Código Civil) y copropiedad inmobiliaria\n\n- **Naturaleza (Art. 2419 del Código Civil):** es la hipoteca constituida sobre bienes que aún no ingresan al patrimonio del constituyente. Otorga al acreedor el derecho de hacerla inscribir a medida que el deudor adquiera el dominio. Funciona bajo la condición suspensiva de que el deudor efectivamente adquiera el inmueble.\n- **Regla especial de la Ley de Copropiedad Inmobiliaria (Art. 16 de la Ley N.° 21.442):** permite hipotecar e inscribir unidades (departamentos o locales) de un condominio en etapa de proyecto o en actual construcción. La hipoteca se inscribe sobre la cuota de terreno desde ya y se radica automáticamente en la unidad definitiva una vez acogido el plano al régimen de copropiedad, sin necesidad de nueva escritura pública ni nueva inscripción.\n\n#### 5. Hipoteca de cuota del comunero (Art. 2417 del Código Civil)\n\n**Facultad del comunero (Art. 2417 inc. 1.° del Código Civil):** el comunero puede hipotecar su cuota indivisa sobre un bien raíz común antes de la división de la comunidad (al igual que puede venderla, Art. 1812 del Código Civil).\n\n**Efectos de la partición sobre la hipoteca de cuota (efecto declarativo, Arts. 718 y 1344 del Código Civil):**\n\n1. **Si el bien se adjudica al comunero hipotecante:** la hipoteca subsiste (tesis de Somarriva y Art. 2421 del Código Civil: se radica y se extiende a todo el inmueble).\n2. **Si el bien se adjudica a otro comunero:** por el efecto declarativo, la hipoteca caduca automáticamente; subsiste, como excepción, si el adjudicatario consiente por escritura pública y se toma nota al margen (Art. 2417 inc. 2.° del Código Civil).\n3. **Si el bien es subastado o vendido a un tercero extraño:** la hipoteca subsiste sobre la cuota frente al tercero.\n\n#### 6. Hipoteca sobre derechos eventuales, limitados, rescindibles o resolutorios (Art. 2416 del Código Civil)\n\n- **Principio de continuidad causal** (*nemo plus iuris*): quien hipoteca un bien sobre el cual tiene un derecho limitado, rescindible o condicional, lo hipoteca con las mismas limitaciones y condiciones a que está sujeto su derecho.\n- **Derecho rescindible (nulidad del título del constituyente):** si se declara la nulidad (absoluta o relativa) del título en virtud del cual el constituyente adquirió el inmueble, se extingue la hipoteca (siempre que el acreedor hipotecario haya sido emplazado en el juicio, Art. 1689 del Código Civil).\n  - **Excepción (Art. 1895 del Código Civil):** declarada la rescisión por lesión enorme en la compraventa, el comprador restituirá la cosa previamente purificada de las hipotecas constituidas.\n- **Derecho sujeto a condición resolutoria (Art. 1491 del Código Civil):** si el derecho del constituyente se resuelve por cumplimiento de una condición resolutoria (por ejemplo, no pago del saldo de precio en la compraventa), la hipoteca se extingue únicamente si la condición resolutoria constaba en el título respectivo, inscrito u otorgado por escritura pública (presunción de mala fe, Art. 1491 del Código Civil).\n\n#### 7. El gran debate de grado: la hipoteca de cosa ajena\n\n¿Es válida o nula la hipoteca constituida por quien no es dueño del inmueble? Se enfrentan dos tesis:\n\n1. **Tesis de la nulidad absoluta** (Fernando Alessandri, Pablo Rodríguez Grez, jurisprudencia de la Corte Suprema): el Art. 2414 del Código Civil exige constituir hipoteca sobre bienes propios; la falta de dominio vulnera una norma prohibitiva (Art. 10 del Código Civil) y el acreedor, sin contacto ni posesión del inmueble, no puede ganar el derecho real por prescripción.\n2. **Tesis de la validez e inoponibilidad** (Arturo Alessandri, Manuel Somarriva, Ramón Meza Barros): el Art. 2414 del Código Civil no es prohibitivo; la hipoteca sobre cosa ajena es válida como contrato pero inoponible al verdadero dueño, y el derecho real de hipoteca se gana por prescripción (Arts. 2498 y 2512 del Código Civil), en analogía con la prenda de cosa ajena (Art. 2390 del Código Civil).\n\n**Desarrollo de la tesis de la nulidad absoluta (jurisprudencia dominante de la Corte Suprema, Fernando Alessandri, Pablo Rodríguez Grez):**\n\n- El artículo 2414 exige que la persona constituya hipoteca sobre “sus bienes” (propios). La ley exige ser dueño; de lo contrario se infringe una ley prohibitiva, sancionada con nulidad absoluta (Arts. 10 y 1682 del Código Civil).\n- A diferencia de la compraventa (donde el Art. 1815 del Código Civil valida expresamente la venta de cosa ajena), en el título de la hipoteca no existe norma equivalente.\n- Rodríguez Grez sostiene que el acreedor no tiene contacto ni posesión física sobre el inmueble, por lo que no puede ganar el derecho real por prescripción adquisitiva.\n\n**Desarrollo de la tesis de la validez e inoponibilidad (Arturo Alessandri, Manuel Somarriva, Ramón Meza Barros):**\n\n- El artículo 2414 del Código Civil no es una norma prohibitiva.\n- La hipoteca sobre cosa ajena es válida como contrato, pero inoponible al verdadero dueño.\n- **El derecho real de hipoteca se gana por prescripción:** conforme a los artículos 2498 inc. 2.° y 2512 del Código Civil, los derechos reales (incluida la hipoteca) se ganan por prescripción ordinaria (5 años) u extraordinaria (10 años). Si la hipoteca de cosa ajena fuera nula de pleno derecho, sería un título injusto que impediría la prescripción ordinaria, tornando inoperante el Art. 2512 del Código Civil.\n- **Analogía con la prenda de cosa ajena (Art. 2390 del Código Civil):** en la prenda sobre cosa ajena, el contrato subsiste en tanto el verdadero dueño no reclame la especie.",
+    "charCount": 9064,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "La necesidad de citar a los acreedores hipotecarios en la subasta pública de un inmueble para extirpar los gravámenes sobre el bien",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «La necesidad de citar a los acreedores hipotecarios en la subasta pública de un inmueble para extirpar los gravámenes sobre el bien» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «La necesidad de citar a los acreedores hipotecarios en la subasta públ...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "civil-contratoar-1-2",
+        "targetTitle": "Arrendamiento de cosas: requisitos, características y capacidad",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.36",
+        "crossoverType": "Materia-Afin",
+        "quote": "Si se encomienda la fijación a un tercero, el contrato se celebra bajo la condición suspensiva de que este determine el monto",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Si se encomienda la fijación a un tercero, el contrato se celebra bajo la condición suspensiva de que este determine el monto» (§ 1.36).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Si se encomienda la fijación a un tercero, el contrato se celebra bajo...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "civil-actojuridi-1-5",
+        "targetTitle": "Requisitos de Validez (II) — Objeto Lícito y Causa Lícita",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.5",
+        "crossoverType": "Materia-Afin",
+        "quote": "Regula la venta de cosas cuya enajenación está prohibida por la ley (vínculo directo con el Art",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Regula la venta de cosas cuya enajenación está prohibida por la ley (vínculo directo con el Art» (§ 1.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Regula la venta de cosas cuya enajenación está prohibida por la ley (v...» en la resolución de casos de civil."
+      }
+    ],
+    "indexCode": "1.125"
+  },
+  {
+    "id": "civil-contratohi-2-4",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 11,
+    "chapterTitle": "Derechos Reales de Garantía",
+    "category": "Derechos Reales de Garantía",
+    "code": "2.4",
+    "title": "Sección 2.4: Obligaciones susceptibles de caucionarse con hipoteca",
+    "cleanTitle": "Obligaciones susceptibles de caucionarse con hipoteca",
+    "sourceFile": "CONTRATOHIPOTECA-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOHIPOTECA-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Contrato",
+      "Obligación"
+    ],
+    "isFree": false,
+    "content": "### Sección 2.4 — Obligaciones susceptibles de caucionarse con hipoteca\n\n#### 1. Regla general de amplitud (Art. 2413 inc. 3.° del Código Civil)\n\nSe pueden caucionar con hipoteca toda clase de obligaciones: civiles o naturales, presentes o futuras, puras y simples o sujetas a modalidad, determinadas o indeterminadas, en moneda nacional o extranjera, y propias o ajenas (Art. 2414 inc. 2.° del Código Civil).\n\n#### 2. Indeterminación del monto y de la naturaleza de la obligación\n\n- **Indeterminación del monto (Arts. 2431 y 2432 N.° 4 del Código Civil):** es perfectamente válida la hipoteca que cauciona obligaciones cuyo monto cuantitativo no está determinado al tiempo de la constitución.\n  - **Límite del duplo (Art. 2431 del Código Civil):** en las hipotecas específicas de monto indeterminado, la hipoteca no puede extenderse a más del doble del importe conocido o presunto de la deuda. El deudor tiene derecho a exigir la reducción del gravamen hasta dicho tope.\n- **Indeterminación de la naturaleza:** Manuel Somarriva demuestra que la hipoteca puede garantizar obligaciones futuras de naturaleza aún no especificada, pues el Art. 2427 del Código Civil alude expresamente a deudas “indeterminadas”.\n\n#### 3. La cláusula de garantía general hipotecaria\n\n- **Concepto:** es la estipulación contractual (frecuente en operaciones bancarias) en virtud de la cual la hipoteca se constituye para caucionar todas y cualquiera de las obligaciones, presentes o futuras, directas o indirectas, que el deudor tenga o llegue a tener en favor del acreedor.\n- **Plena validez doctrinal y jurisprudencial (Somarriva):**\n  1. **Art. 2413 inc. 3.° del Código Civil:** la ley permite expresamente constituir e inscribir la hipoteca antes de que nazcan las obligaciones principales a que acceda.\n  2. **Objeto del contrato accesorio:** el objeto del contrato hipotecario no es la deuda garantizada, sino el inmueble que se da en garantía (el cual está perfectamente determinado).\n- **Oponibilidad a terceros adquirentes del inmueble:** si el deudor vende la finca a un tercero, las nuevas deudas que el deudor originario contraiga con el acreedor hipotecario con posterioridad a la venta continúan garantizadas por la hipoteca frente al tercero poseedor, porque la hipoteca es un derecho real de persecución y el tercero conocía la cláusula general al revisar el Registro.\n\n#### 4. Regulaciones de la Ley N.° 20.555 y la Ley N.° 20.855 (alzamiento de hipotecas)\n\nPara corregir los abusos bancarios en la mantención indefinida de hipotecas generales, la Ley del Consumo (Art. 17 D de la Ley N.° 19.496) fijó las siguientes reglas obligatorias de alzamiento:\n\n| **Tipo de hipoteca** | **Presupuesto de extinción** | **Obligación legal del proveedor o banco** | **Plazo fatal** |\n| --- | --- | --- | --- |\n| **Hipoteca específica** | Extinción total del crédito garantizado. | Otorgar la escritura pública de alzamiento e ingresarla al Conservador de Bienes Raíces a su propio cargo y costo. | 45 días hábiles desde la extinción de la deuda. |\n| **Hipoteca general** | Pago íntegro de las deudas garantizadas. | Informar por escrito al deudor de la extinción. Si el deudor solicita por escrito el alzamiento, el banco debe otorgar e inscribir la cancelación. | 20 días para informar y 45 días para tramitar la cancelación tras la solicitud del deudor. |",
+    "charCount": 3340,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Se produce cuando una de las partes cede a un tercero el objeto incierto de la litis tras la notificación de la demanda",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Se produce cuando una de las partes cede a un tercero el objeto incierto de la litis tras la notificación de la demanda» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Se produce cuando una de las partes cede a un tercero el objeto incier...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "civil-contratohi-4-3",
+        "targetTitle": "Extinción de la hipoteca por vía principal o directa",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.134",
+        "crossoverType": "Materia-Afin",
+        "quote": "Otorgar e ingresar la escritura pública de alzamiento al Conservador de Bienes Raíces a su propio cargo y costo",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Otorgar e ingresar la escritura pública de alzamiento al Conservador de Bienes Raíces a su propio cargo y costo» (§ 1.134).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Otorgar e ingresar la escritura pública de alzamiento al Conservador d...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Incumbe probar las obligaciones o su extinción al que alega aquéllas o ésta",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Incumbe probar las obligaciones o su extinción al que alega aquéllas o ésta» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Incumbe probar las obligaciones o su extinción al que alega aquéllas o...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.126"
+  },
+  {
+    "id": "civil-contratohi-2-5",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 11,
+    "chapterTitle": "Derechos Reales de Garantía",
+    "category": "Derechos Reales de Garantía",
+    "code": "2.5",
+    "title": "Sección 2.5: Puntos críticos para el examen de grado",
+    "cleanTitle": "Puntos críticos para el examen de grado",
+    "sourceFile": "CONTRATOHIPOTECA-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOHIPOTECA-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Dominio",
+      "Nulidad",
+      "Contrato",
+      "Protección"
+    ],
+    "isFree": false,
+    "content": "### Sección 2.5 — Puntos críticos para el examen de grado\n\n1. **Inscripción: ¿solemnidad o tradición?:** frente a la pregunta sobre qué papel cumple la inscripción conservatoria en la hipoteca, corresponde exponer ambas posturas: para la tesis tradicional de Fernando Alessandri es solemnidad; para la tesis mayoritaria (Somarriva, Meza Barros, Claro Solar), la escritura pública es la única solemnidad del contrato (Art. 2409 del Código Civil) y la inscripción en el Registro de Hipotecas es la tradición del derecho real (Arts. 670 y 686 del Código Civil).\n2. **Debate sobre la hipoteca de cosa ajena:** corresponde explicar con precisión el contraste: la jurisprudencia y Fernando Alessandri sostienen la nulidad absoluta por falta de dominio del constituyente (Art. 2414 del Código Civil); la doctrina de Somarriva, Meza Barros y Arturo Alessandri sostiene su validez como contrato e inoponibilidad al dueño, permitiendo al acreedor adquirir el derecho real de hipoteca por prescripción adquisitiva ordinaria o extraordinaria (Arts. 2498 y 2512 del Código Civil).\n3. **Efectos de la partición en la hipoteca de cuota (Art. 2417 del Código Civil):** si el bien común es adjudicado a otro comunero distinto del hipotecante, la hipoteca caduca de pleno derecho por el efecto declarativo de la adjudicación (Arts. 718 y 1344 del Código Civil), a menos que el adjudicatario consienta expresamente por escritura pública anotada al margen de la inscripción hipotecaria.\n4. **Protección al consumidor en el alzamiento (Art. 17 D de la Ley N.° 19.496):** en hipotecas específicas, el banco o proveedor financiero está legalmente obligado a tramitar e inscribir el alzamiento a su propio cargo y costo dentro del plazo de 45 días contados desde el pago total de la deuda.\n\n## Capítulo 3 — Efectos del derecho real de hipoteca\n\nDogmáticamente, los efectos del derecho real de hipoteca se clasifican en **efectos objetivos** (que inciden sobre la extensión material y jurídica del inmueble gravado) y **efectos subjetivos** (que delimitan los derechos y limitaciones del constituyente y del acreedor hipotecario).",
+    "charCount": 2105,
+    "connections": [
+      {
+        "targetTopicId": "civil-contratohi-2-3",
+        "targetTitle": "Cosas susceptibles de hipotecarse",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.125",
+        "crossoverType": "Materia-Afin",
+        "quote": "Efectos de la partición sobre la hipoteca de cuota (efecto declarativo, Arts",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Efectos de la partición sobre la hipoteca de cuota (efecto declarativo, Arts» (§ 1.125).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Efectos de la partición sobre la hipoteca de cuota (efecto declarativo...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-4",
+        "targetTitle": "Ineficacia de los Actos Procesales (Nulidad Procesal)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.7",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.7).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.127"
+  },
+  {
+    "id": "civil-contratohi-3-1",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 11,
+    "chapterTitle": "Derechos Reales de Garantía",
+    "category": "Derechos Reales de Garantía",
+    "code": "3.1",
+    "title": "Sección 3.1: Extensión objetiva de la garantía hipotecaria",
+    "cleanTitle": "Extensión objetiva de la garantía hipotecaria",
+    "sourceFile": "CONTRATOHIPOTECA-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOHIPOTECA-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Propiedad"
+    ],
+    "isFree": false,
+    "content": "### Sección 3.1 — Extensión objetiva de la garantía hipotecaria\n\nConforme a los artículos 2420 a 2423 del Código Civil, la hipoteca comprende e impacta los siguientes elementos agregados o derivados del inmueble (**Base legal:** Arts. 2420 a 2423 del Código Civil):\n\n1. **El bien raíz gravado** (inmueble por naturaleza).\n2. **Los inmuebles por adherencia y destinación** (Arts. 570 y 2420 del Código Civil).\n3. **Los aumentos y mejoras materiales o jurídicas** (Art. 2421 del Código Civil).\n4. **Las rentas de arrendamiento** devengadas por el bien (Art. 2422 del Código Civil).\n5. **Las servidumbres activas** constituidas a favor del predio.\n6. **Las indemnizaciones del seguro** sobre la finca (subrogación real).\n7. **El precio o indemnización por expropiación** (subrogación real).\n\n#### 1. El bien raíz hipotecado (inmueble por naturaleza)\n\n- **Suelo y construcciones:** la garantía recae primariamente sobre el inmueble por naturaleza. En la práctica procesal, el derecho del acreedor termina ejercitándose sobre el precio obtenido en la subasta pública del inmueble.\n\n#### 2. Inmuebles por adherencia e inmuebles por destinación (Arts. 570 y 2420 del Código Civil)\n\n- **Efecto de extensión:** la hipoteca afecta automáticamente a los bienes muebles que se reputan inmuebles por destinación (por ejemplo, maquinaria agrícola o ganado de trabajo) o por adherencia (por ejemplo, edificaciones o plantaciones), independientemente de si existían al momento de constituirse el gravamen o se incorporaron con posterioridad. No se exige mencionarlos en la escritura ni en la inscripción conservatoria.\n- **Pérdida de la carga hipotecaria:**\n  - **Inmuebles por destinación:** dejan de estar afectados por la hipoteca desde el momento en que el dueño los enajena a terceros, recobrando su calidad de bienes muebles.\n  - **Inmuebles por adherencia:** si el dueño los enajena separadamente, pasan a ser muebles por anticipación (Art. 571 del Código Civil) y se liberan de la hipoteca tan pronto se efectúa la tradición a favor de terceros.\n\n#### 3. Aumentos y mejoras (Art. 2421 del Código Civil)\n\n- **Tipos de aumentos comprendidos:**\n  1. **Aumentos materiales:** obras, construcciones de edificios, plantaciones o accesiones naturales (aluvión, avulsión).\n  2. **Aumentos jurídicos:** la extinción de un gravamen real que pesaba sobre la finca. Por ejemplo, si se hipoteca la nuda propiedad y posteriormente se extingue el usufructo, la hipoteca pasa a gravar la propiedad plena por el principio de accesión jurídica.\n- **Límite de la extensión:** la hipoteca no se extiende a los terrenos anexos colindantes adquiridos posteriormente por el deudor, a menos que se hayan fusionado e inscrito formalmente como un solo predio inescindible. Tampoco afecta a las mejoras introducidas por un tercero (como un arrendatario) mientras el propietario del suelo no las haya hecho suyas por accesión.\n\n#### 4. Rentas de arrendamiento y frutos (Art. 2422 del Código Civil)\n\n**Devengamiento y embargo:** la hipoteca comprende las rentas de arrendamiento que devengue el inmueble. No obstante, el acreedor hipotecario no puede percibirlas de plano desde la constitución, sino desde que ejercita su acción hipotecaria mediante el embargo del inmueble y de sus frutos.\n\n#### 5. Indemnización del seguro e indemnización por expropiación (subrogación real)\n\n- **Indemnización del seguro (Art. 2422 del Código Civil y Art. 565 del Código de Comercio):** si el inmueble asegurado se destruye, la indemnización devengada por la compañía aseguradora subroga de pleno derecho al bien raíz (*subrogación real*). La hipoteca recae sobre el dinero del seguro, ejerciendo el acreedor su derecho de preferencia sobre dicho monto.\n- **Indemnización por expropiación (Decreto Ley N.° 2.186):** expropiado el inmueble, el acreedor hipotecario hace valer su derecho de preferencia directamente sobre el monto depositado como precio de expropiación en el tribunal. Además, el acreedor puede exigir que su crédito se considere de plazo vencido y exigible de inmediato si la expropiación disminuye la garantía (Art. 24 del Decreto Ley N.° 2.186).",
+    "charCount": 4112,
+    "connections": [
+      {
+        "targetTopicId": "civil-contratohi-2-3",
+        "targetTitle": "Cosas susceptibles de hipotecarse",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.125",
+        "crossoverType": "Materia-Afin",
+        "quote": "Si el dueño los enajena a terceros separadamente, pasan a ser muebles por anticipación (Art",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Si el dueño los enajena a terceros separadamente, pasan a ser muebles por anticipación (Art» (§ 1.125).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Si el dueño los enajena a terceros separadamente, pasan a ser muebles ...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "La necesidad de citar a los acreedores hipotecarios en la subasta pública de un inmueble para extirpar los gravámenes sobre el bien",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «La necesidad de citar a los acreedores hipotecarios en la subasta pública de un inmueble para extirpar los gravámenes sobre el bien» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «La necesidad de citar a los acreedores hipotecarios en la subasta públ...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-6",
+        "targetTitle": "Las Medidas Cautelares y Precautorias",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.9",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Recaen directamente sobre los bienes muebles o inmuebles del demandado, inmovilizándolos jurídica o materialmente (ej",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Recaen directamente sobre los bienes muebles o inmuebles del demandado, inmovilizándolos jurídica o materialmente (ej» (§ 2.9).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Recaen directamente sobre los bienes muebles o inmuebles del demandado...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.128"
+  },
+  {
+    "id": "civil-contratohi-3-2",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 11,
+    "chapterTitle": "Derechos Reales de Garantía",
+    "category": "Derechos Reales de Garantía",
+    "code": "3.2",
+    "title": "Sección 3.2: Efectos respecto del constituyente (propietario del inmueble)",
+    "cleanTitle": "Efectos respecto del constituyente (propietario del inmueble)",
+    "sourceFile": "CONTRATOHIPOTECA-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOHIPOTECA-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Dominio",
+      "Nulidad",
+      "Protección"
+    ],
+    "isFree": false,
+    "content": "### Sección 3.2 — Efectos respecto del constituyente (propietario del inmueble)\n\nDado que el inmueble permanece en poder del constituyente (Art. 2407 del Código Civil), su derecho de dominio subsiste pero queda sujeto a limitaciones jurídicas y materiales. Debe distinguirse el estado del bien antes y después del embargo.\n\n#### 1. Situación antes del embargo (período entre constitución y notificación de la demanda)\n\n**Respecto de la facultad de disposición jurídica (Art. 2415 del Código Civil):**\n\n- **Libertad para enajenar e hipotecar:** el dueño del bien gravado conserva la facultad plena para enajenarlo o volverlo a hipotecar en favor de otros acreedores.\n- **Nulidad absoluta del pacto de no enajenar:** toda cláusula o estipulación contractual que prohíba al dueño enajenar o hipotecar el bien adolece de nulidad absoluta por objeto ilícito (Arts. 1466, 1682 y 2415 del Código Civil).\n  - **Fundamento:** la enajenación no perjudica al acreedor hipotecario, pues este goza del derecho de persecución; y la posterior hipoteca tampoco lo daña, pues la primera hipoteca goza de preferencia absoluta sobre las posteriores conforme a la fecha de inscripción (Art. 2477 del Código Civil).\n- **Constitución de otros derechos reales (usufructo, servidumbres, uso o habitación):** el dueño puede constituirlos, pero le son inoponibles al acreedor hipotecario. Al momento de ejecutar la finca, el acreedor sacará el inmueble a remate libre de tales gravámenes posteriores.\n\n**Respecto de las facultades de uso, goce y disposición material (Art. 2427 del Código Civil):**\n\nEl propietario no puede ejercer actos de goce o destrucción que deterioren la garantía.\n\n**Mecanismo de protección del Art. 2427 del Código Civil:** si la finca se pierde o deteriora en términos de no ofrecer suficiente garantía para la deuda (sea por hecho culpable del deudor, de un tercero o por caso fortuito o fuerza mayor), el acreedor hipotecario goza de tres derechos alternativos e imperativos:\n\n1. **Exigir suplemento o mejora de la hipoteca** (otorgar nueva hipoteca).\n2. **Exigir otra seguridad equivalente** (prenda o fianza).\n3. **Remedios subsidiarios** (si el deudor no mejora ni da garantía): si la deuda es líquida, caducidad del plazo y cobro inmediato; si la deuda es ilíquida o condicional, providencias conservativas (por ejemplo, prohibición de contratar o nombramiento de interventor).\n\n> **Nota:** no procede reclamo si el deterioro existía al tiempo de constituirse la hipoteca y el acreedor lo aceptó a sabiendas, o si se pactó expresamente la renuncia o tolerancia de la explotación (por ejemplo, predios forestales).\n\n#### 2. Situación después del embargo\n\nDesde que se notifica la demanda y se traba el embargo (o se decreta medida precautoria) sobre la finca, cesa la facultad de disponer del propietario. Toda enajenación posterior adolece de nulidad absoluta por objeto ilícito (Art. 1464 N.° 3 del Código Civil).",
+    "charCount": 2920,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "El tercero alega hallarse en posesión del bien al momento del embargo (amparado por la presunción de dominio del Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «El tercero alega hallarse en posesión del bien al momento del embargo (amparado por la presunción de dominio del Art» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El tercero alega hallarse en posesión del bien al momento del embargo ...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-6",
+        "targetTitle": "Las Medidas Cautelares y Precautorias",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.9",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Efectos respecto de Terceros y Registro (Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Efectos respecto de Terceros y Registro (Art» (§ 2.9).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Efectos respecto de Terceros y Registro (Art...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procemayor-5-4",
+        "targetTitle": "Efectos jurídicos sustanciales y procesales del emplazamiento",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.35",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Un derecho se entiende litigioso para efectos civiles desde que se notifica judicialmente la demanda",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Un derecho se entiende litigioso para efectos civiles desde que se notifica judicialmente la demanda» (§ 2.35).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Un derecho se entiende litigioso para efectos civiles desde que se not...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.129"
+  },
+  {
+    "id": "civil-contratohi-3-3",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 11,
+    "chapterTitle": "Derechos Reales de Garantía",
+    "category": "Derechos Reales de Garantía",
+    "code": "3.3",
+    "title": "Sección 3.3: Efectos respecto del acreedor hipotecario",
+    "cleanTitle": "Efectos respecto del acreedor hipotecario",
+    "sourceFile": "CONTRATOHIPOTECA-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOHIPOTECA-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Dominio",
+      "Nulidad",
+      "Obligación"
+    ],
+    "isFree": false,
+    "content": "### Sección 3.3 — Efectos respecto del acreedor hipotecario\n\nEl acreedor hipotecario es titular de cuatro grandes derechos que garantizan la eficacia de su crédito:\n\n1. **Derecho a exigir la conservación de la finca** (Art. 2427 del Código Civil).\n2. **Derecho de venta** (Arts. 2397 y 2424 del Código Civil).\n3. **Derecho de persecución** (Art. 2428 del Código Civil, acción de desposeimiento).\n4. **Derecho de preferencia** (Arts. 2470 y 2477 del Código Civil, tercera clase).\n\n#### 1. El derecho de venta (Arts. 2397 y 2424 del Código Civil)\n\n**Contenido y vías de realización:** por remisión del artículo 2424 al artículo 2397 del Código Civil, el acreedor hipotecario tiene el derecho de sacar a remate en pública subasta el bien hipotecado para pagarse con el producto.\n\n- **Vía principal:** venta en pública subasta judicial (conforme a las reglas del juicio ejecutivo u ordinario del Código de Procedimiento Civil).\n- **Vía subsidiaria:** a falta de postores admisibles en el remate, el acreedor puede pedir que la finca se le adjudique por los dos tercios de la tasación o se saque a segundo remate con rebaja (Art. 499 del Código de Procedimiento Civil).\n\n**Prohibición absoluta del pacto comisorio o *lex commissoria* (Art. 2397 inc. final del Código Civil):**\n\n- **Regla:** es nula de nulidad absoluta toda estipulación que autorice al acreedor hipotecario a apropiarse de la finca o a disponer de ella por medios distintos a la subasta pública judicial.\n- **Fundamento:** se busca evitar que el acreedor abuse de la necesidad del deudor al momento de contratar, adjudicándose de antemano un inmueble de valor superior al crédito.\n\n**Compatibilidad con la acción personal (derecho de prenda general):** el ejercicio de la acción real hipotecaria sobre la finca no suspende ni extingue la acción personal que el acreedor tiene para perseguir los demás bienes del deudor en virtud del derecho de prenda general (Art. 2425 del Código Civil). La acción personal no gozará de la preferencia hipotecaria respecto de los otros bienes valistas.\n\n#### 2. El derecho de persecución y la acción de desposeimiento (Art. 2428 del Código Civil)\n\n**Concepto de derecho de persecución:** es la facultad que le otorga la ley al acreedor para perseguir la finca hipotecada de manos de quien se encuentre y a cualquier título que la haya adquirido.\n\n**Concepto de tercer poseedor:** es todo aquel que es poseedor o dueño del inmueble gravado sin haberse obligado personalmente al pago de la deuda.\n\n**Principales categorías de terceros poseedores:**\n\n1. **El adquirente del inmueble hipotecado:** quien compra, recibe en donación o permuta una finca que ya estaba gravada con hipoteca.\n2. **El garante hipotecario (tercero que hipoteca bien propio por deuda ajena):** quien constituye hipoteca sobre su bien raíz para asegurar una obligación ajena sin obligarse como fiador personal (Arts. 2414 inc. 2.° y 2430 del Código Civil).\n3. **El legatario del inmueble hipotecado:** que no ha sido gravado personalmente por el testador con la deuda (Art. 1366 del Código Civil).\n4. **El heredero beneficiario:** que paga su cuota hereditaria pero en la partición se le adjudica el inmueble completo que garantiza la deuda del causante (por el exceso actúa como tercer poseedor).\n\n**Procedimiento de la acción de desposeimiento (Arts. 758 a 763 del Código de Procedimiento Civil):** para hacer efectiva la hipoteca contra un tercero poseedor, la ley exige tramitar previa y obligatoriamente la gestión de desposeimiento. Notificado el tercero, este dispone de un plazo fatal de 10 días para optar:\n\n1. **El tercero paga la deuda:** termina el juicio; se subroga legalmente en los derechos del acreedor (Art. 2429 inc. 2.° del Código Civil) para reembolsarse del deudor.\n2. **El tercero abandona la finca (Art. 2426 del Código Civil):** pone la finca a disposición del juez para el remate; conserva el dominio hasta la adjudicación y puede exigir indemnización.\n3. **El tercero no paga ni abandona (inacción):** se inicia el juicio de desposeimiento (ordinario o ejecutivo) para realizar la finca por la fuerza.\n\n> **Nota:** el tercero poseedor carece del beneficio de excusión previa en bienes del deudor personal (Arts. 2429 inc. 1.° y 2430 inc. 2.° del Código Civil).\n\n#### 3. El derecho de preferencia (Arts. 2470 y 2477 del Código Civil)\n\n**Características de la preferencia hipotecaria:**\n\n- **Crédito de tercera clase:** confiere al acreedor prioridad para pagarse con el precio del remate sobre los acreedores valistas o de clases inferiores.\n- **Preferencia especial:** recae exclusivamente sobre el producto de la subasta del bien raíz gravado.\n\n**Pluralidad de hipotecas (regla de antigüedad):** si sobre una misma finca existen múltiples hipotecas, las preferencias se determinan estrictamente por el orden de sus fechas de inscripción en el Registro del Conservador (Art. 2477 inc. 3.° del Código Civil y Art. 24 del Reglamento del Conservador de Bienes Raíces). La inscripción que ingresó antes al Repertorio (hora y fecha) prefiere a la posterior.\n\n**Posposición de la hipoteca:** es el acto unilateral o bilateral por el cual un acreedor hipotecario de grado preferente consiente en postergar su preferencia, permitiendo que una hipoteca constituida con posterioridad prefiera a la suya en el cobro. Es plenamente válida por ser un derecho renunciable que mira al interés privado del acreedor (Art. 12 del Código Civil).",
+    "charCount": 5419,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "La necesidad de citar a los acreedores hipotecarios en la subasta pública de un inmueble para extirpar los gravámenes sobre el bien",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «La necesidad de citar a los acreedores hipotecarios en la subasta pública de un inmueble para extirpar los gravámenes sobre el bien» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «La necesidad de citar a los acreedores hipotecarios en la subasta públ...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-6",
+        "targetTitle": "Las Medidas Cautelares y Precautorias",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.9",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Efectos respecto de Terceros y Registro (Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Efectos respecto de Terceros y Registro (Art» (§ 2.9).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Efectos respecto de Terceros y Registro (Art...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "civil-lasobligac-1-4",
+        "targetTitle": "Modos de Extinguir las Obligaciones (I) — El Pago Efectivo y sus Modalidades",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.17",
+        "crossoverType": "Efecto-Patrimonial",
+        "quote": "Se subroga legalmente en los derechos del acreedor (Art",
+        "whyConnected": "Efectos patrimoniales correlativos e ineficacias vinculadas en el tráfico jurídico. Cita textual del apunte: «Se subroga legalmente en los derechos del acreedor (Art» (§ 1.17).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Se subroga legalmente en los derechos del acreedor (Art...» en la resolución de casos de civil."
+      }
+    ],
+    "indexCode": "1.130"
+  },
+  {
+    "id": "civil-contratohi-3-4",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 11,
+    "chapterTitle": "Derechos Reales de Garantía",
+    "category": "Derechos Reales de Garantía",
+    "code": "3.4",
+    "title": "Sección 3.4: Puntos críticos para el examen de grado",
+    "cleanTitle": "Puntos críticos para el examen de grado",
+    "sourceFile": "CONTRATOHIPOTECA-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOHIPOTECA-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Nulidad",
+      "Responsabilidad"
+    ],
+    "isFree": false,
+    "content": "### Sección 3.4 — Puntos críticos para el examen de grado\n\n1. **Inoponibilidad de gravámenes posteriores:** si el constituyente otorga un usufructo o servidumbre después de inscrita la hipoteca, dichos derechos reales son inoponibles al acreedor hipotecario. El acreedor subastará el bien en remate judicial libre de tales cargas.\n2. **Los remedios del Art. 2427 del Código Civil en caso fortuito:** el artículo 2427 coloca el riesgo del deterioro o pérdida fortuita del bien sobre el deudor, constituyendo un caso excepcional de responsabilidad sin culpa que caduca los plazos y permite exigir suplemento de garantía o cobro inmediato.\n3. **Prohibición del pacto comisorio (Art. 2397 del Código Civil):** en la hipoteca está prohibida de forma absoluta la apropiación directa de la finca por el acreedor ante el incumplimiento. Es nula de nulidad absoluta toda cláusula que autorice la adjudicación sin subasta pública judicial.\n4. **Subrogación legal del tercer poseedor (Art. 2429 del Código Civil):** si el tercero poseedor paga la deuda para evitar el desposeimiento de su inmueble, se subroga por el solo ministerio de la ley en los derechos del acreedor en los mismos términos que un fiador (Art. 2429 inc. 2.° del Código Civil).\n\n## Capítulo 4 — Extinción y purga de la hipoteca",
+    "charCount": 1286,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-6",
+        "targetTitle": "Las Medidas Cautelares y Precautorias",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.9",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.9).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.131"
+  },
+  {
+    "id": "civil-contratohi-4-1",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 11,
+    "chapterTitle": "Derechos Reales de Garantía",
+    "category": "Derechos Reales de Garantía",
+    "code": "4.1",
+    "title": "Sección 4.1: Clasificación dual de la extinción (Art. 2434 del Código Civil)",
+    "cleanTitle": "Clasificación dual de la extinción (Art. 2434 del Código Civil)",
+    "sourceFile": "CONTRATOHIPOTECA-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOHIPOTECA-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Contrato",
+      "Obligación"
+    ],
+    "isFree": false,
+    "content": "### Sección 4.1 — Clasificación dual de la extinción (Art. 2434 del Código Civil)\n\nPor su condición de derecho real y contrato accesorio, la hipoteca puede extinguirse por dos vías dogmáticas claramente diferenciadas (Art. 2434 del Código Civil):\n\n1. **Extinción por vía accesoria o consecuencial:** ocurre por haberse extinguido en forma total y definitiva la obligación principal a la que accede (Art. 2434 inc. 1.° del Código Civil).\n2. **Extinción por vía principal o directa:** la obligación principal se mantiene plenamente vigente, pero la hipoteca se extingue por un modo propio (Arts. 2428 y 2434 incs. 2.°, 3.° y 4.° del Código Civil).",
+    "charCount": 645,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "N° 2 del Código de Procedimiento Civil - CPC)",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «N° 2 del Código de Procedimiento Civil - CPC)» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «N° 2 del Código de Procedimiento Civil - CPC)...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-5",
+        "targetTitle": "Teoría General de los Incidentes (Incidente Ordinario, Desistimiento de la Demanda y Abandono del Procedimiento)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.8",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Ineficacia de la Interrupción Civil de la Prescripción (Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Ineficacia de la Interrupción Civil de la Prescripción (Art» (§ 2.8).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Ineficacia de la Interrupción Civil de la Prescripción (Art...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "El juez civil ordinario está estrictamente sujeto al mandato del artículo 1698 del Código Civil",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «El juez civil ordinario está estrictamente sujeto al mandato del artículo 1698 del Código Civil» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El juez civil ordinario está estrictamente sujeto al mandato del artíc...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.132"
+  },
+  {
+    "id": "civil-contratohi-4-2",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 11,
+    "chapterTitle": "Derechos Reales de Garantía",
+    "category": "Derechos Reales de Garantía",
+    "code": "4.2",
+    "title": "Sección 4.2: Extinción de la hipoteca por vía accesoria o consecuencial",
+    "cleanTitle": "Extinción de la hipoteca por vía accesoria o consecuencial",
+    "sourceFile": "CONTRATOHIPOTECA-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOHIPOTECA-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Obligación"
+    ],
+    "isFree": false,
+    "content": "### Sección 4.2 — Extinción de la hipoteca por vía accesoria o consecuencial\n\n#### 1. Regla fundamental (*accessorium sequitur principale*)\n\nExtinguida la obligación principal por cualquier modo de extinguir (Art. 1567 del Código Civil), se extingue la hipoteca por vía de consecuencia (Art. 2434 inc. 1.° del Código Civil).\n\n**Requisitos copulativos de la extinción accesoria:**\n\n1. **Extinción total:** en virtud del principio de indivisibilidad de la hipoteca (Arts. 1526 N.° 1 y 2408 del Código Civil), mientras permanezca insoluta la más mínima fracción del crédito o sus intereses, la hipoteca subsiste íntegramente sobre la totalidad del inmueble.\n2. **Extinción definitiva:** si la extinción de la obligación principal queda sin efecto retroactivamente (por ejemplo, se declara nulo el pago o se rescinde el finiquito), revive la hipoteca con la misma fecha de su inscripción originaria.\n\n#### 2. Análisis especial de los modos de extinguir frente a la hipoteca accesoria\n\n**a) El pago efectivo (Arts. 1568 y siguientes del Código Civil):**\n\n- **Pago ordinario por el deudor:** extingue definitivamente la obligación principal y la hipoteca.\n- **Pago con subrogación (Arts. 1610 N.° 2 y 3, y 2429 del Código Civil):** si el pago lo realiza un tercero (por ejemplo, el tercer poseedor de la finca hipotecada o un fiador), la obligación y la hipoteca no se extinguen, sino que se traspasan de pleno derecho al tercero subrogante con todos sus privilegios e inscripciones para cobrar al deudor principal.\n\n**b) La dación en pago y la discusión sobre la evicción:**\n\n**Conflicto:** se paga la deuda entregando un bien en dación en pago y se cancela la hipoteca. Posteriormente, el acreedor sufre la evicción del bien recibido en pago. ¿Revive la hipoteca originaria? Se enfrentan dos tesis:\n\n| **Tesis** | **Contenido** |\n| --- | --- |\n| **Tesis A: novación por cambio de objeto** (Art. 2382 del Código Civil para la fianza) | La dación en pago es una novación. Extinguida la obligación primitiva, la hipoteca se extinguió definitivamente y no revive. El acreedor solo tiene acción de saneamiento de evicción. |\n| **Tesis B: modalidad del pago** (Somarriva, tesis mayoritaria) | La dación en pago es una modalidad del pago. Si hay evicción, el pago fue nulo e ineficaz. La obligación principal no se extinguió, por lo que la hipoteca revive. |\n\n1. **Primera tesis (novación):** considera la dación en pago como una novación objetiva por cambio de objeto. Extinguida la primera deuda, la hipoteca cayó de plano y no puede revivir en perjuicio de terceros. Se apoya por analogía en el artículo 2382 del Código Civil (que dispone que la evicción de la cosa dada en pago no hace revivir la fianza).\n2. **Segunda tesis mayoritaria (modalidad de pago, Manuel Somarriva):** sostiene que la dación en pago es una simple modalidad del pago. Si el acreedor es evicto, el pago careció de causa y la obligación principal nunca se extinguió; por ende, la hipoteca subsiste por no haber operado la extinción accesoria.\n\n**c) La novación y la reserva de hipotecas (Arts. 1642 a 1644 del Código Civil):**\n\n- **Regla general:** la novación extingue la obligación primitiva y todos sus accesorios, incluidas las prendas e hipotecas.\n- **Excepción (la reserva de hipotecas, Arts. 1642 y 1644 del Código Civil):** las partes pueden pactar expresamente que la hipoteca constituida para la primera deuda pase a caucionar la nueva obligación.\n\n**Requisitos e impedimentos legales de la reserva de hipotecas (Arts. 1642 a 1644 del Código Civil):**\n\n1. **Consentimiento del tercer garante:** si el inmueble hipotecado pertenece a un tercero (garante hipotecario), la reserva no vale si el tercero no accede expresamente a la nueva obligación (Art. 1642 inc. 2.° del Código Civil).\n2. **Límite del monto mantenido:** la reserva no puede extenderse a lo que la segunda obligación tenga de más que la primera (por ejemplo, si se añaden intereses o mayor capital, la hipoteca reservada no cubre el exceso) (Art. 1642 inc. 3.° del Código Civil).\n3. **Novación por cambio de deudor (Art. 1643 del Código Civil):** si se sustituye un nuevo deudor, la reserva no puede recaer sobre los bienes del nuevo deudor, sino mediante una renovación de hipoteca con nueva inscripción que rige desde su fecha (Art. 1644 del Código Civil).\n\n**d) La prescripción extintiva accesoria (Art. 2516 del Código Civil):**\n\n- **Regla unificada:** “La acción hipotecaria, y las demás que proceden de una obligación accesoria, prescriben junto con la obligación a que acceden.” (Art. 2516 del Código Civil).\n- **Plazos:** si la obligación principal consta en un título ejecutivo y prescribe en 3 años (Art. 2515 del Código Civil), la acción hipotecaria prescribe en el mismo plazo; si prescribe como ordinaria en 5 años, la acción real prescribirá simultáneamente en 5 años. No existe un plazo de prescripción autónomo para la hipoteca por vía accesoria.",
+    "charCount": 4902,
+    "connections": [
+      {
+        "targetTopicId": "civil-lasobligac-1-4",
+        "targetTitle": "Modos de Extinguir las Obligaciones (I) — El Pago Efectivo y sus Modalidades",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.17",
+        "crossoverType": "Efecto-Patrimonial",
+        "quote": "Codeudor solidario, fiador o tercer poseedor de la finca hipotecada",
+        "whyConnected": "Efectos patrimoniales correlativos e ineficacias vinculadas en el tráfico jurídico. Cita textual del apunte: «Codeudor solidario, fiador o tercer poseedor de la finca hipotecada» (§ 1.17).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Codeudor solidario, fiador o tercer poseedor de la finca hipotecada...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Invierten de pleno derecho la carga de la prueba (Art",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Invierten de pleno derecho la carga de la prueba (Art» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Invierten de pleno derecho la carga de la prueba (Art...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Mecanismo para requerir al tercer poseedor de un inmueble hipotecado para que pague la deuda o abandone la finca",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Mecanismo para requerir al tercer poseedor de un inmueble hipotecado para que pague la deuda o abandone la finca» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Mecanismo para requerir al tercer poseedor de un inmueble hipotecado p...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.133"
+  },
+  {
+    "id": "civil-contratohi-4-3",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 11,
+    "chapterTitle": "Derechos Reales de Garantía",
+    "category": "Derechos Reales de Garantía",
+    "code": "4.3",
+    "title": "Sección 4.3: Extinción de la hipoteca por vía principal o directa",
+    "cleanTitle": "Extinción de la hipoteca por vía principal o directa",
+    "sourceFile": "CONTRATOHIPOTECA-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOHIPOTECA-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Dominio",
+      "Obligación",
+      "Resolución"
+    ],
+    "isFree": false,
+    "content": "### Sección 4.3 — Extinción de la hipoteca por vía principal o directa\n\nEn estos eventos la obligación principal se mantiene viva y exigible, pero el gravamen real de hipoteca se extingue de forma independiente. Las causales son:\n\n1. **Resolución del derecho del constituyente** (Arts. 1491, 2416 y 2434 del Código Civil).\n2. **Llegada del plazo o condición de la hipoteca** (Art. 2434 inc. 3.° del Código Civil).\n3. **Prórroga del plazo otorgada al deudor sin venia del garante** (Art. 1649 del Código Civil).\n4. **Expropiación por causa de utilidad pública** (Decreto Ley N.° 2.186).\n5. **Renuncia o alzamiento otorgado por escritura pública** (Art. 2434 inc. 4.° del Código Civil).\n6. **La purga de la hipoteca** (Art. 2428 del Código Civil; se trata en la Sección 4.4).\n\n#### 1. Extinción por resolución del derecho del constituyente (Arts. 1491, 2416 y 2434 inc. 2.° del Código Civil)\n\n- **Principio** *nemo plus iuris*: si se resuelve o extingue el derecho de dominio que el constituyente tenía sobre el inmueble, se extingue por vía directa la hipoteca que este otorgó.\n- **Régimen del Art. 1491 del Código Civil:** si el dominio del constituyente estaba sujeto a condición resolutoria (por ejemplo, compraventa con saldo de precio no pagado) y la condición se cumple, la hipoteca se extingue únicamente si la condición resolutoria constaba en el título respectivo, inscrito u otorgado por escritura pública.\n\n#### 2. Llegada del plazo o cumplimiento de la condición resolutoria del gravamen (Art. 2434 inc. 3.° del Código Civil)\n\nSe produce cuando la hipoteca se constituyó expresamente para durar hasta un día cierto o sujeta a una condición resolutoria autónoma (por ejemplo, hipotecas constituidas por sociedades anónimas para caucionar deudas ajenas con vencimiento máximo, Art. 57 de la Ley de Sociedades Anónimas).\n\n#### 3. Prórroga del plazo concedida al deudor sin concurso del garante (Art. 1649 del Código Civil)\n\nSi el acreedor otorga una prórroga o ampliación del plazo al deudor personal para el pago de la deuda, se extingue la hipoteca constituida por un tercero (garante hipotecario), a menos que dicho tercero concurra en la prórroga y la acepte expresamente.\n\n#### 4. Expropiación por causa de utilidad pública (Decreto Ley N.° 2.186)\n\nLa expropiación extingue el derecho real de hipoteca sobre el suelo expropiado. Se produce una subrogación real de pleno derecho: la preferencia hipotecaria se traslada al precio o indemnización consignado en el tribunal por el ente expropiante (Arts. 23 y 24 del Decreto Ley N.° 2.186).\n\n#### 5. Renuncia o alzamiento de la hipoteca (Art. 2434 inc. 4.° del Código Civil)\n\n- **Concepto:** es el acto jurídico unilateral por el cual el acreedor hipotecario renuncia expresamente a su derecho real de garantía.\n- **Formalidad del alzamiento:** exige ser otorgado por escritura pública de cancelación o alzamiento, de la cual el Conservador de Bienes Raíces toma nota al margen de la inscripción hipotecaria originaria para cancelar el gravamen.\n\n**Régimen obligatorio de alzamiento financiero (Ley N.° 19.496, Art. 17 D):** respecto de acreedores que son proveedores de servicios financieros (bancos e instituciones de crédito), la ley impone plazos imperativos bajo sanción indemnizatoria:\n\n| **Tipo de caución financiera** | **Desencadenante del alzamiento** | **Obligación legal del banco** | **Plazo fatal de tramitación** |\n| --- | --- | --- | --- |\n| **Hipoteca específica** | Pago o extinción total del crédito. | Otorgar e ingresar la escritura pública de alzamiento al Conservador de Bienes Raíces a su propio cargo y costo. | 45 días hábiles desde la extinción. |\n| **Hipoteca general** | Pago total de todas las deudas garantizadas. | Informar la extinción (en 20 días). Si el deudor solicita el alzamiento, otorgar e inscribir la cancelación. | 45 días contados desde la solicitud del deudor. |",
+    "charCount": 3866,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "La necesidad de citar a los acreedores hipotecarios en la subasta pública de un inmueble para extirpar los gravámenes sobre el bien",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «La necesidad de citar a los acreedores hipotecarios en la subasta pública de un inmueble para extirpar los gravámenes sobre el bien» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «La necesidad de citar a los acreedores hipotecarios en la subasta públ...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "civil-contratohi-2-3",
+        "targetTitle": "Cosas susceptibles de hipotecarse",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.125",
+        "crossoverType": "Materia-Afin",
+        "quote": "Código Civil valida expresamente la venta de cosa ajena), en el título de la hipoteca no existe norma equivalente",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Código Civil valida expresamente la venta de cosa ajena), en el título de la hipoteca no existe norma equivalente» (§ 1.125).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Código Civil valida expresamente la venta de cosa ajena), en el título...» en la resolución de casos de civil."
+      },
+      {
+        "targetTopicId": "civil-contratohi-2-4",
+        "targetTitle": "Obligaciones susceptibles de caucionarse con hipoteca",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.126",
+        "crossoverType": "Materia-Afin",
+        "quote": "Otorgar la escritura pública de alzamiento e ingresarla al Conservador de Bienes Raíces a su propio cargo y costo",
+        "whyConnected": "Instituciones afines que comparten principios rectores y régimen normativo correlativo. Cita textual del apunte: «Otorgar la escritura pública de alzamiento e ingresarla al Conservador de Bienes Raíces a su propio cargo y costo» (§ 1.126).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Otorgar la escritura pública de alzamiento e ingresarla al Conservador...» en la resolución de casos de civil."
+      }
+    ],
+    "indexCode": "1.134"
+  },
+  {
+    "id": "civil-contratohi-4-4",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 11,
+    "chapterTitle": "Derechos Reales de Garantía",
+    "category": "Derechos Reales de Garantía",
+    "code": "4.4",
+    "title": "Sección 4.4: La purga de la hipoteca (Art. 2428 del Código Civil y Art. 492 del Código de Procedimiento Civil)",
+    "cleanTitle": "La purga de la hipoteca (Art. 2428 del Código Civil y Art. 492 del Código de Procedimiento Civil)",
+    "sourceFile": "CONTRATOHIPOTECA-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOHIPOTECA-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Examen de Grado",
+      "Derecho"
+    ],
+    "isFree": false,
+    "content": "### Sección 4.4 — La purga de la hipoteca (Art. 2428 del Código Civil y Art. 492 del Código de Procedimiento Civil)\n\n#### 1. Concepto dogmático y fundamento\n\nLa **purga de la hipoteca** es la causal extraordinaria de extinción de la hipoteca por vía principal en virtud de la cual cesa el derecho de persecución del acreedor hipotecario contra el tercero que adquiere el inmueble gravado en una subasta pública judicial, extinguiéndose todos los gravámenes hipotecarios que pesaban sobre el bien, hayan o no alcanzado a pagarse con el producto del remate (Art. 2428 del Código Civil).\n\n**Fundamento de la institución:** evitar la paralización del tráfico inmobiliario. Si el comprador en remate judicial pudiera ser perseguido por hipotecas anteriores que no se pagaron, nadie postularía en las subastas judiciales o los precios serían irrisorios, destruyendo la eficacia del crédito.\n\n#### 2. Requisitos copulativos de procedencia de la purga (Art. 2428 del Código Civil)\n\nPara que se produzca de pleno derecho la purga de las hipotecas deben concurrir tres requisitos imperativos y copulativos:\n\n1. **Venta en pública subasta ordenada por el juez (Art. 2428 inc. 2.° del Código Civil):** debe tratarse de una enajenación forzada efectuada bajo el imperio del tribunal (juicio ejecutivo u ordinario). No opera en ventas privadas o voluntarias.\n2. **Citación personal de los acreedores hipotecarios (Art. 2428 inc. 3.° del Código Civil):** todos y cada uno de los acreedores con hipotecas inscritas sobre el inmueble deben ser notificados personalmente por un receptor judicial antes del remate.\n3. **Transcurso del término de emplazamiento (Art. 2428 inc. 3.° del Código Civil):** la subasta no puede celebrarse sino una vez vencido el término de emplazamiento ordinario contado desde la última notificación efectuada a los acreedores hipotecarios, para que estos puedan intervenir en la fijación del mínimo de la subasta o ejercer sus derechos.\n\n#### 3. El derecho de opción de los acreedores preferentes (Art. 492 del Código de Procedimiento Civil)\n\nCuando la ejecución la promueve un acreedor hipotecario de grado posterior o un acreedor valista, el artículo 492 del Código de Procedimiento Civil confiere a los acreedores hipotecarios de grado preferente un derecho de opción especial:\n\n1. **Exigir el pago de sus créditos** sobre el precio del remate en el orden de sus grados de inscripción.\n2. **Conservar sus hipotecas** sobre la finca subastada, solo si sus créditos no se encuentran devengados (no en mora). Si no dicen nada en el término de emplazamiento, la ley presume que optan por pagarse sobre el precio de la subasta.\n\n- **Regla del silencio registral (Art. 492 inc. 2.° del Código de Procedimiento Civil):** si el acreedor preferente notificado no manifiesta expresamente su voluntad de conservar la hipoteca durante el término de emplazamiento, la ley presume de derecho que opta por pagarse sobre el precio del remate, operando la purga total del gravamen.\n- **Imposibilidad de conservar la hipoteca:** si el crédito del acreedor preferente se halla vencido o devengado, no tiene opción; debe pagarse obligatoriamente con el producto de la subasta y su hipoteca se purga indefectiblemente.\n\n#### 4. Efectos de la omisión de la citación a un acreedor hipotecario\n\n- **Validez del remate judicial:** la omisión de la citación a uno o más acreedores hipotecarios no anula el remate ni la compraventa forzada.\n- **Inoponibilidad de la purga (subsistencia de la hipoteca):** respecto del acreedor omitido, la purga es inoponible y su hipoteca subsiste plenamente sobre el inmueble. El acreedor no citado conserva intacto su derecho de persecución (acción de desposeimiento) para sacar nuevamente a remate el bien de manos del tercero que lo adquirió en la subasta.\n\n#### 5. El gran debate de grado: la purga en la adjudicación a falta de postores\n\n¿Se purgan las hipotecas cuando en el remate no hay postores y el propio acreedor ejecutante se adjudica la finca con cargo a su crédito (Art. 499 del Código de Procedimiento Civil)? Se enfrentan dos tesis:\n\n1. **Tesis formalista (fallos antiguos de la Corte Suprema):** no se purgan. El Art. 2428 del Código Civil alude a “pública subasta” y “precio del remate” (compra por un tercero). La adjudicación en pago es una figura distinta a la compraventa.\n2. **Tesis doctrinal dominante (Manuel Somarriva y Fernando Alessandri):** sí se purgan todas las hipotecas. La adjudicación forzada es una verdadera compraventa donde el precio se paga con el crédito. El valor de adjudicación refleja la insuficiencia real del bien.\n\n**Desarrollo de la tesis de fallos antiguos de la Corte Suprema (inexistencia de purga):** sostenía que el Art. 2428 del Código Civil se refiere a la compraventa por un tercero en pública subasta. La adjudicación a falta de postores es una dación en pago judicial y no una subasta a un tercero, por lo que no purgaría los gravámenes.\n\n**Desarrollo de la tesis doctrinal dominante de Manuel Somarriva y Fernando Alessandri (purga plena):**\n\n- La adjudicación judicial es institucionalmente una compraventa forzada donde el ejecutante actúa como comprador y el juez como representante legal del deudor (Art. 497 del Código de Procedimiento Civil).\n- La insuficiencia del precio del inmueble al no existir postores demuestra que el valor de la finca no alcanza para cubrir las deudas posteriores.\n- Pretender que no se purgue discrimina arbitrariamente entre el tercero rematante y el ejecutante, forzando a mantener gravámenes extinguidos en los hechos. Si los acreedores posteriores fueron notificados formalmente, la adjudicación purga íntegramente las hipotecas.",
+    "charCount": 5648,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "N° 2 del Código de Procedimiento Civil - CPC)",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «N° 2 del Código de Procedimiento Civil - CPC)» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «N° 2 del Código de Procedimiento Civil - CPC)...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Código Civil y a las disposiciones especiales del Código Orgánico de Tribunales (Arts",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Código Civil y a las disposiciones especiales del Código Orgánico de Tribunales (Arts» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Código Civil y a las disposiciones especiales del Código Orgánico de T...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-5",
+        "targetTitle": "Teoría General de los Incidentes (Incidente Ordinario, Desistimiento de la Demanda y Abandono del Procedimiento)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.8",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "El procedimiento incidental ordinario es el modelo tipo que se aplica a falta de norma especial",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «El procedimiento incidental ordinario es el modelo tipo que se aplica a falta de norma especial» (§ 2.8).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El procedimiento incidental ordinario es el modelo tipo que se aplica ...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.135"
+  },
+  {
+    "id": "civil-contratohi-4-5",
+    "subject": "civil",
+    "discipline": "I. Derecho Civil",
+    "sectionName": "I. Derecho Civil",
+    "chapterNumber": 11,
+    "chapterTitle": "Derechos Reales de Garantía",
+    "category": "Derechos Reales de Garantía",
+    "code": "4.5",
+    "title": "Sección 4.5: Puntos críticos para el examen de grado",
+    "cleanTitle": "Puntos críticos para el examen de grado",
+    "sourceFile": "CONTRATOHIPOTECA-pulido.md",
+    "userSourceFiles": [
+      "CONTRATOHIPOTECA-pulido.md"
+    ],
+    "hasUserNotes": true,
+    "tags": [
+      "Obligación"
+    ],
+    "isFree": false,
+    "content": "### Sección 4.5 — Puntos críticos para el examen de grado\n\n1. **Prescripción accesoria (Art. 2516 del Código Civil):** jamás corresponde afirmar que la acción hipotecaria prescribe en 10 años por ser un derecho real. El artículo 2516 del Código Civil establece que la acción hipotecaria prescribe conjuntamente con la obligación principal a que accede (sea en 3 años si es ejecutiva o en 5 años si es ordinaria).\n2. **Efecto de la evicción en la dación en pago:** frente a la pregunta de examen sobre si la evicción de la cosa dada en pago hace revivir la hipoteca, corresponde exponer la discusión: para la tesis de la novación no revive (Art. 2382 del Código Civil para la fianza); para la tesis de Somarriva (modalidad de pago), el pago fue nulo, la obligación principal subsiste y la hipoteca revive por vía accesoria.\n3. **Efectos de la omisión en la citación de purga (Art. 2428 del Código Civil):** la omisión de la citación a un acreedor hipotecario no invalida el remate judicial; únicamente provoca la inoponibilidad de la purga, conservando el acreedor omitido su derecho de persecución contra el adquirente.\n4. **La opción del acreedor preferente (Art. 492 del Código de Procedimiento Civil):** el acreedor hipotecario preferente solo puede optar por conservar su hipoteca si su crédito no se encuentra devengado. Si su crédito está vencido, no tiene opción y debe pagarse obligatoriamente sobre el producto del remate.",
+    "charCount": 1431,
+    "connections": [
+      {
+        "targetTopicId": "procesal-procesal-2-1",
+        "targetTitle": "Las Partes, Terceros y Capacidad Procesal",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.4",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.4).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-derechopro-1-3",
+        "targetTitle": "Carga de la Prueba ( _¿Quién prueba? / Onus Probandi_ )",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.44",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.44).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      },
+      {
+        "targetTopicId": "procesal-procesal-2-2",
+        "targetTitle": "Comparecencia en Juicio (Patrocinio, Mandato Judicial y Agencia Oficiosa)",
+        "targetSubject": "procesal",
+        "targetIndexCode": "2.5",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**» (§ 2.5).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos Críticos para el Examen de Grado (** **_Red Flags_ )**...» en la resolución de casos de procesal."
+      }
+    ],
+    "indexCode": "1.136"
   },
   {
     "id": "procesal-procesal-1-1",
@@ -2868,6 +8731,16 @@ const INITIAL_DATA = {
     "charCount": 6068,
     "connections": [
       {
+        "targetTopicId": "civil-contratoar-1-3",
+        "targetTitle": "Efectos del arrendamiento de cosas: obligaciones del arrendador y del arrendatario",
+        "targetSubject": "civil",
+        "targetIndexCode": "1.37",
+        "crossoverType": "Sustantivo-Procesal",
+        "quote": "En el examen de grado, jamás responda que el arrendatario queda en mora de restituir por la sola llegada del plazo convenido",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «En el examen de grado, jamás responda que el arrendatario queda en mora de restituir por la sola llegada del plazo convenido» (§ 1.37).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «En el examen de grado, jamás responda que el arrendatario queda en mor...» en la resolución de casos de civil."
+      },
+      {
         "targetTopicId": "civil-lasobligac-1-7",
         "targetTitle": "Factores de Imputabilidad, Mora, Causalidad, Daño y Avaluación de Perjuicios",
         "targetSubject": "civil",
@@ -2886,16 +8759,6 @@ const INITIAL_DATA = {
         "quote": "Se debe el precio de la cosa y la indemnización de la mora [8, 9]",
         "whyConnected": "Intersección entre el derecho de fondo y las vías procesales de excepción o defensa. Cita textual del apunte: «Se debe el precio de la cosa y la indemnización de la mora [8, 9]» (§ 1.18).",
         "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Se debe el precio de la cosa y la indemnización de la mora [8, 9]...» en la resolución de casos de civil."
-      },
-      {
-        "targetTopicId": "civil-lasobligac-1-4",
-        "targetTitle": "Modos de Extinguir las Obligaciones (I) — El Pago Efectivo y sus Modalidades",
-        "targetSubject": "civil",
-        "targetIndexCode": "1.17",
-        "crossoverType": "Sustantivo-Procesal",
-        "quote": "Extingue definitivamente la obligación de forma absoluta, liberando a todos los coobligados y extinguiendo las cauciones [8]",
-        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Extingue definitivamente la obligación de forma absoluta, liberando a todos los coobligados y extinguiendo las cauciones [8]» (§ 1.17).",
-        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Extingue definitivamente la obligación de forma absoluta, liberando a ...» en la resolución de casos de civil."
       }
     ],
     "indexCode": "2.15"
@@ -5438,14 +11301,14 @@ const INITIAL_DATA = {
         "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Debates Doctrinales y Puntos Críticos para el Examen de Grado**...» en la resolución de casos de civil."
       },
       {
-        "targetTopicId": "civil-lasobligac-1-3",
-        "targetTitle": "Obligaciones Sujetas a Modalidad (Condición y Plazo) y Acción Resolutoria",
+        "targetTopicId": "civil-contratoar-1-2",
+        "targetTitle": "Arrendamiento de cosas: requisitos, características y capacidad",
         "targetSubject": "civil",
-        "targetIndexCode": "1.16",
+        "targetIndexCode": "1.36",
         "crossoverType": "Sustantivo-Procesal",
-        "quote": "El hecho contemplado debe realizarse en el tiempo posterior a la celebración del acto",
-        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «El hecho contemplado debe realizarse en el tiempo posterior a la celebración del acto» (§ 1.16).",
-        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «El hecho contemplado debe realizarse en el tiempo posterior a la celeb...» en la resolución de casos de civil."
+        "quote": "Puntos críticos para el examen de grado",
+        "whyConnected": "Cruce sustantivo-procesal: la institución civil sustenta la pretensión o acción adjetiva. Cita textual del apunte: «Puntos críticos para el examen de grado» (§ 1.36).",
+        "practicalApplication": "En el examen de grado, la comisión formula preguntas cruzadas analizando cómo incide «Puntos críticos para el examen de grado...» en la resolución de casos de civil."
       }
     ],
     "indexCode": "2.59"

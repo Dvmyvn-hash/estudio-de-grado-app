@@ -36,7 +36,8 @@ OUT_JSON_PATH = os.path.join(BASE_DIR, "dogmatic_connections.json")
 REPORT_PATH = os.path.join(BASE_DIR, "cruces_report.json")
 VAULT_INDEX_PATH = os.path.join(BASE_DIR, "vault_index.json")
 
-MAX_JSON_BYTES = 300 * 1024  # 300 KB
+MAX_JSON_BYTES = 300 * 1024  # 300 KB base (canon 103; v7.40: escala con el canon)
+MAX_BYTES_PER_TOPIC = 3 * 1024  # 3 KB por cédula: presupuesto efectivo max(300KB, total*3KB)
 MAX_QUOTE_CHARS = 135
 
 CLOSED_TAXONOMY = [
@@ -364,13 +365,6 @@ def build_cross_connections():
 
     # 2. PASO 2: Motor derivado determinista para cédulas sin cruces o con < 3 cruces
     print("\n--- PASO 2: Generación determinista de cruces derivados (Tope N=3 por cédula) ---")
-    
-    # Precomputar co-citaciones de casos
-    case_cocitations = {}
-    try:
-        from js_data_extractor import get_cases_data # si existiera, o leemos js/data.js
-    except Exception:
-        pass
 
     for src_topic in topics:
         src_id = src_topic["id"]
@@ -565,9 +559,10 @@ def build_cross_connections():
     json_bytes = serialized_json.encode('utf-8')
     size_kb = len(json_bytes) / 1024.0
 
-    print(f"[build_cross_connections] Tamaño dogmatic_connections.json: {size_kb:.2f} KB (Presupuesto: <= {MAX_JSON_BYTES/1024} KB)")
-    if len(json_bytes) > MAX_JSON_BYTES:
-        raise ValueError(f"Presupuesto excedido: {size_kb:.2f} KB > 300 KB")
+    effective_budget = max(MAX_JSON_BYTES, total_topics * MAX_BYTES_PER_TOPIC)
+    print(f"[build_cross_connections] Tamaño dogmatic_connections.json: {size_kb:.2f} KB (Presupuesto: <= {effective_budget/1024:.0f} KB, canon {total_topics})")
+    if len(json_bytes) > effective_budget:
+        raise ValueError(f"Presupuesto excedido: {size_kb:.2f} KB > {effective_budget/1024:.0f} KB")
 
     with open(OUT_JSON_PATH, "w", encoding="utf-8") as f:
         f.write(serialized_json)

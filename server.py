@@ -50,10 +50,12 @@ try:
 except ImportError:
     HAS_DOCX = False
 
+import importlib
+
 # Soporte opcional para Google Auth SDK (fallback nativo vía urllib / tokeninfo)
 try:
-    import google.auth
-    import google.oauth2.id_token
+    _g_auth = importlib.import_module("google.auth")
+    _g_id_token = importlib.import_module("google.oauth2.id_token")
     HAS_GOOGLE_AUTH = True
 except ImportError:
     HAS_GOOGLE_AUTH = False
@@ -919,8 +921,8 @@ def verify_google_id_token(id_token: str) -> Optional[dict]:
     # Intentar con google-auth oficial si está instalado
     if HAS_GOOGLE_AUTH:
         try:
-            from google.oauth2 import id_token as g_id_token
-            from google.auth.transport import requests as g_requests
+            g_id_token = importlib.import_module("google.oauth2.id_token")
+            g_requests = importlib.import_module("google.auth.transport.requests")
             id_info = g_id_token.verify_oauth2_token(
                 id_token,
                 g_requests.Request(),

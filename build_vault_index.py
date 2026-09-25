@@ -24,7 +24,8 @@ OUT_JS_PATH = os.path.join(BASE_DIR, "js", "vault-index.js")
 SINONIMOS_JSON_PATH = os.path.join(BASE_DIR, "sinonimos.json")
 SINONIMOS_JS_PATH = os.path.join(BASE_DIR, "js", "sinonimos.js")
 
-MAX_INDEX_BYTES = 600 * 1024  # 600 KB de presupuesto estricto
+MAX_INDEX_BYTES = 600 * 1024  # 600 KB de presupuesto base (canon 103; v7.40: escala con el canon)
+MAX_BYTES_PER_DOC = 6 * 1024  # 6 KB por cédula: el presupuesto efectivo es max(600KB, totalDocs*6KB)
 MAX_CONTENT_CHARS = 4000      # Tope de caracteres como en populateApuntesIndex
 MAX_POSITIONS = 8             # Posiciones por término por documento (≤ 8)
 
@@ -221,10 +222,12 @@ def build_vault_index():
     print(f"[build_vault_index] Documentos procesados: {total_docs}")
     print(f"[build_vault_index] Tamaño vault_index.json: {json_size_kb:.2f} KB (tope: 600 KB)")
 
-    if len(json_bytes) > MAX_INDEX_BYTES:
+    effective_budget = max(MAX_INDEX_BYTES, total_docs * MAX_BYTES_PER_DOC)
+    print(f"[build_vault_index] Presupuesto efectivo v7.40 (canon {total_docs}): {effective_budget/1024:.0f} KB")
+    if len(json_bytes) > effective_budget:
         raise ValueError(
             f"PRESUPUESTO EXCEDIDO: vault_index.json ocupa {json_size_kb:.2f} KB "
-            f"(máximo permitido: {MAX_INDEX_BYTES / 1024} KB). Poda stopwords o posiciones."
+            f"(máximo permitido: {effective_budget / 1024} KB). Poda stopwords o posiciones."
         )
 
     # Escribir vault_index.json
