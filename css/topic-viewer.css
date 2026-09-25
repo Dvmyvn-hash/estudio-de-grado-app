@@ -16,6 +16,7 @@
   padding: 24px 36px 80px 36px;
   max-width: 940px;
   margin: 0 auto;
+  overscroll-behavior: contain;
 }
 
 /* Tarjeta Encabezado de la Cédula */
@@ -77,7 +78,7 @@
   font-family: var(--font-display);
   font-size: clamp(1.22rem, 2.2vw, 1.62rem);
   font-weight: 700;
-  line-height: 1.25;
+  line-height: var(--lh-title, 1.28);
   color: var(--text-main);
   letter-spacing: 0.02em;
   margin: 8px 0 12px 0;
@@ -393,7 +394,7 @@
 /* Cuerpo de Lectura Markdown */
 .topic-markdown-body {
   font-size: 1rem;
-  line-height: 1.8;
+  line-height: var(--lh-body, 1.7);
   color: var(--text-main);
 }
 
@@ -405,6 +406,7 @@
   margin-bottom: 10px;
   padding-bottom: 6px;
   border-bottom: 1px solid var(--border-subtle);
+  line-height: var(--lh-title, 1.28);
 }
 
 .topic-markdown-body h3 {
@@ -412,10 +414,12 @@
   color: var(--text-main);
   margin-top: 18px;
   margin-bottom: 8px;
+  line-height: var(--lh-heading, 1.35);
 }
 
 .topic-markdown-body p {
   margin-bottom: 16px;
+  line-height: var(--lh-body, 1.7);
 }
 
 .topic-markdown-body ul, 
@@ -426,6 +430,7 @@
 
 .topic-markdown-body li {
   margin-bottom: 6px;
+  line-height: var(--lh-body, 1.7);
 }
 
 .topic-markdown-body blockquote {
@@ -436,6 +441,7 @@
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   color: var(--text-muted);
   font-style: italic;
+  line-height: var(--lh-body, 1.7);
 }
 
 .topic-markdown-body code {
@@ -1016,7 +1022,7 @@
 .topic-rendered-content {
   margin-top: 24px;
   font-size: 1.05rem;
-  line-height: 1.85;
+  line-height: var(--lh-body, 1.7);
   color: var(--text-main);
 }
 
@@ -1028,7 +1034,7 @@
   margin: 22px 0 10px 0;
   padding-bottom: 8px;
   border-bottom: 2px solid var(--border-subtle);
-  line-height: 1.25;
+  line-height: var(--lh-title, 1.28);
   word-break: break-word;
 }
 
@@ -1040,7 +1046,7 @@
   margin: 18px 0 8px 0;
   padding-bottom: 6px;
   border-bottom: 1px solid var(--border-subtle);
-  line-height: 1.28;
+  line-height: var(--lh-title, 1.28);
   word-break: break-word;
 }
 
@@ -1051,7 +1057,7 @@
   margin: 15px 0 6px 0;
   border-left: 3px solid var(--gold-primary);
   padding-left: 10px;
-  line-height: 1.3;
+  line-height: var(--lh-heading, 1.35);
   word-break: break-word;
 }
 
@@ -1060,7 +1066,7 @@
   font-weight: 700;
   color: #e2e8f0;
   margin: 12px 0 4px 0;
-  line-height: 1.35;
+  line-height: var(--lh-heading, 1.35);
 }
 
 .reading-h5 {
@@ -1071,6 +1077,7 @@
   text-decoration: underline;
   text-decoration-color: rgba(234, 179, 8, 0.4);
   text-underline-offset: 4px;
+  line-height: var(--lh-heading, 1.35);
 }
 
 .reading-h6 {
@@ -1080,11 +1087,13 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
   margin: 10px 0 4px 0;
+  line-height: var(--lh-heading, 1.35);
 }
 
 .reading-p {
   margin-bottom: 18px;
   text-align: justify;
+  line-height: var(--lh-body, 1.7);
 }
 
 /* Listas estilizadas */
@@ -1094,7 +1103,7 @@
   gap: 10px;
   margin-bottom: 8px;
   padding-left: 12px;
-  line-height: 1.7;
+  line-height: var(--lh-body, 1.7);
 }
 
 .ul-item-nested {
@@ -1129,28 +1138,64 @@
 .table-responsive {
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   margin: 24px 0;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-subtle);
   background: var(--bg-surface-elevated);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.table-responsive:focus-visible {
+  outline: 2px solid var(--gold-primary, #d4af37);
+  outline-offset: 2px;
+}
+
+.table-responsive::-webkit-scrollbar {
+  height: 6px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background: var(--border-subtle, rgba(212, 175, 55, 0.25));
+  border-radius: 3px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-primary, #d4af37);
 }
 
 .reading-table {
   width: 100%;
+  min-width: 580px;
   border-collapse: collapse;
   font-size: 0.92rem;
-  line-height: 1.6;
+  line-height: var(--lh-table, 1.6);
+  text-align: left;
 }
 
 .reading-table th {
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(15, 23, 42, 0.95);
   color: var(--gold-primary);
   font-weight: 700;
   text-align: left;
   padding: 12px 16px;
   border-bottom: 2px solid var(--border-subtle);
   letter-spacing: 0.02em;
+  min-width: 140px;
+  white-space: normal;
+  line-height: var(--lh-table, 1.6);
+}
+
+.reading-table th:first-child,
+.reading-table td:first-child {
+  min-width: 150px;
+  font-weight: 600;
 }
 
 .reading-table td {
@@ -1158,6 +1203,15 @@
   border-bottom: 1px solid var(--border-subtle);
   color: var(--text-main);
   vertical-align: top;
+  min-width: 180px;
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: auto;
+  line-height: var(--lh-table, 1.6);
+}
+
+.reading-table tr:nth-child(even) td {
+  background: rgba(255, 255, 255, 0.015);
 }
 
 .reading-table tr:last-child td {
@@ -1165,7 +1219,7 @@
 }
 
 .reading-table tr:hover td {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 /* Cajas de Mapas Conceptuales y Red Flags */
@@ -1174,6 +1228,7 @@
   padding: 20px 24px;
   border-radius: var(--radius-md);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  line-height: var(--lh-dense, 1.5);
 }
 
 .callout-card .callout-title {
@@ -1184,6 +1239,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  line-height: var(--lh-heading, 1.35);
 }
 
 .callout-warning {
@@ -1312,7 +1368,7 @@
 
   .topic-h1-title {
     font-size: 1.35rem;
-    line-height: 1.25;
+    line-height: var(--lh-title, 1.28);
     margin: 6px 0 10px 0;
   }
 
@@ -1320,22 +1376,25 @@
     font-size: 1.32rem;
     margin: 18px 0 8px 0;
     padding-bottom: 6px;
+    line-height: var(--lh-title, 1.28);
   }
 
   .reading-h2 {
     font-size: 1.16rem;
     margin: 14px 0 6px 0;
     padding-bottom: 4px;
+    line-height: var(--lh-title, 1.28);
   }
 
   .reading-h3 {
     font-size: 1.04rem;
     margin: 12px 0 4px 0;
+    line-height: var(--lh-heading, 1.35);
   }
 
   .reading-p {
     font-size: 0.98rem;
-    line-height: 1.75;
+    line-height: var(--lh-body, 1.7);
     margin-bottom: 14px;
   }
 
@@ -1374,7 +1433,8 @@
     padding: 14px 14px 70px 14px;
     width: 100%;
     max-width: 100%;
-    overflow-x: hidden;
+    box-sizing: border-box;
+    min-width: 0;
   }
 
   .topic-header-card {
@@ -1387,6 +1447,7 @@
     font-size: 0.72rem;
     gap: 4px;
     margin-bottom: 8px;
+    line-height: var(--lh-dense, 1.5);
   }
 
   .topic-meta-row {
@@ -1394,6 +1455,7 @@
     align-items: flex-start;
     gap: 8px;
     margin-bottom: 10px;
+    line-height: var(--lh-dense, 1.5);
   }
 
   .topic-official-tags {
@@ -1414,11 +1476,12 @@
     justify-content: center;
     font-size: 0.74rem;
     padding: 6px 8px;
+    line-height: var(--lh-dense, 1.5);
   }
 
   .topic-h1-title {
     font-size: clamp(1.1rem, 4.2vw, 1.28rem);
-    line-height: 1.28;
+    line-height: var(--lh-title, 1.28);
     margin: 6px 0 10px 0;
   }
 
@@ -1426,48 +1489,69 @@
     font-size: 1.22rem;
     margin: 16px 0 8px 0;
     padding-bottom: 6px;
+    line-height: var(--lh-title, 1.28);
   }
 
   .reading-h2 {
     font-size: 1.12rem;
     margin: 14px 0 6px 0;
     padding-bottom: 4px;
+    line-height: var(--lh-title, 1.28);
   }
 
   .reading-h3 {
     font-size: 1.02rem;
     margin: 12px 0 4px 0;
     padding-left: 8px;
+    line-height: var(--lh-heading, 1.35);
   }
 
   .reading-h4 {
     font-size: 0.94rem;
     margin: 10px 0 4px 0;
+    line-height: var(--lh-heading, 1.35);
   }
 
   .reading-h5 {
     font-size: 0.88rem;
     margin: 8px 0 4px 0;
+    line-height: var(--lh-heading, 1.35);
   }
 
   .reading-p {
     text-align: left;
     font-size: 0.94rem;
-    line-height: 1.68;
+    line-height: var(--lh-body, 1.7);
     margin-bottom: 14px;
   }
 
   .topic-rendered-content {
     font-size: 0.94rem;
+    line-height: var(--lh-body, 1.7);
   }
 
-  /* Prevenir desbordes horizontales de código, tablas y citas */
+  /* Prevenir desbordes horizontales de código y citas (las tablas usan .table-responsive) */
   .topic-rendered-content pre,
-  .topic-rendered-content table,
   .topic-rendered-content blockquote {
     max-width: 100%;
     overflow-x: auto;
     word-break: break-word;
+  }
+
+  .table-responsive {
+    margin: 18px 0;
+    border-radius: var(--radius-sm);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .reading-table {
+    min-width: 520px;
+  }
+
+  .reading-table th,
+  .reading-table td {
+    padding: 10px 12px;
+    font-size: 0.86rem;
   }
 
   .afg-official-card {

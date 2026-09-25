@@ -44,12 +44,12 @@
     <!-- BARRA SUPERIOR DE NAVEGACIÓN Y CONTROL -->
     <header class="app-header">
       <div class="header-brand">
-        <button id="btn-toggle-sidebar" class="icon-btn" title="Alternar menú lateral" aria-label="Menú">
-          <i data-lucide="menu"></i>
+        <button id="btn-toggle-sidebar" class="icon-btn" title="Alternar menú lateral" aria-label="Menú" aria-expanded="false">
+          <i data-lucide="menu" aria-hidden="true"></i>
         </button>
         <div class="brand-badge" aria-label="GRADOMANIACOS" title="GRADOMANIACOS" role="img">
           <div class="brand-icon-wrap" aria-hidden="true">
-            <i data-lucide="scale" class="brand-icon"></i>
+            <i data-lucide="scale" class="brand-icon" aria-hidden="true"></i>
           </div>
           <div class="brand-text-block">
             <h1 class="brand-title">GRADOMANIACOS</h1>
@@ -59,18 +59,18 @@
       </div>
 
       <!-- Pestañas de Vista Principal (Compactas) -->
-      <nav class="header-nav" aria-label="Vistas principales">
-        <button class="nav-tab active" data-view="topics" id="tab-topics" title="Temario & Apuntes de Grado">
-          <i data-lucide="book-open"></i>
+      <nav class="header-nav" role="tablist" aria-label="Vistas principales">
+        <button class="nav-tab active" data-view="topics" id="tab-topics" role="tab" aria-selected="true" title="Temario & Apuntes de Grado">
+          <i data-lucide="book-open" aria-hidden="true"></i>
           <span class="nav-tab-label">Apuntes</span>
         </button>
-        <button class="nav-tab" data-view="cases" id="tab-cases" title="Taller Metodológico de Casos">
-          <i data-lucide="briefcase"></i>
+        <button class="nav-tab" data-view="cases" id="tab-cases" role="tab" aria-selected="false" title="Taller Metodológico de Casos">
+          <i data-lucide="briefcase" aria-hidden="true"></i>
           <span class="nav-tab-label">Casos</span>
           <span class="badge-count" id="case-count-badge">0</span>
         </button>
-        <button class="nav-tab" data-view="graph" id="tab-graph" title="Grafo de Instituciones Interconectadas">
-          <i data-lucide="git-fork"></i>
+        <button class="nav-tab" data-view="graph" id="tab-graph" role="tab" aria-selected="false" title="Grafo de Instituciones Interconectadas">
+          <i data-lucide="git-fork" aria-hidden="true"></i>
           <span class="nav-tab-label">Grafo</span>
         </button>
       </nav>

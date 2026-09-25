@@ -25,6 +25,9 @@ sync_config.json
 *.sqlite*
 .auth_secret*
 
+node_modules/
+scratch/
+
 # Scratch / Temporary debugging and test scripts
 scratch_*.py
 lint_report.json

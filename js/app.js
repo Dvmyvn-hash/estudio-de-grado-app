@@ -467,6 +467,7 @@ const App = {
     const closeSidebarMobile = () => {
       if (sidebar) sidebar.classList.add("collapsed");
       if (sidebarBackdrop) sidebarBackdrop.classList.add("hidden");
+      if (btnSidebar) btnSidebar.setAttribute("aria-expanded", "false");
     };
 
     const openSidebarMobile = () => {
@@ -474,9 +475,11 @@ const App = {
       if (sidebarBackdrop && window.innerWidth <= 1024) {
         sidebarBackdrop.classList.remove("hidden");
       }
+      if (btnSidebar) btnSidebar.setAttribute("aria-expanded", "true");
     };
 
     if (btnSidebar && sidebar) {
+      btnSidebar.setAttribute("aria-expanded", (!sidebar.classList.contains("collapsed")).toString());
       btnSidebar.addEventListener("click", () => {
         // En vistas distintas a 'topics' la barra lateral está restringida
         if (this.currentView !== "topics") return;
@@ -514,9 +517,11 @@ const App = {
   switchView(viewName) {
     this.currentView = viewName;
 
-    // Actualizar tabs activas
+    // Actualizar tabs activas y accesibilidad ARIA
     document.querySelectorAll(".header-nav .nav-tab").forEach(t => {
-      t.classList.toggle("active", t.dataset.view === viewName);
+      const isActive = t.dataset.view === viewName;
+      t.classList.toggle("active", isActive);
+      t.setAttribute("aria-selected", isActive ? "true" : "false");
     });
 
     // Actualizar secciones
@@ -547,6 +552,7 @@ const App = {
         btnSidebar.removeAttribute("aria-hidden");
         btnSidebar.disabled = false;
         btnSidebar.style.display = "";
+        btnSidebar.setAttribute("aria-expanded", (!sidebar.classList.contains("collapsed")).toString());
       }
     } else {
       // Ocultar y restringir índice en vistas Casos y Grafo
@@ -562,6 +568,7 @@ const App = {
         btnSidebar.setAttribute("aria-hidden", "true");
         btnSidebar.disabled = true;
         btnSidebar.style.display = "none";
+        btnSidebar.setAttribute("aria-expanded", "false");
       }
     }
 
@@ -845,7 +852,13 @@ const App = {
 
     // Si no hay temas
     if (filteredTopics.length === 0) {
-      container.innerHTML = `<p class="text-muted" style="padding: 16px; font-size: 0.8rem; text-align: center;">No hay cédulas que coincidan con los filtros seleccionados.</p>`;
+      container.innerHTML = `
+        <div class="sidebar-empty-state ui-state-empty">
+          <i data-lucide="inbox"></i>
+          <p class="ui-state-empty-desc">No hay cédulas que coincidan con los filtros seleccionados.</p>
+        </div>
+      `;
+      if (window.lucide) window.lucide.createIcons();
       return;
     }
 
@@ -945,7 +958,7 @@ const App = {
                 const safeTooltip = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(tooltipText) : tooltipText;
 
                 return `
-                <li class="topic-tree-item ${this.currentTopicId === t.id ? 'active' : ''} ${!isUnlocked ? 'locked' : ''}" data-topic-id="${t.id}" title="${safeTooltip}">
+                <li class="topic-tree-item ${this.currentTopicId === t.id ? 'active' : ''} ${!isUnlocked ? 'locked' : ''}" data-topic-id="${t.id}" title="${safeTooltip}" ${this.currentTopicId === t.id ? 'aria-current="true"' : ''}>
                   <div class="topic-item-left">
                     <span class="cedula-code-badge">${displayCode ? '§ ' + safeDisplayCode : '·'}</span>
                     <span class="topic-title-text">${safeCleanTitle}</span>
@@ -3529,10 +3542,17 @@ const App = {
           input.select();
         }
       }
-      // Esc para cerrar modal
+      // Esc para cerrar modal y dropdowns restaurando foco
       if (e.key === "Escape") {
         this.closeImportModal();
-        document.getElementById("search-results-dropdown")?.classList.add("hidden");
+        const searchDropdown = document.getElementById("search-results-dropdown");
+        if (searchDropdown && !searchDropdown.classList.contains("hidden")) {
+          searchDropdown.classList.add("hidden");
+          const input = document.getElementById("global-search-input");
+          if (input && document.activeElement !== input) {
+            input.focus();
+          }
+        }
       }
     });
   },

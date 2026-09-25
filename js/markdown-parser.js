@@ -5,6 +5,9 @@
  */
 
 const MarkdownParser = {
+  parse(text) {
+    return this.render(text);
+  },
   render(text) {
     if (!text) return "";
 
@@ -100,6 +103,27 @@ const MarkdownParser = {
       if (isTableLine) {
         inTable = true;
         tableLines.push(line);
+      } else if (inTable && (line === "" || /^\d{1,4}$/.test(line))) {
+        // Mirar hacia adelante para comprobar si la tabla continúa tras líneas en blanco o números de página OCR
+        let continues = false;
+        for (let j = i + 1; j < lines.length; j++) {
+          const nextTrimmed = lines[j].trim();
+          if (nextTrimmed === "" || /^\d{1,4}$/.test(nextTrimmed)) continue;
+          if (nextTrimmed.startsWith("|") && nextTrimmed.endsWith("|")) {
+            continues = true;
+          }
+          break;
+        }
+        if (continues) {
+          // Omitir línea vacía intermedia entre filas de la tabla
+          continue;
+        } else {
+          // Fin real de la tabla
+          result.push(this.renderSingleTable(tableLines));
+          tableLines = [];
+          inTable = false;
+          result.push(lines[i]);
+        }
       } else {
         if (inTable) {
           result.push(this.renderSingleTable(tableLines));
@@ -132,9 +156,14 @@ const MarkdownParser = {
     const isSep = /^\|?\s*:?-+:?\s*\|/.test(lines[1]);
     const bodyStartIdx = isSep ? 2 : 1;
 
-    let tableHtml = '<div class="table-responsive"><table class="reading-table"><thead><tr>';
+    const formatCell = (c) => {
+      return c.replace(/(?:&amp;lt;|&lt;|<)br\s*\/?(?:&amp;gt;|&gt;|>)/gi, '<br>');
+    };
+
+    // Accesibilidad WCAG AA: tabindex="0" + role="region" + aria-label para scroll y foco accesible por teclado
+    let tableHtml = '<div class="table-responsive" tabindex="0" role="region" aria-label="Tabla comparativa de estudio"><table class="reading-table"><thead><tr>';
     headerCells.forEach(cell => {
-      tableHtml += `<th>${cell}</th>`;
+      tableHtml += `<th>${formatCell(cell)}</th>`;
     });
     tableHtml += '</tr></thead><tbody>';
 
@@ -142,7 +171,7 @@ const MarkdownParser = {
       const cells = parseRow(lines[j]);
       tableHtml += '<tr>';
       cells.forEach(c => {
-        tableHtml += `<td>${c}</td>`;
+        tableHtml += `<td>${formatCell(c)}</td>`;
       });
       tableHtml += '</tr>';
     }
@@ -188,3 +217,8 @@ const MarkdownParser = {
     return clean.trim();
   }
 };
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = MarkdownParser;
+}
+

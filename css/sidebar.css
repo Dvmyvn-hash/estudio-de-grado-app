@@ -11,7 +11,8 @@
   display: flex;
   flex-direction: column;
   transition: transform var(--transition-normal), width var(--transition-normal);
-  z-index: 40;
+  z-index: var(--z-sidebar);
+  overscroll-behavior: contain;
 }
 
 .app-sidebar.collapsed {
@@ -262,10 +263,13 @@
   flex: 1;
   overflow-y: auto;
   padding: 10px 8px;
+  overscroll-behavior: contain;
 }
 
 .category-group {
   margin-bottom: 12px;
+  content-visibility: auto;
+  contain-intrinsic-size: 0 44px;
 }
 
 .category-header {
@@ -423,8 +427,10 @@
 .topic-item-right {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 6px;
   flex-shrink: 0;
+  min-width: 24px;
 }
 
 .cedula-code-badge {
@@ -558,7 +564,7 @@
     max-width: 86vw;
     height: 100%;
     height: 100dvh;
-    z-index: 100;
+    z-index: var(--z-sidebar-mobile);
     box-shadow: var(--shadow-lg);
     transition: transform var(--transition-normal);
     -webkit-overflow-scrolling: touch;
@@ -591,9 +597,20 @@
    BÚSQUEDA Y Q&A MIGRADOS AL HEADER (v7.34, PROMPT 027)
    Las reglas de .vault-search-box, .qa-container y sus componentes fueron
    trasladadas e integradas en css/main.css dentro del dropdown unificado
-   (#search-results-dropdown). El sidebar se preserva exclusivamente como
-   árbol temático de cédulas (#topics-tree-container) y filtros de materia.
-   ========================================================================== */
+   /* Estado Vacío de Temas en Sidebar */
+.sidebar-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  text-align: center;
+  gap: 12px;
+}
 
-
-
+.sidebar-empty-state p {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: var(--lh-dense, 1.5);
+  margin: 0;
+}

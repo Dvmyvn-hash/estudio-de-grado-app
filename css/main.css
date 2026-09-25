@@ -81,6 +81,34 @@
   --font-h2: clamp(1.08rem, 1.8vw, 1.32rem);
   --font-h3: clamp(0.98rem, 1.4vw, 1.15rem);
   --font-h4: clamp(0.9rem, 1.1vw, 1.02rem);
+
+  /* Escala Canónica de Interlineado Unificada (PROMPT 029 / v7.36) */
+  --lh-title: 1.28;   /* Encabezados principales h1, h2 y título de cédula */
+  --lh-heading: 1.35; /* Subtítulos h3, h4, h5, h6 y títulos de tarjetas */
+  --lh-body: 1.70;    /* Párrafos, listas y citas doctrinales */
+  --lh-table: 1.60;   /* Tablas comparativas y celdas th/td */
+  --lh-dense: 1.50;   /* Elementos densos, metadatos, migas de pan y callouts */
+
+  /* Escala Canónica de Espaciado 8pt (PROMPT 030 / v7.37) */
+  --space-1: 4px;     /* 0.25rem - Micro espaciado entre iconos y etiquetas */
+  --space-2: 8px;     /* 0.5rem  - Espaciado compacto para chips, badges y pills */
+  --space-3: 12px;    /* 0.75rem - Relleno interior de controles y botones */
+  --space-4: 16px;    /* 1rem    - Espaciado base estándar entre bloques */
+  --space-5: 24px;    /* 1.5rem  - Separación entre secciones medianas */
+  --space-6: 32px;    /* 2rem    - Márgenes de tarjetas y contenedores */
+  --space-7: 48px;    /* 3rem    - Separación estructural mayor */
+  --space-8: 64px;    /* 4rem    - Márgenes amplios de cabecera/pie */
+
+  /* Escala Canónica de Z-Index Unificada (header < dropdown < modal < toast) */
+  --z-base: 1;
+  --z-surface: 10;
+  --z-sidebar: 40;
+  --z-header: 50;
+  --z-dropdown: 100;
+  --z-overlay: 200;
+  --z-sidebar-mobile: 250;
+  --z-modal: 500;
+  --z-toast: 1000;
 }
 
 /* ==========================================================================
@@ -204,7 +232,7 @@ body {
   justify-content: space-between;
   padding: 0 16px;
   gap: 12px;
-  z-index: 50;
+  z-index: var(--z-header);
   box-shadow: var(--shadow-sm);
 }
 
@@ -338,6 +366,12 @@ body {
   font-weight: 700;
   padding: 1px 5px;
   border-radius: var(--radius-full);
+  min-width: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  text-align: center;
 }
 
 /* Barra de Búsqueda y Acciones de Cabecera */
@@ -544,7 +578,7 @@ body {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
-  z-index: 1000;
+  z-index: var(--z-dropdown);
   padding: 10px;
   scrollbar-width: thin;
   scrollbar-color: var(--border-subtle) transparent;
@@ -1357,7 +1391,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  z-index: 1000;
+  z-index: var(--z-toast);
   pointer-events: none;
 }
 
@@ -1745,7 +1779,7 @@ body {
     width: auto;
     max-width: calc(100vw - 16px);
     max-height: calc(100vh - 180px);
-    z-index: 1200;
+    z-index: var(--z-dropdown);
     box-sizing: border-box;
     overflow-x: hidden;
   }
@@ -1815,6 +1849,11 @@ body {
   .badge-count {
     font-size: 0.6rem;
     padding: 0 4px;
+    min-width: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
   }
 
   .app-body {
@@ -2289,4 +2328,112 @@ body {
   background: rgba(59, 130, 246, 0.12);
   color: #93c5fd;
   border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+/* ==========================================================================
+   FEEDBACK VISUAL UNIFICADO, SKELETONS Y ACCESIBILIDAD WCAG AA (v7.37 / PROMPT 030)
+   ========================================================================== */
+
+/* Universal Focus Visible (WCAG 2.1 AA) */
+:focus-visible {
+  outline: 2px solid var(--gold-primary, #d4af37);
+  outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Reducción de movimiento para usuarios sensibles (WCAG 2.3.3) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Skeleton Loading Shimmer Unificado */
+.ui-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-surface-elevated, #1a1f2c) 25%,
+    var(--bg-surface-hover, #22293a) 37%,
+    var(--bg-surface-elevated, #1a1f2c) 63%
+  );
+  background-size: 400% 100%;
+  animation: uiSkeletonShimmer 1.4s ease infinite;
+  border-radius: var(--radius-sm, 6px);
+  pointer-events: none;
+  user-select: none;
+}
+
+@keyframes uiSkeletonShimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+/* Estados Vacíos Unificados (Empty States) */
+.ui-state-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-6, 32px) var(--space-4, 16px);
+  color: var(--text-muted);
+  gap: var(--space-3, 12px);
+}
+
+.ui-state-empty svg,
+.ui-state-empty i {
+  width: 40px;
+  height: 40px;
+  color: var(--text-subtle);
+  opacity: 0.6;
+}
+
+.ui-state-empty-title {
+  font-family: var(--font-display, var(--font-serif));
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.ui-state-empty-desc {
+  font-size: 0.85rem;
+  line-height: var(--lh-dense, 1.5);
+  color: var(--text-muted);
+  max-width: 380px;
+  margin: 0;
+}
+
+/* Estados de Error Unificados (Error States) */
+.ui-state-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-6, 32px) var(--space-4, 16px);
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius-md);
+  color: var(--danger-text);
+  gap: var(--space-3, 12px);
+}
+
+.ui-state-error svg,
+.ui-state-error i {
+  width: 36px;
+  height: 36px;
+  color: var(--danger);
 }
