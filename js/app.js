@@ -844,6 +844,98 @@ const App = {
     return topic.indexCode || '';
   },
 
+  renderConnectionCardsHtml(connsList, topicContext = null) {
+    if (!connsList || connsList.length === 0) {
+      let suggestions = [];
+      if (typeof VaultSearch !== 'undefined' && typeof VaultSearch.searchVault === 'function' && topicContext) {
+        const queryTerm = topicContext.cleanTitle || topicContext.title || topicContext.label || '';
+        if (queryTerm) {
+          const vResults = VaultSearch.searchVault(queryTerm, { limit: 4 });
+          const targetExcludeId = topicContext.id;
+          suggestions = vResults.filter(r => r.id !== targetExcludeId).slice(0, 3);
+        }
+      }
+      return `
+        <div class="connections-empty-state">
+          <div class="connections-empty-icon"><i data-lucide="info"></i></div>
+          <h4 class="connections-empty-title">Sin cruces validados aún</h4>
+          <p class="connections-empty-desc">Prueba en el buscador global para explorar conexiones semánticas en el temario.</p>
+          ${suggestions.length > 0 ? `
+            <div class="connections-unvalidated-suggestions">
+              <span class="unvalidated-badge" style="margin-bottom: 2px;">Sugerencias del Vault (no validadas):</span>
+              ${suggestions.map(s => `
+                <div class="unvalidated-suggestion-card" data-topic-id="${typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(s.id) : s.id}">
+                  <span class="unvalidated-badge">Sugerencia no validada</span>
+                  <span class="suggestion-title">§ ${typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(s.indexCode) : s.indexCode} · ${typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(s.title) : s.title}</span>
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    return connsList.map(conn => {
+      const safeId = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(conn.id) : conn.id;
+      const safeTitle = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(conn.title) : conn.title;
+      const safeSubject = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(conn.subject || 'civil') : (conn.subject || 'civil');
+      const safeSubjectLabel = (conn.subject === 'civil') ? 'Civil' : ((conn.subject === 'procesal') ? 'Procesal' : 'Constitucional');
+      const safeIndexCode = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(conn.indexCode || '') : (conn.indexCode || '');
+      const safeDiscipline = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(conn.discipline || '') : (conn.discipline || '');
+      const safeCrossoverType = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(conn.crossoverType || 'Cruce Dogmático') : (conn.crossoverType || 'Cruce Dogmático');
+      const safeWhy = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(conn.whyConnected || '') : (conn.whyConnected || '');
+      const safeApp = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(conn.practicalApplication || '') : (conn.practicalApplication || '');
+      const rawQuote = conn.quote || '';
+      const safeQuote = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(rawQuote) : rawQuote;
+
+      return `
+        <div class="linked-connection-card ${safeSubject}" data-topic-id="${safeId}" data-snippet="${safeQuote}" title="Clic para estudiar esta institución vinculada">
+          <div class="connection-header">
+            <div class="connection-badges-row">
+              <span class="connection-crossover-badge">${safeCrossoverType}</span>
+              <span class="connection-subject-badge ${safeSubject}">${safeSubjectLabel}</span>
+              ${safeIndexCode ? `<span class="connection-target-meta">§ ${safeIndexCode} · ${safeDiscipline}</span>` : ''}
+            </div>
+            <h4 class="connection-target-title">${safeTitle}</h4>
+          </div>
+
+          <div class="connection-content-body">
+            <div class="connection-callout reason-box">
+              <div class="connection-callout-header">
+                <i data-lucide="lightbulb" class="callout-icon"></i>
+                <span>¿Por qué se conectan?</span>
+              </div>
+              <p class="connection-callout-text">${safeWhy}</p>
+              ${safeQuote ? `
+                <div class="connection-quote-box">
+                  <span class="connection-quote-glyph">“</span>
+                  <span class="connection-quote-body"><mark class="vault-highlight">${safeQuote}</mark></span>
+                  <span class="connection-quote-glyph">”</span>
+                  ${safeIndexCode ? `<span class="connection-quote-ref"> (§ ${safeIndexCode})</span>` : ''}
+                </div>
+              ` : ''}
+            </div>
+
+            <div class="connection-callout app-box">
+              <div class="connection-callout-header">
+                <i data-lucide="scale" class="callout-icon"></i>
+                <span>Aplicación en el Grado / Casos:</span>
+              </div>
+              <p class="connection-callout-text">${safeApp}</p>
+            </div>
+          </div>
+
+          <div class="connection-action-footer">
+            <button type="button" class="btn-jump-connection" data-target-id="${safeId}" data-snippet="${safeQuote}" title="Estudiar cédula vinculada con fragmento resaltado">
+              <i data-lucide="external-link" style="width: 13px; height: 13px;"></i>
+              <span>Estudiar cédula vinculada${safeIndexCode ? ` (§ ${safeIndexCode})` : ''}</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  },
+
   _isRenderingSidebar: false,
 
   renderSidebar() {
@@ -1213,93 +1305,7 @@ const App = {
     // Fallback honesto: Cero texto plantilla 'Materia Afín'. Si no hay cruces validados, array vacío.
     const displayConnections = richConnections;
 
-    const renderConnectionCardsHtml = (connsList) => {
-      if (!connsList || connsList.length === 0) {
-        let suggestions = [];
-        if (typeof VaultSearch !== 'undefined' && typeof VaultSearch.searchVault === 'function') {
-          const vResults = VaultSearch.searchVault(topic.cleanTitle || topic.title, { limit: 4 });
-          suggestions = vResults.filter(r => r.id !== topic.id).slice(0, 3);
-        }
-        return `
-          <div class="connections-empty-state">
-            <div class="connections-empty-icon"><i data-lucide="info"></i></div>
-            <h4 class="connections-empty-title">Sin cruces validados aún</h4>
-            <p class="connections-empty-desc">Prueba en el buscador global para explorar conexiones semánticas en el temario.</p>
-            ${suggestions.length > 0 ? `
-              <div class="connections-unvalidated-suggestions">
-                <span class="unvalidated-badge" style="margin-bottom: 2px;">Sugerencias del Vault (no validadas):</span>
-                ${suggestions.map(s => `
-                  <div class="unvalidated-suggestion-card" data-topic-id="${typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(s.id) : s.id}">
-                    <span class="unvalidated-badge">Sugerencia no validada</span>
-                    <span class="suggestion-title">§ ${typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(s.indexCode) : s.indexCode} · ${typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(s.title) : s.title}</span>
-                  </div>
-                `).join('')}
-              </div>
-            ` : ''}
-          </div>
-        `;
-      }
-
-      return connsList.map(conn => {
-        const safeId = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(conn.id) : conn.id;
-        const safeTitle = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(conn.title) : conn.title;
-        const safeSubject = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(conn.subject || 'civil') : (conn.subject || 'civil');
-        const safeSubjectLabel = (conn.subject === 'civil') ? 'Civil' : ((conn.subject === 'procesal') ? 'Procesal' : 'Constitucional');
-        const safeIndexCode = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(conn.indexCode || '') : (conn.indexCode || '');
-        const safeDiscipline = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(conn.discipline || '') : (conn.discipline || '');
-        const safeCrossoverType = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(conn.crossoverType || 'Cruce Dogmático') : (conn.crossoverType || 'Cruce Dogmático');
-        const safeWhy = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(conn.whyConnected || '') : (conn.whyConnected || '');
-        const safeApp = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(conn.practicalApplication || '') : (conn.practicalApplication || '');
-        const rawQuote = conn.quote || '';
-        const safeQuote = typeof SecurityShield !== 'undefined' ? SecurityShield.escapeHtml(rawQuote) : rawQuote;
-
-        return `
-          <div class="linked-connection-card ${safeSubject}" data-topic-id="${safeId}" data-snippet="${safeQuote}" title="Clic para estudiar esta institución vinculada">
-            <div class="connection-header">
-              <div class="connection-badges-row">
-                <span class="connection-crossover-badge">${safeCrossoverType}</span>
-                <span class="connection-subject-badge ${safeSubject}">${safeSubjectLabel}</span>
-                ${safeIndexCode ? `<span class="connection-target-meta">§ ${safeIndexCode} · ${safeDiscipline}</span>` : ''}
-              </div>
-              <h4 class="connection-target-title">${safeTitle}</h4>
-            </div>
-
-            <div class="connection-content-body">
-              <div class="connection-callout reason-box">
-                <div class="connection-callout-header">
-                  <i data-lucide="lightbulb" class="callout-icon"></i>
-                  <span>¿Por qué se conectan?</span>
-                </div>
-                <p class="connection-callout-text">${safeWhy}</p>
-                ${safeQuote ? `
-                  <div class="connection-quote-box">
-                    <span class="connection-quote-glyph">“</span>
-                    <span class="connection-quote-body"><mark class="vault-highlight">${safeQuote}</mark></span>
-                    <span class="connection-quote-glyph">”</span>
-                    ${safeIndexCode ? `<span class="connection-quote-ref"> (§ ${safeIndexCode})</span>` : ''}
-                  </div>
-                ` : ''}
-              </div>
-
-              <div class="connection-callout app-box">
-                <div class="connection-callout-header">
-                  <i data-lucide="scale" class="callout-icon"></i>
-                  <span>Aplicación en el Grado / Casos:</span>
-                </div>
-                <p class="connection-callout-text">${safeApp}</p>
-              </div>
-            </div>
-
-            <div class="connection-action-footer">
-              <button type="button" class="btn-jump-connection" data-target-id="${safeId}" data-snippet="${safeQuote}" title="Estudiar cédula vinculada con fragmento resaltado">
-                <i data-lucide="external-link" style="width: 13px; height: 13px;"></i>
-                <span>Estudiar cédula vinculada${safeIndexCode ? ` (§ ${safeIndexCode})` : ''}</span>
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
-    };
+    const renderConnectionCardsHtml = (connsList) => this.renderConnectionCardsHtml(connsList, topic);
 
     // Casos prácticos vinculados
     const linkedCases = (data.cases || []).filter(c => {
@@ -3761,6 +3767,10 @@ if (typeof document !== "undefined") {
   document.addEventListener("DOMContentLoaded", () => {
     App.init();
   });
+}
+
+if (typeof window !== "undefined") {
+  window.renderConnectionCardsHtml = (conns, ctx) => App.renderConnectionCardsHtml(conns, ctx);
 }
 
 if (typeof module !== "undefined" && module.exports) {

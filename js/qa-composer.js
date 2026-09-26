@@ -200,8 +200,9 @@
    * @returns {Object} { empty, mode, query, results, citations, html, disclaimer, suggestedSubject }
    */
   function composeAnswer(query, options = {}) {
+    const opts = typeof options === 'string' ? { mode: options } : (options || {});
     const rawQuery = (query || '').trim();
-    const mode = options.mode || 'definicion';
+    const mode = opts.mode || 'definicion';
 
     if (!rawQuery || rawQuery.length < 2) {
       return {
@@ -219,9 +220,9 @@
       };
     }
 
-    const topicsList = resolveTopicsList(options);
+    const topicsList = resolveTopicsList(opts);
     const searchLimit = mode === 'definicion' ? 5 : 10;
-    const rawResults = executeVaultSearch(rawQuery, Object.assign({}, options, { limit: searchLimit }));
+    const rawResults = executeVaultSearch(rawQuery, Object.assign({}, opts, { limit: searchLimit }));
 
     // Si no hubo resultados o el score fue insuficiente
     if (!rawResults || rawResults.length === 0) {

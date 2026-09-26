@@ -12135,3 +12135,8 @@ Si el tribunal falla sobre hechos o conceptos no discutidos, priva a la parte de
     ]
   }
 };
+
+// LEGACY FALLBACK (Prompt 035): Grafo estático original de 14 nodos conservado como respaldo
+if (typeof module !== 'undefined' && module.exports) module.exports = INITIAL_DATA;
+if (typeof window !== 'undefined') window.INITIAL_DATA = INITIAL_DATA;
+if (typeof globalThis !== 'undefined') globalThis.INITIAL_DATA = INITIAL_DATA;

@@ -1,0 +1,11 @@
+{
+  "totalNodes": 205,
+  "totalLinks": 545,
+  "orphansDropped": 0,
+  "selfLinksDropped": 0,
+  "duplicatesCollapsed": 70,
+  "budgetKB": 615.0,
+  "fileSizeKB": 171.96,
+  "sha256": "3e2802f5cb3539fbf7978f211ffa17b2efdfc040a674d8ccaa32614ffec914d0",
+  "generatedAt": "2026-09-26T03:11:00.992000+00:00"
+}

@@ -1028,6 +1028,11 @@ const INITIAL_DATA = {{
   // 3. GRAFO INTERACTIVO DE INSTITUCIONES
   {graph_match}
 }};
+
+// LEGACY FALLBACK (Prompt 035): Grafo estático original de 14 nodos conservado como respaldo
+if (typeof module !== 'undefined' && module.exports) module.exports = INITIAL_DATA;
+if (typeof window !== 'undefined') window.INITIAL_DATA = INITIAL_DATA;
+if (typeof globalThis !== 'undefined') globalThis.INITIAL_DATA = INITIAL_DATA;
 """
         with open(DATA_JS_PATH, "w", encoding="utf-8") as f:
             f.write(new_data_js)

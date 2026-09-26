@@ -37,6 +37,11 @@ jobs:
       - name: Compilar cruces dogmáticos enriquecidos (build_cross_connections.py)
         run: python3 scripts/build_cross_connections.py
 
+      # v7.43 (Prompt 034): Compilar grafo vivo offline desde canon + cruces (build_graph_data.py)
+      # Orden estricto: después de build_cross_connections.py y antes de generate_clean_notes_data.py
+      - name: Compilar grafo vivo offline desde canon + cruces (build_graph_data.py)
+        run: python3 scripts/build_graph_data.py
+
       # v7.8: Regenerar el índice temático (all_afg_topics.json + js/data.js) desde fuentes/.
       # Cualquier cambio en fuentes/*.md se refleja en la página tras el git push, sin pasos manuales.
       - name: Regenerar índice temático desde fuentes/ (generate_clean_notes_data.py)
