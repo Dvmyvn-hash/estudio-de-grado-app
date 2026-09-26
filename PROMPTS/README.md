@@ -50,6 +50,11 @@
 | 035 | `035_grafo_vivo_canvas.md` | **Grafo vivo en canvas:** `setupData()` consume `GRAPH_DATA` con fallback legacy 14 nodos; física parametrizada + pausa en background; navegación a ID canon real; radio determinista por grado; XSS blindado en inspector. | ✅ Implementado (v7.44, Antigravity) |
 | 036 | `036_grafo_inspector_cerebro.md` | **Inspector cerebro:** ficha de cédula (§, M.C.S) + cruces con cita verbatim y salto highlight (reusa helper 031) + toggle mastery + QA extractivo 1 tarjeta. | ✅ Implementado (v7.45, Antigravity) |
 | 037 | `037_grafo_toolbar_escala.md` | **Toolbar + escala (cierra ciclo):** búsqueda local delegada al Vault, filtros que atenúan, overlay mastery, modo foco vecindario, cap 400 aristas, 60fps PC. | ✅ Implementado (v7.46, Antigravity) |
+| 038 | `038_laya_router_pilotos.md` | **Laya como capa compartida + pilotos:** `scripts/setup_laya.py` versionado, `scripts/laya_router.py` con `LAYA_TASKS` (fallback exit-0, log sin PII, worker warm sub-500ms), `POST /api/laya/predict` solo-local, autodetección modo Q&A y Shield aditivo (OR, umbral 0.85). | ✅ Implementado (v7.47, Antigravity) |
+| 039 | `039_cli_casos_laya.md` | **CLI Casos con Laya:** ejecutable local con `consulta` (citas verbatim), `corrige` (pauta + error fatal), `repaso`/`nutre` (triage Laya con fallback) y `--self-test` en CI. | 📝 Por ejecutar (tras ciclo grafo) |
+| 040 | `040_chatbot_socratico.md` | **Chatbot Socrático extractivo:** chat en vista Casos con 3 modos (interrogar/responder/debatir-pauta), corrección tipo comisión, subida efímera `.md/.txt` sin persistencia (PDF = V2 futura). | 📝 Por ejecutar (tras ciclo grafo, ideal tras 039) |
+| 041 | `041_grafo_agrupado_clusters.md` | **Grafo agrupado:** 3 territorios por materia con gravedad por grupo, layout inicial determinista, envolventes con conteo y puentes inter-materia dorados. | 📝 Por ejecutar (requiere v7.46.1 desplegado) |
+| 042 | `042_grafo_navegacion_tour.md` | **Navegación:** vuelo a grupo, memoria de vista en localStorage y mini-tour de 3 pasos. | 📝 Por ejecutar (depende 041) |
 
 
 ## Reglas transversales para cualquier prompt (las heredan todos)

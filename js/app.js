@@ -2024,6 +2024,7 @@ const App = {
     this.selectedSubject = "all";
     this.selectedChapter = "all";
     this.currentQAMode = "definicion";
+    this.qaModeManualOverride = false;
     this.globalSearchDebounceTimer = null;
     this.globalSearchLastExecutionTime = 0;
 
@@ -2087,6 +2088,9 @@ const App = {
 
       const minLen = this.globalSearchMode === "semantic" ? 3 : 2;
       if (clean.length < minLen) {
+        if (clean.length === 0) {
+          this.qaModeManualOverride = false;
+        }
         if (this.globalSearchMode === "semantic") {
           if (resultsContainer) {
             resultsContainer.classList.add("hidden");
@@ -2132,6 +2136,7 @@ const App = {
     if (clearBtn) {
       clearBtn.addEventListener("click", () => {
         input.value = "";
+        this.qaModeManualOverride = false;
         clearBtn.classList.add("hidden");
         if (this.globalSearchMode === "semantic") {
           if (resultsContainer) {
@@ -2186,9 +2191,16 @@ const App = {
     // Sub-modos Q&A
     qaPills.forEach(pill => {
       pill.addEventListener("click", () => {
-        qaPills.forEach(p => p.classList.remove("active"));
+        qaPills.forEach(p => {
+          p.classList.remove("active");
+          p.removeAttribute("aria-live");
+          if (p.dataset.mode === "definicion") p.title = "Mejor cita directa (definición puntual)";
+          else if (p.dataset.mode === "panorama") p.title = "Citas representativas por disciplina";
+          else if (p.dataset.mode === "comparativa") p.title = "Cotejo de instituciones (dos perspectivas)";
+        });
         pill.classList.add("active");
         this.currentQAMode = pill.dataset.mode || 'definicion';
+        this.qaModeManualOverride = true; // Override manual del alumno: prevalece sobre Laya
         if (input.value.trim().length >= 2) {
           this.executeGlobalSearch(input.value);
         }
@@ -2565,7 +2577,7 @@ const App = {
   },
 
   // Ejecución unificada de búsqueda global (Semántico / Q&A)
-  executeGlobalSearch(rawQuery) {
+  async executeGlobalSearch(rawQuery) {
     if (typeof document === "undefined" || !document) return;
     const getEl = typeof document.getElementById === "function" ? (id) => document.getElementById(id) : () => null;
     const dropdown = getEl("search-results-dropdown");
@@ -2744,6 +2756,48 @@ const App = {
         }
         dropdown.classList.remove("hidden");
         return;
+      }
+
+      // PILOTO 1 LAYA: Autodetección de modo Q&A (con override manual respetado)
+      if (!this.qaModeManualOverride && typeof fetch === "function") {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 600);
+          const resp = await fetch("/api/laya/predict", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              task: "qa_mode",
+              state: { query: clean.slice(0, 200) }
+            }),
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+          if (resp.ok) {
+            const data = await resp.json();
+            if (!data.fallback && data.decision && ["definicion", "panorama", "comparativa"].includes(data.decision)) {
+              if (!this.qaModeManualOverride) {
+                this.currentQAMode = data.decision;
+                const qaPills = document.querySelectorAll("#qa-mode-pills .qa-mode-pill");
+                qaPills.forEach(p => {
+                  const isMatch = p.dataset.mode === data.decision;
+                  p.classList.toggle("active", isMatch);
+                  if (isMatch) {
+                    p.setAttribute("title", "Sugerido por Laya");
+                    p.setAttribute("aria-live", "polite");
+                  } else {
+                    p.removeAttribute("aria-live");
+                    if (p.dataset.mode === "definicion") p.title = "Mejor cita directa (definición puntual)";
+                    else if (p.dataset.mode === "panorama") p.title = "Citas representativas por disciplina";
+                    else if (p.dataset.mode === "comparativa") p.title = "Cotejo de instituciones (dos perspectivas)";
+                  }
+                });
+              }
+            }
+          }
+        } catch (e) {
+          // Fallback silencioso (Pages 404 / timeout): conserva modo actual (definicion)
+        }
       }
 
       const answer = QAComposer.composeAnswer(clean, {

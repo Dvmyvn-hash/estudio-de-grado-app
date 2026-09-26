@@ -1448,7 +1448,7 @@ var CaseSolver = {
    * 1. Criterio Excluyente: si la opción es incorrecta -> 0.0 pts.
    * 2. Rúbrica Oficial de 4 Dimensiones: si es correcta -> +1.0 pto + evaluación de justificación (4.0 pts máx).
    */
-  evaluateCurrentQuestion(activeCase) {
+  async evaluateCurrentQuestion(activeCase) {
     this.saveMcDraft(activeCase.id);
     const draft = StorageService.getCaseDraft(activeCase.id) || {};
     const questions = activeCase.questions || [];
@@ -1518,9 +1518,12 @@ var CaseSolver = {
     const isCorrect = selectedOption.toLowerCase() === currentQ.correctAnswer.toLowerCase();
     if (!draft.evaluations) draft.evaluations = {};
 
-    // BLINDAJE DE CIBERSEGURIDAD: Detección y supresión de Prompt Injection / Jailbreaks / XSS
+    // BLINDAJE DE CIBERSEGURIDAD: Detección y supresión de Prompt Injection / Jailbreaks / XSS (Regex + Laya OR)
     if (typeof SecurityShield !== 'undefined') {
-      const securityCheck = SecurityShield.inspectPromptInjection(justificationText);
+      const securityCheck = (typeof SecurityShield.inspectPromptInjectionAsync === 'function')
+        ? await SecurityShield.inspectPromptInjectionAsync(justificationText)
+        : SecurityShield.inspectPromptInjection(justificationText);
+
       if (securityCheck.isInjected) {
         draft.evaluations[currentQ.id] = {
           isEvaluated: true,
@@ -1531,8 +1534,10 @@ var CaseSolver = {
           rubricScores: { criterio1: 0.0, criterio2: 0.0, criterio3: 0.0, criterio4: 0.0 },
           totalScore: isCorrect ? 1.0 : 0.0,
           securityIncident: true,
+          securityOrigin: securityCheck.origin || "regex",
           securityReason: securityCheck.reason,
           securitySnippet: securityCheck.snippet,
+          layaScore: securityCheck.layaScore || 0.0,
           evaluatedAt: new Date().toISOString()
         };
         StorageService.saveCaseDraft(activeCase.id, draft);

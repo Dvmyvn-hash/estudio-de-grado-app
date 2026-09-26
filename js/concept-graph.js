@@ -12,6 +12,10 @@ const TARGET_DIST = 140;
 const REPEL_DIST_CAP = 320;
 const DAMPING = 0.88;
 const CENTER_STRENGTH = 0.015;
+// Hotfix v7.46.1: tope de velocidad por frame. Sin cap, un signo invertido en
+// resortes (u otra perturbación) acelera nodos a coords astronómicas/NaN y el
+// canvas queda en blanco. El cap garantiza acotación aunque falle otra fuerza.
+const MAX_VELOCITY = 12;
 
 function safeEscapeHtml(str) {
   if (typeof SecurityShield !== 'undefined' && SecurityShield.escapeHtml) {
@@ -1176,10 +1180,12 @@ const ConceptGraph = {
         const force = displacement * K_SPRING;
         const fx = (dx / dist) * force;
         const fy = (dy / dist) * force;
+        // Hooke correcto: extremos opuestos (a +=, b -=). El signo += en ambos
+        // explotaba exponencialmente a NaN y vaciaba el canvas (hotfix v7.46.1).
         a.vx += fx;
         a.vy += fy;
-        b.vx += fx;
-        b.vy += fy;
+        b.vx -= fx;
+        b.vy -= fy;
       }
     });
 
@@ -1190,6 +1196,22 @@ const ConceptGraph = {
       n.vy += (centerY - n.y) * CENTER_STRENGTH;
       n.vx *= DAMPING;
       n.vy *= DAMPING;
+      // Guarda anti-NaN (hotfix v7.46.1): un nodo corrupto se recentra en vez
+      // de envenenar renders futuros con coordenadas no finitas.
+      if (!Number.isFinite(n.x) || !Number.isFinite(n.y) ||
+          !Number.isFinite(n.vx) || !Number.isFinite(n.vy)) {
+        n.x = centerX;
+        n.y = centerY;
+        n.vx = 0;
+        n.vy = 0;
+        return;
+      }
+      // Tope de velocidad: acota energía del sistema (hotfix v7.46.1).
+      const speed = Math.hypot(n.vx, n.vy);
+      if (speed > MAX_VELOCITY) {
+        n.vx = (n.vx / speed) * MAX_VELOCITY;
+        n.vy = (n.vy / speed) * MAX_VELOCITY;
+      }
       n.x += n.vx;
       n.y += n.vy;
     });

@@ -14,6 +14,7 @@ const SecurityShield = {
   // Configuración de límites de seguridad
   MAX_JUSTIFICATION_LENGTH: 2500,
   MAX_TITLE_LENGTH: 200,
+  LAYA_SHIELD_THRESHOLD: 0.85,
 
   /**
    * Sanitiza texto eliminando caracteres de control no imprimibles, normalizando espacios
@@ -131,6 +132,90 @@ const SecurityShield = {
     }
 
     return { isInjected: false, reason: null, snippet: null };
+  },
+
+  /**
+   * Inspección asíncrona de seguridad con evaluación aditiva de Laya (OR lógico):
+   * - Evalúa patrones regex síncronos inmediatamente.
+   * - En paralelo, consulta 'shield_risk' a /api/laya/predict con AbortController (timeout 600 ms).
+   * - Si noul >= LAYA_SHIELD_THRESHOLD (0.85) O el regex dispara -> bloqueo con origen ('regex' | 'laya' | 'ambos').
+   * - Si Laya falla o está ausente -> solo regex (paridad con v7.46).
+   * 
+   * @param {string} text - Texto a inspeccionar
+   * @returns {Promise<Object>} { isInjected: boolean, origin: 'regex'|'laya'|'ambos'|'ninguno', reason: string|null, snippet: string|null, layaScore: number }
+   */
+  async inspectPromptInjectionAsync(text) {
+    const regexResult = this.inspectPromptInjection(text);
+    let layaTriggered = false;
+    let layaScore = 0.0;
+    let layaReason = null;
+
+    try {
+      const clean = (text || "").trim();
+      if (clean.length > 0 && typeof fetch === "function") {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 600);
+        const resp = await fetch("/api/laya/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            task: "shield_risk",
+            state: { text: clean.slice(0, 500) }
+          }),
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        if (resp.ok) {
+          const data = await resp.json();
+          if (!data.fallback && typeof data.decision === "number") {
+            layaScore = data.decision;
+            if (layaScore >= this.LAYA_SHIELD_THRESHOLD) {
+              layaTriggered = true;
+              layaReason = `Score de riesgo Laya (${layaScore.toFixed(4)}) excede el umbral ${this.LAYA_SHIELD_THRESHOLD}`;
+            }
+          }
+        }
+      }
+    } catch (e) {
+      // Timeout o Pages (404): comportamiento tolerante a fallas (fallback silencioso a regex)
+    }
+
+    const regexTriggered = Boolean(regexResult && regexResult.isInjected);
+    const isInjected = regexTriggered || layaTriggered;
+
+    let origin = "ninguno";
+    if (regexTriggered && layaTriggered) {
+      origin = "ambos";
+    } else if (regexTriggered) {
+      origin = "regex";
+    } else if (layaTriggered) {
+      origin = "laya";
+    }
+
+    if (!isInjected) {
+      return {
+        isInjected: false,
+        origin: "ninguno",
+        reason: null,
+        snippet: null,
+        layaScore
+      };
+    }
+
+    const reason = regexTriggered && layaTriggered
+      ? `${regexResult.reason} + ${layaReason}`
+      : (regexTriggered ? regexResult.reason : layaReason);
+
+    const snippet = regexResult?.snippet || (text ? text.slice(0, 80) : "");
+
+    return {
+      isInjected: true,
+      origin,
+      reason,
+      matchedPattern: regexResult?.matchedPattern || `LAYA_RISK_SCORE_${layaScore.toFixed(2)}`,
+      snippet,
+      layaScore
+    };
   },
 
   /**

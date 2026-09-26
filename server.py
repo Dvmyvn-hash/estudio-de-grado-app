@@ -62,6 +62,16 @@ except ImportError:
 
 import db
 
+# Soporte para Laya Decision Router (solo-local, opcional)
+_LAYA_RATE_LIMITS: Dict[str, float] = {}
+try:
+    import scripts.laya_router as laya_router
+except ImportError:
+    try:
+        import laya_router
+    except ImportError:
+        laya_router = None
+
 BASE_DIR = Path(__file__).resolve().parent
 
 def resolve_safe_db_path() -> Path:
@@ -687,6 +697,12 @@ LOGIN_BACKOFF_LIMITER = SecurityRateLimiter(max_entries=5000)
 GOOGLE_AUTH_LIMITER = SecurityRateLimiter(max_entries=5000)
 # Anti fuerza bruta sobre las claves de administración (v7.16): retroceso exponencial por IP.
 ADMIN_LIMITER = SecurityRateLimiter(max_entries=2000)
+# Fase E1 (ESCALA.md, v7.48): limiter compartido de ventana fija para endpoints
+# de escritura + versión expuesta en /api/health. No sustituye los limiters
+# dedicados (auth/admin/laya), solo cubre rutas que no tenían ninguno.
+E1_RATE_LIMITER = SecurityRateLimiter(max_entries=5000)
+APP_VERSION = "7.48"
+SERVER_START_TIME = time.time()
 
 def mask_email(email: str) -> str:
     """Enmascara correo para logs de auditoría seguros (ej. david@gmail.com -> d***@gmail.com)."""
@@ -1100,6 +1116,22 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(response_bytes)
 
+    def _check_e1_rate_limit(self, route, max_requests, window_seconds):
+        """Fase E1 (v7.48): ventana fija por (IP, ruta). 429 + Retry-After si excede. True = seguir."""
+        try:
+            client_ip = self.client_address[0] if getattr(self, "client_address", None) else "127.0.0.1"
+        except Exception:
+            client_ip = "127.0.0.1"
+        allowed, retry_sec = E1_RATE_LIMITER.check_fixed_limit(f"{client_ip}:{route}", max_requests, window_seconds)
+        if not allowed:
+            self.send_json_response(
+                {"ok": False, "error": "Límite de velocidad excedido"},
+                status_code=429,
+                headers={"Retry-After": str(int(retry_sec) + 1)},
+            )
+            return False
+        return True
+
     def get_authenticated_user(self):
         """Extrae y valida la cookie de sesión, retornando el registro del usuario o None."""
         cookie_header = self.headers.get("Cookie", "")
@@ -1353,6 +1385,28 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json_response({"ok": True, "codes": codes})
             return
 
+        # API 8.1 (Fase E1, ESCALA.md v7.48): Health check barato para monitoreo y balanceadores.
+        # Sin auth, sin parseo de apuntes: solo tiempo, version, uptime y DB (SELECT 1 + tamano).
+        if clean_path == "/api/health":
+            try:
+                with db.get_db_connection(db_path=DB_PATH) as conn:
+                    conn.execute("SELECT 1")
+                db_ok = True
+            except Exception:
+                db_ok = False
+            try:
+                db_kb = round(DB_PATH.stat().st_size / 1024, 1) if DB_PATH.exists() else -1
+            except Exception:
+                db_kb = -1
+            self.send_json_response({
+                "ok": True,
+                "version": APP_VERSION,
+                "time": time.time(),
+                "uptimeSec": round(time.time() - SERVER_START_TIME, 1),
+                "db": {"reachable": db_ok, "sizeKB": db_kb},
+            })
+            return
+
         # API 9: (ELIMINADO en v7.8) Listar Apuntes Registrados — la subida admin de apuntes se retiró;
         # la carpeta fuentes/ es la única fuente canónica y la regeneración ocurre en CI/arranque.
 
@@ -1394,6 +1448,46 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header("Content-Type", "application/json")
             self.end_headers()
             self.wfile.write(json.dumps({"ok": False, "error": f"Carga útil excede el límite máximo de seguridad ({MAX_PAYLOAD_SIZE // 1024} KB)"}).encode("utf-8"))
+            return
+
+        # API: Predicción de Decisión Local vía Laya (solo-local, opcional en Pages)
+        if clean_path == "/api/laya/predict":
+            if content_length > 4096:
+                self.send_json_response({"ok": False, "error": "Carga útil excede el límite máximo de 4 KB"}, status_code=413)
+                return
+
+            client_ip = self.client_address[0] if hasattr(self, "client_address") and self.client_address else "127.0.0.1"
+            now = time.time()
+            last_req = _LAYA_RATE_LIMITS.get(client_ip, 0.0)
+            if now - last_req < 0.150:
+                self.send_json_response({"ok": False, "error": "Límite de velocidad excedido (1 req / 150 ms)"}, status_code=429)
+                return
+            _LAYA_RATE_LIMITS[client_ip] = now
+
+            body = self.rfile.read(content_length).decode("utf-8", errors="replace")
+            try:
+                req_data = json.loads(body)
+            except Exception:
+                self.send_json_response({"ok": False, "error": "Cuerpo JSON inválido"}, status_code=400)
+                return
+
+            task = req_data.get("task")
+            state = req_data.get("state", {})
+
+            if not task or not laya_router or task not in laya_router.LAYA_TASKS:
+                self.send_json_response({"ok": False, "error": f"Tarea desconocida o no registrada: '{task}'"}, status_code=400)
+                return
+
+            if len(json.dumps(state)) > 4096:
+                self.send_json_response({"ok": False, "error": "El estado de Laya excede el límite de 4 KB"}, status_code=413)
+                return
+
+            try:
+                res = laya_router.predict(task, state, timeout_ms=500)
+                self.send_json_response(res)
+            except Exception as e:
+                fallback_res = laya_router.make_fallback_response(task, f"server_exception: {str(e)}")
+                self.send_json_response(fallback_res)
             return
 
         # API Admin: Crear Código de Acceso (rol pleno 'admin' únicamente)
@@ -1898,6 +1992,8 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
             if not user:
                 self.send_json_response({"ok": False, "error": "No autenticado"}, status_code=401)
                 return
+            if not self._check_e1_rate_limit("/api/user/progress", 30, 60.0):
+                return
 
             body = self.rfile.read(content_length).decode("utf-8", errors="replace")
             try:
@@ -1929,6 +2025,8 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
             user = self.get_authenticated_user()
             if not user:
                 self.send_json_response({"ok": False, "error": "No autenticado"}, status_code=401)
+                return
+            if not self._check_e1_rate_limit("/api/user/topic-mastery", 60, 60.0):
                 return
 
             body = self.rfile.read(content_length).decode("utf-8", errors="replace")
@@ -2008,6 +2106,8 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
             if client_ip not in ("127.0.0.1", "::1", "localhost"):
                 self.send_error(403, "Configuración restringida al equipo local")
                 return
+            if not self._check_e1_rate_limit("/api/set-sync-folder", 10, 60.0):
+                return
 
             body = self.rfile.read(content_length).decode("utf-8", errors="replace")
             try:
@@ -2050,6 +2150,8 @@ class AutoSyncHTTPHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_header("Content-Type", "application/json")
                 self.end_headers()
                 self.wfile.write(json.dumps({"ok": False, "error": "Content-Type debe ser application/json"}).encode("utf-8"))
+                return
+            if not self._check_e1_rate_limit("/api/ai/save-generated-case", 10, 60.0):
                 return
 
             body = self.rfile.read(content_length).decode("utf-8", errors="replace")

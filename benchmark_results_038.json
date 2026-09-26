@@ -1,0 +1,190 @@
+{
+  "accuracy": 95.0,
+  "correctCount": 19,
+  "total": 20,
+  "p50Ms": 498.43,
+  "p95Ms": 548.76,
+  "verdict": "VIABLE Y SUPERIOR AL DEFAULT: Acierto 95.0% supera ampliamente la heurística estática (definición por defecto).",
+  "details": [
+    {
+      "query": "Qué es la tradición y cuáles son sus requisitos",
+      "expected": "definicion",
+      "decision": "definicion",
+      "confidence": 0.5053,
+      "latencyMs": 548.76,
+      "match": true,
+      "fallback": false
+    },
+    {
+      "query": "Concepto de nulidad absoluta en el Código Civil",
+      "expected": "definicion",
+      "decision": "definicion",
+      "confidence": 0.9999,
+      "latencyMs": 468.51,
+      "match": true,
+      "fallback": false
+    },
+    {
+      "query": "Defina la compraventa y sus elementos de la esencia",
+      "expected": "definicion",
+      "decision": "definicion",
+      "confidence": 0.9997,
+      "latencyMs": 495.88,
+      "match": true,
+      "fallback": false
+    },
+    {
+      "query": "Noción de derecho real y derecho personal",
+      "expected": "definicion",
+      "decision": "definicion",
+      "confidence": 0.9936,
+      "latencyMs": 480.66,
+      "match": true,
+      "fallback": false
+    },
+    {
+      "query": "Qué se entiende por caso fortuito o fuerza mayor",
+      "expected": "definicion",
+      "decision": "definicion",
+      "confidence": 0.9992,
+      "latencyMs": 493.5,
+      "match": true,
+      "fallback": false
+    },
+    {
+      "query": "Concepto de acción reivindicatoria y quién puede deducirla",
+      "expected": "definicion",
+      "decision": "definicion",
+      "confidence": 0.999,
+      "latencyMs": 508.09,
+      "match": true,
+      "fallback": false
+    },
+    {
+      "query": "Definición legal de sociedad conyugal",
+      "expected": "definicion",
+      "decision": "definicion",
+      "confidence": 0.9998,
+      "latencyMs": 473.2,
+      "match": true,
+      "fallback": false
+    },
+    {
+      "query": "Qué es el recurso de casación en el fondo",
+      "expected": "definicion",
+      "decision": "definicion",
+      "confidence": 0.9938,
+      "latencyMs": 508.74,
+      "match": true,
+      "fallback": false
+    },
+    {
+      "query": "Panorama general de las fuentes de las obligaciones",
+      "expected": "panorama",
+      "decision": "panorama",
+      "confidence": 0.8701,
+      "latencyMs": 489.42,
+      "match": true,
+      "fallback": false
+    },
+    {
+      "query": "Clasificación de los contratos y sus criterios dogmáticos",
+      "expected": "panorama",
+      "decision": "panorama",
+      "confidence": 0.9255,
+      "latencyMs": 493.33,
+      "match": true,
+      "fallback": false
+    },
+    {
+      "query": "Estructura y etapas del juicio ordinario de mayor cuantía",
+      "expected": "panorama",
+      "decision": "comparativa",
+      "confidence": 0.6234,
+      "latencyMs": 488.5,
+      "match": false,
+      "fallback": false
+    },
+    {
+      "query": "Visión general de las garantías constitucionales del artículo 19",
+      "expected": "panorama",
+      "decision": "panorama",
+      "confidence": 0.5222,
+      "latencyMs": 510.24,
+      "match": true,
+      "fallback": false
+    },
+    {
+      "query": "Clasificaciones de las obligaciones según su eficacia",
+      "expected": "panorama",
+      "decision": "panorama",
+      "confidence": 0.4904,
+      "latencyMs": 493.9,
+      "match": true,
+      "fallback": false
+    },
+    {
+      "query": "Panorama de las medidas precautorias y sus presupuestos",
+      "expected": "panorama",
+      "decision": "panorama",
+      "confidence": 0.7948,
+      "latencyMs": 505.37,
+      "match": true,
+      "fallback": false
+    },
+    {
+      "query": "Diferencias entre nulidad absoluta y nulidad relativa",
+      "expected": "comparativa",
+      "decision": "comparativa",
+      "confidence": 0.9306,
+      "latencyMs": 500.99,
+      "match": true,
+      "fallback": false
+    },
+    {
+      "query": "Paralelo entre el contrato de mandato y el arrendamiento de servicios",
+      "expected": "comparativa",
+      "decision": "comparativa",
+      "confidence": 0.9995,
+      "latencyMs": 490.93,
+      "match": true,
+      "fallback": false
+    },
+    {
+      "query": "Distinción entre culpa civil y culpa penal",
+      "expected": "comparativa",
+      "decision": "comparativa",
+      "confidence": 0.8172,
+      "latencyMs": 511.83,
+      "match": true,
+      "fallback": false
+    },
+    {
+      "query": "Semejanzas y diferencias entre prescripción adquisitiva y extintiva",
+      "expected": "comparativa",
+      "decision": "comparativa",
+      "confidence": 0.9575,
+      "latencyMs": 526.18,
+      "match": true,
+      "fallback": false
+    },
+    {
+      "query": "Comparación entre juicio ejecutivo y procedimiento incidental",
+      "expected": "comparativa",
+      "decision": "comparativa",
+      "confidence": 1.0,
+      "latencyMs": 532.68,
+      "match": true,
+      "fallback": false
+    },
+    {
+      "query": "Diferencias entre recurso de reposición y apelación",
+      "expected": "comparativa",
+      "decision": "comparativa",
+      "confidence": 0.8099,
+      "latencyMs": 525.36,
+      "match": true,
+      "fallback": false
+    }
+  ]
+}
